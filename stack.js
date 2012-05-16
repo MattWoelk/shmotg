@@ -5,7 +5,7 @@ var n = 4, // number of layers
 
 var margin = 20,
     width = document.documentElement.clientWidth - margin
-    height = 500 - .5 - margin,
+    height = document.documentElement.clientHeight - .5 - margin - 50,
     mx = m,
     my = d3.max(data, function(d) {
       return d3.max(d, function(d) {
