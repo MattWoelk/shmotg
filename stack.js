@@ -1,10 +1,10 @@
 var n = 4, // number of layers
-    m = 64, // number of samples per layer
+    m = 20, // number of samples per layer
     data = d3.layout.stack()(stream_layers(n, m, .1)),
     color = d3.interpolateRgb("#aad", "#556");
 
 var margin = 20,
-    width = 960,
+    width = document.documentElement.clientWidth - margin
     height = 500 - .5 - margin,
     mx = m,
     my = d3.max(data, function(d) {
