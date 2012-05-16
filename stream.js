@@ -1,11 +1,12 @@
-var n = 20, // number of layers
+var n = 12, // number of layers
     m = 200, // number of samples per layer
     data0 = d3.layout.stack().offset("wiggle")(stream_layers(n, m)),
     data1 = d3.layout.stack().offset("wiggle")(stream_layers(n, m)),
     color = d3.interpolateRgb("#aad", "#556");
 
-var width = 960,
-    height = 500,
+var margin = 20
+    width = document.documentElement.clientWidth - margin
+    height = document.documentElement.clientHeight - .5 - margin - 50,
     mx = m - 1,
     my = d3.max(data0.concat(data1), function(d) {
       return d3.max(d, function(d) {
