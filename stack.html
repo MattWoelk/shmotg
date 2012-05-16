@@ -9,6 +9,9 @@
   </head>
   <body>
     <div id="chart">
+      <button id="back" onclick="history.go(-1);return true;">
+        back
+      </button>
       <button id="group" class="first" onclick="transitionGroup()">
         <!-- maybe onclick should be ontouch ??? -->
         Group
@@ -17,7 +20,7 @@
         <!-- maybe onclick should be ontouch ??? -->
         Stack
       </button>
-    </div>
+      </div>
     <script type="text/javascript" src="stack.js"></script>
   </body>
 </html>
