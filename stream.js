@@ -1,5 +1,5 @@
 var n = 12, // number of layers
-    m = 200, // number of samples per layer
+    m = 100, // number of samples per layer
     data0 = d3.layout.stack().offset("wiggle")(stream_layers(n, m)),
     data1 = d3.layout.stack().offset("wiggle")(stream_layers(n, m)),
     color = d3.interpolateRgb("#aad", "#556");
