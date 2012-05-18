@@ -43,8 +43,8 @@ path {
 var data = d3.svg.symbolTypes;
 
 var margin = {top: 10, right: 10, bottom: 20, left:10},
-    width = 960 - margin.right - margin.left,
-    height = 100 - margin.top - margin.bottom;
+    width = document.documentElement.clientWidth - margin.left - margin.right - 20;
+    height = 100 - margin.top - margin.bottom - 20;
 
 var x = d3.scale.ordinal()
     .domain(data)

@@ -23,8 +23,8 @@ rect {
 <script>
 
 var margin = {top: 0, right: 0, bottom: 12, left: 24},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = document.documentElement.clientWidth - margin.left - margin.right - 20;
+    height = document.documentElement.clientHeight - margin.top - margin.bottom - 20;
 
 var x = d3.scale.linear()
     .domain([-width / 2, width / 2])

@@ -42,7 +42,7 @@ circle {
 var data = d3.range(800).map(Math.random);
 
 var margin = {top: 10, right: 10, bottom: 20, left: 10},
-    width = 960 - margin.right - margin.left,
+    width = document.documentElement.clientWidth - margin.left - margin.right - 20;
     height = 100 - margin.top - margin.bottom;
 
 var x = d3.scale.linear()

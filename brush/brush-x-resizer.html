@@ -48,7 +48,7 @@ circle {
 var data = d3.range(800).map(Math.random);
 
 var margin = {top: 4, right: 50, bottom: 20, left: 50},
-    width = 960 - margin.left - margin.right,
+    width = document.documentElement.clientWidth - margin.left - margin.right - 20;
     height = 120 - margin.top - margin.bottom;
 
 var x = d3.scale.linear()

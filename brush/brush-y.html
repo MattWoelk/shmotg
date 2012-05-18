@@ -43,7 +43,7 @@ var data = d3.range(800).map(Math.random);
 
 var margin = {top: 10, right: 10, bottom: 10, left: 40},
     width = 120 - margin.right - margin.left,
-    height = 960 - margin.top - margin.bottom;
+    height = document.documentElement.clientHeight - margin.top - margin.bottom - 20;
 
 var x = d3.random.normal(width / 2, width / 8);
 
