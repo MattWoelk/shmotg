@@ -5,6 +5,13 @@
     <title>Brush</title>
     <script type="text/javascript" src="../d3.v2.js"></script>
     <style type="text/css">
+    <script type="text/javascript">
+       function preventBehavior(e)
+       {
+         e.preventDefault();
+       };
+       document.addEventListener("touchmove", preventBehavior, false);
+   </script>
 
 svg {
   font: 10px sans-serif;
