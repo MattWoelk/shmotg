@@ -2,6 +2,11 @@ body {
   background: #ddd
 }
 
+div.page-content {
+  max-width: 500px;
+  margin: auto;
+}
+
 a.bigbutton {
   display: block;
 
@@ -9,7 +14,6 @@ a.bigbutton {
   background: -webkit-linear-gradient(#FBA633, #DC840E) no-repeat scroll 0 0 transparent;
   border: 1px solid #9C5E09;
 
-  border-radius: 8px;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset;
   color: #FFFFFF;
   font-size: 20px;
@@ -19,7 +23,12 @@ a.bigbutton {
   text-decoration: none;
 }
 
-div.page-content {
-  max-width: 500px;
-  margin: auto;
+a.bbfirst {
+ border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+a.bblast {
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
