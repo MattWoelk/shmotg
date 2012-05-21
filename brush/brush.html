@@ -37,14 +37,14 @@ circle {
     </style>
   </head>
   <body>
-      
+
     <button id="back" onclick="history.go(-1);return true;">
       back
     </button>
     <script type="text/javascript">
 
 var random = d3.random.normal(.5, .1),
-    data = d3.range(800).map(function() { return [random(), random()]; });
+    data = d3.range(100).map(function() { return [random(), random()]; });
 
 var margin = {top: 10, right: 10, bottom: 20, left: 40},
     width = document.documentElement.clientWidth - margin.left - margin.right - 20;
