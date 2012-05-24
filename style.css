@@ -4,7 +4,10 @@ body {
 
 div.page-content {
   max-width: 500px;
-  margin: auto;
+  margin: 0 auto;
+  padding: 0px 40px 40px 40px;
+  border: 1px solid #333;
+  background: #F2F2F2;
 }
 
 a.bigbutton {
@@ -23,12 +26,51 @@ a.bigbutton {
   text-decoration: none;
 }
 
+a.bigbutton:active {
+  background: -moz-linear-gradient(center top, #EB9623, #CC740E) no-repeat scroll 0 0 transparent;
+  background: -webkit-linear-gradient(#EB9623, #CC740E) no-repeat scroll 0 0 transparent;
+}
+
+a.bigbutton:hover {
+  background: -moz-linear-gradient(center top, #EB9623, #CC740E) no-repeat scroll 0 0 transparent;
+  background: -webkit-linear-gradient(#EB9623, #CC740E) no-repeat scroll 0 0 transparent;
+}
+
 a.bbfirst {
- border-top-left-radius: 16px;
+  border-top-left-radius: 16px;
   border-top-right-radius: 16px;
 }
 
 a.bblast {
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
+}
+
+h2.ribbon {
+  position: relative;
+  width: 45%;
+  padding: 6px 20px 6px 60px;
+  margin: 30px 10px 20px -60px;
+  color: #FFF;
+  background-color: #999;
+  text-shadow: 0 -1px rgba(0, 0, 0, 0.45);
+  -webkit-box-shadow : 0px 2px 2px #888;
+  -moz-box-shadow    : 0px 2px 2px #888;
+  box-shadow         : 0px 2px 2px #888;
+
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+h2.ribbon:after
+{
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 0px;
+  top: 100%;
+  border-width: 5px 10px;
+  border-style: solid;
+  border-color: #666 #666 transparent transparent;
 }
