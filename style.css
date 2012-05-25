@@ -2,10 +2,14 @@ body {
   background: #ddd
 }
 
+div.page-buffer {
+  margin: 0 15px 0 15px;
+}
+
 div.page-content {
   max-width: 500px;
   margin: 0 auto;
-  padding: 0px 40px 40px 40px;
+  padding: 0px 20px 20px 20px; /* TODO: media this to look nicer on bigger screens*/
   border: 1px solid #333;
   background: #F2F2F2;
 }
@@ -50,7 +54,7 @@ h2.ribbon {
   position: relative;
   width: 45%;
   padding: 6px 20px 6px 60px;
-  margin: 30px 10px 20px -60px;
+  margin: 30px 10px 20px -40px; /* TODO: media this one so that it matches with the other TODO up top ^^ */
   color: #FFF;
   background-color: #999;
   text-shadow: 0 -1px rgba(0, 0, 0, 0.45);
