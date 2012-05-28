@@ -19,7 +19,8 @@
       var x = d3.scale.linear()
           .domain([0, d3.max(datums)])
           //.range(["0%", "80%"]); //using percent is LOVELY
-          .range([0, 420]); //for svg; not quoted, and no "px"
+          .range(["0%", "100%"]); //using percent is LOVELY
+          //.range([0, 420]); //for svg; not quoted, and no "px"
 
       var y = d3.scale.ordinal()
           .domain(datums)
@@ -34,7 +35,7 @@
 
       var chart = d3.select("body").append("svg")
           .attr("class", "chart")
-          .attr("width", 420) // units are pixels for svg automatically, so we don't need to say that they are.
+          .attr("width", "100%") // units are pixels for svg automatically, so we don't need to say that they are.
           .attr("height", 20 * datums.length);
 
       chart.selectAll("rect")
@@ -56,7 +57,8 @@
 
   var t = 10663, // start time (seconds since epoch)
       v = 70, // start value (subscribers)
-      data = d3.range(33).map(next); // starting dataset
+      number_of_datas = 30;
+      data = d3.range(number_of_datas).map(next); // starting dataset
 
   function next() {
     return {
@@ -71,12 +73,12 @@
     redraw();
   }, 600);
 
-  var w = 20,
+  var w = (100 / number_of_datas) + "%",
       h = 80;
 
   var x = d3.scale.linear()
     .domain([0, 1])
-    .range([0, w]);
+    .range(["0%", w]);
 
   var y = d3.scale.linear()
     .domain([0, 100])
@@ -84,13 +86,13 @@
 
   var charz = d3.select("body").append("svg")
     .attr("class", "chart")
-    .attr("width", w * data.length - 1)
+    .attr("width", "100%")
     .attr("height", h);
 
   charz.selectAll("rect")
       .data(data)
     .enter().append("rect")
-    .attr("x", function(d, i) { return x(i) - 0.5; })
+    .attr("x", function(d, i) { return x(i); })
     .attr("y", function(d) { return h - y(d.value) - 0.5; })
     .attr("width", w)
     .attr("height", function(d) { return y(d.value); });
@@ -114,7 +116,7 @@
 
     // Enter...
     rect.enter().insert("rect", "line")
-        .attr("x", function(d, i) { return x(i + 1) - 0.5; })
+        .attr("x", function(d, i) { return x(i + 1); })
         .attr("y", function(d) { return h - y(d.value) - 0.5; })
         .attr("width", w)
         .attr("height", function(d) { return y(d.value); })
@@ -123,17 +125,17 @@
 //        .on("mouseout", function() { d3.select(this).style("fill", "steelblue");})
       .transition()
         .duration(500)
-        .attr("x", function(d, i) { return x(i) - 0.5; });
+        .attr("x", function(d, i) { return x(i); });
 
     // Update...
     rect.transition()
       .duration(500)
-      .attr("x", function(d, i) { return x(i) - 0.5; });
+      .attr("x", function(d, i) { return x(i); });
 
     // Exit...
     rect.exit().transition()
       .duration(500)
-      .attr("x", function(d, i) { return x(i - 1) - 0.5; })
+      .attr("x", function(d, i) { return x(i - 1); })
       .remove();
   }
 
