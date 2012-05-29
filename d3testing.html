@@ -46,14 +46,14 @@
           .attr("width", x)
           .attr("height", y.rangeBand());
 
-      chart.selectAll("circle")
-          .data(datums)
-        .enter().append("circle") // enter() means select all nodes which didn't have a datums point before.
-                            // exit() means select all nodes which don't have a datums point anymore.
-                            // update() means select all nodes which have datums
-          .attr("cy", 90)
-          .attr("cx", function(d) { return 3 * d;})
-          .attr("r", function(d) { return d;});
+//      chart.selectAll("circle")
+//          .data(datums)
+//        .enter().append("circle") // enter() means select all nodes which didn't have a datums point before.
+//                            // exit() means select all nodes which don't have a datums point anymore.
+//                            // update() means select all nodes which have datums
+//          .attr("cy", 90)
+//          .attr("cx", function(d) { return 3 * d;})
+//          .attr("r", function(d) { return d;});
 
   var t = 10663, // start time (seconds since epoch)
       v = 70, // start value (subscribers)

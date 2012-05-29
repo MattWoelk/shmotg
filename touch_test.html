@@ -16,13 +16,24 @@ body {
 svg {
   display: block;
   overflow: hidden;
+  position: fixed;
+  top: 10%;
+  left: 0;
+  margin-bottom: 0;
+  z-index: 1030; /*Be on top of everything!*/
+  right: 0;
   width: 100%;
-  height: 100%;
+  height: 90%;
 }
 
     </style>
   </head>
   <body>
+      <button id="back" class="first last" onclick="history.go(-1);return true;">
+        back
+      </button>
+    <br/>
+      Touch and hold anywhere with multiple fingers.
     <script type="text/javascript">
 
 var color = d3.scale.category10();
