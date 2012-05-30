@@ -10,17 +10,18 @@ var margin = 20,
     my = d3.max(data, function(d) {
       return d3.max(d, function(d) {
         return d.y0 + d.y;
-      });
+      }); // the biggest y0 (minimum y position of the value (baseline)) + y value
     }),
     mz = d3.max(data, function(d) {
       return d3.max(d, function(d) {
         return d.y;
-      });
+      }); // the biggest y value
     }),
     x = function(d) { return d.x * width / mx; },
     y0 = function(d) { return height - d.y0 * height / my; },
     y1 = function(d) { return height - (d.y + d.y0) * height / my; },
-    y2 = function(d) { return d.y * height / mz; }; // or `my` to not rescale
+    y2 = function(d) { return d.y * height / mz; }, // or `my` to not rescale
+    y3 = function(d) { return height - (d.y + d.y0) * height / my; };
 
 var vis = d3.select("#chart")
   .append("svg")
@@ -73,13 +74,16 @@ function transitionGroup() {
       .attr("class", "first active");
 
   group.select("#stack")
+      .attr("class", "");
+
+  group.select("#percent")
       .attr("class", "last");
 
   group.selectAll("g.layer rect")
     .transition()
       .duration(500)
       .delay(function(d, i) { return (i % m) * 10; })
-      .attr("x", function(d, i) { return x({x: .9 * ~~(i / m) / n}); })
+      .attr("x", function(d, i) { return x({x: .9 * ~~(i / m) / n}); }) /* ~~ == Math.floor(), but maybe closer to zero for negative numbers ?? Probably best to actually use Math.floor()*/
       .attr("width", x({x: .9 / n}))
       .each("end", transitionEnd);
 
@@ -99,7 +103,10 @@ function transitionStack() {
       .attr("class", "first");
 
   stack.select("#stack")
-      .attr("class", "last active");
+      .attr("class", "active");
+
+  stack.select("#percent")
+      .attr("class", "last");
 
   stack.selectAll("g.layer rect")
     .transition()
@@ -108,6 +115,35 @@ function transitionStack() {
       .attr("y", y1)
       .attr("height", function(d) { return y0(d) - y1(d); })
       .each("end", transitionEnd);
+
+  function transitionEnd() {
+    d3.select(this)
+      .transition()
+        .duration(500)
+        .attr("x", 0)
+        .attr("width", x({x: .9}));
+  }
+}
+
+function transitionPercent() {
+  var stack = d3.select("#chart");
+
+  stack.select("#group")
+      .attr("class", "first");
+
+  stack.select("#stack")
+      .attr("class", "");
+
+  stack.select("#percent")
+      .attr("class", "last active");
+
+  stack.selectAll("g.layer rect")
+    .transition()
+      .duration(500)
+      .delay(function(d, i) { return (i % m) * 10; })
+        .attr("y", y3)
+        .attr("height", y2)
+        .each("end", transitionEnd);
 
   function transitionEnd() {
     d3.select(this)
