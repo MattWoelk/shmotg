@@ -1,0 +1,30 @@
+body {
+  background-color: #ccc;
+  font-family: sans-serif;
+  color: #000;
+  font-size: 20px;
+}
+
+.setosa_svg {
+  fill: #800;
+}
+
+.versicolor_svg {
+  fill: #080;
+}
+
+.virginica_svg {
+  fill: #008;
+}
+
+.setosa_html {
+  color: #800;
+}
+
+.versicolor_html {
+  color: #080;
+}
+
+.virginica_html {
+  color: #008;
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+    <link type="text/css" rel="stylesheet" href="iris.css"/>
+
+    <title>Data visualisation demo</title>
+  </head>
+  <body>
+    <div>
+      <svg id="chart" width="100%" height="100%"></svg>
+    </div>
+    <form id="controls">
+      <div>
+        <h2>X axis</h2>
+        <ul id="x-axis">
+          <li><label><input checked="checked" type="radio" name="x-axis" value="seplen "> Sepal Length</label></li>
+          <li><label><input type="radio" name="x-axis" value="inversions               "> Petal Length</li>
+          <li><label><input type="radio" name="x-axis" value="height                   "> Sepal Width</li>
+          <li><label><input type="radio" name="x-axis" value="speed                    "> Petal Width</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Y axis</h2>
+        <ul id="y-axis">
+          <li><label><input checked="checked" type="radio" name="y-axis" value="opened "> Sepal Length</label></li>
+          <li><label><input type="radio" name="y-axis" value="inversions               "> Petal Length</label></li>
+          <li><label><input checked="checked" type="radio" name="y-axis" value="height "> Sepal Width</label></li>
+          <li><label><input type="radio" name="y-axis" value="speed                    "> Petal Width</label></li>
+        </ul>
+      </div>
+      <!--
+      <div>
+        <h2>Radius</h2>
+        <ul id="r-axis">
+          <li><label><input checked="checked" type="radio" name="r-axis" value="opened">Year opened</label></li>
+          <li><label><input  checked="checked" type="radio" name="r-axis" value="inversions">Inversions</label></li>
+          <li><label><input type="radio" name="r-axis" value="height">Height</label></li>
+          <li><label><input type="radio" name="r-axis" value="speed">Speed</label></li>
+          <li><label><input type="radio" name="r-axis" value="duration">Duration</label></li>
+          <li><label><input type="radio" name="r-axis" value="length">Length</label></li>
+        </ul>
+      </div> -->
+      <div>
+        <h2>Types of flowers</h2>
+        <ul id="coaster-types">
+          <li><label class="setosa_html"><input type="checkbox" checked="checked" value="iris_setosa">Iris Setosa</label></li>
+          <li><label class="versicolor_html"><input type="checkbox" checked="checked" value="iris_versicolor">Iris Versicolor</label></li>
+          <li><label class="virginica_html"><input type="checkbox" checked="checked" value="iris_virginica">Iris Virginica</label></li>
+        </ul>
+      </div>
+<!--      <div>
+        <h2>Dataset</h2>
+        <ul>
+          <li>
+            <select id="dataset">
+              <option value="arrow">Arrow dynamics</option>
+              <option selected="selected" value="bolliger-mabillard">Bolliger &amp; Mabillard</option>
+              <option value="gerstlauer">Gerstlauer</option>
+              <option value="intamin">Intamin AG</option>
+              <option value="maurer-sohne">Maurer Sohne</option>
+              <option value="morgan">Morgan</option>
+              <option value="schwarzkopf">Schwarzkopf</option>
+              <option value="vekoma">Vekoma</option>
+            </select>
+          </li>
+          <li><label><input type="checkbox" checked="checked" id="cull-dirty"> Cull dirty data</label></li>
+        </ul>
+
+      </div>   -->
+    </form>
+  </body>
+  <script src="datavis-demo/d3/d3.js"></script>
+  <script src="datavis-demo/d3/d3.csv.js"></script>
+  <script src="iris.js"></script>
+</html>
+
