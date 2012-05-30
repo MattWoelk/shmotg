@@ -20,7 +20,6 @@ svg {
   top: 10%;
   left: 0;
   margin-bottom: 0;
-  z-index: 1030; /*Be on top of everything!*/
   right: 0;
   width: 100%;
   height: 90%;
@@ -46,8 +45,17 @@ d3.select("body")
     .on("touchend", touch);
 
 function touch() {
-  d3.event.preventDefault();
+  //d3.event.preventDefault();
 
+  // Prevent dragging:
+  function preventBehavior(e)
+  {
+    e.preventDefault();
+  };
+  document.addEventListener("touchmove", preventBehavior, false);
+  document.addEventListener("select", preventBehavior, false);
+
+  
   var circle = svg.selectAll("circle.touch")
       .data(d3.touches(svg.node()), function(d) { return d.identifier; })
       .attr("cx", function(d) { return d[0]; })
