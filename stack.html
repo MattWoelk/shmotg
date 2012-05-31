@@ -9,9 +9,11 @@
   </head>
   <body>
     <div id="chart">
-      <button id="back" class="first last" onclick="history.go(-1);return true;">
-        back
-      </button>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
       <button id="group" class="first" onclick="transitionGroup()">
         <!-- maybe onclick should be ontouch ??? -->
         Group

@@ -6,9 +6,11 @@
     <link type="text/css" rel="stylesheet" href="d3testing.css"/>
   </head>
   <body>
-    <button id="back" onclick="history.go(-1);return true;">
-      back
-    </button>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
     <script type="text/javascript">
       var datums = [4, 8, 15, 16, 23, 42];
 

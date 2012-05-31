@@ -93,9 +93,11 @@
   </head>
   <body>
     <h1>
-      <button id="back" class="first last" onclick="history.go(-1);return true;">
-        back
-      </button>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
       Visualising roller coaster data
     </h1>
     <svg id="visualisation" width="800" height="600"></svg>

@@ -55,9 +55,11 @@
 
   <body onload="onBodyLoad()">
     <div class="navbar-fixed-top">
-      <button id="back" class="first last" onclick="history.go(-1);return true;">
-        back
-      </button>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
     </div>
     <div class="navbar-page-buffer"></div>
     <p>  This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of text This is a giant wall of textThis is a giant wall of text </p>

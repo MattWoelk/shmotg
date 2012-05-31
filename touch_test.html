@@ -28,9 +28,11 @@ svg {
     </style>
   </head>
   <body>
-      <button id="back" class="first last" onclick="history.go(-1);return true;">
-        back
-      </button>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
     <br/>
       Touch and hold anywhere with multiple fingers.
     <script type="text/javascript">
