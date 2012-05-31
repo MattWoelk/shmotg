@@ -1,0 +1,85 @@
+body {
+  background: #ccc;
+  margin: 0;
+}
+
+.contain {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #A0A0F0;
+  position: relative;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.5);
+}
+
+.right {
+  margin: 0 0 0 40px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+}
+
+.left {
+  float: left;
+  width: 40px;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+.left ul{
+  padding: 0px;
+  margin: 0px;
+  list-style: none;
+}
+
+.left li{
+  background: #8080F0;
+  height: 40px;
+  width: 40px;
+  text-align: center;
+}
+
+.left a {
+  padding: 10px;
+  display: block;
+  text-decoration: none;
+  border-bottom: 1px solid #000;
+}
+
+.leftbot {
+  left: 0;
+  bottom: 0;
+  position: absolute;
+  display: block;
+  vertical-align: baseline;
+  width: 40px;
+}
+
+.leftbot a{
+  border-bottom: none;
+  border-top: 1px solid #000;
+}
+
+body#one .left:not(:hover) a#uno,
+body#two .left:not(:hover) a#dose,
+body#three .left:not(:hover) a#trays,
+body#four .left:not(:hover) a#catorz {
+  background: #A0A0F0;
+}
+
+body#one .left:not(:active) a#uno,
+body#two .left:not(:active) a#dose,
+body#three .left:not(:active) a#trays,
+body#four .left:not(:active) a#catorz {
+  background: #A0A0F0;
+}
+
+.left:hover a,
+.left:active a {
+  background: #8080F0; !important
+}
+
+.left:hover a:hover,
+.left:active a:active {
+  background: #C0C0F0; !important
+}
