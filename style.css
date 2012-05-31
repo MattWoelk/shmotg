@@ -40,16 +40,6 @@ a.bigbutton:hover {
   background: -webkit-linear-gradient(#EB9623, #CC740E) no-repeat scroll 0 0 transparent;
 }
 
-a.bbfirst {
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-}
-
-a.bblast {
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-}
-
 h2.ribbon {
   position: relative;
   width: 45%;
@@ -77,4 +67,19 @@ h2.ribbon:after
   border-width: 5px 10px;
   border-style: solid;
   border-color: #666 #666 transparent transparent;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li:last-child a{
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+li:first-child a{
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
