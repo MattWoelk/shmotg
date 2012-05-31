@@ -23,3 +23,9 @@ div.navbar-page-buffer {
   margin-bottom: 0;
   position: static;
 }
+
+.scrollme {
+  position: absolute;
+  height: 80%;
+  overflow-y: scroll;
+}
