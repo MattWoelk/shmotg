@@ -16,4 +16,5 @@ div.navbar-fixed-top {
   top: 45px;
   bottom: 0px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
