@@ -1,31 +1,19 @@
 div.navbar-fixed-top {
   height: 45px !important;
-  max-height: 45px !important;
-  min-height: 45px !important;
   overflow: hidden;
   position: fixed !important;
 
   top: 0;
   left: 0;
-  margin-bottom: 0;
   right: 0;
+  margin-bottom: 0;
   background-color: #7D15FB;
   z-index: 1030; /*Be on top of everything!*/
 }
 
-div.navbar-page-buffer {
-  height: 38px !important; /*This is dependent on the margins and things of the page*/
-  min-height: 38px !important;
-  max-height: 38px !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  margin-bottom: 0;
-  position: static;
-}
-
 .scrollme {
   position: absolute;
-  height: 80%;
-  overflow-y: scroll;
+  top: 45px;
+  bottom: 0px;
+  overflow-y: auto;
 }
