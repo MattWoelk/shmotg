@@ -5,6 +5,7 @@ var MARGINS = {top: 2, right: 2, bottom: 2, left: 2}, // margins around the grap
   xAxis = d3.svg.axis().scale(xRange).tickSize(10).tickSubdivide(true),
   yAxis = d3.svg.axis().scale(yRange).tickSize(10).tickSubdivide(true).orient("right"),
   chart, //the chart where everything is drawn.
+  drawingData, //the data which will be drawn.
   species= [
     "setosa",
     "versicolor",
@@ -18,7 +19,12 @@ var MARGINS = {top: 2, right: 2, bottom: 2, left: 2}, // margins around the grap
   flowerData;
 
 chart = d3.select("#chart");
+
+chart.attr("width", "600px")
+  .attr("height", "200px");
+
 d3.csv("iris.csv", function(data) {
+  drawingData = data;
   d3.select("#chart").selectAll("circle")
       .data(data)
     .enter().append("circle")
@@ -26,28 +32,39 @@ d3.csv("iris.csv", function(data) {
       .attr("cx", function(d) { return d.sepwid * 20; })
       .attr("cy", function(d) { return 20*d.petlen; })
       .attr("class", function(d) { return d.species + "_svg"; });
+  redraw();
 });
 
 
 
 // this redraws the graph when forms are clicked
 function redraw () {
+  console.log("redraw:");
   // THIS WHOLE FUNCTION DOES NOT YET WORK //
   chart = d3.select("#chart");
 
-  console.log(chart);
+  //console.log(chart);
 
-  var dataPoints = d3.selectAll("circle"), // select the data points and set their data
+  var dataPoints = chart.selectAll("circle").data(drawingData), // select the data points and set their data
     axes = getChosenAxes (); // object containing the axes we'd like to use (duration, inversions, etc.)
 
-  console.log(dataPoints);
+  //console.log(dataPoints);
+
+  xRange.domain([
+    d3.min(drawingData, function (d) { return +d[axes.xAxis]; }),
+    d3.max(drawingData, function (d) { return +d[axes.xAxis]; })
+  ]);
+  yRange.domain([
+    d3.min(drawingData, function (d) { return +d[axes.yAxis]; }),
+    d3.max(drawingData, function (d) { return +d[axes.yAxis]; })
+  ]);
 
   // add new points if they're needed
-  dataPoints.enter()
-    .append("svg:circle")
-      .attr("cx", 10)
-      .attr("cy", 10)
-      .style("fill", "#f0f"); // set fill colour from the colours array
+  //dataPoints.enter()
+    //.append("svg:circle")
+      //.attr("cx", 10)
+      //.attr("cy", 10)
+      //.style("fill", "#f0f"); // set fill colour from the colours array
 
   /*
   // the data domains or desired axes might have changed, so update them all
@@ -71,7 +88,9 @@ function redraw () {
 */
   // transition the points
   dataPoints.transition().duration(1500).ease("exp-in-out")
-    .style("opacity", 1);
+    .style("opacity", 1)
+    .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
+    .attr("cy", function (d) { return yRange (d[axes.yAxis]); });
 //    .style("fill", function (d) { return colours[d.type.id]; }) // set fill colour from the colours array
 //    .attr("r", function(d) { return rRange (d[axes.radiusAxis]); })
 //    .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
@@ -107,3 +126,4 @@ function getChosenFlowers () {
 // listen to the form fields changing
 document.getElementById("controls").addEventListener ("click", redraw, false);
 document.getElementById("controls").addEventListener ("keyup", redraw, false);
+
