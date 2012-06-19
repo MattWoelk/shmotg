@@ -53,6 +53,18 @@ function redraw () {
   var dataPoints = chart.selectAll("circle").data(localDrawingData, function (d) { return d.id; }), // select the data points and set their data
       axes = getChosenAxes (); // object containing the axes we'd like to use (duration, inversions, etc.)
 
+  // add new points if they're needed
+  dataPoints.enter()
+    .insert("svg:circle")
+      .attr("r", 0)
+      .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
+      .attr("cy", function (d) { return yRange (d[axes.yAxis]); })
+      .attr("class", function(d) { return d.species + "_svg"; });
+
+  dataPoints.transition()
+    .duration(1500)
+    .attr("r", 5);
+
   xRange.domain([
     d3.min(localDrawingData, function (d) { return +d[axes.xAxis]; }),
     d3.max(localDrawingData, function (d) { return +d[axes.xAxis]; })
@@ -63,27 +75,20 @@ function redraw () {
     d3.max(localDrawingData, function (d) { return +d[axes.yAxis]; })
   ]);
 
-  // add new points if they're needed
-  dataPoints.enter()
-    .insert("svg:circle")
-      .attr("r", 5)
-      .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
-      .attr("cy", function (d) { return yRange (d[axes.yAxis]); })
-      .attr("class", function(d) { return d.species + "_svg"; });
-
   // transition the points
   dataPoints.transition()
     .duration(1500)
-    .ease("exp-in-out")
-    .style("opacity", 1)
     .attr("r", 5)
     .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
     .attr("cy", function (d) { return yRange (d[axes.yAxis]); });
 
   // delete old points if they aren't needed
   dataPoints.exit()
-    .transition().duration(500).ease("exp-in-out")
+    .transition()
+    .duration(1500)
     .attr("r", 0)
+    .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
+    .attr("cy", function (d) { return yRange (d[axes.yAxis]); })
     .remove();
 
   /*
