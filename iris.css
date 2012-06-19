@@ -28,3 +28,12 @@ body {
 .virginica_html {
   color: #008;
 }
+
+input {
+  height: 30px;
+  width: 30px;
+}
+
+.float-left {
+  float: left;
+}
