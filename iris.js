@@ -10,9 +10,7 @@ var MARGINS = {top: 2, right: 2, bottom: 2, left: 2}, // margins around the grap
   drawingData, //the data which will be drawn.
   chart_width = 600,
   chart_height = 200,
-
-  //TODO: not yet used
-  species= [
+  flowerSpecies = [ //the species of the flowers
     "setosa",
     "versicolor",
     "virginica"],
@@ -34,7 +32,7 @@ d3.csv("iris.csv", function(data) {
   d3.select("#chart").selectAll("circle")
       .data(data)
     .enter().append("circle")
-      .attr("r", function(d) { return 5; })
+      .attr("r", function(d) { return 1; })
       .attr("cx", function(d) { return "50%"; })
       .attr("cy", function(d) { return "50%"; })
       .attr("class", function(d) { return d.species + "_svg"; });
@@ -45,43 +43,62 @@ d3.csv("iris.csv", function(data) {
 
 // this redraws the graph when forms are clicked
 function redraw () {
-  console.log("redraw:");
   chart = d3.select("#chart");
 
-  var dataPoints = chart.selectAll("circle").data(drawingData), // select the data points and set their data
+  var localDrawingData = filterOutUnwantedTypes(drawingData);
+  //var localDrawingData = drawingData;
+  console.log(getSelectedFlowerTypes());
+  //console.log(filterOutUnwantedTypes(drawingData));
+
+  var dataPoints = chart.selectAll("circle").data(localDrawingData, function (d) { return d.id; }), // select the data points and set their data
       axes = getChosenAxes (); // object containing the axes we'd like to use (duration, inversions, etc.)
 
   xRange.domain([
-    d3.min(drawingData, function (d) { return +d[axes.xAxis]; }),
-    d3.max(drawingData, function (d) { return +d[axes.xAxis]; })
+    d3.min(localDrawingData, function (d) { return +d[axes.xAxis]; }),
+    d3.max(localDrawingData, function (d) { return +d[axes.xAxis]; })
   ]);
 
   yRange.domain([
-    d3.min(drawingData, function (d) { return +d[axes.yAxis]; }),
-    d3.max(drawingData, function (d) { return +d[axes.yAxis]; })
+    d3.min(localDrawingData, function (d) { return +d[axes.yAxis]; }),
+    d3.max(localDrawingData, function (d) { return +d[axes.yAxis]; })
   ]);
 
   // add new points if they're needed
   dataPoints.enter()
-    .append("svg:circle")
-      .attr("cx", 10)
-      .attr("cr", 5)
-      .attr("cy", 10)
-      .style("fill", "#f0f"); // set fill colour from the colours array
+    .insert("svg:circle")
+      .attr("r", 5)
+      .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
+      .attr("cy", function (d) { return yRange (d[axes.yAxis]); })
+      .attr("class", function(d) { return d.species + "_svg"; });
+
+  // transition the points
+  dataPoints.transition()
+    .duration(1500)
+    .ease("exp-in-out")
+    .style("opacity", 1)
+    .attr("r", 5)
+    .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
+    .attr("cy", function (d) { return yRange (d[axes.yAxis]); });
+
+  // delete old points if they aren't needed
+  dataPoints.exit()
+    .transition().duration(500).ease("exp-in-out")
+    .attr("r", 0)
+    .remove();
 
   /*
   // the data domains or desired axes might have changed, so update them all
   xRange.domain([
-    d3.min(drawingData, function (d) { return +d[axes.xAxis]; }),
-    d3.max(drawingData, function (d) { return +d[axes.xAxis]; })
+    d3.min(localDrawingData, function (d) { return +d[axes.xAxis]; }),
+    d3.max(localDrawingData, function (d) { return +d[axes.xAxis]; })
   ]);
   yRange.domain([
-    d3.min(drawingData, function (d) { return +d[axes.yAxis]; }),
-    d3.max(drawingData, function (d) { return +d[axes.yAxis]; })
+    d3.min(localDrawingData, function (d) { return +d[axes.yAxis]; }),
+    d3.max(localDrawingData, function (d) { return +d[axes.yAxis]; })
   ]);
   rRange.domain([
-    d3.min(drawingData, function (d) { return +d[axes.radiusAxis]; }),
-    d3.max(drawingData, function (d) { return +d[axes.radiusAxis]; })
+    d3.min(localDrawingData, function (d) { return +d[axes.radiusAxis]; }),
+    d3.max(localDrawingData, function (d) { return +d[axes.radiusAxis]; })
   ]);
 
   // transition function for the axes
@@ -89,15 +106,12 @@ function redraw () {
     t.select(".x.axis").call(xAxis);
     t.select(".y.axis").call(yAxis);
 */
-  // transition the points
-  dataPoints.transition().duration(1500).ease("exp-in-out")
-    .style("opacity", 1)
-    .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
-    .attr("cy", function (d) { return yRange (d[axes.yAxis]); });
+
 //    .style("fill", function (d) { return colours[d.type.id]; }) // set fill colour from the colours array
 //    .attr("r", function(d) { return rRange (d[axes.radiusAxis]); })
 //    .attr("cx", function (d) { return xRange (d[axes.xAxis]); })
 //    .attr("cy", function (d) { return yRange (d[axes.yAxis]); });
+
 /*
   // remove points if we don't need them anymore
   rollercoasters.exit()
@@ -116,16 +130,23 @@ function redraw () {
 // return an object containing the currently selected axis choices
 function getChosenAxes () {
   return {
-    xAxis      : document.querySelector("#x-axis input:checked").value,
-    yAxis      : document.querySelector("#y-axis input:checked").value,
+    xAxis: document.querySelector("#x-axis input:checked").value,
+    yAxis: document.querySelector("#y-axis input:checked").value,
   };
 }
 
 // return a list of types which are currently selected
-function getChosenFlowers () {
-  return [].map.call (document.querySelectorAll ("#coaster-types input:checked"), function (checkbox) { return checkbox.value;} );
+function getSelectedFlowerTypes () {
+  return [].map.call (document.querySelectorAll ("#flower-types input:checked"), function (checkbox) { return checkbox.value;} );
+}
+
+function filterOutUnwantedTypes (dataToBeFiltered) {
+  var typesToInclude = getSelectedFlowerTypes();
+
+  return dataToBeFiltered.filter (function (flr) {
+    return typesToInclude.indexOf(flr.species) !== -1;
+  });
 }
 
 // listen to the form fields changing
-document.getElementById("controls").addEventListener ("click", redraw, false);
-document.getElementById("controls").addEventListener ("keyup", redraw, false);
+document.getElementById("controls").addEventListener ("change", redraw, false);
