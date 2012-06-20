@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+    <link type="text/css" rel="stylesheet" href="horizon.css"/>
+
+    <title>Data visualisation demo</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
+
+    <div>
+      <svg id="chart"></svg>
+    </div>
+
+  </body>
+  <script src="d3.v2.js"></script>
+  <script src="horizon.js"></script>
+</html>
+

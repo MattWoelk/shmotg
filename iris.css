@@ -37,3 +37,7 @@ input {
 .float-left {
   float: left;
 }
+
+ul li {
+  list-style-type: none;
+}
