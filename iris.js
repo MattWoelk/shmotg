@@ -1,15 +1,13 @@
 //IDEAS:
 // - a 'keep axes rigid' button which keeps the upper and lower bounds on the graph constant, independent of what property is being shown.
 
-var MARGINS = {top: 2, right: 2, bottom: 2, left: 2}, // margins around the graph (percentages)
+var MARGINS = {top: 15, right: 15, bottom: 15, left: 15}, // margins around the graph (percentages)
   xRange = d3.scale.linear().range([MARGINS.left + "%", (100 - MARGINS.right) + "%"]), // x range function (percentages)
   yRange = d3.scale.linear().range([100 - MARGINS.top + "%", MARGINS.bottom + "%"]), // y range function (percentages)
   xAxis = d3.svg.axis().scale(xRange).tickSize(10).tickSubdivide(true),
   yAxis = d3.svg.axis().scale(yRange).tickSize(10).tickSubdivide(true).orient("right"),
   chart, //the chart where everything is drawn.
   drawingData, //the data which will be drawn.
-  chart_width = 600,
-  chart_height = 200,
   flowerSpecies = [ //the species of the flowers
     "setosa",
     "versicolor",
@@ -24,8 +22,9 @@ var MARGINS = {top: 2, right: 2, bottom: 2, left: 2}, // margins around the grap
 
 chart = d3.select("#chart");
 
-chart.attr("width", chart_width + "px")
-  .attr("height", chart_height + "px");
+chart.attr("width", "100%")
+  .attr("height", document.documentElement.clientHeight/2 - MARGINS.top - MARGINS.bottom)
+  .attr("display", "block");
 
 d3.csv("iris.csv", function(data) {
   drawingData = data;
