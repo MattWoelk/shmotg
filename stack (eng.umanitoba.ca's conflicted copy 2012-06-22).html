@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stacked Bar Chart</title>
+    <script type="text/javascript" src="d3.v2.js"></script>
+    <script type="text/javascript" src="stream_layers.js"></script>
+    <link type="text/css" rel="stylesheet" href="button.css"/>
+    <link type="text/css" rel="stylesheet" href="stack.css"/>
+  </head>
+  <body>
+    <div id="chart">
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
+      <button id="group" class="first" onclick="transitionGroup()">
+        <!-- maybe onclick should be ontouch ??? -->
+        Group
+      </button>
+      <button id="stack" class="active" onclick="transitionStack()">
+        <!-- maybe onclick should be ontouch ??? -->
+        Stack
+      </button>
+      <button id="percent" class="last" onclick="transitionPercent()">
+        <!-- maybe onclick should be ontouch ??? -->
+        Percent Stack (broken)
+      </button>
+      </div>
+    <script type="text/javascript" src="stack.js"></script>
+  </body>
+</html>
