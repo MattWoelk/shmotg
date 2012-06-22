@@ -20,53 +20,54 @@
 
     <script type="text/javascript">
 
-var DATA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+var DATA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 8, 6, 4, 2, 0];
 
 var charts = d3.select("#charts")
 
 ///////////////
-var chart1 = charts.append("div").append("svg");
+var chart1 = charts.append("svg");
 
 chart1.attr("width", "500")
-.attr("height", "50");
+  .attr("height", 80);
 
 chart1.selectAll("rect")
   .data(DATA)
 .enter()
   .append("rect")
-  .style("stroke", "gray")
+  .style("stroke", "steelblue")
   .style("fill", "white")
   .attr("width", 20)
-  .attr("height", 40)
+  .attr("height", function (d) { return d * 5; })
+  .attr("y", function (d) { return 50 - (d * 5); })
   .attr("x", function (d, i) { return i*25; });
 
 ///////////////
-var chart2 = charts.append("div").append("svg");
+var chart2 = charts.append("svg");
 
 chart2.attr("width", "500")
-.attr("height", "50");
+  .attr("height", 80);
 
 chart2.selectAll("circle")
   .data(DATA)
 .enter()
   .append("circle")
-  .style("stroke", "gray")
+  .style("stroke", "steelblue")
   .style("fill", "white")
-  .attr("r", 10)
+  .attr("r", function (d) { return d * 2; })
   .attr("cy", 20)
   .attr("cx", function (d, i) { return i*25 + 10; });
 
 ///////////////
-var chart3 = charts.append("div").append("svg");
+var chart3 = charts.append("svg");
 
 chart3.attr("width", "500")
-.attr("height", "50");
+  .attr("height", 80);
 
 chart3.selectAll("line")
   .data(DATA)
 .enter()
   .append("line")
-  .style("stroke", "gray")
+  .style("stroke", "steelblue")
   .style("fill", "white")
   .attr("x1", function (d, i) { return i*25 - 25; })
   .attr("x2", function (d, i) { return i*25; })
@@ -74,25 +75,47 @@ chart3.selectAll("line")
   .attr("y2", function (d, i) { return 50 - d; });
 
 ///////////////
-var chart4 = charts.append("div").append("svg");
+var chart4 = charts.append("svg");
 
 chart4.attr("width", "500")
-.attr("height", "50");
+  .attr("height", 80);
 
-var line = d3.svg.line()
-  .x(function(d, i) { return i * 25; })
-  .y(function(d, i) { return d; });
+var d3line3 = d3.svg.line()
+  .x(function (d, i) { return i * 25; })
+  .y(function (d, i) { return 22 - (d * 2); })
+  .interpolate("linear");
 
-chart4.selectAll("path")
-  .data(DATA)
-.enter()
-  .append("path")
-  .style("stroke", "gray")
-  .style("fill", "white")
-  .attr("x1", function (d, i) { return i*25 - 25; })
-  .attr("x2", function (d, i) { return i*25; })
-  .attr("y1", function (d, i) { return 50 - d; })
-  .attr("y2", function (d, i) { return 50 - d; });
+chart4.append("svg:path")
+  .attr("d", d3line3(DATA))
+  .style("stroke-width", 4)
+  .style("stroke", "steelblue")
+  .style("fill", "#3EA847");
+
+
+///////////////
+var chart5 = charts.append("svg");
+
+chart5.attr("width", "500")
+  .attr("height", 80);
+
+var d3area5 = d3.svg.area()
+  .x(function (d, i) { return i * 25; })
+  .y1(function (d, i) { return 22 - (d * 2); })
+  .y0((d3.max(DATA) + 1 ) * 2 + 25)
+  .interpolate("step-after");
+
+//var marker5 = d3.svg.marker();
+
+chart5.append("svg:path")
+  .attr("d", d3area5(DATA))
+//  .attr("marker-end", "url(#arrowGray)")
+//  .attr("marker-mid", "url(#arrowGray)")
+//  .attr("marker-start", "url(#arrowGray)")
+  .style("stroke-width", 2)
+  .style("stroke", "steelblue")
+  .style("fill", "#3EA847");
+
+
 
     </script>
 
