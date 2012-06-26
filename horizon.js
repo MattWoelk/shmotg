@@ -1,87 +1,37 @@
-var data = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+var data = [1, 5, 3, 7, 10, 4, 7, 8, 6, 3, 0, 1];
 
-console.log(data);
+var chart = d3.select("#chart").append("svg");
 
-var line = d3.svg.line()
-    .interpolate("basis")
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.price); });
+chart.attr("width", 900)
+  .attr("height", 1600);
 
-var mode = "offset",
-    buffer = document.createElement("svg"),
-    width = buffer.width = 300,
-    height = buffer.height = 300,
-    scale = d3.scale.linear().interpolate(d3.interpolateRound),
-    colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
+// Make one array for each band, and store all arrays in a big array
+//var allArrays = [[], [], []];
+var numOfBands = 2;
+var maxValue = d3.max(data);
+var modValue = d3.max(data) / numOfBands; //TODO: use a d3 scale instead.
 
-var chart = d3.select("#chart")
+var d3area1 = d3.svg.area()
+  .x(function (d, i) { return i * 30; })
+  .y1(function (d, i) { return 100 - (d * 10); })
+  .y0(100)
+  .interpolate("basis");
 
-var x = d3.scale.linear().domain([0, data.length - 1]).range [0, width],
-    y = d3.scale.linear().domain([0, d3.max(data)]).range [height, 0],
-    duration = 1500,
-    delay = 500;
+//var marker5 = d3.svg.marker();
+var colors = ["steelblue", "lightblue"];
 
-//var area = d3.svg.area()
-//    .interpolate("basis")
-//    .x(function (d, i) { return i; })
-//    .y(function (d) { return d; });
+for (var i = 0; i < numOfBands; i++) {
+  chart.append("svg:path")
+    .attr("d", d3area1(data))
+    .style("stroke-width", 2)
+    .style("fill", colors[i])
+    .style("cursor", "help")
+    .attr("transform", "translate(0, " + (i - 1) * 50 + ")");
 
-//area.y0(50);
-
-chart.attr("width", width)
-  .attr("height", height);
-
-chart.selectAll('path.line')
-    .data([data])
-  .enter().append("svg:path")
-    .attr("class", "line")
-    .attr("fill", "none")
-    .attr("stroke", "maroon")
-    .attr("stroke-width", 2)
-    .attr("d", d3.svg.line()
-//      .x(function(d) { return x(d.date); })
-//      .y(function(d) { return y(d.price); })
-//        .x(function(d) { return x(d); })
-//        .y(function(d) { return y(d); }));
-    );
-
-var shmeu = d3.svg.line().x(function (d) { return d; });
-
-//    .attr("d", d3.svg.line()
-//        .x(data)
-//        .y(y));
-//
-
-//chart.selectAll(".area")
-//    .data(data)
-//  .enter().insert("svg:path", ".line")
-//    .attr("class", "area")
-//    .attr("d", area(data))
-//    .style("fill", "#f0f")
-//    .style("fill-opacity", 1e-6);
+  chart.attr("width", data.length * 30).attr("height", 50);
+}
 
 
-//selection.each(function (d, i) {
-//  var that = this,
-//      colors_ = typeof colors === "function" ? colors.call(that, d, i) : colors,
-//      start = -Infinity,
-//      m = colors_.length >> 1,
-//      canvas = d3.select(that).select("svg"),
-//      ready;
-
-//  for (var j = 0; j < m; ++j) {
-//    canvas.fillStyle = colors_[m + j];
-//
-//    var y0 = (j - m + 1) * height;
-//    scale.range([m + height + y0, y0]);
-//    y0 = scale(0);
-//
-//    for (var i = 0, n = width, y1; i < n; ++i) {
-//      y1 = metric_.valueAt(i);
-//      if (y1 <= 0) { negative = true; continue; }
-//      canvas.fillRect(i, y1 = scale(y1), 1, y0 - y1);
-//    }
-//  }
-
-//  canvas.restore();
-//})
+//TODO: wrap this all up into a nice abstractable class thing :)
+//      - get rid of magic numbers
+//      - make it work for negative values (might work already)
