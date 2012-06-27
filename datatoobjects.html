@@ -37,7 +37,7 @@
 
     <script type="text/javascript">
 
-var DATA = [0, 5, 3, 6, 8, 10, 4, 7, 6, 1, 3, 2, 6, 4, 9, 8, 6, 1];
+var DATA = [2, 0, 5, 3, 6, 8, 10, 4, 7, 6, 1, 3, 2, 6, 4, 9, 5, 6, 1];
 
 var charts = d3.select("#charts")
 
@@ -88,8 +88,8 @@ chart3.selectAll("line")
   .append("line")
   .style("stroke", "steelblue")
   .style("fill", "white")
-  .attr("x1", function (d, i) { return i*25 - 25; })
-  .attr("x2", function (d, i) { return i*25; })
+  .attr("x1", function (d, i) { return i*25; })
+  .attr("x2", function (d, i) { return i*25 + 25; })
   .attr("y1", function (d, i) { return 50 - d; })
   .attr("y2", function (d, i) { return 50 - d; });
 
@@ -147,7 +147,7 @@ var d3area5 = d3.svg.area()
   .x(function (d, i) { return i * 25; })
   .y1(function (d, i) { return 30 - (d * 2); })
   .y0((d3.max(DATA) + 1 ) * 2 + 25)
-  .interpolate("step-after");
+  .interpolate("linear");
 
 //var marker5 = d3.svg.marker();
 
