@@ -51,3 +51,4 @@ chart.selectAll("path")
 //      - make it work for negative values (might work already)
 //      Make the graph dynamic so that it sizes according to the screen
 //      - this might just mean setting it statically each time the screen is loaded or rotated.
+//      Either use transparency for the colours, or find a sweet way to make it an equation.
