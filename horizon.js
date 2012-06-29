@@ -2,13 +2,14 @@
 //var data = [1, 2, 5, 4, 7, 6, 9, 8, 10, 0, 1];
 var data = [0, 5, 10, 7, 10, 0, 7, 8, 2.5];
 //var data = [-1, 0, 1, 0];
-var data = [0, 1, 0];
+//var data = [0, 1, 0];
 
 var colors = ["#F88", "#F44"];
 //var colors = ["steelblue", "lightblue"];
 var numOfBands = 2;
 var height = 50;
 var width = document.documentElement.clientWidth - 20;
+var zeroPoint = 0;
 
 var upperBound = d3.max(data); //TODO: make use of these in scales.
 var lowerBound = d3.min(0, d3.min(data));
@@ -18,11 +19,11 @@ var xScale = d3.scale.linear()
   .range([0, width + (width / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
 
 var yScalePos = d3.scale.linear()
-  .domain([0, d3.max([0, d3.max(data)])])
+  .domain([zeroPoint, d3.max([zeroPoint, d3.max(data)])])
   .range([height * numOfBands, 0]);
 
 //var yScaleNeg = d3.scale.linear()
-//  .domain([d3.min(d3.min(data), 0), 0])
+//  .domain([d3.min(d3.min(data), zeroPoint), zeroPoint])
 //  .range([height * numOfBands, 0]);
 
 
@@ -47,7 +48,7 @@ d3.select("#chart")
 //Our canvas, where the curves will be rendered, and which will be clipped.
 var chart = d3.select("#chart").append("svg:g");
 
-//Make the clipPath (for cropping the paths)
+//Make the clipPath (for cropping the paths) //TODO: actually employ this
 chart.insert("defs")
   .append("clipPath")
     .attr("id", "clip")
@@ -57,7 +58,7 @@ chart.insert("defs")
 
 //Make and render the curves.
 chart.selectAll("path")
-    .data(d3.range(numOfBands))
+    .data(d3.range(numOfBands)) //TODO: make this number of positive bands, then make another for negative ones.
   .enter().append("path")
     .attr("fill", "rgba(0, 0, 255, " + 1.0 / numOfBands + ")") //function (d, i) { return colors[i]; }) //TODO: use a non-linear scale for this instead!!!
     .style("stroke-width", 2)
