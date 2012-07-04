@@ -1,7 +1,7 @@
 var outlinesOrNot = true;
 
 var coolChart = function (whereToDrawIt) {
-  var bandSize = 9; // maybe have this constant band size instead of setting the number of bands.
+  var bandSize = 5; // maybe have this constant band size instead of setting the number of bands.
 
   var height = 50;
   var width = document.documentElement.clientWidth - 20;
@@ -42,7 +42,7 @@ var coolChart = function (whereToDrawIt) {
       //Set the chart's dimensions
       chart
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height * 5);
 
       //Draw the background for the chart
       chart
@@ -59,11 +59,11 @@ var coolChart = function (whereToDrawIt) {
           .attr("width", width)
           .attr("height", height); //height / 4 - 20);
 
-      chart.attr("clip-path", "url(#clip)");
+//      chart.attr("clip-path", "url(#clip)");
 
       //Make and render the Positive curves.
       chart.selectAll("posPath")
-          .data(d3.range(numOfPositiveBands))
+          .data(d3.range(numOfMostBands))
         .enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
@@ -71,11 +71,11 @@ var coolChart = function (whereToDrawIt) {
           .style("cursor", "help")
           .style("stroke", "#000")
           .attr("d", d3area1(d))
-          .attr("transform", function (d, i) {return "translate(0, " + (i - numOfPositiveBands + 1) * height + ")"; });
+          .attr("transform", function (d, i) {return "translate(0, " + (i - numOfMostBands + 1) * height + ")"; });
 
       //Make and render the Negative curves.
       chart.selectAll("negPath")
-          .data(d3.range(numOfNegativeBands))
+          .data(d3.range(numOfMostBands, 0, -1))
         .enter().append("path")
           .attr("class", "negPath")
           .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
@@ -83,7 +83,7 @@ var coolChart = function (whereToDrawIt) {
           .style("stroke", "#000")
           .style("cursor", "help")
           .attr("d", d3area1(d))
-          .attr("transform", function (d, i) {return "translate(0, " + (i - numOfNegativeBands - 2) * height + ")"; });
+          .attr("transform", function (d, i) {return "translate(0, " + (d - numOfMostBands - 2) * height + ")"; });
 
 
       //Draw the outline for the chart
