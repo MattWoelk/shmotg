@@ -13,6 +13,7 @@ var coolChart = function (whereToDrawIt) {
 
   var numOfPositiveBands = (d3.max(data) > zeroPoint) ? Math.ceil(Math.abs(d3.max(data) - zeroPoint) / bandSize) : 0; // the closest to mod bandSize, rounded up.
   var numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
+  var numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
 
   console.log("numPos: " + numOfPositiveBands); //TODO: test these with all types of input data. Maybe make test cases which use this as a module and render a bunch of different graphs. :D
   console.log("numNeg: " + numOfNegativeBands);
@@ -65,14 +66,26 @@ var coolChart = function (whereToDrawIt) {
       chart.attr("clip-path", "url(#clip)");
 
       //Make and render the Positive curves.
-      chart.selectAll("path")
+      chart.selectAll("posPath")
           .data(d3.range(numOfPositiveBands)) //TODO: make this number of positive bands, then make another for negative ones.
         .enter().append("path")
-          .attr("fill", "rgba(0, 0, 255, " + 1.0 / numOfPositiveBands + ")") //function (d, i) { return colors[i]; }) //TODO: use a non-linear scale for this instead!!!
+          .attr("class", "posPath")
+          .attr("fill", "rgba(255, 0, 0, " + 1.0 / numOfMostBands + ")") //function (d, i) { return colors[i]; }) //TODO: use a non-linear scale for this instead!!!
           .style("stroke-width", 2)
           .style("cursor", "help")
           .attr("d", d3area1(d))
           .attr("transform", function (d, i) {return "translate(0, " + (i - 1) * 50 + ")"; });
+
+      //Make and render the Negative curves.
+      chart.selectAll("negPath")
+          .data(d3.range(numOfNegativeBands)) //TODO: make this number of positive bands, then make another for negative ones.
+        .enter().append("path")
+          .attr("class", "negPath")
+          .attr("fill", "rgba(0, 0, 255, " + 1.0 / numOfMostBands + ")") //function (d, i) { return colors[i]; }) //TODO: use a non-linear scale for this instead!!!
+          .style("stroke-width", 2)
+          .style("cursor", "help")
+          .attr("d", d3area1(d))
+          .attr("transform", function (d, i) {return "translate(0, " + - (i + 2) * 50 + ")"; });
 
 
       //Draw the outline for the chart
@@ -89,12 +102,14 @@ var coolChart = function (whereToDrawIt) {
   my.width = function (value) {
     if (!arguments.length) return width;
     width = value;
+    chart.attr("width", width); //TODO: fix this so that it redraws the plot
     return my;
   }
 
   my.height = function (value) {
     if (!arguments.length) return height;
     height = value;
+    chart.attr("height", height); //TODO: fix this so that it redraws the plot
     return my;
   }
 
@@ -112,7 +127,7 @@ var coolChart = function (whereToDrawIt) {
 
 //var data = [0, 5, 10, 7, 10, 0, 7, 8, 6, 3, 0, 1, 2, 7, 8, 2];
 //var data = [1, 2, 5, 4, 7, 6, 9, 8, 10, 0, 1];
-var data = [0, 5, 10, 7, 10, 0, 7, 8, 2.5];
+var data = [0, -5, 10, -7, 10, -1, 7, 8, 2.5];
 //var data = [-1, 0, 1, 0];
 //var data = [0, 1, 0];
 
@@ -123,13 +138,15 @@ d3.select("#charts")
   .datum(data)
   .call(coolChart1);
 
-var data2 = [2, 3, 2, 2, 3, 1, 0, 1, 0];
+//coolChart1.width(100).height(70);
+
+var data2 = [2, 3, 2, 2, 3, 1, -1, 0, 1];
 var coolChart2 = coolChart(d3.select("#charts"));
 d3.select("#charts")
   .datum(data2)
   .call(coolChart2);
 
-var data3 = [0, 1, 0, 10, 0, 5, 2, 0, 2.5];
+var data3 = [0, 1, -3, 10, 0, 5, -4, -10, 2.5];
 var coolChart3 = coolChart(d3.select("#charts"));
 d3.select("#charts")
   .datum(data3)
