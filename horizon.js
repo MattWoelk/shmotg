@@ -1,5 +1,4 @@
-
-function coolChart(whereToDrawIt) {
+var coolChart = function (whereToDrawIt) {
   var colors = ["#F88", "#F44"];
   //var colors = ["steelblue", "lightblue"];
   var numOfBands = 2;
@@ -38,23 +37,22 @@ function coolChart(whereToDrawIt) {
     .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ???
     .interpolate("cardinal");
 
-  function my(selection) {
-
+  var my = function (selection) {
     selection.each(function (d, i) {
+      //Our canvas, where the curves will be rendered, and which will be clipped.
+      chart = whereToDrawIt.append("svg");
+
       //Set the chart's dimensions
-      whereToDrawIt
+      chart
         .attr("width", width)
         .attr("height", height);
 
       //Draw the background for the chart
-      whereToDrawIt
+      chart
         .insert("svg:rect")
           .attr("width", width)
           .attr("height", height)
           .style("fill", "#FFF");
-
-      //Our canvas, where the curves will be rendered, and which will be clipped.
-      chart = whereToDrawIt.append("svg:g");
 
       //Make the clipPath (for cropping the paths) //TODO: actually employ this
       chart.insert("defs")
@@ -76,7 +74,7 @@ function coolChart(whereToDrawIt) {
 
 
       //Draw the outline for the chart
-      whereToDrawIt
+      chart
         .append("svg:rect")
           .attr("width", width)
           .attr("height", height)
@@ -86,13 +84,13 @@ function coolChart(whereToDrawIt) {
     });
   }
 
-  my.width = function(value) {
+  my.width = function (value) {
     if (!arguments.length) return width;
     width = value;
     return my;
   }
 
-  my.height = function(value) {
+  my.height = function (value) {
     if (!arguments.length) return height;
     height = value;
     return my;
@@ -118,25 +116,25 @@ var data = [0, 5, 10, 7, 10, 0, 7, 8, 2.5];
 
 
 //var coolChart1 = coolChart().width(50).height(50);
-var coolChart1 = coolChart(d3.select("#chart"));
-d3.select("#chart")
+var coolChart1 = coolChart(d3.select("#charts"));
+d3.select("#charts")
   .datum(data)
   .call(coolChart1);
 
 var data2 = [2, 3, 2, 2, 3, 1, 0, 1, 0];
-var coolChart2 = coolChart(d3.select("#chart2"));
-d3.select("#chart")
+var coolChart2 = coolChart(d3.select("#charts"));
+d3.select("#charts")
   .datum(data2)
   .call(coolChart2);
 
 var data3 = [0, 1, 0, 10, 0, 5, 2, 0, 2.5];
-var coolChart3 = coolChart(d3.select("#chart3"));
-d3.select("#chart")
+var coolChart3 = coolChart(d3.select("#charts"));
+d3.select("#charts")
   .datum(data3)
   .call(coolChart3);
 
 var data4 = [10, 8, 9, 5, 3, 7, 4, 8, 9, 6, 10];
-var coolChart4 = coolChart(d3.select("#chart4"));
-d3.select("#chart")
+var coolChart4 = coolChart(d3.select("#charts"));
+d3.select("#charts")
   .datum(data4)
   .call(coolChart4);
