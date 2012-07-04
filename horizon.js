@@ -1,15 +1,11 @@
+var outlinesOrNot = true;
+
 var coolChart = function (whereToDrawIt) {
-  var colors = ["#F88", "#F44"];
-  //var colors = ["steelblue", "lightblue"];
-  var numOfBands = 2;
+  var bandSize = 9; // maybe have this constant band size instead of setting the number of bands.
+
   var height = 50;
   var width = document.documentElement.clientWidth - 20;
   var zeroPoint = 0;
-
-  var bandSize = 5; // maybe have this constant band size instead of setting the number of bands.
-
-  var upperBound = d3.max(data); //TODO: make use of these in scales.
-  var lowerBound = d3.min(0, d3.min(data));
 
   var numOfPositiveBands = (d3.max(data) > zeroPoint) ? Math.ceil(Math.abs(d3.max(data) - zeroPoint) / bandSize) : 0; // the closest to mod bandSize, rounded up.
   var numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
@@ -22,19 +18,19 @@ var coolChart = function (whereToDrawIt) {
     .domain([0, data.length])
     .range([0, width + (width / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
 
-  var yScalePos = d3.scale.linear()
+  var yScale = d3.scale.linear()
     .domain([zeroPoint, d3.max([zeroPoint, d3.max(data)])])
     .range([height * numOfPositiveBands, 0]);
 
-  //var yScaleNeg = d3.scale.linear()
-  //  .domain([d3.min(d3.min(data), zeroPoint), zeroPoint])
-  //  .range([height * numOfBands, 0]);
+  var fillScale = d3.scale.linear()
+    .domain([0, numOfMostBands])
+    .rangeRound([255, 0]);
 
   var chart;
 
   var d3area1 = d3.svg.area()
     .x(function (d, i) { return xScale(i); })
-    .y1(function (d, i) { return yScalePos(d); }) // height - (d * 10); })
+    .y1(function (d, i) { return yScale(d); }) // height - (d * 10); })
     .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ???
     .interpolate("cardinal");
 
@@ -67,25 +63,27 @@ var coolChart = function (whereToDrawIt) {
 
       //Make and render the Positive curves.
       chart.selectAll("posPath")
-          .data(d3.range(numOfPositiveBands)) //TODO: make this number of positive bands, then make another for negative ones.
+          .data(d3.range(numOfPositiveBands))
         .enter().append("path")
           .attr("class", "posPath")
-          .attr("fill", "rgba(255, 0, 0, " + 1.0 / numOfMostBands + ")") //function (d, i) { return colors[i]; }) //TODO: use a non-linear scale for this instead!!!
-          .style("stroke-width", 2)
+          .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
+          .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
           .style("cursor", "help")
+          .style("stroke", "#000")
           .attr("d", d3area1(d))
-          .attr("transform", function (d, i) {return "translate(0, " + (i - 1) * 50 + ")"; });
+          .attr("transform", function (d, i) {return "translate(0, " + (i - numOfPositiveBands + 1) * height + ")"; });
 
       //Make and render the Negative curves.
       chart.selectAll("negPath")
-          .data(d3.range(numOfNegativeBands)) //TODO: make this number of positive bands, then make another for negative ones.
+          .data(d3.range(numOfNegativeBands))
         .enter().append("path")
           .attr("class", "negPath")
-          .attr("fill", "rgba(0, 0, 255, " + 1.0 / numOfMostBands + ")") //function (d, i) { return colors[i]; }) //TODO: use a non-linear scale for this instead!!!
-          .style("stroke-width", 2)
+          .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
+          .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+          .style("stroke", "#000")
           .style("cursor", "help")
           .attr("d", d3area1(d))
-          .attr("transform", function (d, i) {return "translate(0, " + - (i + 2) * 50 + ")"; });
+          .attr("transform", function (d, i) {return "translate(0, " + (i - numOfNegativeBands - 2) * height + ")"; });
 
 
       //Draw the outline for the chart
@@ -116,12 +114,12 @@ var coolChart = function (whereToDrawIt) {
   return my;
 
   //TODO:
-  //      make it work for negative values
-  //      - maybe use streamgraphs so that the tops and bottoms are both wiggly?
   //      Make the graph dynamic so that it sizes according to the screen
   //      - this might just mean setting it statically each time the screen is loaded or rotated.
   //      Either use transparency for the colours, or find a sweet way to make it an equation.
   //      Make sure it works for any number of bands >= 1
+  //      Test with only negative values; only positive values.
+  //      Test with different zero levels of all possibilities.
 }
 
 
