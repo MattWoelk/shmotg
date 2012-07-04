@@ -54,13 +54,15 @@ var coolChart = function (whereToDrawIt) {
           .attr("height", height)
           .style("fill", "#FFF");
 
-      //Make the clipPath (for cropping the paths) //TODO: actually employ this
+      //Make the clipPath (for cropping the paths)
       chart.insert("defs")
         .append("clipPath")
           .attr("id", "clip")
         .append("rect")
           .attr("width", width)
           .attr("height", height); //height / 4 - 20);
+
+      chart.attr("clip-path", "url(#clip)");
 
       //Make and render the Positive curves.
       chart.selectAll("path")
