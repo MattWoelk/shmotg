@@ -1,18 +1,15 @@
 var outlinesOrNot = true;
 
 var coolChart = function (whereToDrawIt) {
-  var bandSize = 3; // maybe have this constant band size instead of setting the number of bands.
+  var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
 
   var height = 50;
   var width = document.documentElement.clientWidth - 20;
-  var zeroPoint = 0;
+  var zeroPoint = 0; //TODO: use scales instead? Might make things WAY simpler if we scale the data
 
   var numOfPositiveBands = (d3.max(data) > zeroPoint) ? Math.ceil(Math.abs(d3.max(data) - zeroPoint) / bandSize) : 0; // the closest to mod bandSize, rounded up.
   var numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
   var numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
-
-  console.log("numPos: " + numOfPositiveBands); //TODO: test these with all types of input data. Maybe make test cases which use this as a module and render a bunch of different graphs. :D
-  console.log("numNeg: " + numOfNegativeBands);
 
   var xScale = d3.scale.linear()
     .domain([0, data.length])
@@ -31,7 +28,7 @@ var coolChart = function (whereToDrawIt) {
   var d3area1 = d3.svg.area()
     .x(function (d, i) { return xScale(i); })
     .y1(function (d, i) { return yScale(d); }) // height - (d * 10); })
-    .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ???
+    .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
     .interpolate("cardinal");
 
   var my = function (selection) {
@@ -85,7 +82,6 @@ var coolChart = function (whereToDrawIt) {
           .attr("d", d3area1(d))
           .attr("transform", function (d, i) {return "translate(0, " + (d - (numOfMostBands * 2)) * height + ")"; });
 
-
       //Draw the outline for the chart
       chart
         .append("svg:rect")
@@ -123,15 +119,8 @@ var coolChart = function (whereToDrawIt) {
 }
 
 
-//var data = [0, 5, 10, 7, 10, 0, 7, 8, 6, 3, 0, 1, 2, 7, 8, 2];
-//var data = [1, 2, 5, 4, 7, 6, 9, 8, 10, 0, 1];
 var data = [0, -5, 10, -7, 10, -1, 7, 8, 2.5];
-//var data = [-1, 0, 1, 0];
-//var data = [0, 1, 0];
-
-
-//var coolChart1 = coolChart().width(50).height(50);
-var coolChart1 = coolChart(d3.select("#charts"));
+var coolChart1 = coolChart(d3.select("#charts")); //TODO: send it an appended one? That's probably most useful in the long run. AND that way we don't have data being assigned and re-assigned all over the place.
 d3.select("#charts")
   .datum(data)
   .call(coolChart1);
