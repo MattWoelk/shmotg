@@ -1,7 +1,7 @@
 var outlinesOrNot = true;
 
 var coolChart = function (whereToDrawIt) {
-  var bandSize = 5; // maybe have this constant band size instead of setting the number of bands.
+  var bandSize = 3; // maybe have this constant band size instead of setting the number of bands.
 
   var height = 50;
   var width = document.documentElement.clientWidth - 20;
@@ -19,7 +19,7 @@ var coolChart = function (whereToDrawIt) {
     .range([0, width + (width / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
 
   var yScale = d3.scale.linear()
-    .domain([zeroPoint, d3.max([zeroPoint, d3.max(data)])])
+    .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
     .range([height * numOfPositiveBands, 0]);
 
   var fillScale = d3.scale.linear()
@@ -42,7 +42,7 @@ var coolChart = function (whereToDrawIt) {
       //Set the chart's dimensions
       chart
         .attr("width", width)
-        .attr("height", height * 5);
+        .attr("height", height);
 
       //Draw the background for the chart
       chart
@@ -59,7 +59,7 @@ var coolChart = function (whereToDrawIt) {
           .attr("width", width)
           .attr("height", height); //height / 4 - 20);
 
-//      chart.attr("clip-path", "url(#clip)");
+      chart.attr("clip-path", "url(#clip)");
 
       //Make and render the Positive curves.
       chart.selectAll("posPath")
@@ -83,7 +83,7 @@ var coolChart = function (whereToDrawIt) {
           .style("stroke", "#000")
           .style("cursor", "help")
           .attr("d", d3area1(d))
-          .attr("transform", function (d, i) {return "translate(0, " + (d - numOfMostBands - 2) * height + ")"; });
+          .attr("transform", function (d, i) {return "translate(0, " + (d - (numOfMostBands * 2)) * height + ")"; });
 
 
       //Draw the outline for the chart
