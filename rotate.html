@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Mobile Device</title>
+<script type="text/javascript">
+// Detect whether device supports orientationchange event, otherwise fall back to
+// the resize event.
+var supportsOrientationChange = "onorientationchange" in window,
+    orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
+
+window.addEventListener(orientationEvent, function() {
+    if(window.orientation==0)
+    {
+      document.getElementById('portrait').style.display = '';
+      document.getElementById('landscape').style.display = 'none';
+    }
+    else if(window.orientation==90)
+    {
+      document.getElementById('portrait').style.display = 'none';
+      document.getElementById('landscape').style.display = '';
+    }
+}, false);
+</script>
+<meta name="HandheldFriendly" content="true" />
+<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" />
+</head>
+<body>
+<div id="portrait" style="width:100%;height:100%;font-size:20px;">Portrait</div>
+<div id="landscape" style="width:100%;height:100%;font-size:20px;">Landscape</div>
+
+<script type="text/javascript">
+if(window.orientation==0)
+{
+  document.getElementById('portrait').style.display = '';
+  document.getElementById('landscape').style.display = 'none';
+}
+else if(window.orientation==90)
+{
+  document.getElementById('portrait').style.display = 'none';
+  document.getElementById('landscape').style.display = '';
+}
+</script>
+</body>
+</html>
