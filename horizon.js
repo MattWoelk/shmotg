@@ -9,19 +9,23 @@ var supportsOrientationChange = "onorientationchange" in window,
 window.addEventListener(orientationEvent, function() {
   //redraw the plots
   //alert("plots.length: " + plots.length);
-  plots.forEach(function (plt) {
-    //alert("for-each-ing");
-    //plt();
-    plt.width(screen.width - 20); //TODO: magic
-  });
+  redraw();
 }, false);
 
-
+var redraw = function () {
+  plots.forEach(function (plt) {
+    //plt.width(document.documentElement.clientWidth - 20); //TODO: magic
+    //plt.redraw();
+    //plt.update();
+    plt.call(coolChart());
+  });
+  /////// my.update = function () { slctn.transition().call(my); };
+};
 
 
 var outlinesOrNot = true;
 
-var coolChart = function (whereToDrawIt) {
+var coolChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
 
   var height = 50;
@@ -45,14 +49,16 @@ var coolChart = function (whereToDrawIt) {
     .rangeRound([255, 0]);
 
   //Our canvas, where the curves will be rendered, and which will be clipped.
-  var chart = whereToDrawIt.append("svg");
-
+  var chart;
 
   var d3area1 = d3.svg.area()
     .x(function (d, i) { return xScale(i); })
     .y1(function (d, i) { return yScale(d); }) // height - (d * 10); })
     .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
     .interpolate("cardinal");
+
+  var my = function (selection) {
+    chart = selection;
 
     //Set the chart's dimensions
     chart
@@ -74,56 +80,81 @@ var coolChart = function (whereToDrawIt) {
         .attr("width", width)
         .attr("height", height); //height / 4 - 20);
 
+    //Apply the clipPath
     chart.attr("clip-path", "url(#clip)");
 
-  var my = function (selection) {
-    //alert("my-ing");
+    width = document.documentElement.clientWidth - 20; //TODO: magic
+
     selection.each(function (data) {
 
-      //Make and render the Positive curves.
-      chart.selectAll("posPath")
-          .data(d3.range(numOfMostBands))
-        .enter().append("path")
-          .attr("class", "posPath")
-          .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
-          .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-          .style("cursor", "help")
-          .style("stroke", "#000")
-          .attr("d", d3area1(data))
-          .attr("transform", function (d, i) {return "translate(0, " + (i - numOfMostBands + 1) * height + ")"; });
+    //Make and render the Positive curves.
+    chart.selectAll("posPath")
+        .data(d3.range(numOfMostBands))
+      .enter().append("path")
+        .attr("class", "posPath")
+        .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
+        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("cursor", "help")
+        .style("stroke", "#000")
+        .attr("d", d3area1(data))
+        .attr("transform", function (d, i) {return "translate(0, " + (i - numOfMostBands + 1) * height + ")"; });
 
-      //Make and render the Negative curves.
-      chart.selectAll("negPath")
-          .data(d3.range(numOfMostBands, 0, -1))
-        .enter().append("path")
-          .attr("class", "negPath")
-          .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
-          .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-          .style("stroke", "#000")
-          .style("cursor", "help")
-          .attr("d", d3area1(data))
-          .attr("transform", function (d, i) {return "translate(0, " + (d - (numOfMostBands * 2)) * height + ")"; });
+    //Make and render the Negative curves.
+    chart.selectAll("negPath")
+        .data(d3.range(numOfMostBands, 0, -1))
+      .enter().append("path")
+        .attr("class", "negPath")
+        .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
+        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke", "#000")
+        .style("cursor", "help")
+        .attr("d", d3area1(data))
+        .attr("transform", function (d, i) {return "translate(0, " + (d - (numOfMostBands * 2)) * height + ")"; });
 
-      //Draw the outline for the chart
-      chart
-        .append("svg:rect")
-          .attr("width", width)
-          .attr("height", height)
-          .style("fill", "rgba(0,0,0,0)")
-          .style("stroke-width", 3)
-          .style("stroke", "#000");
+    //Draw the outline for the chart
+    chart
+      .append("svg:rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "rgba(0,0,0,0)")
+        .style("stroke-width", 3)
+        .style("stroke", "#000");
+
     });
   }
+
+  my.update = function () { slctn.transition().call(my); };
 
   my.redraw = function () {
     //TODO: put a bunch of the stuff from my() into here.
     //      set x range, and transition (just like in iris.js)
+    // alert("redrawing");
+    chart.selectAll("rect")
+      .attr("width", width);
+
+    xScale
+      .domain([0, data.length])
+      .range([0, width + (width / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+    d3area1
+      .x(function (d, i) { return xScale(i); })
+
+    chart.selectAll("negPath")
+        .data(d3.range(numOfMostBands, 0, -1))
+      .enter().append("path")
+        .attr("class", "negPath")
+        .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
+        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke", "#000")
+        .style("cursor", "help")
+        .attr("d", d3area1(data))
+
+
   }
 
   my.width = function (value) {
     if (!arguments.length) return width;
     width = value;
-    chart.attr("width", width); //TODO: fix this so that it redraws the plot
+    chart.attr("width", width);
     my.redraw();
     return my;
   }
@@ -131,7 +162,7 @@ var coolChart = function (whereToDrawIt) {
   my.height = function (value) {
     if (!arguments.length) return height;
     height = value;
-    chart.attr("height", height); //TODO: fix this so that it redraws the plot
+    chart.attr("height", height);
     my.redraw();
     return my;
   }
@@ -149,35 +180,35 @@ var coolChart = function (whereToDrawIt) {
 
 
 var data = [0, -5, 10, -7, 10, -1, 7, 8, 2.5];
-var coolChart1 = coolChart(d3.select("#charts")); //TODO: send it an appended one? That's probably most useful in the long run. AND that way we don't have data being assigned and re-assigned all over the place.
-d3.select("#charts")
+var coolChart1 = coolChart(); //TODO: send it an appended one? That's probably most useful in the long run. AND that way we don't have data being assigned and re-assigned all over the place.
+plots.push (d3.select("#charts").append("svg")
   .datum(data)
-  .call(coolChart1); // This essentially calls my(data) for the coolChart1 instance.
+  .call(coolChart()));
 
-plots.push(coolChart1);
+//plots.push(coolChart1);
 
 //coolChart1.width(100).height(70);
 
-var data2 = [2, 3, 2, 2, 3, 1, -1, 0, 1];
-var coolChart2 = coolChart(d3.select("#charts"));
-d3.select("#charts")
-  .datum(data2)
-  .call(coolChart2);
-
-plots.push(coolChart2);
-
-var data3 = [0, 1, -3, 10, 0, 5, -4, -10, 2.5];
-var coolChart3 = coolChart(d3.select("#charts"));
-d3.select("#charts")
-  .datum(data3)
-  .call(coolChart3);
-
-plots.push(coolChart3);
-
-var data4 = [10, 8, 9, 5, 3, 7, 4, 8, 9, 6, 10];
-var coolChart4 = coolChart(d3.select("#charts"));
-d3.select("#charts")
-  .datum(data4)
-  .call(coolChart4);
-
-plots.push(coolChart4);
+//var data2 = [2, 3, 2, 2, 3, 1, -1, 0, 1];
+//var coolChart2 = coolChart(); // coolChart2 = my;
+//d3.select("#charts").append("svg")
+//  .datum(data2)
+//  .call(coolChart()); // This essentially calls my(data) for the coolChart1 instance.
+//
+//plots.push(coolChart2);
+//
+//var data3 = [0, 1, -3, 10, 0, 5, -4, -10, 2.5];
+//var coolChart3 = coolChart();
+//d3.select("#charts").append("svg")
+//  .datum(data3)
+//  .call(coolChart());
+//
+//plots.push(coolChart3);
+//
+//var data4 = [10, 8, 9, 5, 3, 7, 4, 8, 9];
+//var coolChart4 = coolChart();
+//d3.select("#charts").append("svg")
+//  .datum(data4)
+//  .call(coolChart());
+//
+//plots.push(coolChart4);
