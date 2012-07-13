@@ -9,7 +9,7 @@ var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
 
   var height = 50;
-  var width = document.documentElement.clientWidth - 20; //TODO: magic
+  var width = window.innerWidth - 20; //TODO: magic
   var zeroPoint = 0; //TODO: use scales instead? Might make things WAY simpler if we scale the data
 
   var numOfPositiveBands;
