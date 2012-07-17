@@ -8,8 +8,10 @@
 var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
 
+  var margins = {top: 0, left: 25, bottom: 25, right: 25};
+
   var height = 50;
-  var width = window.innerWidth - 20; //TODO: magic
+  var width = window.innerWidth;
   var zeroPoint = 0; //TODO: use scales instead? Might make things WAY simpler if we scale the data
 
   var numOfPositiveBands;
@@ -19,14 +21,22 @@ var horizonChart = function () {
   var bkgrect;
   var frgrect;
   var defclip;
+  var xAxisContainer;
+  var xAxis;
+  var yAxisContainer;
+  var yAxis;
 
   var chart;
+  var paths;
 
   var slctn; // Save the selection so that my.update() works.
 
 
   var my = function (selection) {
     slctn = selection; // Save the selection so that my.update() works.
+
+    realWidth = width - margins.right - margins.left;
+    //width = width - margins.right - margins.left;
 
     selection.each(function (data) {
 
@@ -36,7 +46,11 @@ var horizonChart = function () {
 
     var xScale = d3.scale.linear()
       .domain([0, data.length])
-      .range([0, width + (width / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+      .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+
+    var xAxisScale = d3.scale.linear() //different than xScale because we want the right-most point to be at the right edge of the chart
+      .domain([0, data.length - 1])
+      .range([0, realWidth]);
 
     var yScale = d3.scale.linear()
       .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
@@ -54,31 +68,32 @@ var horizonChart = function () {
               .interpolate("cardinal");
 
     chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
-//    console.log(chart);
 
     //Set it's container's dimensions
     selection
-      .attr("height", height)
+      .attr("height", height + margins.bottom)
       .attr("width", width);
 
     //Set the chart's dimensions
     chart
-      .attr("width", width)
-      .attr("height", height);
+      .attr("width", width - 10) //TODO: magic numbers to get rid of scroll bars
+      .attr("height", height + margins.bottom);
 
     //Draw the background for the chart
     if (!bkgrect)
     {
       bkgrect = chart
         .insert("svg:rect")
-          .attr("width", width)
+          .attr("width", realWidth)
           .attr("height", height)
           .attr("class", "bkgrect")
+          .attr("transform", "translate(" + margins.left + ", 0)")
           .style("fill", "#FFF");
     }else{
       bkgrect
-        .attr("width", width)
+        .attr("width", realWidth)
         .attr("height", height)
+        .attr("transform", "translate(" + margins.left + ", 0)")
         .style("fill", "#FFF");
     }
 
@@ -89,21 +104,26 @@ var horizonChart = function () {
         .append("clipPath")
           .attr("id", "clip")
         .append("rect")
-          .attr("width", width)
-          .attr("height", height); //height / 4 - 20);
+          .attr("width", realWidth)
+          .attr("transform", "translate(" + margins.left + ", 0)")
+          .attr("height", height);
     }else{
       defclip
-        .attr("width", width)
+        .attr("width", realWidth)
+        .attr("transform", "translate(" + margins.left + ", 0)")
         .attr("height", height);
     }
 
     //Apply the clipPath
-    chart.attr("clip-path", "url(#clip)");
+    paths = !paths ? chart.append("g") : paths;
+    paths.attr("clip-path", "url(#clip)")
+        .attr("class", "paths")
+        .attr("height", height);
 
     var currentSelection;
 
     //Make and render the Positive curves.
-    currentSelection = chart.selectAll(".posPath")
+    currentSelection = paths.selectAll(".posPath")
         .data(d3.range(numOfMostBands));
 
     //update
@@ -113,7 +133,7 @@ var horizonChart = function () {
         .style("cursor", "help")
         .style("stroke", "#000")
         .attr("d", d3area1(data))
-        .attr("transform", function (d, i) {return "translate(0, " + (i - numOfMostBands + 1) * height + ")"; });
+        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
     //enter
     currentSelection.enter().append("path")
@@ -123,11 +143,11 @@ var horizonChart = function () {
         .style("cursor", "help")
         .style("stroke", "#000")
         .attr("d", d3area1(data))
-        .attr("transform", function (d, i) {return "translate(0, " + (i - numOfMostBands + 1) * height + ")"; });
+        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
 
     //Make and render the Negative curves.
-    currentSelection = chart.selectAll(".negPath")
+    currentSelection = paths.selectAll(".negPath")
         .data(d3.range(numOfMostBands, 0, -1));
 
     //update
@@ -138,7 +158,7 @@ var horizonChart = function () {
       .style("stroke", "#000")
       .style("cursor", "help")
       .attr("d", d3area1(data))
-      .attr("transform", function (d, i) {return "translate(0, " + (d - (numOfMostBands * 2)) * height + ")"; });
+      .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
     //enter
     currentSelection.enter().append("path")
@@ -148,25 +168,43 @@ var horizonChart = function () {
       .style("stroke", "#000")
       .style("cursor", "help")
       .attr("d", d3area1(data))
-      .attr("transform", function (d, i) {return "translate(0, " + (d - (numOfMostBands * 2)) * height + ")"; });
+      .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
+
+      // Draw Axes
+      xAxis = d3.svg.axis().scale(xAxisScale).orient("bottom");
+      yAxis = d3.svg.axis().scale(yScale).orient("bottom");
+
+      if(!xAxisContainer)
+      {
+        xAxisContainer = chart.append("svg:g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(" + margins.left + "," + height + ")");
+        xAxis(xAxisContainer);
+      }else{
+        d3.select(".x")
+          .attr("transform", "translate(" + margins.left + "," + height + ")");
+        xAxis(xAxisContainer);
+      }
 
       //Draw the outline for the chart
       if(!frgrect)
       {
         frgrect = chart
           .append("svg:rect")
-            .attr("width", width)
+            .attr("width", realWidth)
             .attr("height", height)
             .attr("class", "frgrect")
             .style("fill", "rgba(0,0,0,0)")
             .style("stroke-width", 3)
+            .attr("transform", "translate(" + margins.left + ", 0)")
             .style("stroke", "#000");
       }else{
         frgrect
-            .attr("width", width)
+            .attr("width", realWidth)
             .attr("height", height)
             .style("fill", "rgba(0,0,0,0)")
             .style("stroke-width", 3)
+            .attr("transform", "translate(" + margins.left + ", 0)")
             .style("stroke", "#000");
       }
 

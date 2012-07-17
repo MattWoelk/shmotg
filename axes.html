@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+    <link type="text/css" rel="stylesheet" href="horizon.css"/>
+
+    <title>Data visualisation demo</title>
+    <style type="text/css">
+
+#chart {
+  font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  /*shape-rendering: crispEdges;*/
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  /*shape-rendering: crispEdges;*/
+}
+
+    </style>
+
+  </head>
+  <body>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
+
+    <div id="chart"></div>
+
+  </body>
+  <script src="d3.v2.js"></script>
+  <script src="axes.js"></script>
+</html>
