@@ -1,7 +1,7 @@
 var plots = []; //an array of all plots
 
 console.log(document.getElementById("charts").offsetWidth);
-//document.getElementById("charts").offsetWidth //this works KINDA:
+//document.getElementById("width-element").offsetWidth //this works KINDA:
 //- since there are larger elements on the background, the 100% width
 //  div doesn't always to back to being smaller. :/
 
