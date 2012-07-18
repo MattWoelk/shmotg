@@ -11,7 +11,7 @@ var horizonChart = function () {
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
   var height = 50;
-  var width = window.innerWidth;
+  var width = d3.max([window.innerWidth, screen.width]);
   var zeroPoint = 0; //TODO: use scales instead? Might make things WAY simpler if we scale the data
 
   var numOfPositiveBands;
@@ -33,6 +33,7 @@ var horizonChart = function () {
 
 
   var my = function (selection) {
+    console.log(document.getElementById("charts").offsetWidth + " : " + window.innerWidth);
     slctn = selection; // Save the selection so that my.update() works.
 
     realWidth = width - margins.right - margins.left;
@@ -238,3 +239,5 @@ var horizonChart = function () {
 
   return my;
 }
+
+//greatest value of screen.width and window.innerWidth ???
