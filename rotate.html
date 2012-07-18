@@ -11,7 +11,7 @@ var supportsOrientationChange = "onorientationchange" in window,
     orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
 
 window.addEventListener(orientationEvent, function() {
-    alert('Rotation of screen: ' + window.orientation + ", " + screen.width + ":" + document.documentElement.clientWidth + ":" + window.innerWidth);
+    alert('Rotation of screen: ' + window.orientation + "\ndocumentElement.clientWidth: " + document.documentElement.clientWidth + "\nwindow.innerWidth: " + window.innerWidth + "\ndocument.documentElement.offsetWidth: " + document.documentElement.offsetWidth + "\nscreen.width: " + screen.width + "\n");
 
     if(window.orientation === 0 || window.orientation === 180)
     {
