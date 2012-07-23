@@ -8,6 +8,8 @@
 
 var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
+  var outlinesOrNot = true;
+
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
@@ -229,6 +231,12 @@ var horizonChart = function () {
   my.bandSize = function (value) {
     if (!arguments.length) return bandSize;
     bandSize = value;
+    return my;
+  }
+
+  my.outlinesOrNot = function (value) {
+    if (!arguments.length) return outlinesOrNot;
+    outlinesOrNot = value;
     return my;
   }
 
