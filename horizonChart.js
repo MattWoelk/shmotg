@@ -4,6 +4,7 @@
 //      Test with only negative values; only positive values.
 //      Test with different zero levels of all possibilities.
 //      Add Axes and the ability to modify the bandSize
+//      strange things happen for various bandSize's and negative and positive values.
 
 var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
@@ -33,7 +34,7 @@ var horizonChart = function () {
 
 
   var my = function (selection) {
-    console.log(document.getElementById("charts").offsetWidth + " : " + window.innerWidth);
+    //console.log(document.getElementById("charts").offsetWidth + " : " + window.innerWidth);
     slctn = selection; // Save the selection so that my.update() works.
 
     realWidth = width - margins.right - margins.left;
@@ -117,7 +118,8 @@ var horizonChart = function () {
 
     //Apply the clipPath
     paths = !paths ? chart.append("g") : paths;
-    paths.attr("clip-path", "url(#clip)")
+    paths
+        .attr("clip-path", "url(#clip)")
         .attr("class", "paths")
         .attr("height", height);
 
@@ -131,7 +133,7 @@ var horizonChart = function () {
     currentSelection
         .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("cursor", "help")
+        //.style("cursor", "help")
         .style("stroke", "#000")
         .attr("d", d3area1(data))
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
@@ -141,7 +143,6 @@ var horizonChart = function () {
         .attr("class", "posPath")
         .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("cursor", "help")
         .style("stroke", "#000")
         .attr("d", d3area1(data))
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
@@ -157,7 +158,6 @@ var horizonChart = function () {
       .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
       .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
       .style("stroke", "#000")
-      .style("cursor", "help")
       .attr("d", d3area1(data))
       .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
@@ -167,7 +167,6 @@ var horizonChart = function () {
       .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
       .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
       .style("stroke", "#000")
-      .style("cursor", "help")
       .attr("d", d3area1(data))
       .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 

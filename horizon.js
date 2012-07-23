@@ -1,6 +1,6 @@
 var plots = []; //an array of all plots
 
-console.log(document.getElementById("charts").offsetWidth);
+//console.log(document.getElementById("charts").offsetWidth);
 //document.getElementById("width-element").offsetWidth //this works KINDA:
 //- since there are larger elements on the background, the 100% width
 //  div doesn't always to back to being smaller. :/
@@ -26,15 +26,15 @@ var dataA = [0, 5, 2, -3, 4, 6, 8, 4, -2, 0];
 var dataB = [2, 1, 2, -1, -2, -5, -9, 2, 6, 10];
 var dataC = [-2, -1, -2, 1, 2, 5, 9, -2, -6, -10];
 var dataD = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-plot1 = horizonChart().width(100).height(100);
-plot2 = horizonChart().width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
-plot3 = horizonChart().width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
-plot4 = horizonChart().width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
+var plot1 = horizonChart().width(100).height(100);
+var plot2 = horizonChart().width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
+var plot3 = horizonChart().width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
+var plot4 = horizonChart().width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
 
-pl1 = d3.select("#charts").append("svg").datum(dataA).call(plot1);
-pl2 = d3.select("#charts").append("svg").datum(dataB).call(plot2);
-pl3 = d3.select("#charts").append("svg").datum(dataC).call(plot3);
-pl4 = d3.select("#charts").append("svg").datum(dataD).call(plot4);
+var pl1 = d3.select("#charts").append("svg").datum(dataA).call(plot1);
+var pl2 = d3.select("#charts").append("svg").datum(dataB).call(plot2);
+var pl3 = d3.select("#charts").append("svg").datum(dataC).call(plot3);
+var pl4 = d3.select("#charts").append("svg").datum(dataD).call(plot4);
 
 // This is how we change a value and update the plot.
 plot1.height(50).width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
@@ -51,3 +51,25 @@ plots.push(plot1);
 plots.push(plot2);
 plots.push(plot3);
 plots.push(plot4);
+
+
+
+
+
+d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
+  data = json;
+  w = data.length;
+
+  //fakejsondata = [40, -47.85, -39.38, -44.91, 0, 1];
+
+  var plot5 = horizonChart()
+    .width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth)
+    .bandSize(26);
+  var pl5 = d3.select("#charts").append("svg")
+    .datum(json.map(function (d) { return -d.ESGgirder1; }))
+    //.datum(fakejsondata)
+    .call(plot5);
+  plots.push(plot5);
+
+  //console.log(json.map(function (d) { return -d.ESGgirder1; }));
+  });
