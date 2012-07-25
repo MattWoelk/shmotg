@@ -70,9 +70,13 @@ var horizonChart = function () {
     }
 
     if (!yScale){
-    yScale = d3.scale.linear()
-      .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
-      .range([height * numOfPositiveBands, 0]);
+      yScale = d3.scale.linear()
+        .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
+        .range([height * numOfPositiveBands, 0]);
+    }else{
+      yScale
+        .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
+        .range([height * numOfPositiveBands, 0]);
     }
 
     var fillScale = d3.scale.linear()
@@ -84,7 +88,8 @@ var horizonChart = function () {
           .x(function (d, i) { return xScale(i); })
           .y1(function (d, i) { return yScale(d); }) // height - (d * 10); })
           .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
-              .interpolate("cardinal");
+//              .interpolate("cardinal");
+              .interpolate("linear");
 
     chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
 
@@ -146,13 +151,16 @@ var horizonChart = function () {
     currentSelection = paths.selectAll(".posPath")
         .data(d3.range(numOfMostBands));
 
+    var d3area1withdata = d3area1(data);
+
     //update
     currentSelection
         .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         //.style("cursor", "help")
         .style("stroke", "#000")
-        .attr("d", d3area1(data))
+        .transition().duration(1000)
+        .attr("d", d3area1withdata)
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
     //enter
@@ -161,7 +169,7 @@ var horizonChart = function () {
         .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", "#000")
-        .attr("d", d3area1(data))
+        .attr("d", d3area1withdata)
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
 
@@ -175,7 +183,8 @@ var horizonChart = function () {
       .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
       .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
       .style("stroke", "#000")
-      .attr("d", d3area1(data))
+      .transition().duration(1000)
+      .attr("d", d3area1withdata)
       .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
     //enter
@@ -184,11 +193,12 @@ var horizonChart = function () {
       .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
       .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
       .style("stroke", "#000")
-      .attr("d", d3area1(data))
+      .attr("d", d3area1withdata)
       .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
       // Draw Axes
-      xAxis = d3.svg.axis().scale(xAxisScale).orient("bottom");
+      xAxis = d3.svg.axis()
+        .scale(xAxisScale).orient("bottom");
       yAxis = d3.svg.axis().scale(yScale).orient("bottom");
 
       if(!xAxisContainer)
@@ -196,11 +206,11 @@ var horizonChart = function () {
         xAxisContainer = chart.append("svg:g")
           .attr("class", "x axis")
           .attr("transform", "translate(" + margins.left + "," + height + ")");
-        xAxis(xAxisContainer);
+        xAxisContainer.call(xAxis);
       }else{
         d3.select(".x")
           .attr("transform", "translate(" + margins.left + "," + height + ")");
-        xAxis(xAxisContainer);
+        xAxisContainer.transition().duration(1000).call(xAxis);
       }
 
       //Draw the outline for the chart
