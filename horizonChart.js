@@ -1,10 +1,18 @@
 //TODO:
-//      Make sure it works for any number of bands >= 1
+//      Make sure it works for any number of bands >= 1.
 //      - currently things get overlappy and weird when the bandSize is changed to very different values and then updated.
 //      Test with only negative values; only positive values.
 //      Test with different zero levels of all possibilities.
-//      Add Axes and the ability to modify the bandSize
 //      strange things happen for various bandSize's and negative and positive values.
+//      zoom buttons do not work together with the zoom function (likely due to the centering issue).
+//      fix centering issue with zooming into the plot.
+//      get zooming and especially panning to work on the iPad.
+//      use boxes (or some way so that we can treat the parts individually)
+//      put multiple plots of real data beside eachother
+//      synchronize the zooming of two plots
+//      plot peaks vs. lows for large regions (may have to abandon horizon for this to look good).
+//      make nice bandSize transitions.
+//      fix the difference in zoomings between the axis and the plot.
 
 var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
