@@ -19,6 +19,18 @@ var redraw = function () {
   });
 }
 
+var zoomout = function () {
+  plots.forEach(function (plt) {
+    plt.zoomout().update();
+  });
+}
+
+var zoomin = function () {
+  plots.forEach(function (plt) {
+    plt.zoomin().update();
+  });
+}
+
 
 var dataA = [0, 5, 2, -3, 4, 6, 8, 4, -2, 0];
 var dataB = [2, 1, 2, -1, -2, -5, -9, 2, 6, 10];
@@ -55,7 +67,7 @@ plots.push(plot4);
 
 
 d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
-  w = json.length;
+  var w = json.length;
 
   //fakejsondata = [40, -47.85, -39.38, -44.91, 0, 1];
 
@@ -85,4 +97,4 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   //console.log(json.map(function (d) { return -d.ESGgirder1 - jAvg; }));
   //console.log(json.map(function (d) { return -d.ESGgirder1; }));
   //console.log(d3.mean(json, function (d) { return d.ESGgirder1; }));
-  });
+});

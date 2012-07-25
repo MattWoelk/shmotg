@@ -28,6 +28,9 @@ var horizonChart = function () {
   var xAxis;
   var yAxisContainer;
   var yAxis;
+  var xScale;
+  var yScale;
+  var xAxisScale;
 
   var chart;
   var paths;
@@ -48,17 +51,29 @@ var horizonChart = function () {
     numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
     numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
 
-    var xScale = d3.scale.linear()
-      .domain([0, data.length])
-      .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+    if (!xScale) {
+      xScale = d3.scale.linear()
+        .domain([0, data.length])
+        .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+    }else{
+      xScale
+        .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+    }
 
-    var xAxisScale = d3.scale.linear() //different than xScale because we want the right-most point to be at the right edge of the chart
+    if (!xAxisScale) {
+    xAxisScale = d3.scale.linear() //different than xScale because we want the right-most point to be at the right edge of the chart
       .domain([0, data.length - 1])
       .range([0, realWidth]);
+    }else{
+      xAxisScale
+        .range([0, realWidth]);
+    }
 
-    var yScale = d3.scale.linear()
+    if (!yScale){
+    yScale = d3.scale.linear()
       .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
       .range([height * numOfPositiveBands, 0]);
+    }
 
     var fillScale = d3.scale.linear()
       .domain([0, numOfMostBands])
@@ -237,6 +252,18 @@ var horizonChart = function () {
   my.outlinesOrNot = function (value) {
     if (!arguments.length) return outlinesOrNot;
     outlinesOrNot = value;
+    return my;
+  }
+
+  my.zoomout = function () {
+    xScale.domain([0, xScale.domain()[1] * 2]);
+    xAxisScale.domain([0, xAxisScale.domain()[1] * 2]);
+    return my;
+  }
+
+  my.zoomin = function () {
+    xScale.domain([0, xScale.domain()[1] / 2]);
+    xAxisScale.domain([0, xAxisScale.domain()[1] / 2]);
     return my;
   }
 
