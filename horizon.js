@@ -70,37 +70,37 @@ plots.push(plot4);
 
 
 
-//
-//d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
-//  var w = json.length;
-//
-//  //fakejsondata = [40, -47.85, -39.38, -44.91, 0, 1];
-//
-//  var plot5 = horizonChart()
-//    .width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth)
-//    .outlinesOrNot(false)
-//    .bandSize(26);
-//  var pl5 = d3.select("#charts").append("svg")
-//    .datum(json.map(function (d) { return -d.ESGgirder1; }))
-//    //.datum(fakejsondata)
-//    .call(plot5);
-//  plots.push(plot5);
-//
-//  var jAvg = -d3.mean(json, function (d) { return d.ESGgirder1; });
-//  var jRange = d3.max(json, function (d) { return d.ESGgirder1; })
-//    - d3.min(json, function (d) { return d.ESGgirder1; });
-//  var plot6 = horizonChart()
-//    .width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth)
-//    .outlinesOrNot(false)
-//    .bandSize(jRange / 2);
-//  var pl6 = d3.select("#charts").append("svg")
-//    .datum(json.map(function (d) { return -d.ESGgirder1 - jAvg; }))
-//    //.datum(fakejsondata)
-//    .call(plot6);
-//  plots.push(plot6);
-//
-//  //console.log(json.map(function (d) { return -d.ESGgirder1 - jAvg; }));
-//  //console.log(json.map(function (d) { return -d.ESGgirder1; }));
-//  //console.log(d3.mean(json, function (d) { return d.ESGgirder1; }));
-//});
-//
+
+d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
+  var w = json.length;
+
+  //fakejsondata = [40, -47.85, -39.38, -44.91, 0, 1];
+
+  var plot5 = horizonChart()
+    .width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth)
+    .outlinesOrNot(false)
+    .bandSize(26);
+  var pl5 = d3.select("#charts").append("svg")
+    .datum(json.map(function (d) { return -d.ESGgirder1; }))
+    //.datum(fakejsondata)
+    .call(plot5);
+  plots.push(plot5);
+
+  var jAvg = -d3.mean(json, function (d) { return d.ESGgirder1; });
+  var jRange = d3.max(json, function (d) { return d.ESGgirder1; })
+    - d3.min(json, function (d) { return d.ESGgirder1; });
+  var plot6 = horizonChart()
+    .width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth)
+    .outlinesOrNot(false)
+    .bandSize(jRange / 2);
+  var pl6 = d3.select("#charts").append("svg")
+    .datum(json.map(function (d) { return -d.ESGgirder1 - jAvg; }))
+    //.datum(fakejsondata)
+    .call(plot6);
+  plots.push(plot6);
+
+  //console.log(json.map(function (d) { return -d.ESGgirder1 - jAvg; }));
+  //console.log(json.map(function (d) { return -d.ESGgirder1; }));
+  //console.log(d3.mean(json, function (d) { return d.ESGgirder1; }));
+});
+

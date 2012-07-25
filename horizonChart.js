@@ -161,7 +161,7 @@ var horizonChart = function () {
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         //.style("cursor", "help")
         .style("stroke", "#000")
-        .transition().duration(1000)
+        //.transition().duration(1000)
         .attr("d", d3area1withdata)
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
@@ -185,7 +185,7 @@ var horizonChart = function () {
       .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
       .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
       .style("stroke", "#000")
-      .transition().duration(1000)
+      //.transition().duration(1000)
       .attr("d", d3area1withdata)
       .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
