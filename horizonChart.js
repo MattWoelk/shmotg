@@ -103,6 +103,13 @@ var horizonChart = function () {
       .attr("width", width - 10) //TODO: magic numbers to get rid of scroll bars
       .attr("height", height + margins.bottom);
 
+    //Allow dragging and zooming.
+    //console.log("before: " + xScale.domain());
+    chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
+    //selection.call(d3.behavior.zoom().x(xAxisScale));
+    //console.log("after: " + xScale.domain());
+
+
     //Draw the background for the chart
     if (!bkgrect)
     {
@@ -115,7 +122,7 @@ var horizonChart = function () {
           .style("fill", "#FFF");
     }else{
       bkgrect
-        .transition().duration(1000)
+        //.transition().duration(1000)
         .attr("width", realWidth)
         .attr("height", height)
         .attr("transform", "translate(" + margins.left + ", 0)")
@@ -134,7 +141,7 @@ var horizonChart = function () {
           .attr("height", height);
     }else{
       defclip
-        .transition().duration(1000)
+        //.transition().duration(1000)
         .attr("width", realWidth)
         .attr("transform", "translate(" + margins.left + ", 0)")
         .attr("height", height);
@@ -229,7 +236,7 @@ var horizonChart = function () {
             .style("stroke", "#000");
       }else{
         frgrect
-          .transition().duration(1000)
+          //.transition().duration(1000)
             .attr("width", realWidth)
             .attr("height", height)
             .style("fill", "rgba(0,0,0,0)")
@@ -278,6 +285,13 @@ var horizonChart = function () {
     xScale.domain([0, xScale.domain()[1] / 2]);
     xAxisScale.domain([0, xAxisScale.domain()[1] / 2]);
     return my;
+  }
+
+  my.zoom = function () {
+    xAxisScale.domain(xScale.domain());
+    xAxisContainer.call(xAxis);
+    //yAxisContainer.call(yAxis);
+    my.update();
   }
 
   my.update = function () {
