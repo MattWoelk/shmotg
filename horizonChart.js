@@ -115,6 +115,7 @@ var horizonChart = function () {
           .style("fill", "#FFF");
     }else{
       bkgrect
+        .transition().duration(1000)
         .attr("width", realWidth)
         .attr("height", height)
         .attr("transform", "translate(" + margins.left + ", 0)")
@@ -133,6 +134,7 @@ var horizonChart = function () {
           .attr("height", height);
     }else{
       defclip
+        .transition().duration(1000)
         .attr("width", realWidth)
         .attr("transform", "translate(" + margins.left + ", 0)")
         .attr("height", height);
@@ -227,6 +229,7 @@ var horizonChart = function () {
             .style("stroke", "#000");
       }else{
         frgrect
+          .transition().duration(1000)
             .attr("width", realWidth)
             .attr("height", height)
             .style("fill", "rgba(0,0,0,0)")
