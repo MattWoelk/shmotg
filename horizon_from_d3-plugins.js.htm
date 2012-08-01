@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+    <link type="text/css" rel="stylesheet" href="horizon.css"/>
+
+    <title>Data visualisation demo</title>
+    <script src="d3.v2.min.js"></script>
+    <script src="horizon_from_d3-plugins.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
+
+    <div id="charts"></div>
+      <!--lorem
+    <div id="width-element" style="width:100%; color:#f0f">
+      <p>Varius in, facilisis vitae, odio. Phasellus eget leo at urna adipiscing
+      vulputate. Nam eu erat vel arcu tristique mattis. Nullam placerat lorem non
+      augue. Cras et velit. Morbi sapien nulla, volutpat a, tristique eu, molestie
+      ac, felis.</p>
+
+      <p>Suspendisse sit amet tellus non odio porta pellentesque. Nulla facilisi.
+      Integer iaculis condimentum augue. Nullam.</p>
+    </div>
+      /lorem-->
+
+  <script type="text/javascript">
+	  data = [1, 2, 3, 2, 3, 4, 5, 5, 1, 2, 3, 2, 3];
+	  blagh = d3.horizon();
+	var plot1 = d3.horizon();//.width(100).height(50);
+
+	var pl1 = d3.select("#charts").append("svg").datum(data).call(plot1);
+  </script>
+
+  </body>
+
+</html>
