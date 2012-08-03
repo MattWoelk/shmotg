@@ -70,6 +70,7 @@
             .attr("width", w)
             .attr("height", h);
 
+		//***
         // We'll use a container to clip all horizon layers at once.
         g.selectAll("g")
             .data([null])
@@ -79,6 +80,7 @@
         // Instantiate each copy of the path with different transforms.
         var path = g.select("g").selectAll("path")
             .data(d3.range(-1, -bands - 1, -1).concat(d3.range(1, bands + 1)), Number);
+
 
         var d0 = d3_horizonArea
             .interpolate(interpolate)

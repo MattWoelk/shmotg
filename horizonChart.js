@@ -42,6 +42,8 @@ var horizonChart = function () {
 
   var chart;
   var paths;
+  var d3area1;
+  var d0;
 
   var slctn; // Save the selection so that my.update() works.
 
@@ -55,163 +57,173 @@ var horizonChart = function () {
 
     selection.each(function (data) {
 
-    numOfPositiveBands = (d3.max(data) > zeroPoint) ? Math.ceil(Math.abs(d3.max(data) - zeroPoint) / bandSize) : 0; // the closest to mod bandSize, rounded up.
-    numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
-    numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
+      numOfPositiveBands = (d3.max(data) > zeroPoint) ? Math.ceil(Math.abs(d3.max(data) - zeroPoint) / bandSize) : 0; // the closest to mod bandSize, rounded up.
+      numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
+      numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
 
-    if (!xScale) {
-      xScale = d3.scale.linear()
-        .domain([0, data.length])
-        .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
-    }else{
-      xScale
-        .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
-    }
+      if (!xScale) {
+        xScale = d3.scale.linear()
+      .domain([0, data.length])
+      .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+      }else{
+        xScale
+      .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
+      }
 
-    if (!xAxisScale) {
-    xAxisScale = d3.scale.linear() //different than xScale because we want the right-most point to be at the right edge of the chart
+      if (!xAxisScale) {
+        xAxisScale = d3.scale.linear() //different than xScale because we want the right-most point to be at the right edge of the chart
       .domain([0, data.length - 1])
       .range([0, realWidth]);
-    }else{
-      xAxisScale
-        .range([0, realWidth]);
-    }
+      }else{
+        xAxisScale
+          .range([0, realWidth]);
+      }
 
-    if (!yScale){
-      yScale = d3.scale.linear()
-        .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
-        .range([height * numOfPositiveBands, 0]);
-    }else{
-      yScale
-        .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
-        .range([height * numOfPositiveBands, 0]);
-    }
+      if (!yScale){
+        yScale = d3.scale.linear()
+          .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
+          .range([height * numOfPositiveBands, 0]);
+      }else{
+        yScale
+          .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
+          .range([height * numOfPositiveBands, 0]);
+      }
 
-    var fillScale = d3.scale.linear()
-      .domain([0, numOfMostBands])
-      .rangeRound([255, 0]);
+      var fillScale = d3.scale.linear()
+        .domain([0, numOfMostBands])
+        .rangeRound([255, 0]);
 
 
-    var d3area1 = d3.svg.area()
+      if (!d3area1){
+        d3area1 = d3.svg.area()
+        var d0 = d3area1
           .x(function (d, i) { return xScale(i); })
-          .y1(function (d, i) { return yScale(d); }) // height - (d * 10); })
+          .y1(function (d, i) { return yScale(d); })
           .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
-//              .interpolate("cardinal");
-              .interpolate("linear");
-
-    chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
-
-    //Set it's container's dimensions
-    selection
-      .attr("height", height + margins.bottom)
-      .attr("width", width);
-
-    //Set the chart's dimensions
-    chart
-      .attr("width", width - 10) //TODO: magic numbers to get rid of scroll bars
-      .attr("height", height + margins.bottom);
-
-    //Allow dragging and zooming.
-    //console.log("before: " + xScale.domain());
-    chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
-    //selection.call(d3.behavior.zoom().x(xAxisScale));
-    //console.log("after: " + xScale.domain());
+          //              .interpolate("cardinal");
+          .interpolate("linear")(data);
+      }else{
+        var d0 = d3area1
+          .x(function (d, i) { return xScale(i); })
+          .y1(function (d, i) { return yScale(d); })
+          .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
+          //              .interpolate("cardinal");
+          .interpolate("linear")(data);
+      }
 
 
-    //Draw the background for the chart
-    if (!bkgrect)
-    {
-      bkgrect = chart
-        .insert("svg:rect")
+      chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
+
+      //Set it's container's dimensions
+      selection
+        .attr("height", height + margins.bottom)
+        .attr("width", width);
+
+      //Set the chart's dimensions
+      chart
+        .attr("width", width - 10) //TODO: magic numbers to get rid of scroll bars
+        .attr("height", height + margins.bottom);
+
+      //Allow dragging and zooming.
+      //console.log("before: " + xScale.domain());
+      chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
+      //selection.call(d3.behavior.zoom().x(xAxisScale));
+      //console.log("after: " + xScale.domain());
+
+
+      //Draw the background for the chart
+      if (!bkgrect)
+      {
+        bkgrect = chart
+          .insert("svg:rect")
           .attr("width", realWidth)
           .attr("height", height)
           .attr("class", "bkgrect")
           .attr("transform", "translate(" + margins.left + ", 0)")
           .style("fill", "#FFF");
-    }else{
-      bkgrect
-        //.transition().duration(1000)
-        .attr("width", realWidth)
-        .attr("height", height)
-        .attr("transform", "translate(" + margins.left + ", 0)")
-        .style("fill", "#FFF");
-    }
+      }else{
+        bkgrect
+          //.transition().duration(1000)
+          .attr("width", realWidth)
+          .attr("height", height)
+          .attr("transform", "translate(" + margins.left + ", 0)")
+          .style("fill", "#FFF");
+      }
 
-    //Make the clipPath (for cropping the paths)
-    if (!defclip)
-    {
-      defclip = chart.insert("defs")
-        .append("clipPath")
+      //Make the clipPath (for cropping the paths)
+      if (!defclip)
+      {
+        defclip = chart.insert("defs")
+          .append("clipPath")
           .attr("id", "clip")
-        .append("rect")
+          .append("rect")
           .attr("width", realWidth)
           .attr("transform", "translate(" + margins.left + ", 0)")
           .attr("height", height);
-    }else{
-      defclip
-        //.transition().duration(1000)
-        .attr("width", realWidth)
-        .attr("transform", "translate(" + margins.left + ", 0)")
-        .attr("height", height);
-    }
+      }else{
+        defclip
+          //.transition().duration(1000)
+          .attr("width", realWidth)
+          .attr("transform", "translate(" + margins.left + ", 0)")
+          .attr("height", height);
+      }
 
-    //Apply the clipPath
-    paths = !paths ? chart.append("g") : paths;
-    paths
+      //Apply the clipPath
+      paths = !paths ? chart.append("g") : paths;
+      paths
         .attr("clip-path", "url(#clip)")
         .attr("class", "paths")
         .attr("height", height);
 
-    var currentSelection;
+      var currentSelection;
 
-    //Make and render the Positive curves.
-    currentSelection = paths.selectAll(".posPath")
+      //Make and render the Positive curves.
+      currentSelection = paths.selectAll(".posPath")
         .data(d3.range(numOfMostBands));
 
-    var d3area1withdata = d3area1(data);
 
-    //update
-    currentSelection
+      //update
+      currentSelection
         .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         //.style("cursor", "help")
         .style("stroke", "#000")
         //.transition().duration(1000)
-        .attr("d", d3area1withdata)
+        .attr("d", d0)
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
-    //enter
-    currentSelection.enter().append("path")
+      //enter
+      currentSelection.enter().append("path")
         .attr("class", "posPath")
         .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", "#000")
-        .attr("d", d3area1withdata)
+        .attr("d", d0)
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
 
 
-    //Make and render the Negative curves.
-    currentSelection = paths.selectAll(".negPath")
+      //Make and render the Negative curves.
+      currentSelection = paths.selectAll(".negPath")
         .data(d3.range(numOfMostBands, 0, -1));
 
-    //update
-    currentSelection
-      .attr("class", "negPath")
-      .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
-      .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-      .style("stroke", "#000")
-      //.transition().duration(1000)
-      .attr("d", d3area1withdata)
-      .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
+      //update
+      currentSelection
+        .attr("class", "negPath")
+        .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
+        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke", "#000")
+        //.transition().duration(1000)
+        .attr("d", d0)
+        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
-    //enter
-    currentSelection.enter().append("path")
-      .attr("class", "negPath")
-      .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
-      .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-      .style("stroke", "#000")
-      .attr("d", d3area1withdata)
-      .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
+      //enter
+      currentSelection.enter().append("path")
+        .attr("class", "negPath")
+        .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
+        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke", "#000")
+        .attr("d", d0)
+        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
       // Draw Axes
       xAxis = d3.svg.axis()
@@ -235,22 +247,22 @@ var horizonChart = function () {
       {
         frgrect = chart
           .append("svg:rect")
-            .attr("width", realWidth)
-            .attr("height", height)
-            .attr("class", "frgrect")
-            .style("fill", "rgba(0,0,0,0)")
-            .style("stroke-width", 3)
-            .attr("transform", "translate(" + margins.left + ", 0)")
-            .style("stroke", "#000");
+          .attr("width", realWidth)
+          .attr("height", height)
+          .attr("class", "frgrect")
+          .style("fill", "rgba(0,0,0,0)")
+          .style("stroke-width", 3)
+          .attr("transform", "translate(" + margins.left + ", 0)")
+          .style("stroke", "#000");
       }else{
         frgrect
           //.transition().duration(1000)
-            .attr("width", realWidth)
-            .attr("height", height)
-            .style("fill", "rgba(0,0,0,0)")
-            .style("stroke-width", 3)
-            .attr("transform", "translate(" + margins.left + ", 0)")
-            .style("stroke", "#000");
+          .attr("width", realWidth)
+          .attr("height", height)
+          .style("fill", "rgba(0,0,0,0)")
+          .style("stroke-width", 3)
+          .attr("transform", "translate(" + margins.left + ", 0)")
+          .style("stroke", "#000");
       }
 
     });
