@@ -61,55 +61,33 @@ var horizonChart = function () {
       numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
       numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
 
-      if (!xScale) {
-        xScale = d3.scale.linear()
-      .domain([0, data.length])
-      .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
-      }else{
-        xScale
-      .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
-      }
+      if (!xScale) { xScale = d3.scale.linear(); }
+      xScale
+        .domain([0, data.length])
+        .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
 
-      if (!xAxisScale) {
-        xAxisScale = d3.scale.linear() //different than xScale because we want the right-most point to be at the right edge of the chart
-      .domain([0, data.length - 1])
-      .range([0, realWidth]);
-      }else{
-        xAxisScale
-          .range([0, realWidth]);
-      }
+      if (!xAxisScale) { xAxisScale = d3.scale.linear(); } //different than xScale because we want the right-most point to be at the right edge of the chart
+      xAxisScale
+        .domain([0, data.length - 1])
+        .range([0, realWidth]);
 
-      if (!yScale){
-        yScale = d3.scale.linear()
-          .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
-          .range([height * numOfPositiveBands, 0]);
-      }else{
-        yScale
-          .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
-          .range([height * numOfPositiveBands, 0]);
-      }
+      if (!yScale){ yScale = d3.scale.linear(); }
+      yScale
+        .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
+        .range([height * numOfPositiveBands, 0]);
 
       var fillScale = d3.scale.linear()
         .domain([0, numOfMostBands])
         .rangeRound([255, 0]);
 
 
-      if (!d3area1){
-        d3area1 = d3.svg.area()
-        var d0 = d3area1
-          .x(function (d, i) { return xScale(i); })
-          .y1(function (d, i) { return yScale(d); })
-          .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
-          //              .interpolate("cardinal");
-          .interpolate("linear")(data);
-      }else{
-        var d0 = d3area1
-          .x(function (d, i) { return xScale(i); })
-          .y1(function (d, i) { return yScale(d); })
-          .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
-          //              .interpolate("cardinal");
-          .interpolate("linear")(data);
-      }
+      if (!d3area1){ d3area1 = d3.svg.area(); }
+      var d0 = d3area1
+        .x(function (d, i) { return xScale(i); })
+        .y1(function (d, i) { return yScale(d); })
+        .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
+        //              .interpolate("cardinal");
+        .interpolate("linear")(data);
 
 
       chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
@@ -132,41 +110,22 @@ var horizonChart = function () {
 
 
       //Draw the background for the chart
-      if (!bkgrect)
-      {
-        bkgrect = chart
-          .insert("svg:rect")
-          .attr("width", realWidth)
-          .attr("height", height)
-          .attr("class", "bkgrect")
-          .attr("transform", "translate(" + margins.left + ", 0)")
-          .style("fill", "#FFF");
-      }else{
-        bkgrect
-          //.transition().duration(1000)
-          .attr("width", realWidth)
-          .attr("height", height)
-          .attr("transform", "translate(" + margins.left + ", 0)")
-          .style("fill", "#FFF");
-      }
+      if (!bkgrect) { bkgrect = chart.insert("svg:rect"); }
+      bkgrect
+        //.transition().duration(1000)
+        .attr("width", realWidth)
+        .attr("height", height)
+        .attr("class", "bkgrect")
+        .attr("transform", "translate(" + margins.left + ", 0)")
+        .style("fill", "#FFF");
 
       //Make the clipPath (for cropping the paths)
-      if (!defclip)
-      {
-        defclip = chart.insert("defs")
-          .append("clipPath")
-          .attr("id", "clip")
-          .append("rect")
-          .attr("width", realWidth)
-          .attr("transform", "translate(" + margins.left + ", 0)")
-          .attr("height", height);
-      }else{
-        defclip
-          //.transition().duration(1000)
-          .attr("width", realWidth)
-          .attr("transform", "translate(" + margins.left + ", 0)")
-          .attr("height", height);
-      }
+      if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip").append("rect"); }
+      defclip
+        //.transition().duration(1000)
+        .attr("width", realWidth)
+        .attr("transform", "translate(" + margins.left + ", 0)")
+        .attr("height", height);
 
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
@@ -230,40 +189,22 @@ var horizonChart = function () {
         .scale(xAxisScale).orient("bottom");
       yAxis = d3.svg.axis().scale(yScale).orient("bottom");
 
-      if(!xAxisContainer)
-      {
-        xAxisContainer = chart.append("svg:g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(" + margins.left + "," + height + ")");
-        xAxisContainer.call(xAxis);
-      }else{
-        d3.select(".x")
-          .attr("transform", "translate(" + margins.left + "," + height + ")");
-        xAxisContainer.transition().duration(1000).call(xAxis);
-      }
+      if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
+      xAxisContainer.attr("class", "x axis")
+        .attr("transform", "translate(" + margins.left + "," + height + ")");
+      xAxisContainer.transition().duration(1000).call(xAxis);
 
       //Draw the outline for the chart
-      if(!frgrect)
-      {
-        frgrect = chart
-          .append("svg:rect")
-          .attr("width", realWidth)
-          .attr("height", height)
-          .attr("class", "frgrect")
-          .style("fill", "rgba(0,0,0,0)")
-          .style("stroke-width", 3)
-          .attr("transform", "translate(" + margins.left + ", 0)")
-          .style("stroke", "#000");
-      }else{
-        frgrect
-          //.transition().duration(1000)
-          .attr("width", realWidth)
-          .attr("height", height)
-          .style("fill", "rgba(0,0,0,0)")
-          .style("stroke-width", 3)
-          .attr("transform", "translate(" + margins.left + ", 0)")
-          .style("stroke", "#000");
-      }
+      if (!frgrect) { frgrect = chart.append("svg:rect"); }
+      frgrect
+        //.transition().duration(1000)
+        .attr("width", realWidth)
+        .attr("height", height)
+        .attr("class", "frgrect")
+        .style("fill", "rgba(0,0,0,0)")
+        .style("stroke-width", 3)
+        .attr("transform", "translate(" + margins.left + ", 0)")
+        .style("stroke", "#000");
 
     });
   }
