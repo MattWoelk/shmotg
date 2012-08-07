@@ -14,8 +14,11 @@
 //      make nice bandSize transitions.
 //      fix the difference in zoomings between the axis and the plot.
 //      BIG ITEM:
-//        - Convert everything to use HTML5 canvas instead. This renders an image, which means we lose things like hover events, but real-time manipulation should be much quicker.
-//          - resizing might be weird and difficult again...
+//      - Convert everything to use HTML5 canvas instead. This renders an image, which means we lose things like hover events, but real-time manipulation should be much quicker.
+//        - resizing might be weird and difficult again...
+//        - can perhaps use BOTH svg and canvas rendering like this page does: http://www.jasondavies.com/tree-of-life/
+//      make margins dynamic, or at least based on whether or not there are specific axes.
+//      to change the number of bands with an animation, we need to store a d0 as well as a d1; a current state and a future state, so that the new bands can start off like the others are, then transition to the new state.
 
 var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
