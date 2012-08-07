@@ -13,6 +13,9 @@
 //      plot peaks vs. lows for large regions (may have to abandon horizon for this to look good).
 //      make nice bandSize transitions.
 //      fix the difference in zoomings between the axis and the plot.
+//      BIG ITEM:
+//        - Convert everything to use HTML5 canvas instead. This renders an image, which means we lose things like hover events, but real-time manipulation should be much quicker.
+//          - resizing might be weird and difficult again...
 
 var horizonChart = function () {
   var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
@@ -61,14 +64,12 @@ var horizonChart = function () {
       numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
       numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
 
-      if (!xScale) { xScale = d3.scale.linear(); }
+      if (!xScale) { xScale = d3.scale.linear().domain([0, data.length]); }
       xScale
-        .domain([0, data.length])
         .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
 
-      if (!xAxisScale) { xAxisScale = d3.scale.linear(); } //different than xScale because we want the right-most point to be at the right edge of the chart
+      if (!xAxisScale) { xAxisScale = d3.scale.linear().domain([0, data.length - 1]); } //different than xScale because we want the right-most point to be at the right edge of the chart
       xAxisScale
-        .domain([0, data.length - 1])
         .range([0, realWidth]);
 
       if (!yScale){ yScale = d3.scale.linear(); }
@@ -237,7 +238,7 @@ var horizonChart = function () {
   }
 
   my.zoomout = function () {
-    xScale.domain([0, xScale.domain()[1] * 2]);
+    xScale.domain([0, xScale.domain()[1] * 2]); // TODO: modify a constant instead? That way we can re-do each domain each time without worrying or hacking around.
     xAxisScale.domain([0, xAxisScale.domain()[1] * 2]);
     return my;
   }
