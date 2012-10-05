@@ -67,9 +67,9 @@ var horizonChart = function () {
       numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
       numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
 
-      if (!xScale) { xScale = d3.scale.linear().domain([0, data.length - 1]); }
+      if (!xScale) { xScale = d3.scale.linear().domain([0, data.length]); }
       xScale
-        .range([0, realWidth]); // So that the furthest-right point is at the right edge of the plot
+        .range([0, realWidth + (realWidth / (data.length - 1))]); // So that the furthest-right point is at the right edge of the plot
 
       if (!xAxisScale) { xAxisScale = d3.scale.linear().domain([0, data.length - 1]); } //different than xScale because we want the right-most point to be at the right edge of the chart
       xAxisScale

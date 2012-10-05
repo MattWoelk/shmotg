@@ -14,9 +14,9 @@
         .range(["#d62728", "#fff", "#1f77b4"]);
 
     // For each small multiple…
-    function horizon(g) {
+    function my(g) {
       g.each(function(d, i) {
-        var g = d3.select(this),
+        var chart = d3.select(this),
             n = 2 * bands + 1,
             xMin = Infinity,
             xMax = -Infinity,
@@ -55,7 +55,7 @@
         }
 
         // We'll use a defs to store the area path and the clip path.
-        var defs = g.selectAll("defs")
+        var defs = chart.selectAll("defs")
             .data([null]);
 
         // The clip path is a simple rect.
@@ -70,15 +70,14 @@
             .attr("width", w)
             .attr("height", h);
 
-		//***
         // We'll use a container to clip all horizon layers at once.
-        g.selectAll("g")
+        chart.selectAll("g")
             .data([null])
           .enter().append("g")
             .attr("clip-path", "url(#d3_horizon_clip" + id + ")");
 
         // Instantiate each copy of the path with different transforms.
-        var path = g.select("g").selectAll("path")
+        var currentSelection = chart.select("g").selectAll("path")
             .data(d3.range(-1, -bands - 1, -1).concat(d3.range(1, bands + 1)), Number);
 
 
@@ -94,18 +93,18 @@
             .y1(function(d) { return h * bands - y1(d[1]); })
             (data);
 
-        path.enter().append("path")
+        currentSelection.enter().append("path")
             .style("fill", color)
             .attr("transform", t0)
             .attr("d", d0);
 
-        path.transition()
+        currentSelection.transition()
             .duration(duration)
             .style("fill", color)
             .attr("transform", t1)
             .attr("d", d1);
 
-        path.exit().transition()
+        currentSelection.exit().transition()
             .duration(duration)
             .attr("transform", t1)
             .attr("d", d1)
@@ -117,62 +116,62 @@
       d3.timer.flush();
     }
 
-    horizon.duration = function(x) {
+    my.duration = function(x) {
       if (!arguments.length) return duration;
       duration = +x;
-      return horizon;
+      return my;
     };
 
-    horizon.bands = function(x) {
+    my.bands = function(x) {
       if (!arguments.length) return bands;
       bands = +x;
       color.domain([-bands, 0, bands]);
-      return horizon;
+      return my;
     };
 
-    horizon.mode = function(x) {
+    my.mode = function(x) {
       if (!arguments.length) return mode;
       mode = x + "";
-      return horizon;
+      return my;
     };
 
-    horizon.colors = function(x) {
+    my.colors = function(x) {
       if (!arguments.length) return color.range();
       color.range(x);
-      return horizon;
+      return my;
     };
 
-    horizon.interpolate = function(x) {
+    my.interpolate = function(x) {
       if (!arguments.length) return interpolate;
       interpolate = x + "";
-      return horizon;
+      return my;
     };
 
-    horizon.x = function(z) {
+    my.x = function(z) {
       if (!arguments.length) return x;
       x = z;
-      return horizon;
+      return my;
     };
 
-    horizon.y = function(z) {
+    my.y = function(z) {
       if (!arguments.length) return y;
       y = z;
-      return horizon;
+      return my;
     };
 
-    horizon.width = function(x) {
+    my.width = function(x) {
       if (!arguments.length) return w;
       w = +x;
-      return horizon;
+      return my;
     };
 
-    horizon.height = function(x) {
+    my.height = function(x) {
       if (!arguments.length) return h;
       h = +x;
-      return horizon;
+      return my;
     };
 
-    return horizon;
+    return my;
   };
 
   var d3_horizonArea = d3.svg.area(),
