@@ -46,6 +46,7 @@ var pl2 = d3.select("#charts").append("svg").datum(dataB).call(plot2);
 var pl3 = d3.select("#charts").append("svg").datum(dataC).call(plot3);
 var pl4 = d3.select("#charts").append("svg").datum(dataD).call(plot4);
 
+
 // This is how we change a value and update the plot.
 plot1.height(50).width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
 //pl1.call(plot1); // this is an option, but the next one is easier.
@@ -69,6 +70,7 @@ plots.push(plot4);
 
 
 
+var plot10 = lineChart().width(100).height(50);
 
 
 d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
@@ -104,5 +106,13 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   //console.log(json.map(function (d) { return -d.ESGgirder1 - jAvg; }));
   //console.log(json.map(function (d) { return -d.ESGgirder1; }));
   //console.log(d3.mean(json, function (d) { return d.ESGgirder1; }));
+
+  var plot10 = lineChart()
+    .width(100)
+    .outlinesOrNot(true);
+
+  var pl10 = d3.select("#charts").append("svg").datum(json.map(function (d) { return -d.ESGgirder1; })).call(plot10);
+  plot10.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+  plots.push(plot10);
 });
 

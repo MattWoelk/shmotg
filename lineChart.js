@@ -1,40 +1,20 @@
-//TODO:
-//      Make sure it works for any number of bands >= 1.
-//      - currently things get overlappy and weird when the bandSize is changed to very different values and then updated.
-//      Test with only negative values; only positive values.
-//      Test with different zero levels of all possibilities.
-//      strange things happen for various bandSize's and negative and positive values.
-//      zoom buttons do not work together with the zoom function (likely due to the centering issue).
-//      fix centering issue with zooming into the plot.
-//      get zooming and especially panning to work on the iPad.
-//      use boxes (or some way so that we can treat the parts individually)
-//      put multiple plots of real data beside eachother
-//      synchronize the zooming of two plots
-//      plot peaks vs. lows for large regions (may have to abandon horizon for this to look good).
-//      make nice bandSize transitions.
-//      fix the difference in zoomings between the axis and the plot.
-//      BIG ITEM:
-//      - Convert everything to use HTML5 canvas instead. This renders an image, which means we lose things like hover events, but real-time manipulation should be much quicker.
-//        - resizing might be weird and difficult again...
-//        - can perhaps use BOTH svg and canvas rendering like this page does: http://www.jasondavies.com/tree-of-life/
-//      make margins dynamic, or at least based on whether or not there are specific axes.
-//      to change the number of bands with an animation, we need to store a d0 as well as a d1; a current state and a future state, so that the new bands can start off like the others are, then transition to the new state.
-//      fix the real data charts' colours being really faded (wrong number of something?)
-
-var horizonChart = function () {
-  var bandSize = 3.5; // maybe have this constant band size instead of setting the number of bands.
+var lineChart = function () {
   var outlinesOrNot = true;
 
+  Array.prototype.clean = function(deleteValue) {
+    for (var i = 0; i < this.length; i++) {
+      if (this[i] == deleteValue) {
+        this.splice(i, 1);
+        i--;
+      }
+    }
+    return this;
+  };
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
   var height = 50;
   var width = d3.max([window.innerWidth, screen.width]);
-  var zeroPoint = 0; //TODO: use scales instead? Might make things WAY simpler if we scale the data
-
-  var numOfPositiveBands;
-  var numOfNegativeBands;
-  var numOfMostBands;
 
   var bkgrect;
   var frgrect;
@@ -56,19 +36,57 @@ var horizonChart = function () {
 
 
   var my = function (selection) {
-    //console.log(document.getElementById("charts").offsetWidth + " : " + window.innerWidth);
     slctn = selection; // Save the selection so that my.update() works.
 
     realWidth = width - margins.right - margins.left;
-    //width = width - margins.right - margins.left;
 
     selection.each(function (data) {
 
-      numOfPositiveBands = (d3.max(data) > zeroPoint) ? Math.ceil(Math.abs(d3.max(data) - zeroPoint) / bandSize) : 0; // the closest to mod bandSize, rounded up.
-      numOfNegativeBands = (d3.min(data) < zeroPoint) ? Math.ceil(Math.abs(zeroPoint - d3.min(data)) / bandSize) : 0;
-      numOfMostBands = d3.max([numOfPositiveBands, numOfNegativeBands]);
+      var binnedData = new Array(1);
 
-      if (!xScale) { xScale = d3.scale.linear().domain([0, data.length -1]); }
+      binnedData[0] = data;
+
+      binnedData[1] = new Array(1);
+      var i = 0;
+      for(i = 0; i < data.length; i = i + 2){
+        if (i % 2 == 0) {
+          if (data[i+1]){
+            if (binnedData[1][0] == undefined) {
+              binnedData[1][0] =  ( data[i] + data[i+1] ) / 2;
+            }else{
+              binnedData[1].push( ( data[i] + data[i+1] ) / 2 );
+            }
+          }else{
+            if (binnedData[1][0] == undefined) {
+              binnedData[1][0] = data[i];
+            }else{
+              binnedData[1].push( data[i] );
+            }
+          }
+        }else{
+          // do nothing;
+        }
+      } ///////// TODO: get this upper block working because it will be more efficient than what follows.
+
+
+//      OLD WAY:
+//      binnedData[1] = data.map(function (d, i) {
+//        if (i % 2 == 0) {
+//          if (data[i+1]){
+//            return ( d + data[i+1] ) / 2;
+//          }else{
+//            return d;
+//          }
+//        }else{
+//          return; // return 'undefined'
+//        }
+//      });
+//      binnedData[1].clean(undefined); //get rid of all undefined elements :)
+//      :END OLD WAY
+
+//      console.log(binnedData[1]);
+
+      if (!xScale) { xScale = d3.scale.linear().domain([0, data.length - 1]); }
       xScale
         .range([0, realWidth]); // So that the furthest-right point is at the right edge of the plot
 
@@ -78,21 +96,21 @@ var horizonChart = function () {
 
       if (!yScale){ yScale = d3.scale.linear(); }
       yScale
-        .domain([zeroPoint, d3.max([zeroPoint, numOfMostBands * bandSize])])
-        .range([height * numOfPositiveBands, 0]);
+        .domain([d3.min(data), d3.max(data)])
+        .range([0, height]);
 
       var fillScale = d3.scale.linear()
-        .domain([0, numOfMostBands])
+        .domain([0, d3.max(data)])
         .rangeRound([255, 0]);
 
 
-      if (!d3area1){ d3area1 = d3.svg.area(); }
+      if (!d3area1){ d3area1 = d3.svg.line(); }
       var d0 = d3area1
         .x(function (d, i) { return xScale(i); })
-        .y1(function (d, i) { return yScale(d); })
-        .y0(height * numOfPositiveBands) //TODO: change this to both Pos and Neg or something ??? Probably perfect how it is.
+        .y(function (d, i) { return yScale(data[i]); })
         //              .interpolate("cardinal");
-        .interpolate("linear")(data);
+        //.interpolate("linear")(data);
+        .interpolate("monotone")(data);
 
 
       chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
@@ -143,56 +161,32 @@ var horizonChart = function () {
 
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data(d3.range(numOfMostBands));
+        .data([2]);
 
 
       //update
       currentSelection
-        .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
+        .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        //.style("cursor", "help")
-        .style("stroke", "#000")
+        .style("stroke", "#700")
         //.transition().duration(1000)
         .attr("d", d0)
-        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
+        .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
       //enter
       currentSelection.enter().append("path")
         .attr("class", "posPath")
-        .attr("fill", function (d, i) { return "rgba(255, " + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 1)"; })
+        .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", "#000")
+        .style("stroke", "#700")
         .attr("d", d0)
-        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (i - numOfMostBands + 1) * height + ")"; });
+        .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
-
-      //Make and render the Negative curves.
-      currentSelection = paths.selectAll(".negPath")
-        .data(d3.range(numOfMostBands, 0, -1));
-
-      //update
-      currentSelection
-        .attr("class", "negPath")
-        .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
-        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", "#000")
-        //.transition().duration(1000)
-        .attr("d", d0)
-        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
-
-      //enter
-      currentSelection.enter().append("path")
-        .attr("class", "negPath")
-        .attr("fill", function (d, i) { return "rgba(" + fillScale(i + 1) + ", " + fillScale(i + 1) + ", 255, 1)"; })
-        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", "#000")
-        .attr("d", d0)
-        .attr("transform", function (d, i) {return "translate(" + margins.left + ", " + (d - (numOfMostBands * 2)) * height + ")"; });
 
       // Draw Axes
       xAxis = d3.svg.axis()
         .scale(xAxisScale).orient("bottom");
-      yAxis = d3.svg.axis().scale(yScale).orient("bottom");
+//      yAxis = d3.svg.axis().scale(yScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
       xAxisContainer.attr("class", "x axis")
@@ -229,12 +223,6 @@ var horizonChart = function () {
     return my;
   }
 
-  my.bandSize = function (value) {
-    if (!arguments.length) return bandSize;
-    bandSize = value;
-    return my;
-  }
-
   my.outlinesOrNot = function (value) {
     if (!arguments.length) return outlinesOrNot;
     outlinesOrNot = value;
@@ -266,5 +254,3 @@ var horizonChart = function () {
 
   return my;
 }
-
-//greatest value of screen.width and window.innerWidth ???
