@@ -13,6 +13,7 @@
 //      plot peaks vs. lows for large regions (may have to abandon horizon for this to look good).
 //      make nice bandSize transitions.
 //      fix the difference in zoomings between the axis and the plot.
+//      - the offset of the graph from the edge of the screen (the margin) is the same as the difference between where the cursor is, and where it's zooming to.
 //      BIG ITEM:
 //      - Convert everything to use HTML5 canvas instead. This renders an image, which means we lose things like hover events, but real-time manipulation should be much quicker.
 //        - resizing might be weird and difficult again...

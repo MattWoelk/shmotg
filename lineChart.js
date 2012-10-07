@@ -43,24 +43,38 @@ var lineChart = function () {
     selection.each(function (data) {
 
       var binnedData = new Array(1);
+      var binnedMaxes = new Array(1);
+      var binnedMins = new Array(1);
 
       binnedData[0] = data;
+      binnedMaxes[0] = data;
+      binnedMins[0] = data;
 
       binnedData[1] = new Array(1);
+      binnedMaxes[1] = new Array(1);
+      binnedMins[1] = new Array(1);
       var i = 0;
       for(i = 0; i < data.length; i = i + 2){
         if (i % 2 == 0) {
           if (data[i+1]){
             if (binnedData[1][0] == undefined) {
               binnedData[1][0] =  ( data[i] + data[i+1] ) / 2;
+              binnedMaxes[1][0] = d3.max([data[i], data[i+1]]);
+              binnedMins[1][0] = d3.min([data[i], data[i+1]]);
             }else{
               binnedData[1].push( ( data[i] + data[i+1] ) / 2 );
+              binnedMaxes[1].push( d3.max([data[i], data[i+1]]) );
+              binnedMins[1].push( d3.min([data[i], data[i+1]]) );
             }
           }else{
             if (binnedData[1][0] == undefined) {
               binnedData[1][0] = data[i];
+              binnedMaxes[1][0] = data[i];
+              binnedMins[1][0] = data[i];
             }else{
               binnedData[1].push( data[i] );
+              binnedMaxes[1].push( data[i] );
+              binnedMins[1].push( data[i] );
             }
           }
         }else{
