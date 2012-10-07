@@ -30,7 +30,6 @@ var lineChart = function () {
   var chart;
   var paths;
   var d3area1;
-  var d0;
 
   var slctn; // Save the selection so that my.update() works.
 
@@ -119,12 +118,23 @@ var lineChart = function () {
 
 
       if (!d3area1){ d3area1 = d3.svg.line(); }
-      var d0 = d3area1
+      var d3areaArray = new Array(1);
+      d3areaArray[0] = d3.svg.line();
+      d3areaArray[1] = d3.svg.line();
+      var d0 = new Array(1);
+      d0[0] = d3areaArray[0]
         .x(function (d, i) { return xScale(i); })
-        .y(function (d, i) { return yScale(data[i]); })
+        .y(function (d, i) { return yScale(binnedData[0][i]); })
         //              .interpolate("cardinal");
-        //.interpolate("linear")(data);
-        .interpolate("monotone")(data);
+        //.interpolate("linear")(binnedData[0]);
+        .interpolate("monotone")(binnedData[0]);
+
+      d0[1] = d3areaArray[0]
+        .x(function (d, i) { return xScale(i); })
+        .y(function (d, i) { return yScale(binnedData[1][i]); })
+        //              .interpolate("cardinal");
+        //.interpolate("linear")(binnedData[1]);
+        .interpolate("monotone")(binnedData[1]);
 
 
       chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
@@ -175,7 +185,7 @@ var lineChart = function () {
 
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data([2]);
+        .data([0, 1]);
 
 
       //update
@@ -184,7 +194,7 @@ var lineChart = function () {
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", "#700")
         //.transition().duration(1000)
-        .attr("d", d0)
+        .attr("d", function (d, i) { return d0[i]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
       //enter
@@ -193,7 +203,7 @@ var lineChart = function () {
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", "#700")
-        .attr("d", d0)
+        .attr("d", function (d, i) { return d0[i]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
 
