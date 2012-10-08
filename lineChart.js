@@ -4,16 +4,6 @@
 var lineChart = function () {
   var outlinesOrNot = true;
 
-//  Array.prototype.clean = function(deleteValue) {
-//    for (var i = 0; i < this.length; i++) {
-//      if (this[i] == deleteValue) {
-//        this.splice(i, 1);
-//        i--;
-//      }
-//    }
-//    return this;
-//  };
-
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
   var height = 50;
@@ -87,28 +77,28 @@ var lineChart = function () {
         return bDat;
       }
 
-      function binTheData (datas) {
-        var bDat = new Array(0);
-        var bMax = new Array(0);
-        var bMin = new Array(0);
-        var i = 0;
-        for(i = 0; i < datas.length; i = i + 2){
-          if (i % 2 == 0) {
-            if (datas[i+1]){
-              bDat.push( ( datas[i] + datas[i+1] ) / 2 );
-              bMax.push( d3.max([datas[i], datas[i+1]]) );
-              bMin.push( d3.min([datas[i], datas[i+1]]) );
-            }else{
-              bDat.push( datas[i] );
-              bMax.push( datas[i] );
-              bMin.push( datas[i] );
-            }
-          }else{
-            // do nothing;
-          }
-        } ///////// TODO: get this upper block working because it will be more efficient than what follows.
-        return [bDat, bMax, bMin];
-      }
+//      function binTheData (datas) {
+//        var bDat = new Array(0);
+//        var bMax = new Array(0);
+//        var bMin = new Array(0);
+//        var i = 0;
+//        for(i = 0; i < datas.length; i = i + 2){
+//          if (i % 2 == 0) {
+//            if (datas[i+1]){
+//              bDat.push( ( datas[i] + datas[i+1] ) / 2 );
+//              bMax.push( d3.max([datas[i], datas[i+1]]) );
+//              bMin.push( d3.min([datas[i], datas[i+1]]) );
+//            }else{
+//              bDat.push( datas[i] );
+//              bMax.push( datas[i] );
+//              bMin.push( datas[i] );
+//            }
+//          }else{
+//            // do nothing;
+//          }
+//        } ///////// TODO: get this upper block working because it will be more efficient than what follows.
+//        return [bDat, bMax, bMin];
+//      }
 
       // populate the binned datas (binData):
       var j = 0;
@@ -122,21 +112,6 @@ var lineChart = function () {
         }
       }
 
-      //[binData['averages']['data'][0], binData['maxes']['data'][0], binData['mins']['data'][0]] = binTheData(data);
-
-      console.log("after binning:");
-      console.log(binData);
-
-//      var j = 0;
-//      for (j = 1; j < howManyBinLevels; j++) {
-//        [binData['averages']['data'][j], binData['maxes']['data'][j], binData['mins']['data'][j]] = binTheData(binData['averages']['data'][j-1]);
-//      }
-//
-//      console.log("populated:");
-//      console.log(binData);
-
-      //console.log("object keys:");
-      //console.log(Object.keys(binData));
 
       if (!xScale) { xScale = d3.scale.linear().domain([0, data.length - 1]); }
       xScale
@@ -157,13 +132,10 @@ var lineChart = function () {
 
 
       //generate all d0s. (generate the lines paths)
-      console.log("big complex part");
 
       for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
         var j = 0;
         for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
-          console.log(binData['keys'][ key ]);
-
           binData[binData['keys'][ key ]].d0[j] = d3.svg.line()
             .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
             .y(function (d, i) { return yScale(binData[binData.keys[key]].data[j][i]); }) //TODO: get rid of this line ????????
@@ -219,20 +191,45 @@ var lineChart = function () {
 
       var currentSelection;
 
+      // The following function returns something which looks like this:
+      // [
+      //   {type: 'averages', which: 1},
+      //   {type: 'averages', which: 2},
+      //   {type: 'averages', which: 3},
+      //   {type: 'mins',     which: 1},
+      //   {type: 'mins',     which: 2},
+      //   {type: 'mins',     which: 3},
+      //   {type: 'maxes',     which: 1},
+      //   {type: 'maxes',     which: 2},
+      //   {type: 'maxes',     which: 3}
+      // ]
+      var makeDataObjectForKeyFanciness = function () { //TODO: convert all functions to be in this form (it's way better, yo).
+        var resultArray = new Array(0);
+
+        var j = 0;
+        for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
+          for (j = 0; j < howManyBinLevels; j++) {
+            resultArray.push({
+              type: binData.keys[key],
+              which: j
+            });
+          }
+        }
+
+        return resultArray;
+      };
+
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data(new Array(binData.keys.length));
-      console.log("keys length");
-      console.log(binData.keys.length);
-
+        .data(makeDataObjectForKeyFanciness()); //TODO: make this like the following:
 
       //update
       currentSelection
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", function (d, i) { return colours[i]; })
+        .style("stroke", function (d, i) { return binData[d.type].colour; })
         //.transition().duration(1000)
-        .attr("d", function (d, i) { return d0[i]; })
+        .attr("d", function (d, i) { return binData[d.type].d0[d.which]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
       //enter
@@ -240,8 +237,8 @@ var lineChart = function () {
         .attr("class", "posPath")
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", function (d, i) { return colours[i]; })
-        .attr("d", function (d, i) { return d0[i]; })
+        .style("stroke", function (d, i) { return binData[d.type].colour; })
+        .attr("d", function (d, i) { return binData[d.type].d0[d.which]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
 
@@ -316,3 +313,13 @@ var lineChart = function () {
 
   return my;
 }
+
+//  Array.prototype.clean = function(deleteValue) {
+//    for (var i = 0; i < this.length; i++) {
+//      if (this[i] == deleteValue) {
+//        this.splice(i, 1);
+//        i--;
+//      }
+//    }
+//    return this;
+//  };
