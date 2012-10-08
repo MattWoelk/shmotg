@@ -1,19 +1,20 @@
+// TODO:
+//       store the binnedData, binnedMaxes, and binnedMins in a convenient object.
+
 var lineChart = function () {
   var outlinesOrNot = true;
 
-  Array.prototype.clean = function(deleteValue) {
-    for (var i = 0; i < this.length; i++) {
-      if (this[i] == deleteValue) {
-        this.splice(i, 1);
-        i--;
-      }
-    }
-    return this;
-  };
+//  Array.prototype.clean = function(deleteValue) {
+//    for (var i = 0; i < this.length; i++) {
+//      if (this[i] == deleteValue) {
+//        this.splice(i, 1);
+//        i--;
+//      }
+//    }
+//    return this;
+//  };
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
-  //var colours = {avg: "#F00", max: "#0F0", min: "#00F"};
-  var colours = ["#BBB", "#F00", "#0F0", "#00F" ];
 
   var height = 50;
   var width = d3.max([window.innerWidth, screen.width]);
@@ -31,7 +32,6 @@ var lineChart = function () {
 
   var chart;
   var paths;
-  var d3area1;
 
   var slctn; // Save the selection so that my.update() works.
 
@@ -43,17 +43,49 @@ var lineChart = function () {
 
     selection.each(function (data) {
 
-      var binnedData = new Array(0);
-      var binnedMaxes = new Array(0);
-      var binnedMins = new Array(0);
+      var binData = {
+        keys : ['averages', 'maxes', 'mins'],
+        averages : {
+          data  : new Array(0),
+          d0    : new Array(0),
+          colour: '#F00',
+          func  : function (a, b) { return (a+b)/2; }
+        },
+        maxes : {
+          data  : new Array(0),
+          d0    : new Array(0),
+          colour: '#0F0',
+          func  : function (a, b) { return d3.max([a, b]); }
+        },
+        mins : {
+          data  : new Array(0),
+          d0    : new Array(0),
+          colour: '#00F',
+          func  : function (a, b) { return d3.min([a, b]); }
+        },
+      };
 
-      binnedData[0] = data;
-      binnedMaxes[0] = data;
-      binnedMins[0] = data;
+//      console.log("iterate through keys");
+//      for (var key in binData['keys']){
+//        console.log(binData['keys'][ key ]);
+//      }
 
-      binnedData[1] = new Array(0);
-      binnedMaxes[1] = new Array(0);
-      binnedMins[1] = new Array(0);
+      function binTheDataWithFunction (datas, func) {
+        var bDat = new Array(0);
+        var i = 0;
+        for(i = 0; i < datas.length; i = i + 2){
+          if (i % 2 == 0) {
+            if (datas[i+1]){
+              bDat.push( func( datas[i], datas[i+1]));
+            }else{
+              bDat.push( datas[i] );
+            }
+          }else{
+            // do nothing;
+          }
+        }
+        return bDat;
+      }
 
       function binTheData (datas) {
         var bDat = new Array(0);
@@ -77,8 +109,34 @@ var lineChart = function () {
         } ///////// TODO: get this upper block working because it will be more efficient than what follows.
         return [bDat, bMax, bMin];
       }
-      [ binnedData[1], binnedMaxes[1], binnedMins[1] ] = binTheData(data);
 
+      // populate the binned datas (binData):
+      var j = 0;
+      var howManyBinLevels = 4;
+      for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
+        binData[binData.keys[key]]['data'][0] = data;
+
+        //TODO: refactor this type of thing so it's more like function(binData[binData.keys[key]]), so we don't have to keep tying that out a bunch of times. :)
+        for (j = 1; j < howManyBinLevels; j++){ // for each bin level
+          binData[binData.keys[key]]['data'][j] = binTheDataWithFunction(binData[binData.keys[key]]['data'][j-1], binData[binData.keys[key]]['func']);
+        }
+      }
+
+      //[binData['averages']['data'][0], binData['maxes']['data'][0], binData['mins']['data'][0]] = binTheData(data);
+
+      console.log("after binning:");
+      console.log(binData);
+
+//      var j = 0;
+//      for (j = 1; j < howManyBinLevels; j++) {
+//        [binData['averages']['data'][j], binData['maxes']['data'][j], binData['mins']['data'][j]] = binTheData(binData['averages']['data'][j-1]);
+//      }
+//
+//      console.log("populated:");
+//      console.log(binData);
+
+      //console.log("object keys:");
+      //console.log(Object.keys(binData));
 
       if (!xScale) { xScale = d3.scale.linear().domain([0, data.length - 1]); }
       xScale
@@ -98,29 +156,22 @@ var lineChart = function () {
         .rangeRound([255, 0]);
 
 
-      if (!d3area1){ d3area1 = d3.svg.line(); }
-      var d3areaArray = new Array(1);
-      var d0 = new Array(1);
-      var j = 0;
-      for (j = 0; j < 2; j++) {
-        d3areaArray[j] = d3.svg.line();
-        d0[j] = d3areaArray[j]
-          .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-          .y(function (d, i) { return yScale(binnedData[j][i]); })
-          .interpolate("linear")(binnedData[j]);
+      //generate all d0s. (generate the lines paths)
+      console.log("big complex part");
+
+      for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
+        var j = 0;
+        for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
+          console.log(binData['keys'][ key ]);
+
+          binData[binData['keys'][ key ]].d0[j] = d3.svg.line()
+            .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
+            .y(function (d, i) { return yScale(binData[binData.keys[key]].data[j][i]); }) //TODO: get rid of this line ????????
+            .interpolate("linear")(binData[binData.keys[key]].data[j]);
+        }
       }
 
-      d3areaArray[2] = d3.svg.line();
-      d0[2] = d3areaArray[2]
-        .x(function (d, i) { return xScale(i * Math.pow(2, 1)); })
-        .y(function (d, i) { return yScale(binnedMaxes[1][i]); })
-        .interpolate("linear")(binnedMaxes[1]);
-
-      d3areaArray[3] = d3.svg.line();
-      d0[3] = d3areaArray[3]
-        .x(function (d, i) { return xScale(i * Math.pow(2, 1)); })
-        .y(function (d, i) { return yScale(binnedMins[1][i]); })
-        .interpolate("linear")(binnedMins[1]);
+      console.log(binData);
 
       chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
 
@@ -170,7 +221,9 @@ var lineChart = function () {
 
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data(new Array(d0.length));
+        .data(new Array(binData.keys.length));
+      console.log("keys length");
+      console.log(binData.keys.length);
 
 
       //update
