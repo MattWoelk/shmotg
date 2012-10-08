@@ -12,6 +12,8 @@ var lineChart = function () {
   };
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
+  //var colours = {avg: "#F00", max: "#0F0", min: "#00F"};
+  var colours = ["#BBB", "#F00", "#0F0", "#00F" ];
 
   var height = 50;
   var width = d3.max([window.innerWidth, screen.width]);
@@ -41,63 +43,42 @@ var lineChart = function () {
 
     selection.each(function (data) {
 
-      var binnedData = new Array(1);
-      var binnedMaxes = new Array(1);
-      var binnedMins = new Array(1);
+      var binnedData = new Array(0);
+      var binnedMaxes = new Array(0);
+      var binnedMins = new Array(0);
 
       binnedData[0] = data;
       binnedMaxes[0] = data;
       binnedMins[0] = data;
 
-      binnedData[1] = new Array(1);
-      binnedMaxes[1] = new Array(1);
-      binnedMins[1] = new Array(1);
-      var i = 0;
-      for(i = 0; i < data.length; i = i + 2){
-        if (i % 2 == 0) {
-          if (data[i+1]){
-            if (binnedData[1][0] == undefined) {
-              binnedData[1][0] =  ( data[i] + data[i+1] ) / 2;
-              binnedMaxes[1][0] = d3.max([data[i], data[i+1]]);
-              binnedMins[1][0] = d3.min([data[i], data[i+1]]);
+      binnedData[1] = new Array(0);
+      binnedMaxes[1] = new Array(0);
+      binnedMins[1] = new Array(0);
+
+      function binTheData (datas) {
+        var bDat = new Array(0);
+        var bMax = new Array(0);
+        var bMin = new Array(0);
+        var i = 0;
+        for(i = 0; i < datas.length; i = i + 2){
+          if (i % 2 == 0) {
+            if (datas[i+1]){
+              bDat.push( ( datas[i] + datas[i+1] ) / 2 );
+              bMax.push( d3.max([datas[i], datas[i+1]]) );
+              bMin.push( d3.min([datas[i], datas[i+1]]) );
             }else{
-              binnedData[1].push( ( data[i] + data[i+1] ) / 2 );
-              binnedMaxes[1].push( d3.max([data[i], data[i+1]]) );
-              binnedMins[1].push( d3.min([data[i], data[i+1]]) );
+              bDat.push( datas[i] );
+              bMax.push( datas[i] );
+              bMin.push( datas[i] );
             }
           }else{
-            if (binnedData[1][0] == undefined) {
-              binnedData[1][0] = data[i];
-              binnedMaxes[1][0] = data[i];
-              binnedMins[1][0] = data[i];
-            }else{
-              binnedData[1].push( data[i] );
-              binnedMaxes[1].push( data[i] );
-              binnedMins[1].push( data[i] );
-            }
+            // do nothing;
           }
-        }else{
-          // do nothing;
-        }
-      } ///////// TODO: get this upper block working because it will be more efficient than what follows.
+        } ///////// TODO: get this upper block working because it will be more efficient than what follows.
+        return [bDat, bMax, bMin];
+      }
+      [ binnedData[1], binnedMaxes[1], binnedMins[1] ] = binTheData(data);
 
-
-//      OLD WAY:
-//      binnedData[1] = data.map(function (d, i) {
-//        if (i % 2 == 0) {
-//          if (data[i+1]){
-//            return ( d + data[i+1] ) / 2;
-//          }else{
-//            return d;
-//          }
-//        }else{
-//          return; // return 'undefined'
-//        }
-//      });
-//      binnedData[1].clean(undefined); //get rid of all undefined elements :)
-//      :END OLD WAY
-
-//      console.log(binnedData[1]);
 
       if (!xScale) { xScale = d3.scale.linear().domain([0, data.length - 1]); }
       xScale
@@ -119,23 +100,27 @@ var lineChart = function () {
 
       if (!d3area1){ d3area1 = d3.svg.line(); }
       var d3areaArray = new Array(1);
-      d3areaArray[0] = d3.svg.line();
-      d3areaArray[1] = d3.svg.line();
       var d0 = new Array(1);
-      d0[0] = d3areaArray[0]
-        .x(function (d, i) { return xScale(i); })
-        .y(function (d, i) { return yScale(binnedData[0][i]); })
-        //              .interpolate("cardinal");
-        //.interpolate("linear")(binnedData[0]);
-        .interpolate("monotone")(binnedData[0]);
+      var j = 0;
+      for (j = 0; j < 2; j++) {
+        d3areaArray[j] = d3.svg.line();
+        d0[j] = d3areaArray[j]
+          .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
+          .y(function (d, i) { return yScale(binnedData[j][i]); })
+          .interpolate("linear")(binnedData[j]);
+      }
 
-      d0[1] = d3areaArray[0]
-        .x(function (d, i) { return xScale(i); })
-        .y(function (d, i) { return yScale(binnedData[1][i]); })
-        //              .interpolate("cardinal");
-        //.interpolate("linear")(binnedData[1]);
-        .interpolate("monotone")(binnedData[1]);
+      d3areaArray[2] = d3.svg.line();
+      d0[2] = d3areaArray[2]
+        .x(function (d, i) { return xScale(i * Math.pow(2, 1)); })
+        .y(function (d, i) { return yScale(binnedMaxes[1][i]); })
+        .interpolate("linear")(binnedMaxes[1]);
 
+      d3areaArray[3] = d3.svg.line();
+      d0[3] = d3areaArray[3]
+        .x(function (d, i) { return xScale(i * Math.pow(2, 1)); })
+        .y(function (d, i) { return yScale(binnedMins[1][i]); })
+        .interpolate("linear")(binnedMins[1]);
 
       chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
 
@@ -185,14 +170,14 @@ var lineChart = function () {
 
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data([0, 1]);
+        .data(new Array(d0.length));
 
 
       //update
       currentSelection
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", "#700")
+        .style("stroke", function (d, i) { return colours[i]; })
         //.transition().duration(1000)
         .attr("d", function (d, i) { return d0[i]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
@@ -202,7 +187,7 @@ var lineChart = function () {
         .attr("class", "posPath")
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", "#700")
+        .style("stroke", function (d, i) { return colours[i]; })
         .attr("d", function (d, i) { return d0[i]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
