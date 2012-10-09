@@ -2,6 +2,7 @@
 //       make checkboxes to choose what gets rendered and how many layers.
 
 //      document.write("<button id='redraw' onclick='redraw()'>redraw</button>");
+//      data on the far right is being useless. Can we change this?
 
 var lineChart = function () {
   var outlinesOrNot = true;
@@ -14,6 +15,7 @@ var lineChart = function () {
   var howManyBinLevels = 4;
   var whichLevelsToRender = [1, 2, 3];
   var whichLinesToRender = ['rawData', 'averages', 'maxes', 'mins'];
+  var interpolationMethod = ['linear'];
 
   var bkgrect;
   var frgrect;
@@ -150,7 +152,7 @@ var lineChart = function () {
       binData.rawData.d0[0] = d3.svg.line()
         .x(function (d, i) { return xScale(i); })
         .y(function (d, i) { return yScale(binData.rawData.data[0][i]); }) //TODO: get rid of this line ????????
-        .interpolate("linear")(binData.rawData.data[0]);
+        .interpolate(interpolationMethod)(binData.rawData.data[0]);
 
       for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
         var j = 0;
@@ -158,7 +160,7 @@ var lineChart = function () {
           binData[binData['keys'][ key ]].d0[j] = d3.svg.line()
             .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
             .y(function (d, i) { return yScale(binData[binData.keys[key]].data[j][i]); }) //TODO: get rid of this line ????????
-            .interpolate("linear")(binData[binData.keys[key]].data[j]);
+            .interpolate(interpolationMethod )(binData[binData.keys[key]].data[j]);
         }
       }
 
@@ -369,8 +371,11 @@ var lineChart = function () {
     whichLinesToRender = a;
 
     //var b = [].map.call (document.querySelectorAll ("#render-levels input:checked"), function (checkbox) { return Number(checkbox.value);} );
-    var b = [Number(document.querySelector("#x-axis input:checked").value)];
+    var b = [Number(document.querySelector("#render-levels input:checked").value)];
     whichLevelsToRender = b;
+
+    var b = document.querySelector("#render-method input:checked").value;
+    interpolationMethod = b;
     return my;
   }
 
