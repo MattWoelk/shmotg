@@ -19,6 +19,14 @@ var redraw = function () {
   });
 }
 
+var changeLines = function () {
+  plots.forEach(function (plt) {
+    plt.setSelectedLines().update();
+  });
+}
+
+document.getElementById("controls").addEventListener ("change", changeLines, false);
+
 var zoomout = function () {
   plots.forEach(function (plt) {
     plt.zoomout().update();
@@ -48,7 +56,7 @@ var pl3 = d3.select("#charts").append("svg").datum(dataC).call(plot3);
 
 
 // This is how we change a value and update the plot.
-plot1.height(50).width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
+plot1.height(75).width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
 //pl1.call(plot1); // this is an option, but the next one is easier.
 plot1.update(); // easy now that we've stored the selection within the plot. Plot instances are now not reusable for more than one data set. This is okay I think.
 

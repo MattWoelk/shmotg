@@ -34,6 +34,7 @@ var lineChart = function () {
   //document.write("<button id='red-raw' onclick='redraw()'>redraw</button>");
 
   var my = function (selection) {
+    my.setSelectedLines();
     slctn = selection; // Save the selection so that my.update() works.
 
     realWidth = width - margins.right - margins.left;
@@ -273,8 +274,8 @@ var lineChart = function () {
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
       //exit
-      // TODO todo TODO todo TODO todo TODO
-      //      see if we need a key or something to keep track of enters and exits properly
+      currentSelection.exit() // TODO: make a key!!!!!
+        .remove();
 
       // Draw Axes
       xAxis = d3.svg.axis()
@@ -328,6 +329,12 @@ var lineChart = function () {
     return my;
   }
 
+  my.whichLinesToRender  = function (value) {
+    if (!arguments.length) return whichLinesToRender   ;
+    whichLinesToRender   = value;
+    return my;
+  }
+
   my.outlinesOrNot = function (value) {
     if (!arguments.length) return outlinesOrNot;
     outlinesOrNot = value;
@@ -355,6 +362,12 @@ var lineChart = function () {
 
   my.update = function () {
     my(slctn);
+  }
+
+  my.setSelectedLines = function () {
+    var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
+    whichLinesToRender = a;
+    return my;
   }
 
   return my;

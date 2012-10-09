@@ -30,6 +30,15 @@
     <button id='zoomin' onclick='zoomin()'>+</button>
     <button id='zoomout' onclick='zoomout()'>-</button>
 
+    <form id="controls">
+      <ul id="render-lines">
+        <li><label class="setosa_html"><input type="checkbox" checked="checked" value="rawData">Raw Data</label></li>
+        <li><label class="setosa_html"><input type="checkbox" checked="checked" value="averages">Averages</label></li>
+        <li><label class="versicolor_html"><input type="checkbox" checked="checked" value="mins">Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+        <li><label class="virginica_html"><input type="checkbox" checked="checked" value="maxes">Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+      </ul>
+    </form>
+
   </body>
   <script src="d3.v2.js"></script>
   <script src="horizonChart.js"></script>
