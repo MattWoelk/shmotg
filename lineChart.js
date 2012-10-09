@@ -1,12 +1,14 @@
 // TODO:
 //       make checkboxes to choose what gets rendered and how many layers.
 
+//      document.write("<button id='redraw' onclick='redraw()'>redraw</button>");
+
 var lineChart = function () {
   var outlinesOrNot = true;
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
-  var height = 50;
+  var height = 75;
   var width = d3.max([window.innerWidth, screen.width]);
 
   var howManyBinLevels = 4;
@@ -29,6 +31,7 @@ var lineChart = function () {
 
   var slctn; // Save the selection so that my.update() works.
 
+  //document.write("<button id='red-raw' onclick='redraw()'>redraw</button>");
 
   var my = function (selection) {
     slctn = selection; // Save the selection so that my.update() works.
@@ -40,25 +43,25 @@ var lineChart = function () {
       var binData = {
         keys : ['averages', 'maxes', 'mins'],
         rawData : {
-          data  : new Array(0),
-          d0    : new Array(0),
+          data  : new Array(),
+          d0    : new Array(),
           colour: '#BBB'
         },
         averages: {
-          data  : new Array(0),
-          d0    : new Array(0),
+          data  : new Array(),
+          d0    : new Array(),
           colour: '#F00',
           func  : function (a, b) { return (a+b)/2; }
         },
         maxes : {
-          data  : new Array(0),
-          d0    : new Array(0),
+          data  : new Array(),
+          d0    : new Array(),
           colour: '#0F0',
           func  : function (a, b) { return d3.max([a, b]); }
         },
         mins : {
-          data  : new Array(0),
-          d0    : new Array(0),
+          data  : new Array(),
+          d0    : new Array(),
           colour: '#00F',
           func  : function (a, b) { return d3.min([a, b]); }
         },
@@ -72,7 +75,7 @@ var lineChart = function () {
 //      }
 
       var binTheDataWithFunction = function (datas, func) {
-        var bDat = new Array(0);
+        var bDat = new Array();
         var i = 0;
         for(i = 0; i < datas.length; i = i + 2){
           if (i % 2 == 0) {
@@ -89,9 +92,9 @@ var lineChart = function () {
       }
 
 //      var binTheData = function  (datas) {
-//        var bDat = new Array(0);
-//        var bMax = new Array(0);
-//        var bMin = new Array(0);
+//        var bDat = new Array();
+//        var bMax = new Array();
+//        var bMin = new Array();
 //        var i = 0;
 //        for(i = 0; i < datas.length; i = i + 2){
 //          if (i % 2 == 0) {
@@ -221,7 +224,7 @@ var lineChart = function () {
       // ]
       // add to it if you want more lines displayed
       var makeDataObjectForKeyFanciness = function () { //TODO: convert all functions to be in this form (it's way better, yo).
-        var resultArray = new Array(0);
+        var resultArray = new Array();
 
         if (whichLinesToRender.indexOf('rawData') > -1){
           resultArray.push({
