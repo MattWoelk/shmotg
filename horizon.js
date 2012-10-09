@@ -36,9 +36,9 @@ var dataA = [0, 5, 2, -3, 4, 6, 8, 4, -2, 0];
 var dataB = [2, 1, 2, -1, -2, -5, -9, 2, 6, 10];
 var dataC = [-2, -1, -2, 1, 2, 5, 9, -2, -6, -10];
 var dataD = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-var plot1 = horizonChart().width(100).height(50);
+var plot1 = horizonChart().width(100).height(75);
 //var plot2 = horizonChart().width(100).height(50);
-var plot3 = horizonChart().width(100).height(50);
+var plot3 = horizonChart().width(100).height(75);
 //var plot4 = horizonChart().width(100).height(50);
 
 var pl1 = d3.select("#charts").append("svg").datum(dataA).call(plot1);
@@ -70,7 +70,7 @@ plots.push(plot3);
 
 
 
-var plot10 = lineChart().width(100).height(50);
+var plot10 = lineChart().width(100).height(75);
 
 
 d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
