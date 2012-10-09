@@ -31,11 +31,19 @@
     <button id='zoomout' onclick='zoomout()'>-</button>
 
     <form id="controls">
-      <ul id="render-lines">
-        <li><label class="setosa_html"><input type="checkbox" checked="checked" value="rawData">Raw Data</label></li>
-        <li><label class="setosa_html"><input type="checkbox" checked="checked" value="averages">Averages</label></li>
-        <li><label class="versicolor_html"><input type="checkbox" checked="checked" value="mins">Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-        <li><label class="virginica_html"><input type="checkbox" checked="checked" value="maxes">Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+      <ul style="float : left" id="render-lines">
+        Which functions to render:
+        <li><label><input type="checkbox" checked="checked" value="rawData">Raw Data</label></li>
+        <li><label><input type="checkbox" checked="checked" value="averages">Averages</label></li>
+        <li><label><input type="checkbox" checked="checked" value="mins">Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+        <li><label><input type="checkbox" checked="checked" value="maxes">Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+      </ul>
+
+      <ul style="float : left" id="x-axis">
+        Which layers to render:
+        <li><label><input type="radio" checked="checked" name="x-axis" value="1">1</li>
+        <li><label><input type="radio"                   name="x-axis" value="2">2</li>
+        <li><label><input type="radio"                   name="x-axis" value="3">3</li>
       </ul>
     </form>
 

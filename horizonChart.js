@@ -29,7 +29,7 @@ var horizonChart = function () {
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
-  var height = 75;
+  var height = 150;
   var width = d3.max([window.innerWidth, screen.width]);
   var zeroPoint = 0; //TODO: use scales instead? Might make things WAY simpler if we scale the data
 

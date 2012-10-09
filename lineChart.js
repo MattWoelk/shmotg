@@ -8,7 +8,7 @@ var lineChart = function () {
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
 
-  var height = 75;
+  var height = 150;
   var width = d3.max([window.innerWidth, screen.width]);
 
   var howManyBinLevels = 4;
@@ -367,6 +367,10 @@ var lineChart = function () {
   my.setSelectedLines = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     whichLinesToRender = a;
+
+    //var b = [].map.call (document.querySelectorAll ("#render-levels input:checked"), function (checkbox) { return Number(checkbox.value);} );
+    var b = [Number(document.querySelector("#x-axis input:checked").value)];
+    whichLevelsToRender = b;
     return my;
   }
 
