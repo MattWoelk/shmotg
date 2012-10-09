@@ -19,14 +19,6 @@ var redraw = function () {
   });
 }
 
-var changeLines = function () {
-  plots.forEach(function (plt) {
-    plt.setSelectedLines().update();
-  });
-}
-
-document.getElementById("controls").addEventListener ("change", changeLines, false);
-
 var zoomout = function () {
   plots.forEach(function (plt) {
     plt.zoomout().update();
@@ -40,45 +32,43 @@ var zoomin = function () {
 }
 
 
-//var dataA = [0, 5, 2, -3, 4, 6, 8, 4, -2, 0];
-//var dataB = [2, 1, 2, -1, -2, -5, -9, 2, 6, 10];
-//var dataC = [-2, -1, -2, 1, 2, 5, 9, -2, -6, -10];
-//var dataD = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-//var plot1 = horizonChart().width(100).height(150);
-////var plot2 = horizonChart().width(100).height(50);
-//var plot3 = horizonChart().width(100).height(150);
-////var plot4 = horizonChart().width(100).height(50);
-//
-//var pl1 = d3.select("#charts").append("svg").datum(dataA).call(plot1);
-////var pl2 = d3.select("#charts").append("svg").datum(dataB).call(plot2);
-//var pl3 = d3.select("#charts").append("svg").datum(dataC).call(plot3);
-////var pl4 = d3.select("#charts").append("svg").datum(dataD).call(plot4);
-//
-//
-//// This is how we change a value and update the plot.
-//plot1.height(150).width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
-////pl1.call(plot1); // this is an option, but the next one is easier.
-//plot1.update(); // easy now that we've stored the selection within the plot. Plot instances are now not reusable for more than one data set. This is okay I think.
-//
-//// This is even EVEN better.
-//plot3.bandSize(4).update();
-////plot4.bandSize(1).update();
-//
-//plot1.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
-////plot2.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
-//plot3.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
-////plot4.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
-//
-////So that we can change and update them whenever we like. :)
-////  keep them in a nice array
-//plots.push(plot1);
-////plots.push(plot2);
-//plots.push(plot3);
-////plots.push(plot4);
-//
-//
+var dataA = [0, 5, 2, -3, 4, 6, 8, 4, -2, 0];
+var dataB = [2, 1, 2, -1, -2, -5, -9, 2, 6, 10];
+var dataC = [-2, -1, -2, 1, 2, 5, 9, -2, -6, -10];
+var dataD = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+var plot1 = horizonChart().width(100).height(50);
+var plot2 = horizonChart().width(100).height(50);
+var plot3 = horizonChart().width(100).height(50);
+var plot4 = horizonChart().width(100).height(50);
 
-var plot10 = lineChart().width(100).height(150);
+var pl1 = d3.select("#charts").append("svg").datum(dataA).call(plot1);
+var pl2 = d3.select("#charts").append("svg").datum(dataB).call(plot2);
+var pl3 = d3.select("#charts").append("svg").datum(dataC).call(plot3);
+var pl4 = d3.select("#charts").append("svg").datum(dataD).call(plot4);
+
+// This is how we change a value and update the plot.
+plot1.height(50).width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth);
+//pl1.call(plot1); // this is an option, but the next one is easier.
+plot1.update(); // easy now that we've stored the selection within the plot. Plot instances are now not reusable for more than one data set. This is okay I think.
+
+// This is even EVEN better.
+plot3.bandSize(4).update();
+plot4.bandSize(1).update();
+
+plot1.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+plot2.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+plot3.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+plot4.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+
+//So that we can change and update them whenever we like. :)
+//  keep them in a nice array
+plots.push(plot1);
+plots.push(plot2);
+plots.push(plot3);
+plots.push(plot4);
+
+
+
 
 
 d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
@@ -86,17 +76,17 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
 
   //fakejsondata = [40, -47.85, -39.38, -44.91, 0, 1];
 
-//  var plot5 = horizonChart()
-//    .width(100)
-//    .outlinesOrNot(false)
-//    .bandSize(26);
-//  var pl5 = d3.select("#charts").append("svg")
-//    .datum(json.map(function (d) { return -d.ESGgirder1; }))
-//    //.datum(fakejsondata)
-//    .call(plot5);
-//  plots.push(plot5);
-//
-//  plot5.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+  var plot5 = horizonChart()
+    .width(100)
+    .outlinesOrNot(false)
+    .bandSize(26);
+  var pl5 = d3.select("#charts").append("svg")
+    .datum(json.map(function (d) { return -d.ESGgirder1; }))
+    //.datum(fakejsondata)
+    .call(plot5);
+  plots.push(plot5);
+
+  plot5.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
 
   var jAvg = -d3.mean(json, function (d) { return d.ESGgirder1; });
   var jRange = d3.max(json, function (d) { return d.ESGgirder1; })
@@ -105,22 +95,14 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
     .width(100)
     .outlinesOrNot(false)
     .bandSize(jRange / 2);
-//  var pl6 = d3.select("#charts").append("svg")
-//    .datum(json.map(function (d) { return -d.ESGgirder1 - jAvg; }))
+  var pl6 = d3.select("#charts").append("svg")
+    .datum(json.map(function (d) { return -d.ESGgirder1 - jAvg; }))
     //.datum(fakejsondata)
-//    .call(plot6);
-//  plots.push(plot6);
-//  plot6.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+    .call(plot6);
+  plots.push(plot6);
+  plot6.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
   //console.log(json.map(function (d) { return -d.ESGgirder1 - jAvg; }));
   //console.log(json.map(function (d) { return -d.ESGgirder1; }));
   //console.log(d3.mean(json, function (d) { return d.ESGgirder1; }));
-
-  var plot10 = lineChart()
-    .width(100)
-    .outlinesOrNot(true);
-
-  var pl10 = d3.select("#charts").append("svg").datum(json.map(function (d) { return -d.ESGgirder1; })).call(plot10);
-  plot10.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
-  plots.push(plot10);
 });
 

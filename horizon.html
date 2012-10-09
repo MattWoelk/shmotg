@@ -27,30 +27,15 @@
     </div>
       /lorem-->
 
-    <button id='zoomin' onclick='zoomin()'>+</button>
-    <button id='zoomout' onclick='zoomout()'>-</button>
-
-    <form id="controls">
-      <ul style="float : left" id="render-lines">
-        Which functions to render:
-        <li><label><input type="checkbox" checked="checked" value="rawData">Raw Data</label></li>
-        <li><label><input type="checkbox" checked="checked" value="averages">Averages</label></li>
-        <li><label><input type="checkbox" checked="checked" value="mins">Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-        <li><label><input type="checkbox" checked="checked" value="maxes">Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-      </ul>
-
-      <ul style="float : left" id="x-axis">
-        Which layers to render:
-        <li><label><input type="radio" checked="checked" name="x-axis" value="1">1</li>
-        <li><label><input type="radio"                   name="x-axis" value="2">2</li>
-        <li><label><input type="radio"                   name="x-axis" value="3">3</li>
-      </ul>
-    </form>
+    <script type="text/javascript">
+      document.write("<button id='redraw' onclick='redraw()'>redraw</button>");
+      document.write("<button id='zoomin' onclick='zoomin()'>+</button>");
+      document.write("<button id='zoomout' onclick='zoomout()'>-</button>");
+    </script>
 
   </body>
-  <script src="d3.v2.js"></script>
+  <script src="d3.v2.min.js"></script>
   <script src="horizonChart.js"></script>
-  <script src="lineChart.js"></script>
   <script src="horizon.js"></script>
 </html>
 
