@@ -1,5 +1,5 @@
 // TODO:
-//       store the binnedData, binnedMaxes, and binnedMins in a convenient object.
+//       make checkboxes to choose what gets rendered and how many layers.
 
 var lineChart = function () {
   var outlinesOrNot = true;
@@ -8,6 +8,10 @@ var lineChart = function () {
 
   var height = 50;
   var width = d3.max([window.innerWidth, screen.width]);
+
+  var howManyBinLevels = 4;
+  var whichLevelsToRender = [1, 2, 3];
+  var whichLinesToRender = ['rawData', 'averages', 'maxes', 'mins'];
 
   var bkgrect;
   var frgrect;
@@ -35,7 +39,12 @@ var lineChart = function () {
 
       var binData = {
         keys : ['averages', 'maxes', 'mins'],
-        averages : {
+        rawData : {
+          data  : new Array(0),
+          d0    : new Array(0),
+          colour: '#BBB'
+        },
+        averages: {
           data  : new Array(0),
           d0    : new Array(0),
           colour: '#F00',
@@ -55,12 +64,14 @@ var lineChart = function () {
         },
       };
 
+      binData.rawData.data[0] = data;
+
 //      console.log("iterate through keys");
 //      for (var key in binData['keys']){
 //        console.log(binData['keys'][ key ]);
 //      }
 
-      function binTheDataWithFunction (datas, func) {
+      var binTheDataWithFunction = function (datas, func) {
         var bDat = new Array(0);
         var i = 0;
         for(i = 0; i < datas.length; i = i + 2){
@@ -77,7 +88,7 @@ var lineChart = function () {
         return bDat;
       }
 
-//      function binTheData (datas) {
+//      var binTheData = function  (datas) {
 //        var bDat = new Array(0);
 //        var bMax = new Array(0);
 //        var bMin = new Array(0);
@@ -102,7 +113,6 @@ var lineChart = function () {
 
       // populate the binned datas (binData):
       var j = 0;
-      var howManyBinLevels = 4;
       for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
         binData[binData.keys[key]]['data'][0] = data;
 
@@ -133,6 +143,11 @@ var lineChart = function () {
 
       //generate all d0s. (generate the lines paths)
 
+      binData.rawData.d0[0] = d3.svg.line()
+        .x(function (d, i) { return xScale(i); })
+        .y(function (d, i) { return yScale(binData.rawData.data[0][i]); }) //TODO: get rid of this line ????????
+        .interpolate("linear")(binData.rawData.data[0]);
+
       for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
         var j = 0;
         for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
@@ -143,7 +158,6 @@ var lineChart = function () {
         }
       }
 
-      console.log(binData);
 
       chart = d3.select(this); //TODO: Since we're using a .call(), "this" is the svg element.
 
@@ -191,28 +205,42 @@ var lineChart = function () {
 
       var currentSelection;
 
+
       // The following function returns something which looks like this:
       // [
+      //   {type: 'rawData',     which: 0}, <-- this one is for the raw data
       //   {type: 'averages', which: 1},
       //   {type: 'averages', which: 2},
       //   {type: 'averages', which: 3},
       //   {type: 'mins',     which: 1},
       //   {type: 'mins',     which: 2},
       //   {type: 'mins',     which: 3},
-      //   {type: 'maxes',     which: 1},
-      //   {type: 'maxes',     which: 2},
-      //   {type: 'maxes',     which: 3}
+      //   {type: 'maxes',    which: 1},
+      //   {type: 'maxes',    which: 2},
+      //   {type: 'maxes',    which: 3}
       // ]
+      // add to it if you want more lines displayed
       var makeDataObjectForKeyFanciness = function () { //TODO: convert all functions to be in this form (it's way better, yo).
         var resultArray = new Array(0);
 
+        if (whichLinesToRender.indexOf('rawData') > -1){
+          resultArray.push({
+            type: 'rawData',
+            which: 0
+          });
+        }
+
         var j = 0;
         for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
-          for (j = 0; j < howManyBinLevels; j++) {
-            resultArray.push({
-              type: binData.keys[key],
-              which: j
-            });
+          if (whichLinesToRender.indexOf(binData.keys[key]) > -1){
+            for (j = 0; j < howManyBinLevels; j++) {
+              if (whichLevelsToRender.indexOf(j) > -1){
+                resultArray.push({
+                  type: binData.keys[key],
+                  which: j
+                });
+              }
+            }
           }
         }
 
@@ -221,7 +249,7 @@ var lineChart = function () {
 
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data(makeDataObjectForKeyFanciness()); //TODO: make this like the following:
+        .data(makeDataObjectForKeyFanciness());
 
       //update
       currentSelection
@@ -241,6 +269,9 @@ var lineChart = function () {
         .attr("d", function (d, i) { return binData[d.type].d0[d.which]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
+      //exit
+      // TODO todo TODO todo TODO todo TODO
+      //      see if we need a key or something to keep track of enters and exits properly
 
       // Draw Axes
       xAxis = d3.svg.axis()
@@ -279,6 +310,18 @@ var lineChart = function () {
   my.height = function (value) {
     if (!arguments.length) return height;
     height = value;
+    return my;
+  }
+
+  my.howManyBinLevels = function (value) {
+    if (!arguments.length) return howManyBinLevels ;
+    howManyBinLevels = value;
+    return my;
+  }
+
+  my.whichLevelsToRender = function (value) {
+    if (!arguments.length) return whichLevelsToRender  ;
+    whichLevelsToRender = value;
     return my;
   }
 
