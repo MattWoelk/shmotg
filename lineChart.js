@@ -370,8 +370,8 @@ var lineChart = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     whichLinesToRender = a;
 
-    //var b = [].map.call (document.querySelectorAll ("#render-levels input:checked"), function (checkbox) { return Number(checkbox.value);} );
-    var b = [Number(document.querySelector("#render-levels input:checked").value)];
+    //var b = [].map.call (document.querySelectorAll ("#render-depth input:checked"), function (checkbox) { return Number(checkbox.value);} );
+    var b = [Number(document.querySelector("#render-depth input:checked").value)];
     whichLevelsToRender = b;
 
     var b = document.querySelector("#render-method input:checked").value;
