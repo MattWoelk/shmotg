@@ -272,7 +272,7 @@ var lineChart = function () {
       //update
       //TODO: Must first transition to an interpolated line, then instantly switch to the simpler line.
       //      - to make the interpolated line, we need a really fancy function ...
-      //      Fading out and then back in is an okay option as well.
+      //      Fading out and then back in is an okay option as well. Likely the best one. They should fade at the same time though, which will require using a more detailed key. This might help everything work better. :)
       //      transitioning to a line at the average, then back up would look very cool also. Maybe transition to a line, stretch or shrink the line (instantly), then back up.
       currentSelection
         //.transition().duration(500)
