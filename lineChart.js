@@ -3,6 +3,8 @@
 
 //      document.write("<button id='redraw' onclick='redraw()'>redraw</button>");
 //      data on the far right is being useless. Can we change this?
+//      key isn't working ... add an effect to exits and you'll see what I mean
+//      think about using a moving average instead of binning ???
 
 var lineChart = function () {
   var outlinesOrNot = true;
@@ -27,6 +29,7 @@ var lineChart = function () {
   var xScale;
   var yScale;
   var xAxisScale;
+  var flatLined0; // a useful average line for interpolation purposes
 
   var chart;
   var paths;
@@ -149,6 +152,12 @@ var lineChart = function () {
 
       //generate all d0s. (generate the lines paths)
 
+      flatLined0 = d3.svg.line()
+        .x(function (d, i) { return xScale(i); })
+        .y(function (d, i) { return d3.avg(binData.rawData.data[0]); })
+        .interpolate("linear");
+
+
       binData.rawData.d0[0] = d3.svg.line()
         .x(function (d, i) { return xScale(i); })
         .y(function (d, i) { return yScale(binData.rawData.data[0][i]); }) //TODO: get rid of this line ????????
@@ -156,6 +165,9 @@ var lineChart = function () {
 
       for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
         var j = 0;
+
+        binData[binData['keys'][key]].d0[0] = binData['rawData'].d0[0];
+
         for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
           binData[binData['keys'][ key ]].d0[j] = d3.svg.line()
             .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
@@ -187,7 +199,7 @@ var lineChart = function () {
       //Draw the background for the chart
       if (!bkgrect) { bkgrect = chart.insert("svg:rect"); }
       bkgrect
-        //.transition().duration(1000)
+        //.transition().duration(500)
         .attr("width", realWidth)
         .attr("height", height)
         .attr("class", "bkgrect")
@@ -197,7 +209,7 @@ var lineChart = function () {
       //Make the clipPath (for cropping the paths)
       if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip").append("rect"); }
       defclip
-        //.transition().duration(1000)
+        //.transition().duration(500)
         .attr("width", realWidth)
         .attr("transform", "translate(" + margins.left + ", 0)")
         .attr("height", height);
@@ -255,14 +267,22 @@ var lineChart = function () {
 
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data(makeDataObjectForKeyFanciness());
+        .data(makeDataObjectForKeyFanciness(), function (d) { return d.type; });
 
       //update
+      //TODO: Must first transition to an interpolated line, then instantly switch to the simpler line.
+      //      - to make the interpolated line, we need a really fancy function ...
+      //      Fading out and then back in is an okay option as well.
+      //      transitioning to a line at the average, then back up would look very cool also. Maybe transition to a line, stretch or shrink the line (instantly), then back up.
       currentSelection
+        //.transition().duration(500)
+        //.attr("opacity", 0.1)
+        //.transition().delay(500).duration(500)
+        .attr("opacity", 1)
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", function (d, i) { return binData[d.type].colour; })
-        //.transition().duration(1000)
+        //.transition().duration(500)
         .attr("d", function (d, i) { return binData[d.type].d0[d.which]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
@@ -276,7 +296,8 @@ var lineChart = function () {
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; });
 
       //exit
-      currentSelection.exit() // TODO: make a key!!!!!
+      currentSelection.exit()
+        //.transition().duration(500).attr("opacity", "0")
         .remove();
 
       // Draw Axes
@@ -287,12 +308,12 @@ var lineChart = function () {
       if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
       xAxisContainer.attr("class", "x axis")
         .attr("transform", "translate(" + margins.left + "," + height + ")");
-      xAxisContainer.transition().duration(1000).call(xAxis);
+      xAxisContainer.transition().duration(500).call(xAxis);
 
       //Draw the outline for the chart
       if (!frgrect) { frgrect = chart.append("svg:rect"); }
       frgrect
-        //.transition().duration(1000)
+        //.transition().duration(500)
         .attr("width", realWidth)
         .attr("height", height)
         .attr("class", "frgrect")
