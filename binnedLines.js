@@ -33,7 +33,7 @@ var zoomin = function () {
 }
 
 
-var plot10 = lineChart().width(100).height(150);
+var plot10 = binnedLineChart().width(100).height(150);
 
 d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   var w = json.length;
@@ -42,7 +42,7 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   var jRange = d3.max(json, function (d) { return d.ESGgirder1; })
     - d3.min(json, function (d) { return d.ESGgirder1; });
 
-  var plot10 = lineChart()
+  var plot10 = binnedLineChart()
     .width(100)
     .outlinesOrNot(true);
 

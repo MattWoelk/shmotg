@@ -6,7 +6,7 @@
 //      key isn't working ... add an effect to exits and you'll see what I mean
 //      think about using a moving average instead of binning ???
 
-var lineChart = function () {
+var binnedLineChart = function () {
   var outlinesOrNot = true;
 
   var margins = {top: 0, left: 25, bottom: 25, right: 25};
