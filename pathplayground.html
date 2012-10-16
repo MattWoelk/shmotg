@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+    <link type="text/css" rel="stylesheet" href="horizon.css"/>
+
+    <title>Path Playground</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
+
+    <div id="charts"></div>
+
+    <button id='zoomin' onclick='zoomin()'>+</button>
+    <button id='zoomout' onclick='zoomout()'>-</button>
+
+    <form id="controls">
+      <ul style="float : left" id="render-lines">
+        Which functions to render:
+        <li><label><input type="checkbox" checked="checked" value="rawData">Raw Data</label></li>
+        <li><label><input type="checkbox"                   value="averages">Averages</label></li>
+        <li><label><input type="checkbox" checked="checked" value="mins">Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+        <li><label><input type="checkbox"                   value="maxes">Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+      </ul>
+
+      <ul style="float : left" id="render-depth">
+        Bin Size:
+        <li><label><input type="radio"                   name="render-depth" value="0">1</li>
+        <li><label><input type="radio"                   name="render-depth" value="1">2</li>
+        <li><label><input type="radio" checked="checked" name="render-depth" value="2">4</li>
+        <li><label><input type="radio"                   name="render-depth" value="3">8</li>
+        <li><label><input type="radio"                   name="render-depth" value="4">16</li>
+        <li><label><input type="radio"                   name="render-depth" value="5">32</li>
+      </ul>
+
+      <ul style="float : left" id="render-method">
+        Interpolation Method:
+        <li><label><input type="radio"                   name="render-method" value="linear">Linear</li>
+        <li><label><input type="radio" checked="checked" name="render-method" value="step-after">Step-After</li>
+        <li><label><input type="radio"                   name="render-method" value="cardinal">Cardinal</li>
+          <li><label><input type="radio"                   name="render-method" value="monotone">Monotone</li>
+      </ul>
+    </form>
+
+  </body>
+  <script src="d3.v2.js"></script>
+  <script src="playLineChart.js"></script>
+  <script src="playLines.js"></script>
+</html>
