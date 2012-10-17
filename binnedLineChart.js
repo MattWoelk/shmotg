@@ -1,9 +1,5 @@
 // TODO:
-//      data on the far right is being useless. Can we change this?
 //      think about using a moving average instead of binning ???
-//      !! get data to always be at the back. I think it has something to do with the mega data object trickery. It might need some sorting. :)
-//      - nope. it has to do with updates not killing and re-making objects. this is normal I guess.
-//      - possible solution is to make it always on top, but with transparency
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
@@ -49,24 +45,28 @@ var binnedLineChart = function () {
         rawData : {
           data  : new Array(),
           d0    : new Array(),
-          colour: '#BBB'
+          colour: '#000',
+          opacity: 0.5
         },
         averages: {
           data  : new Array(),
           d0    : new Array(),
           colour: '#F00',
+          opacity: 1,
           func  : function (a, b) { return (a+b)/2; }
         },
         maxes : {
           data  : new Array(),
           d0    : new Array(),
           colour: '#0F0',
+          opacity: 1,
           func  : function (a, b) { return d3.max([a, b]); }
         },
         mins : {
           data  : new Array(),
           d0    : new Array(),
           colour: '#00F',
+          opacity: 1,
           func  : function (a, b) { return d3.min([a, b]); }
         },
       };
@@ -235,7 +235,7 @@ var binnedLineChart = function () {
       //update
       currentSelection
         .transition().duration(500)
-        .attr("opacity", 1)
+        .attr("opacity", function (d) { return binData[d.type].opacity; }) // TODO: delete this line?
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", function (d, i) { return binData[d.type].colour; })
@@ -253,7 +253,7 @@ var binnedLineChart = function () {
         .style("stroke", function (d, i) { return binData[d.type].colour; })
         .attr("opacity", 0)
         .transition().ease("cubic-out").duration(500)
-        .attr("opacity", 1);
+        .attr("opacity", function (d) { return binData[d.type].opacity; });
 
       //exit
       currentSelection.exit()
