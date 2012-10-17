@@ -4,6 +4,8 @@
 //      !! get data to always be at the back. I think it has something to do with the mega data object trickery. It might need some sorting. :)
 //      - nope. it has to do with updates not killing and re-making objects. this is normal I guess.
 //      - possible solution is to make it always on top, but with transparency
+//
+//      maybe do something like this: http://bl.ocks.org/1313857 with point-along-path stuff instead.
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
@@ -155,7 +157,11 @@ var binnedLineChart = function () {
         var i = 0;
 
         if (howmanytimesmore > 1) {
+          var d = 5;
           for (i = 1; i < howmanytimesmore; i++) {
+            // MxMy --> H(Mx+d)V(My), where d is the space between Hs normally
+            resultFrom = resultFrom.replace(/M([0-9.]*),([0-9.]*)/gi, function (a, b, x, y) { return "M" + (x + d) + "V" + "y"; });
+            // HxVy --> HxVyH(x+d)Vy, where d is the space between Hs normally
             resultFrom = resultFrom.replace(/(H[0-9.]*)(V[0-9.]*)/gi, "$1$2$1$2");
           }
         }else if (howmanytimesless > 1) {
@@ -279,8 +285,8 @@ var binnedLineChart = function () {
       //update
       currentSelection
         //.attr("d", function (d, i) { return interpolateStraight(currentSelection[0][i].getAttribute('d')); })
-        //.attr("d", function (d, i) { interpolateLength(currentSelection[0][i].getAttribute('d'), binData[d.type].d0[d.which]); return interpolateStraight(currentSelection[0][i].getAttribute('d')); })
-        .attr("d", function (d, i) { return interpolateLength(currentSelection[0][i].getAttribute('d'), binData[d.type].d0[d.which])[0]; })
+        .attr("d", function (d, i) { console.log(currentSelection[0][i].getAttribute('d')); console.log(binData[d.type].d0[d.which]); return interpolateStraight(currentSelection[0][i].getAttribute('d')); })
+        //.attr("d", function (d, i) { return interpolateLength(currentSelection[0][i].getAttribute('d'), binData[d.type].d0[d.which])[0]; })
         .transition().duration(500)
         .attr("opacity", 1)
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
