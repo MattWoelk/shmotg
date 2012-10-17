@@ -1,5 +1,10 @@
 // TODO:
 //      think about using a moving average instead of binning ???
+//
+//      Current thought process regarding mean vs. median:
+//      - if we use median, then we can work with data we already have in order to show abstracted data ONLY because we are always using 2 pieces of data at a time.
+//      - mean won't work for quartiles. I checked.
+//      Fade based on how many pixels are being rendered.
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
@@ -40,6 +45,80 @@ var binnedLineChart = function () {
 
     selection.each(function (data) {
 
+      //     TODO: with this method, we can send binData.levels[0] to func so that functions can share data between themselves. yay!
+      //TODO NEW binData way of storing things:        usage: binData.levels[0].rawData = new Array;
+      //                                                      binData.properties.averages.opacity = 0.75;
+      //             SUMMARY:
+      //             binData = {
+      //               keys : [names-of-functions],
+      //               properties : {
+      //                 function-name : {
+      //                   property: value,
+      //                   property2: value2
+      //                 }
+      //               },
+      //               levels : [
+      //                 { // level 0
+      //                   rawData : new Array();
+      //                 },
+      //                 { // level 1
+      //                   rawData : new Array();
+      //                   averages: new Array();
+      //                   maxes   : new Array();
+      //                 },
+      //               ]
+      //             }
+      //
+      //
+      //
+      // binData = {
+      //   keys : ['averages', 'maxes', 'mins', 'q1', 'q2', 'q3'],
+      //   properties : {
+      //     averages : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     },
+      //     averages : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     },
+      //     maxes    : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     },
+      //     mins     : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     },
+      //     q1       : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     },
+      //     q2       : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     },
+      //     q3       : {
+      //       colour: '#F00',
+      //       opacity: 1
+      //     }
+      //   },
+      //   levels : [
+      //     {
+      //       rawData : new Array()
+      //     },
+      //     {
+      //       rawData : new Array(),
+      //       average : new Array(),
+      //       maxes   : new Array(),
+      //       mins    : new Array(),
+      //       q1      : new Array(),
+      //       q2      : new Array(),
+      //       q3      : new Array()
+      //     }
+      //   ]
+      // }
+
       var binData = {
         keys : ['averages', 'maxes', 'mins'],
         rawData : {
@@ -69,6 +148,13 @@ var binnedLineChart = function () {
           opacity: 1,
           func  : function (a, b) { return d3.min([a, b]); }
         },
+        q2 : {
+          data  : new Array(),
+          d0    : new Array(),
+          colour: '#F44',
+          opacity: 1,
+          func  : function (a, b) { return ; }
+        }
       };
 
       binData.rawData.data[0] = data;
