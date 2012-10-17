@@ -4,6 +4,16 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <style type="text/css">
 
+
+    <script type="text/javascript">
+        // If you want to prevent dragging, uncomment this section
+      function preventBehavior(e)
+      {
+        e.preventDefault();
+      };
+      document.addEventListener("touchmove", preventBehavior, false);
+    </script>
+
 svg {
   border: solid 1px #aaa;
 }
@@ -19,9 +29,9 @@ svg {
     <script type="text/javascript" src="../d3.v2.js"></script>
     <script type="text/javascript">
 
-var width = 960,
-    height = 500,
-    radius = 120;
+var width = 400,
+    height = 400,
+    radius = 100;
 
 var drag = d3.behavior.drag()
     .origin(function(d) { return d; })
