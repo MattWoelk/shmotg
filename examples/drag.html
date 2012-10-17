@@ -11,6 +11,11 @@ svg {
     </style>
   </head>
   <body>
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
     <script type="text/javascript" src="../d3.v2.js"></script>
     <script type="text/javascript">
 
