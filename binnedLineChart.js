@@ -36,6 +36,22 @@ var binnedLineChart = function () {
 
   var slctn; // Save the selection so that my.update() works.
 
+  var getTwoLargest = function (array) {
+    first = d3.max(array);
+    second = d3.max(array.splice(array.indexOf(first),1));
+    return [first, second];
+  };
+
+  var getTwoSmallest = function (array) {
+    first = d3.min(array);
+    second = d3.min(array.splice(array.indexOf(first),1));
+    return [first, second];
+  };
+
+  var average = function (array) {
+    return d3.sum(array)/array.length;
+  };
+
 
   var my = function (selection) {
     my.setSelectedLines();
@@ -68,124 +84,146 @@ var binnedLineChart = function () {
       //                 },
       //               ]
       //             }
-      //
-      //
-      //
-      // binData = {
-      //   keys : ['averages', 'maxes', 'mins', 'q1', 'q2', 'q3'],
-      //   properties : {
-      //     averages : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     },
-      //     averages : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     },
-      //     maxes    : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     },
-      //     mins     : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     },
-      //     q1       : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     },
-      //     q2       : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     },
-      //     q3       : {
-      //       colour: '#F00',
-      //       opacity: 1
-      //     }
-      //   },
-      //   levels : [
-      //     {
-      //       rawData : new Array()
-      //     },
-      //     {
-      //       rawData : new Array(),
-      //       average : new Array(),
-      //       maxes   : new Array(),
-      //       mins    : new Array(),
-      //       q1      : new Array(),
-      //       q2      : new Array(),
-      //       q3      : new Array()
-      //     }
-      //   ]
-      // }
-
-      var binData = {
-        keys : ['averages', 'maxes', 'mins'],
-        rawData : {
-          data  : new Array(),
-          d0    : new Array(),
-          colour: '#000',
-          opacity: 0.5
-        },
-        averages: {
-          data  : new Array(),
-          d0    : new Array(),
-          colour: '#F00',
-          opacity: 1,
-          func  : function (a, b) { return (a+b)/2; }
-        },
-        maxes : {
-          data  : new Array(),
-          d0    : new Array(),
-          colour: '#0F0',
-          opacity: 1,
-          func  : function (a, b) { return d3.max([a, b]); }
-        },
-        mins : {
-          data  : new Array(),
-          d0    : new Array(),
-          colour: '#00F',
-          opacity: 1,
-          func  : function (a, b) { return d3.min([a, b]); }
-        },
-        q2 : {
-          data  : new Array(),
-          d0    : new Array(),
-          colour: '#F44',
-          opacity: 1,
-          func  : function (a, b) { return ; }
-        }
-      };
-
-      binData.rawData.data[0] = data;
 
 
-      var binTheDataWithFunction = function (datas, func) {
+
+       binData = {
+         keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
+         properties : {
+           rawData : {
+             colour: '#000',
+             opacity: 0.5
+           },
+           averages : {
+             colour : '#F00',
+             opacity: 1,
+             func   : function (a, b) { return (a+b)/2; }
+           },
+           maxes : {
+             colour : '#00F',
+             opacity: 1,
+             func   : function (a, b) { return d3.max([a,b]); }
+           },
+           mins : {
+             colour : '#0F0',
+             opacity: 1,
+             func   : function (a, b) { return d3.min([a,b]); }
+           },
+           q1 : {
+             colour : '#7F7',
+             opacity: 1,
+             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
+           },
+           q3 : {
+             colour : '#77F',
+             opacity: 1,
+             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
+           }
+         },
+         levels : [
+           { // level 0
+             rawData   : new Array(),
+             rawDatad0 : new Array(),
+             average   : new Array(),
+             averaged0 : new Array(),
+             maxes     : new Array(),
+             maxesd0   : new Array(),
+             mins      : new Array(),
+             minsd0    : new Array(),
+             q1        : new Array(),
+             q1d0      : new Array(),
+             q2        : new Array(),
+             q2d0      : new Array(),
+             q3        : new Array(),
+             q3d0      : new Array()
+           },
+           { // level 1
+             average   : new Array(),
+             averaged0 : new Array(),
+             maxes     : new Array(),
+             maxesd0   : new Array(),
+             mins      : new Array(),
+             minsd0    : new Array(),
+             q1        : new Array(),
+             q1d0      : new Array(),
+             q2        : new Array(),
+             q2d0      : new Array(),
+             q3        : new Array(),
+             q3d0      : new Array()
+           } // etc.
+         ]
+       }
+
+      binData.levels[0].rawData = data;
+
+
+      // TODO: this must be re-written for the sake of q1 and q3 (because they rely on eachother
+      //       return a populated array, and take in the levels structure, the current level, they key, and the function which works on that data structure
+      var binTheDataWithFunction = function (curLevelData, key, func){
         var bDat = new Array();
         var i = 0;
-        for(i = 0; i < datas.length; i = i + 2){
+        for(i = 0; i < curLevelData[key].length; i = i + 2){
           if (i % 2 == 0) {
-            if (datas[i+1]){
-              bDat.push( func( datas[i], datas[i+1]));
+            if (curLevelData[key][i+1]){
+              if (key === 'q1' || key === 'q3') {
+                bDat.push( func(
+                      curLevelData['q1'][i],
+                      curLevelData['q1'][i+1],
+                      curLevelData['q3'][i],
+                      curLevelData['q3'][i+1])); // This is messy and depends on a lot of things
+              }else{
+                bDat.push( func(
+                      curLevelData[key][i],
+                      curLevelData[key][i+1]));
+              }
             }else{
-              bDat.push( datas[i] );
+              bDat.push( curLevelData[key][i] );
             }
           }else{
-            // do nothing;
+            // do nothing; This will never actually happen, and we don't need to check for it.
+            console.log("#12345 THIS WILL NEVER HAPPEN");
           }
         }
         return bDat;
-      }
+      };
 
+//
+//      var binTheDataWithFunction = function (datas, func) {
+//        var bDat = new Array();
+//        var i = 0;
+//        for(i = 0; i < datas.length; i = i + 2){
+//          if (i % 2 == 0) {
+//            if (datas[i+1]){
+//              bDat.push( func( datas[i], datas[i+1]));
+//            }else{
+//              bDat.push( datas[i] );
+//            }
+//          }else{
+//            // do nothing; This will never actually happen, and we don't need to check for it.
+//            console.log("#12345 THIS WILL NEVER HAPPEN");
+//          }
+//        }
+//        return bDat;
+//      };
+//
 
       // populate the binned datas (binData):
       var j = 0;
-      for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
-        binData[binData.keys[key]]['data'][0] = data;
+      for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
+        binData.levels.push({});
+      }
 
-        //TODO: refactor this type of thing so it's more like function(binData[binData.keys[key]]), so we don't have to keep tying that out a bunch of times. :)
-        for (j = 1; j < howManyBinLevels; j++){ // for each bin level
-          binData[binData.keys[key]]['data'][j] = binTheDataWithFunction(binData[binData.keys[key]]['data'][j-1], binData[binData.keys[key]]['func']);
+      for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
+        binData.levels[0][binData.keys[keyValue]] = data;
+      }
+
+      for (j = 1; j < howManyBinLevels; j++){ // for each bin level
+        for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
+          var key = binData.keys[keyValue];
+          binData.levels[0][key] = data;
+
+          binData.levels[j][key] = new Array(0);
+          binData.levels[j][key] = binTheDataWithFunction(binData.levels[j-1], key, binData.properties[key]['func']);
         }
       }
 
@@ -212,24 +250,25 @@ var binnedLineChart = function () {
 
       flatLined0 = d3.svg.line()
         .x(function (d, i) { return xScale(i); })
-        .y(function (d, i) { return d3.avg(binData.rawData.data[0]); })
+        .y(function (d, i) { return d3.avg(binData.levels[0]['rawData']); })
         .interpolate("linear");
 
-      binData.rawData.d0[0] = d3.svg.line()
+      binData.levels[0]['rawDatad0'] = d3.svg.line()
         .x(function (d, i) { return xScale(i); })
-        .y(function (d, i) { return yScale(binData.rawData.data[0][i]); })
-        .interpolate(interpolationMethod)(binData.rawData.data[0]);
+        .y(function (d, i) { return yScale(binData.levels[0].rawData[i]); })
+        .interpolate(interpolationMethod)(binData.levels[0].rawData);
 
-      for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
+      for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min'
         var j = 0;
+        var key = binData['keys'][keyValue];
 
-        binData[binData['keys'][key]].d0[0] = binData['rawData'].d0[0];
+        binData.levels[0][key + "d0"] = binData.levels[0]['rawDatad0'];
 
         for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
-          binData[binData['keys'][ key ]].d0[j] = d3.svg.line()
+          binData.levels[j][key + "d0"] = d3.svg.line()
             .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-            .y(function (d, i) { return yScale(binData[binData.keys[key]].data[j][i]); })
-            .interpolate(interpolationMethod )(binData[binData.keys[key]].data[j]);
+            .y(function (d, i) { return yScale(binData.levels[j][key][i]); })
+            .interpolate( interpolationMethod )(binData.levels[j][key]);
         }
       }
 
@@ -298,12 +337,14 @@ var binnedLineChart = function () {
         }
 
         var j = 0;
-        for (var key in binData['keys']){ // for each of 'average', 'max', 'min'
-          if (whichLinesToRender.indexOf(binData.keys[key]) > -1){
+        for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min'
+          var key = binData.keys[keyValue];
+
+          if (whichLinesToRender.indexOf(key) > -1){
             for (j = 0; j < howManyBinLevels; j++) {
               if (whichLevelsToRender.indexOf(j) > -1){
                 resultArray.push({
-                  type: binData.keys[key],
+                  type: key,
                   which: j
                 });
               }
@@ -321,11 +362,11 @@ var binnedLineChart = function () {
       //update
       currentSelection
         .transition().duration(500)
-        .attr("opacity", function (d) { return binData[d.type].opacity; }) // TODO: delete this line?
+        .attr("opacity", function (d) { return binData.properties[d.type].opacity; }) // TODO: delete this line?
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", function (d, i) { return binData[d.type].colour; })
-        .attr("d", function (d, i) { return binData[d.type].d0[d.which]; })
+        .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .transition().duration(500)
         .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
 
@@ -334,12 +375,12 @@ var binnedLineChart = function () {
         .attr("class", "posPath")
         .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .attr("d", function (d, i) { return binData[d.type].d0[d.which]; })
+        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
-        .style("stroke", function (d, i) { return binData[d.type].colour; })
+        .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("opacity", 0)
         .transition().ease("cubic-out").duration(500)
-        .attr("opacity", function (d) { return binData[d.type].opacity; });
+        .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit
       currentSelection.exit()
@@ -370,7 +411,7 @@ var binnedLineChart = function () {
         .style("stroke", "#000");
 
     });
-  }
+  };
 
 
   // == Getters and Setters ==
@@ -379,59 +420,59 @@ var binnedLineChart = function () {
     if (!arguments.length) return width;
     width = value;
     return my;
-  }
+  };
 
   my.height = function (value) {
     if (!arguments.length) return height;
     height = value;
     return my;
-  }
+  };
 
   my.howManyBinLevels = function (value) {
     if (!arguments.length) return howManyBinLevels ;
     howManyBinLevels = value;
     return my;
-  }
+  };
 
   my.whichLevelsToRender = function (value) {
     if (!arguments.length) return whichLevelsToRender  ;
     whichLevelsToRender = value;
     return my;
-  }
+  };
 
   my.whichLinesToRender  = function (value) {
     if (!arguments.length) return whichLinesToRender   ;
     whichLinesToRender   = value;
     return my;
-  }
+  };
 
   my.outlinesOrNot = function (value) {
     if (!arguments.length) return outlinesOrNot;
     outlinesOrNot = value;
     return my;
-  }
+  };
 
   my.zoomout = function () {
     xScale.domain([0, xScale.domain()[1] * 2]); // TODO: modify a constant instead? That way we can re-do each domain each time without worrying or hacking around.
     xAxisScale.domain([0, xAxisScale.domain()[1] * 2]);
     return my;
-  }
+  };
 
   my.zoomin = function () {
     xScale.domain([0, xScale.domain()[1] / 2]);
     xAxisScale.domain([0, xAxisScale.domain()[1] / 2]);
     return my;
-  }
+  };
 
   my.zoom = function () {
     xAxisScale.domain(xScale.domain());
     xAxisContainer.call(xAxis);
     my.update();
-  }
+  };
 
   my.update = function () {
     my(slctn);
-  }
+  };
 
   my.setSelectedLines = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
@@ -443,7 +484,7 @@ var binnedLineChart = function () {
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;
     return my;
-  }
+  };
 
   return my;
-}
+};
