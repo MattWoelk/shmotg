@@ -409,7 +409,7 @@ var binnedLineChart = function () {
         .transition().duration(500)
         .attrTween("d", function(d) {
           //console.log(pathTween(binData.levels[d.which][d.type + "d0"], 4, this)()());
-          return     (pathTween(binData.levels[d.which][d.type + "d0"], 4, this)());
+          return pathTween(binData.levels[d.which][d.type + "d0"], 4, this)();
         })
         .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
 
