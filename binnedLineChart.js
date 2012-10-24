@@ -3,6 +3,11 @@
 //      - mean and quartiles can be rendered if all we know are previous means and quartiles, so we'll use them
 //      - median cannot, so we'll ignore it
 //      Fade based on how many pixels are being rendered.
+//
+//JUST DONE:
+//      Changed how the fade transition works so that the area doesn't flicker weirdly
+//      - lines are kept, everything looks snazzy.
+//      - area moves instantly, but you'd never know it. :)
 
 
 //d3.select("body").append("svg")
@@ -144,13 +149,13 @@ var binnedLineChart = function () {
             func   : function (a, b) { return d3.min([a,b]); }
           },
           q1 : {
-            colour : '#009',
-            opacity: 1,
+            colour : '#800',
+            opacity: 0.3,
             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
           },
           q3 : {
-            colour : '#090',
-            opacity: 1,
+            colour : '#800',
+            opacity: 0.3,
             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
           }
         },
@@ -275,21 +280,15 @@ var binnedLineChart = function () {
         }
       }
 
-      var thekeys = ['q1'];
+      binData.levels[0]["q1d0"] = binData.levels[0]['rawDatad0'];
+      binData.levels[0]["q3d0"] = binData.levels[0]['rawDatad0'];
 
-      for (var keyValue in thekeys){ // for each of 'q1'
-        var j = 0;
-
-        binData.levels[0][key + "d0"] = binData.levels[0]['rawDatad0'];
-        binData.levels[0]['q3' + "d0"] = binData.levels[0]['rawDatad0'];
-
-        for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
-          binData.levels[j][key + "d0"] = d3.svg.area()
-            .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-            .y0(function (d, i) { return yScale(binData.levels[j][key][i]); })
-            .y1(function (d, i) { return yScale(binData.levels[j]['q3'][i]); })
-            .interpolate( interpolationMethod )(binData.levels[j][key]);
-        }
+      for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
+        binData.levels[j]["q1d0"] = d3.svg.area()
+          .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
+          .y0(function (d, i) { return yScale(binData.levels[j]["q1"][i]); })
+          .y1(function (d, i) { return yScale(binData.levels[j]["q3"][i]); })(binData.levels[j]["q1"])
+          ;//.interpolate( interpolationMethod )(binData.levels[j]["q1"]);
       }
 
 
@@ -387,6 +386,10 @@ var binnedLineChart = function () {
         .transition().duration(500)
         .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
 
+      //areaeasing = "circle-out";
+      areaeasing_out = "cubic-in";
+      areaeasing_in = "cubic-out";
+
       //enter area
       currentSelection.enter().append("path")
         .attr("class", "posArea")
@@ -395,14 +398,14 @@ var binnedLineChart = function () {
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
-        .attr("opacity", 0)
-        .transition().ease("cubic-out").duration(500)
+        //.attr("opacity", 0)
+        //.transition().ease(areaeasing_in).duration(2000)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit area
       currentSelection.exit()
         .attr("fill", function (d, i) { console.log("this happened..."); return "rgba(0,0,0,0)"; })
-        .transition().ease("cubic-out").duration(500)
+        //.transition().ease(areaeasing_out).duration(2000) //500
         .attr("opacity", 0)
         .remove();
 
