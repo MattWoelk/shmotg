@@ -283,7 +283,7 @@ var binnedLineChart = function () {
       binData.levels[0]["q1d0"] = binData.levels[0]['rawDatad0'];
       binData.levels[0]["q3d0"] = binData.levels[0]['rawDatad0'];
 
-      for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
+      for (j = 0; j < howManyBinLevels; j++){ // for each level of binning
         binData.levels[j]["q1d0"] = d3.svg.area()
           .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
           .y0(function (d, i) { return yScale(binData.levels[j]["q1"][i]); })
