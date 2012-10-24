@@ -1,10 +1,12 @@
 // TODO:
-//      think about using a moving average instead of binning ???
-//
 //      Current thought process regarding mean vs. median:
-//      - if we use median, then we can work with data we already have in order to show abstracted data ONLY because we are always using 2 pieces of data at a time.
-//      - mean won't work for quartiles. I checked.
+//      - mean and quartiles can be rendered if all we know are previous means and quartiles, so we'll use them
+//      - median cannot, so we'll ignore it
 //      Fade based on how many pixels are being rendered.
+
+
+//d3.select("body").append("svg")
+//  .append("svg:path");
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
@@ -74,25 +76,20 @@ var binnedLineChart = function () {
 
   var makeQuartileObjectForKeyFanciness = function () {
     var resultArray = new Array();
-    var thekeys = ['q1', 'q3'];
+    var key = 'q1';
 
     var j = 0;
-    for (var keyValue in thekeys){ // for each of 'q1', 'q2'
-      var key = binData.keys[keyValue];
-
-      for (j = 0; j < howManyBinLevels; j++) {
-        if (whichLevelsToRender.indexOf(j) > -1){
-          resultArray.push({
-            type: key,
-            which: j
-          });
-        }
+    for (j = 0; j < howManyBinLevels; j++) {
+      if (whichLevelsToRender.indexOf(j) > -1){
+        resultArray.push({
+          type: key,
+          which: j
+        });
       }
     }
 
     return resultArray;
   }
-
 
   var getTwoLargest = function (array) {
     var arr = array.slice();
@@ -123,105 +120,79 @@ var binnedLineChart = function () {
 
     selection.each(function (data) {
 
-      //     TODO: with this method, we can send binData.levels[0] to func so that functions can share data between themselves. yay!
-      //TODO NEW binData way of storing things:        usage: binData.levels[0].rawData = new Array;
-      //                                                      binData.properties.averages.opacity = 0.75;
-      //             SUMMARY:
-      //             binData = {
-      //               keys : [names-of-functions],
-      //               properties : {
-      //                 function-name : {
-      //                   property: value,
-      //                   property2: value2
-      //                 }
-      //               },
-      //               levels : [
-      //                 { // level 0
-      //                   rawData : new Array();
-      //                 },
-      //                 { // level 1
-      //                   rawData : new Array();
-      //                   averages: new Array();
-      //                   maxes   : new Array();
-      //                 },
-      //               ]
-      //             }
-
-
-
-       binData = {
-         keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
-         properties : {
-           rawData : {
-             colour: '#000',
-             opacity: 0.5
-           },
-           averages : {
-             colour : '#F00',
-             opacity: 1,
-             func   : function (a, b) { return (a+b)/2; } //This is actually the mean AND the median ???
-           },
-           maxes : {
-             colour : '#0F0',
-             opacity: 1,
-             func   : function (a, b) { return d3.max([a,b]); }
-           },
-           mins : {
-             colour : '#00F',
-             opacity: 1,
-             func   : function (a, b) { return d3.min([a,b]); }
-           },
-           q1 : {
-             colour : '#009',
-             opacity: 1,
-             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
-           },
-           q3 : {
-             colour : '#090',
-             opacity: 1,
-             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
-           }
-         },
-         levels : [
-           { // level 0
-             rawData   : new Array(),
-             rawDatad0 : new Array(),
-             average   : new Array(),
-             averaged0 : new Array(),
-             maxes     : new Array(),
-             maxesd0   : new Array(),
-             mins      : new Array(),
-             minsd0    : new Array(),
-             q1        : new Array(),
-             q1d0      : new Array(),
-             q2        : new Array(),
-             q2d0      : new Array(),
-             q3        : new Array(),
-             q3d0      : new Array()
-           },
-           { // level 1
-             average   : new Array(),
-             averaged0 : new Array(),
-             maxes     : new Array(),
-             maxesd0   : new Array(),
-             mins      : new Array(),
-             minsd0    : new Array(),
-             q1        : new Array(),
-             q1d0      : new Array(),
-             q2        : new Array(),
-             q2d0      : new Array(),
-             q3        : new Array(),
-             q3d0      : new Array()
-           } // etc.
-         ]
-       }
+      //Where everything is stored:
+      binData = {
+        keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
+        properties : {
+          rawData : {
+            colour: '#000',
+            opacity: 0.5
+          },
+          averages : {
+            colour : '#F00',
+            opacity: 1,
+            func   : function (a, b) { return (a+b)/2; } //This is actually the mean AND the median ???
+          },
+          maxes : {
+            colour : '#0F0',
+            opacity: 1,
+            func   : function (a, b) { return d3.max([a,b]); }
+          },
+          mins : {
+            colour : '#00F',
+            opacity: 1,
+            func   : function (a, b) { return d3.min([a,b]); }
+          },
+          q1 : {
+            colour : '#009',
+            opacity: 1,
+            func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
+          },
+          q3 : {
+            colour : '#090',
+            opacity: 1,
+            func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
+          }
+        },
+        levels : [
+          { // level 0
+            rawData   : new Array(),
+            rawDatad0 : new Array(),
+            average   : new Array(),
+            averaged0 : new Array(),
+            maxes     : new Array(),
+            maxesd0   : new Array(),
+            mins      : new Array(),
+            minsd0    : new Array(),
+            q1        : new Array(),
+            q1d0      : new Array(),
+            q2        : new Array(),
+            q2d0      : new Array(),
+            q3        : new Array(),
+            q3d0      : new Array()
+          },
+          { // level 1
+            average   : new Array(),
+            averaged0 : new Array(),
+            maxes     : new Array(),
+            maxesd0   : new Array(),
+            mins      : new Array(),
+            minsd0    : new Array(),
+            q1        : new Array(),
+            q1d0      : new Array(),
+            q2        : new Array(),
+            q2d0      : new Array(),
+            q3        : new Array(),
+            q3d0      : new Array()
+          } // etc.
+        ]
+      }
 
       binData.levels[0].rawData = data;
 
 
-      // TODO: this must be re-written for the sake of q1 and q3 (because they rely on eachother
-      //       return a populated array, and take in the levels structure, the current level, they key, and the function which works on that data structure
-      var binTheDataWithFunction = function (curLevelData, key, func){
+      // Bin the data into abstracted bins
+      var binTheDataWithFunction = function (curLevelData, key, func) {
         var bDat = new Array();
         var i = 0;
         for(i = 0; i < curLevelData[key].length; i = i + 2){
@@ -304,24 +275,23 @@ var binnedLineChart = function () {
         }
       }
 
-//      var thekeys = ['q1'];
-//
-//      for (var keyValue in thekeys){ // for each of 'average', 'max', 'min'
-//        var j = 0;
-//        var key = 'q1';
-//
-//        binData.levels[0][key + "d0"] = binData.levels[0]['rawDatad0'];
-//        binData.levels[0]['q3' + "d0"] = binData.levels[0]['rawDatad0'];
-//
-//        for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
-//          binData.levels[j][key + "d0"] = d3.svg.area()
-//            .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-//            .y0(function (d, i) { return yScale(binData.levels[j][key][i]); })
-//            .y1(function (d, i) { return yScale(binData.levels[j]['q3'][i]); })
-//            .interpolate( interpolationMethod )(binData.levels[j][key]);
-//        }
-//      }
-//
+      var thekeys = ['q1'];
+
+      for (var keyValue in thekeys){ // for each of 'q1'
+        var j = 0;
+
+        binData.levels[0][key + "d0"] = binData.levels[0]['rawDatad0'];
+        binData.levels[0]['q3' + "d0"] = binData.levels[0]['rawDatad0'];
+
+        for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
+          binData.levels[j][key + "d0"] = d3.svg.area()
+            .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
+            .y0(function (d, i) { return yScale(binData.levels[j][key][i]); })
+            .y1(function (d, i) { return yScale(binData.levels[j]['q3'][i]); })
+            .interpolate( interpolationMethod )(binData.levels[j][key]);
+        }
+      }
+
 
       chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
 
@@ -402,24 +372,25 @@ var binnedLineChart = function () {
         .attr("opacity", 0)
         .remove();
 
+      //make and render the area
       currentSelection = paths.selectAll(".posArea")
-        .data(makeQuartileObjectForKeyFanciness, function (d) {return d.type + d.which; });
+        .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which; });
 
-      //update
+      //update area
       currentSelection
         .transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; }) // TODO: delete this line?
-        .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+        .attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .transition().duration(500)
         .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
 
-      //enter
-      currentSelection.enter().append("area")
+      //enter area
+      currentSelection.enter().append("path")
         .attr("class", "posArea")
-        .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
+        .attr("fill", function (d, i) {console.log("this happens, too"); return binData.properties[d.type].colour; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
@@ -428,9 +399,9 @@ var binnedLineChart = function () {
         .transition().ease("cubic-out").duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
-      //exit
+      //exit area
       currentSelection.exit()
-        .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+        .attr("fill", function (d, i) { console.log("this happened..."); return "rgba(0,0,0,0)"; })
         .transition().ease("cubic-out").duration(500)
         .attr("opacity", 0)
         .remove();
