@@ -17,6 +17,7 @@ div.page-content {
 a.bigbutton {
   display: block;
 
+  background-color: #DC840E;
   background: -moz-linear-gradient(center top, #FBA633, #DC840E) no-repeat scroll 0 0 transparent;
   background: -webkit-linear-gradient(#FBA633, #DC840E) no-repeat scroll 0 0 transparent;
   border: 1px solid #9C5E09;
@@ -31,11 +32,13 @@ a.bigbutton {
 }
 
 a.bigbutton:active {
+  background-color: #CC740E;
   background: -moz-linear-gradient(center top, #EB9623, #CC740E) no-repeat scroll 0 0 transparent;
   background: -webkit-linear-gradient(#EB9623, #CC740E) no-repeat scroll 0 0 transparent;
 }
 
 a.bigbutton:hover {
+  background-color: #CC740E;
   background: -moz-linear-gradient(center top, #EB9623, #CC740E) no-repeat scroll 0 0 transparent;
   background: -webkit-linear-gradient(#EB9623, #CC740E) no-repeat scroll 0 0 transparent;
 }
