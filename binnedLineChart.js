@@ -4,14 +4,60 @@
 //      - median cannot, so we'll ignore it
 //      Fade based on how many pixels are being rendered.
 //
-//JUST DONE:
-//      Changed how the fade transition works so that the area doesn't flicker weirdly
-//      - lines are kept, everything looks snazzy.
-//      - area moves instantly, but you'd never know it. :)
+//      Fix transitions again. I want enabling and disabling the area to be smooth, and I also want it to look good when changing bin size.
+//      - Currently:
+//        - lines are kept, everything looks snazzy.
+//        - area moves instantly, but you'd never know it. :)
 
 
-//d3.select("body").append("svg")
-//  .append("svg:path");
+//suvg = d3.select("body").append("svg");
+//circ1 = suvg.append("svg:circle");
+//circ2 = suvg.append("svg:circle");
+//circ3 = suvg.append("svg:circle");
+//
+//circ1.attr("cx", 55)
+//     .attr("cy", 55)
+//     .attr("id", "circ1")
+//     .attr("r", 50)
+//     .attr("opacity", 0.3);
+//
+//circ2.attr("cx", 105)
+//     .attr("cy", 55)
+//     .attr("id", "circ2")
+//     .attr("r", 50)
+//     .attr("opacity", 0.0);
+//
+//circ3.attr("cx", 80)
+//     .attr("cy", 150)
+//     .attr("id", "circ2")
+//     .attr("r", 50)
+//     .attr("opacity", 0.3);
+//
+//console.log(circ2);
+//console.log(d3.select("#circ1"));
+//
+//tim = 500;
+//
+//firstorsecond = true;
+//var fade = function () {
+//  if (firstorsecond) {
+//    d3.select("#circ1")
+//      .transition().duration(tim).ease("cubic-out")
+//      .attr("opacity", 0.0);
+//    d3.select("#circ2")
+//      .transition().duration(tim).ease("cubic-out")
+//      .attr("opacity", 0.3);
+//    firstorsecond = false;
+//  }else{
+//    d3.select("#circ1")
+//      .transition().duration(tim).ease("cubic-out")
+//      .attr("opacity", 0.3);
+//    d3.select("#circ2")
+//      .transition().duration(tim).ease("cubic-out")
+//      .attr("opacity", 0.0);
+//    firstorsecond = true;
+//  }
+//}
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
@@ -25,6 +71,7 @@ var binnedLineChart = function () {
   var whichLevelsToRender = [1, 2, 3];
   var whichLinesToRender = ['rawData', 'averages', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
+  var easingMethod = 'cubic-out';
 
   var bkgrect;
   var frgrect;
@@ -81,18 +128,20 @@ var binnedLineChart = function () {
 
   var makeQuartileObjectForKeyFanciness = function () {
     var resultArray = new Array();
-    var key = 'q1';
+    var key = 'quartiles';
 
     var j = 0;
-    for (j = 0; j < howManyBinLevels; j++) {
-      if (whichLevelsToRender.indexOf(j) > -1){
-        resultArray.push({
-          type: key,
-          which: j
-        });
+    if (whichLinesToRender.indexOf('quartiles') > -1)
+    {
+      for (j = 0; j < howManyBinLevels; j++) {
+        if (whichLevelsToRender.indexOf(j) > -1){
+          resultArray.push({
+            type: key,
+            which: j
+          });
+        }
       }
     }
-
     return resultArray;
   }
 
@@ -139,7 +188,7 @@ var binnedLineChart = function () {
             func   : function (a, b) { return (a+b)/2; } //This is actually the mean AND the median ???
           },
           maxes : {
-            colour : '#0F0',
+            colour : '#00B515',
             opacity: 1,
             func   : function (a, b) { return d3.max([a,b]); }
           },
@@ -150,13 +199,18 @@ var binnedLineChart = function () {
           },
           q1 : {
             colour : '#800',
-            opacity: 0.3,
+            opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
           },
           q3 : {
             colour : '#800',
-            opacity: 0.3,
+            opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
+          },
+          quartiles : {
+            colour : '#800',
+            opacity: 0.3,
+            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
           }
         },
         levels : [
@@ -174,7 +228,8 @@ var binnedLineChart = function () {
             q2        : new Array(),
             q2d0      : new Array(),
             q3        : new Array(),
-            q3d0      : new Array()
+            q3d0      : new Array(),
+            quartilesd0: new Array()
           },
           { // level 1
             average   : new Array(),
@@ -188,7 +243,8 @@ var binnedLineChart = function () {
             q2        : new Array(),
             q2d0      : new Array(),
             q3        : new Array(),
-            q3d0      : new Array()
+            q3d0      : new Array(),
+            quartilesd0: new Array()
           } // etc.
         ]
       }
@@ -266,7 +322,7 @@ var binnedLineChart = function () {
         .y(function (d, i) { return yScale(binData.levels[0].rawData[i]); })
         .interpolate(interpolationMethod)(binData.levels[0].rawData);
 
-      for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min'
+      for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
         var j = 0;
         var key = binData['keys'][keyValue];
 
@@ -284,11 +340,11 @@ var binnedLineChart = function () {
       binData.levels[0]["q3d0"] = binData.levels[0]['rawDatad0'];
 
       for (j = 0; j < howManyBinLevels; j++){ // for each level of binning
-        binData.levels[j]["q1d0"] = d3.svg.area()
+        binData.levels[j]["quartilesd0"] = d3.svg.area()
           .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
           .y0(function (d, i) { return yScale(binData.levels[j]["q1"][i]); })
-          .y1(function (d, i) { return yScale(binData.levels[j]["q3"][i]); })(binData.levels[j]["q1"])
-          ;//.interpolate( interpolationMethod )(binData.levels[j]["q1"]);
+          .y1(function (d, i) { return yScale(binData.levels[j]["q3"][i]); })
+          .interpolate( interpolationMethod )(binData.levels[j]["q1"]);
       }
 
 
@@ -337,6 +393,7 @@ var binnedLineChart = function () {
       var currentSelection;
 
 
+      //CURVES
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
         .data(makeDataObjectForKeyFanciness(), function (d) {return d.type + d.which; });
@@ -361,16 +418,18 @@ var binnedLineChart = function () {
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("opacity", 0)
-        .transition().ease("cubic-out").duration(500)
+        .transition().ease(easingMethod).duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit
       currentSelection.exit()
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-        .transition().ease("cubic-out").duration(500)
+        .transition().ease(easingMethod).duration(500)
         .attr("opacity", 0)
         .remove();
 
+
+      // AREAS
       //make and render the area
       currentSelection = paths.selectAll(".posArea")
         .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which; });
@@ -379,16 +438,12 @@ var binnedLineChart = function () {
       currentSelection
         .transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; }) // TODO: delete this line?
-        .attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
+        //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
-        .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .transition().duration(500)
         .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
-
-      //areaeasing = "circle-out";
-      areaeasing_out = "cubic-in";
-      areaeasing_in = "cubic-out";
 
       //enter area
       currentSelection.enter().append("path")
@@ -397,16 +452,16 @@ var binnedLineChart = function () {
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
-        .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
-        //.attr("opacity", 0)
-        //.transition().ease(areaeasing_in).duration(2000)
+        //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        .attr("opacity", 0.0)
+        .transition().duration(500).ease(easingMethod)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit area
       currentSelection.exit()
-        .attr("fill", function (d, i) { console.log("this happened..."); return "rgba(0,0,0,0)"; })
-        //.transition().ease(areaeasing_out).duration(2000) //500
-        .attr("opacity", 0)
+        .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+        .transition().duration(500).ease(easingMethod)
+        .attr("opacity", 0.0)
         .remove();
 
       // Draw Axes
