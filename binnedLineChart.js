@@ -9,56 +9,6 @@
 //        - lines are kept, everything looks snazzy.
 //        - area moves instantly, but you'd never know it. :)
 
-
-//suvg = d3.select("body").append("svg");
-//circ1 = suvg.append("svg:circle");
-//circ2 = suvg.append("svg:circle");
-//circ3 = suvg.append("svg:circle");
-//
-//circ1.attr("cx", 55)
-//     .attr("cy", 55)
-//     .attr("id", "circ1")
-//     .attr("r", 50)
-//     .attr("opacity", 0.3);
-//
-//circ2.attr("cx", 105)
-//     .attr("cy", 55)
-//     .attr("id", "circ2")
-//     .attr("r", 50)
-//     .attr("opacity", 0.0);
-//
-//circ3.attr("cx", 80)
-//     .attr("cy", 150)
-//     .attr("id", "circ2")
-//     .attr("r", 50)
-//     .attr("opacity", 0.3);
-//
-//console.log(circ2);
-//console.log(d3.select("#circ1"));
-//
-//tim = 500;
-//
-//firstorsecond = true;
-//var fade = function () {
-//  if (firstorsecond) {
-//    d3.select("#circ1")
-//      .transition().duration(tim).ease("cubic-out")
-//      .attr("opacity", 0.0);
-//    d3.select("#circ2")
-//      .transition().duration(tim).ease("cubic-out")
-//      .attr("opacity", 0.3);
-//    firstorsecond = false;
-//  }else{
-//    d3.select("#circ1")
-//      .transition().duration(tim).ease("cubic-out")
-//      .attr("opacity", 0.3);
-//    d3.select("#circ2")
-//      .transition().duration(tim).ease("cubic-out")
-//      .attr("opacity", 0.0);
-//    firstorsecond = true;
-//  }
-//}
-
 var binnedLineChart = function () {
   var outlinesOrNot = true;
 
@@ -91,10 +41,10 @@ var binnedLineChart = function () {
 
   // The following function returns something which looks like this:
   // [
-  //   {type: 'rawData',  which: 0}, <-- this one is for the raw data
-  //   {type: 'averages', which: 2}, <-- the current level is 'which'
-  //   {type: 'mins',     which: 2},
-  //   {type: 'maxes',    which: 2}, <-- etc.
+  //   {type: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
+  //   {type: 'averages', which: 2, interpolate: blabla}, <-- the current level is 'which'
+  //   {type: 'mins',     which: 2, interpolate: blabla},
+  //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
   // ]
   // add to it if you want more lines displayed
   var makeDataObjectForKeyFanciness = function () {
@@ -116,7 +66,8 @@ var binnedLineChart = function () {
           if (whichLevelsToRender.indexOf(j) > -1){
             resultArray.push({
               type: key,
-              which: j
+              which: j,
+              interpolate: interpolationMethod
             });
           }
         }
@@ -137,7 +88,8 @@ var binnedLineChart = function () {
         if (whichLevelsToRender.indexOf(j) > -1){
           resultArray.push({
             type: key,
-            which: j
+            which: j,
+            interpolate: interpolationMethod
           });
         }
       }
@@ -396,7 +348,7 @@ var binnedLineChart = function () {
       //CURVES
       //Make and render the Positive curves.
       currentSelection = paths.selectAll(".posPath")
-        .data(makeDataObjectForKeyFanciness(), function (d) {return d.type + d.which; });
+        .data(makeDataObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
       //update
       currentSelection
@@ -432,7 +384,7 @@ var binnedLineChart = function () {
       // AREAS
       //make and render the area
       currentSelection = paths.selectAll(".posArea")
-        .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which; });
+        .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
       //update area
       currentSelection
