@@ -1,13 +1,5 @@
 // TODO:
-//      Current thought process regarding mean vs. median:
-//      - mean and quartiles can be rendered if all we know are previous means and quartiles, so we'll use them
-//      - median cannot, so we'll ignore it
 //      Fade based on how many pixels are being rendered.
-//
-//      Fix transitions again. I want enabling and disabling the area to be smooth, and I also want it to look good when changing bin size.
-//      - Currently:
-//        - lines are kept, everything looks snazzy.
-//        - area moves instantly, but you'd never know it. :)
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
