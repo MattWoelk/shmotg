@@ -1,5 +1,9 @@
 // TODO:
 //      Fade based on how many pixels are being rendered.
+//      Bin Size of 1 should show data points as circles
+//      - mouseover data points to show exact values
+//      Threshold integration to show all points over a certain value in a certain colour?
+//      - maybe just have a movable dashed line which a user can use to look at thresholds
 
 var binnedLineChart = function () {
   var outlinesOrNot = true;
@@ -392,7 +396,7 @@ var binnedLineChart = function () {
       //enter area
       currentSelection.enter().append("path")
         .attr("class", "posArea")
-        .attr("fill", function (d, i) {console.log("this happens, too"); return binData.properties[d.type].colour; })
+        .attr("fill", function (d, i) {return binData.properties[d.type].colour; })
         .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
@@ -497,7 +501,7 @@ var binnedLineChart = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     whichLinesToRender = a;
 
-    var b = [Number(document.querySelector("#render-depth input:checked").value)];
+    var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
     whichLevelsToRender = b;
 
     var b = document.querySelector("#render-method input:checked").value;

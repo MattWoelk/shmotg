@@ -24,41 +24,44 @@
 
     </br> <!-- to keep the controls on the next line -->
 
-    <form id="controls">
-      <ul style="float: left" id="render-lines">
-        Which functions to render:
-        <li><label><input type="checkbox"                   value="rawData">Raw Data</label></li>
-        <li><label><input type="checkbox" checked="checked" value="averages">Averages</label></li>
-        <li><label><input type="checkbox" checked="checked" value="mins">Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-        <li><label><input type="checkbox" checked="checked" value="maxes">Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-        <li><label><input type="checkbox"                   value="q3">1st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-        <li><label><input type="checkbox"                   value="q1">3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-        <li><label><input type="checkbox" checked="checked" value="quartiles">Quartile Area</label></li>
-      </ul>
-
-      <ul style="float : left" id="render-depth">
-        Bin Size:
-        <li><label><input type="radio"                   name="render-depth" value="0">1</li>
-        <li><label><input type="radio"                   name="render-depth" value="1">2</li>
-        <li><label><input type="radio"                   name="render-depth" value="2">4</li>
-        <li><label><input type="radio"                   name="render-depth" value="3">8</li>
-        <li><label><input type="radio" checked="checked" name="render-depth" value="4">16</li>
-        <li><label><input type="radio"                   name="render-depth" value="5">32</li>
-      </ul>
-
-      <ul style="float : left" id="render-method">
-        Interpolation Method:
-        <li><label><input type="radio" checked="checked" name="render-method" value="linear">Linear</li>
-        <li><label><input type="radio"                   name="render-method" value="step-after">Step-After</li>
-        <!--<li><label><input type="radio"                   name="render-method" value="cardinal">Cardinal</li>
-          <li><label><input type="radio"                   name="render-method" value="monotone">Monotone</li>-->
-      </ul>
-    </form>
+    <div id="controls">
+      <form>
+        <ul style="float: left" id="render-lines">
+          Which functions to render:
+          <li><label><input type="checkbox"                   value="rawData"/>Raw Data</label></li>
+          <li><label><input type="checkbox" checked="checked" value="averages"/>Averages</label></li>
+          <li><label><input type="checkbox" checked="checked" value="mins"/>Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+          <li><label><input type="checkbox" checked="checked" value="maxes"/>Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+          <li><label><input type="checkbox"                   value="q3"/>1st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+          <li><label><input type="checkbox"                   value="q1"/>3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+          <li><label><input type="checkbox" checked="checked" value="quartiles"/>Quartile Area</label></li>
+        </ul>
+  
+        <ul style="float : left" id="render-depth">
+          Bin Size: <label><input id="automaticSetter" type="checkbox"  onchange="setAutomatic()"/>Automatic</label>
+          <li><label><input type="radio"                   name="render-depth" disabled="true" value="0"/>1</li>
+          <li><label><input type="radio"                   name="render-depth" disabled="true" value="1"/>2</li>
+          <li><label><input type="radio"                   name="render-depth" disabled="true" value="2"/>4</li>
+          <li><label><input type="radio"                   name="render-depth" disabled="true" value="3"/>8</li>
+          <li><label><input type="radio" checked="checked" name="render-depth" disabled="true" value="4"/>16</li>
+          <li><label><input type="radio"                   name="render-depth" disabled="true" value="5"/>32</li>
+        </ul>
+  
+        <ul style="float : left" id="render-method">
+          Interpolation Method:
+          <li><label><input type="radio" checked="checked" name="render-method" value="linear"/>Linear</li>
+          <li><label><input type="radio"                   name="render-method" value="step-after"/>Step-After</li>
+          <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>
+            <li><label><input type="radio"                   name="render-method" value="monotone"/>Monotone</li>-->
+        </ul>
+      </form>
+    </div>
 
     <!--<button id='fade' onclick='fade()'>fade</button>-->
 
   </body>
   <script src="d3.v2.js"></script>
+  <script src="underscore.js"></script>
   <script src="binnedLineChart.js"></script>
   <script src="binnedLines.js"></script>
 </html>

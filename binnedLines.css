@@ -12,37 +12,63 @@ body {
 .axis path, .axis line {
   fill: none;
   stroke: #000;
-  /*shape-rendering: crispEdges;*/
+  shape-rendering: crispEdges;
 }
 
 #expand-btn {
   display: inline-block;
-  padding: 0 0.25em 0 0.25em;
+  /*padding: 0 0.25em 0 0.25em;*/
   border-radius: 1em; /*16px;*/
-  box-shadow: 0px 0px 0.4em #000;
+  /*box-shadow: 0px 0px 0.4em #000;*/
 }
 
-#isexpanded:checked ~ #expand-btn {
+/*#isexpanded:checked ~ #expand-btn {
   box-shadow:inset 0px 0px 0.2em #000;
-}
+}*/
 
-#isexpanded, #controls {
-  display: none;
+#controls {
+  -moz-transition: max-height 0.5s ease-in-out;
+  -webkit-transition: max-height 0.5s ease-in-out;
+  transition: max-height 0.5s ease-in-out; /* this is a bit of a hack */
+
+  overflow: hidden;
+  max-height: 0;
+  background: #cccccc;
+  border: solid;
+  border-width: 0px;
+  border-radius: 1em;
+  box-shadow: inset 0px 0px 0.4em #000;
 }
 
 #isexpanded:checked ~ #controls {
-    display: block;
-    display: inline-block;
-    clear: both;
-    background: #cccccc;
-    border: solid;
-    border-width: 0px;
-    border-radius: 1em;
-    box-shadow:inset 0px 0px 0.4em #000;
+  overflow: hidden;
+  max-height: 50em; /* this is a bit of a hack */
+  background: #cccccc;
+  border: solid;
+  border-width: 0px;
+  border-radius: 1em;
+  box-shadow: inset 0px 0px 0.4em #000;
 }
 
 #controls ul {
   list-style: none;
   padding: 0.5em 0.5em 0.5em 0.5em;
   margin: 0;
+}
+
+#controls ul{
+  border-bottom-left-radius: 1em; /*16px;*/
+  border-top-left-radius: 1em; /*16px;*/
+  border-left: dashed grey;
+}
+
+#controls ul:not(:first-child){
+  border-bottom-left-radius: 1em; /*16px;*/
+  border-left: dashed grey;
+}
+
+input {
+  width: 1em; /* grow with the text */
+  height: 1em;
+  disabled: true;
 }

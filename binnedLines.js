@@ -51,3 +51,20 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   plots.push(plot10);
 });
 
+var setAutomatic = function () {
+  var el = document.getElementById("automaticSetter");
+
+  if(el.checked) {
+     _.each( document.getElementsByName("render-depth"),
+         function (e) {
+           e.disabled = true;
+         });
+    } else {
+     _.each( document.getElementsByName("render-depth"),
+         function (e) {
+           e.disabled = false;
+         });
+   }
+}
+
+setAutomatic();
