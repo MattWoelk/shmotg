@@ -19,12 +19,10 @@
     <button id='zoomin' onclick='zoomin()'>+</button>
     <button id='zoomout' onclick='zoomout()'>-</button>
 
-    <input type="checkbox" checked="checked" id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
-    <label for="isexpanded" id="expand-btn">Controls</label>
-
     </br> <!-- to keep the controls on the next line -->
 
-    <div id="controls">
+    <details open="open" id="controls">
+      <summary>Controls</summary>
       <form>
         <ul style="float: left" id="render-lines">
           Which functions to render:
@@ -36,7 +34,7 @@
           <li><label><input type="checkbox"                   value="q1"/>3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
           <li><label><input type="checkbox" checked="checked" value="quartiles"/>Quartile Area</label></li>
         </ul>
-  
+
         <ul style="float : left" id="render-depth">
           Bin Size: <label><input id="automaticSetter" type="checkbox"  onchange="setAutomatic()"/>Automatic</label>
           <li><label><input type="radio"                   name="render-depth" disabled="true" value="0"/>1</li>
@@ -46,7 +44,7 @@
           <li><label><input type="radio" checked="checked" name="render-depth" disabled="true" value="4"/>16</li>
           <li><label><input type="radio"                   name="render-depth" disabled="true" value="5"/>32</li>
         </ul>
-  
+
         <ul style="float : left" id="render-method">
           Interpolation Method:
           <li><label><input type="radio" checked="checked" name="render-method" value="linear"/>Linear</li>
@@ -55,7 +53,7 @@
             <li><label><input type="radio"                   name="render-method" value="monotone"/>Monotone</li>-->
         </ul>
       </form>
-    </div>
+    </details>
 
     <!--<button id='fade' onclick='fade()'>fade</button>-->
 
