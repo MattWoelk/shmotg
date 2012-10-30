@@ -57,14 +57,13 @@ body {
 }
 
 #controls ul{
-  border-bottom-left-radius: 1em; /*16px;*/
-  border-top-left-radius: 1em; /*16px;*/
   border-left: dashed grey;
+  border-top: dashed grey;
 }
 
 #controls ul:not(:first-child){
-  border-bottom-left-radius: 1em; /*16px;*/
   border-left: dashed grey;
+  border-top: dashed grey;
 }
 
 input {
