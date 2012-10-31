@@ -1,0 +1,43 @@
+<html>
+
+<head>
+  <title>Test</title>
+  <style type="text/css">
+    #left {
+      float:left;
+      width:180px;
+      background-color:#ff0000;
+    }
+    #right {
+      margin-left: 190px;
+      background-color:#00FF00;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <div id="left">left</div>
+    <div id="right">right</div>
+    <input type="text" id="outputid" />
+  </div>
+</body>
+
+<script type="text/javascript">
+  var supportsOrientationChange = "onorientationchange" in window,
+      orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
+  window.addEventListener(orientationEvent, function() {
+    redraw();
+  }, false);
+
+  var redraw = function () {
+    console.log(document.getElementById("right").offsetWidth);
+    console.log(document.getElementById("left").offsetWidth);
+    document.getElementById("outputid").value = document.getElementById("right").offsetWidth;
+  };
+
+  redraw();
+</script>
+
+</html>
+
