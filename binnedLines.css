@@ -40,6 +40,10 @@ body {
   box-shadow: inset 0px 0px 0.4em #000;
 }
 
+#controls ul {
+  float: left;
+}
+
 #isexpanded:checked ~ #controls {
   -moz-transition: max-height 0.5s ease-in;
   -webkit-transition: max-height 0.5s ease-in;
