@@ -8,7 +8,7 @@ window.addEventListener(orientationEvent, function() {
 
 var redraw = function () {
   plots.forEach(function (plt) {
-    plt.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+    plt.offsetWidth(document.getElementById("charts").offsetWidth).update();
   });
 }
 
@@ -33,7 +33,7 @@ var zoomin = function () {
 }
 
 
-var plot10 = binnedLineChart().width(100).height(150);
+var plot10 = binnedLineChart().offsetWidth(100).height(150);
 
 d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   var w = json.length;
@@ -42,12 +42,10 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
   var jRange = d3.max(json, function (d) { return d.ESGgirder1; })
     - d3.min(json, function (d) { return d.ESGgirder1; });
 
-  var plot10 = binnedLineChart()
-    .width(100)
-    .outlinesOrNot(true);
+  var plot10 = binnedLineChart();
 
   var pl10 = d3.select("#charts").append("svg").datum(json.map(function (d) { return -d.ESGgirder1; })).call(plot10);
-  plot10.width(supportsOrientationChange ? d3.max([window.innerWidth, screen.width]) : window.innerWidth).update();
+  plot10.offsetWidth(document.getElementById("charts").offsetWidth).update();
   plots.push(plot10);
 });
 

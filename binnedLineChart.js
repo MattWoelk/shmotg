@@ -4,14 +4,16 @@
 //      - mouseover data points to show exact values
 //      Threshold integration to show all points over a certain value in a certain colour?
 //      - maybe just have a movable dashed line which a user can use to look at thresholds
+//      Integrate all the amazing things I drew up last night.
 
 var binnedLineChart = function () {
-  var outlinesOrNot = true;
+  var strokeWidth = 1;
 
-  var margins = {top: 0, left: 25, bottom: 25, right: 25};
+  var margin = {top: 10, right: 10, bottom: 25, left: 10};
 
-  var height = 150;
-  var width = d3.max([window.innerWidth, screen.width]);
+  var height = 150 - margin.top - margin.bottom;
+  var offsetWidth = document.getElementById("charts").offsetWidth;
+  var width = offsetWidth - margin.left - margin.right;
 
   var howManyBinLevels = 6;
   var whichLevelsToRender = [1, 2, 3];
@@ -118,7 +120,7 @@ var binnedLineChart = function () {
     my.setSelectedLines();
     slctn = selection; // Saving the selection so that my.update() works.
 
-    realWidth = width - margins.right - margins.left;
+    width = offsetWidth - margin.left - margin.right;
 
     selection.each(function (data) {
 
@@ -247,11 +249,11 @@ var binnedLineChart = function () {
 
       if (!xScale) { xScale = d3.scale.linear().domain([0, data.length - 1]); }
       xScale
-        .range([0, realWidth]); // So that the furthest-right point is at the right edge of the plot
+        .range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
       if (!xAxisScale) { xAxisScale = d3.scale.linear().domain([0, data.length - 1]); } //different than xScale because we want the right-most point to be at the right edge of the chart
       xAxisScale
-        .range([0, realWidth]);
+        .range([0, width]);
 
       if (!yScale){ yScale = d3.scale.linear(); }
       yScale
@@ -300,13 +302,13 @@ var binnedLineChart = function () {
 
       //Set it's container's dimensions
       selection
-        .attr("height", height + margins.bottom)
+        .attr("height", height + margin.bottom)
         .attr("width", width);
 
       //Set the chart's dimensions
       chart
-        .attr("width", width - 10) //TODO: magic numbers to get rid of scroll bars
-        .attr("height", height + margins.bottom);
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
 
       //Allow dragging and zooming.
       chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
@@ -317,18 +319,18 @@ var binnedLineChart = function () {
       if (!bkgrect) { bkgrect = chart.insert("svg:rect"); }
       bkgrect
         //.transition().duration(500)
-        .attr("width", realWidth)
+        .attr("width", width)
         .attr("height", height)
         .attr("class", "bkgrect")
-        .attr("transform", "translate(" + margins.left + ", 0)")
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .style("fill", "#FFF");
 
       //Make the clipPath (for cropping the paths)
       if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip").append("rect"); }
       defclip
         //.transition().duration(500)
-        .attr("width", realWidth)
-        .attr("transform", "translate(" + margins.left + ", 0)")
+        .attr("width", width)
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .attr("height", height);
 
       //Apply the clipPath
@@ -349,21 +351,21 @@ var binnedLineChart = function () {
       //update
       currentSelection
         .transition().duration(500)
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; }) // TODO: delete this line?
+        .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke-width", strokeWidth)
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .transition().duration(500)
-        .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
       //enter
       currentSelection.enter().append("path")
         .attr("class", "posPath")
         .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
-        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke-width", strokeWidth)
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("opacity", 0)
         .transition().ease(easingMethod).duration(500)
@@ -385,21 +387,22 @@ var binnedLineChart = function () {
       //update area
       currentSelection
         .transition().duration(500)
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; }) // TODO: delete this line?
+        .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
-        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke-width", strokeWidth)
         //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .transition().duration(500)
-        .attr("transform", function (d, i) { return "translate(" + margins.left + ", 0)"; });
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
       //enter area
       currentSelection.enter().append("path")
         .attr("class", "posArea")
         .attr("fill", function (d, i) {return binData.properties[d.type].colour; })
-        .style("stroke-width", function () { return outlinesOrNot ? 1 : 0; })
+        .style("stroke-width", strokeWidth)
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("transform", function (d, i) {return "translate(" + margins.left + ", 0)"; })
+        //.attr("transform", function (d, i) {return "translate(" + margin.left + ", 0)"; })
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("opacity", 0.0)
         .transition().duration(500).ease(easingMethod)
@@ -419,18 +422,19 @@ var binnedLineChart = function () {
 
       if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
       xAxisContainer.attr("class", "x axis")
-        .attr("transform", "translate(" + margins.left + "," + height + ")");
+        .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+        //.attr("transform", "translate(" + margin.left + "," + height + ")");
       xAxisContainer.transition().duration(500).call(xAxis);
 
       //Draw the outline for the chart
       if (!frgrect) { frgrect = chart.append("svg:rect"); }
       frgrect
-        .attr("width", realWidth)
+        .attr("width", width)
         .attr("height", height)
         .attr("class", "frgrect")
         .style("fill", "rgba(0,0,0,0)")
         .style("stroke-width", 3)
-        .attr("transform", "translate(" + margins.left + ", 0)")
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .style("stroke", "#000");
 
     });
@@ -439,9 +443,9 @@ var binnedLineChart = function () {
 
   // == Getters and Setters ==
 
-  my.width = function (value) {
-    if (!arguments.length) return width;
-    width = value;
+  my.offsetWidth = function (value) {
+    if (!arguments.length) return offsetWidth;
+    offsetWidth = value;
     return my;
   };
 
@@ -469,9 +473,9 @@ var binnedLineChart = function () {
     return my;
   };
 
-  my.outlinesOrNot = function (value) {
-    if (!arguments.length) return outlinesOrNot;
-    outlinesOrNot = value;
+  my.strokeWidth = function (value) {
+    if (!arguments.length) return strokeWidth;
+    strokeWidth = value;
     return my;
   };
 
