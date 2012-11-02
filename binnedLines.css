@@ -46,7 +46,7 @@ body {
   transition: max-height 0.5s ease-in; /* this is a bit of a hack */
 
   overflow: hidden;
-  max-height: 20em; /* this is a bit of a hack */
+  max-height: 30em; /* this is a bit of a hack */
   background: #cccccc;
   border: solid;
   border-width: 0px;
