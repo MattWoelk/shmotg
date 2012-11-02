@@ -27,9 +27,9 @@ body {
 }*/
 
 #controls {
-  -moz-transition: max-height 0.5s ease-in-out;
-  -webkit-transition: max-height 0.5s ease-in-out;
-  transition: max-height 0.5s ease-in-out; /* this is a bit of a hack */
+  -moz-transition: max-height 0.5s ease-out;
+  -webkit-transition: max-height 0.5s ease-out;
+  transition: max-height 0.5s ease-out; /* this is a bit of a hack */
 
   overflow: hidden;
   max-height: 0;
@@ -41,8 +41,12 @@ body {
 }
 
 #isexpanded:checked ~ #controls {
+  -moz-transition: max-height 0.5s ease-in;
+  -webkit-transition: max-height 0.5s ease-in;
+  transition: max-height 0.5s ease-in; /* this is a bit of a hack */
+
   overflow: hidden;
-  max-height: 50em; /* this is a bit of a hack */
+  max-height: 20em; /* this is a bit of a hack */
   background: #cccccc;
   border: solid;
   border-width: 0px;
