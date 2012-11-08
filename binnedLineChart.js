@@ -340,12 +340,10 @@ var binnedLineChart = function () {
         .attr("class", "paths")
         .attr("height", height);
 
-      var currentSelection;
-
 
       //CURVES
       //Make and render the Positive curves.
-      currentSelection = paths.selectAll(".posPath")
+      var currentSelection = paths.selectAll(".posPath")
         .data(makeDataObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
       //update
