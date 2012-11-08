@@ -3,7 +3,8 @@ var plots = []; //an array of all plots
 var supportsOrientationChange = "onorientationchange" in window,
     orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
 window.addEventListener(orientationEvent, function() {
-  redraw();
+  setTimeout("redraw()", 500); //TODO: make only wait for Android
+  //redraw();
 }, false);
 
 var redraw = function () {
