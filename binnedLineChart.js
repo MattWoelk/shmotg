@@ -502,8 +502,35 @@ var binnedLineChart = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     whichLinesToRender = a;
 
-    var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
-    whichLevelsToRender = b;
+    //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
+    //whichLevelsToRender = b;
+    pixelsPerBin = document.getElementById("renderdepth").value;
+    ////binSizePerSamples = Math.pow(2, whichlevel);
+    ////whichlevel = Math.log(2, binsizepersamples);
+
+    //find how many samples are in each pixelsPerBin
+    if (xScale) { // isn't there on the first rendering
+      var totalSamplesShown = xScale.domain()[1] - xScale.domain()[0]
+    }else{
+      var totalSamplesShown = 100; //dummy value
+    }
+
+    var totalPixelsShown = width;
+    var SamplesPerPixel = totalSamplesShown / totalPixelsShown;
+    //round down to the nearest 2**binsize
+    whichLevelsToRender = [ d3.min([
+        d3.max([
+          0,
+          Math.round(Math.log( SamplesPerPixel*pixelsPerBin, 2))
+          ]),
+        (howManyBinLevels - 1)
+        ])];
+    //TODO: fix this so that it fits with the "Bin Render Size" mentality properly
+    //       whichLevelsToRender = [ Math.round(Math.log(SamplesPerPixel, 2)*pixelsPerBin) ]; ?????
+
+    console.log(pixelsPerBin);
+    console.log(whichLevelsToRender);
+    //console.log( Math.log(SamplesPerPixel*pixelsPerBin, 2) );
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;

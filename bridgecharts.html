@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+    <link type="text/css" rel="stylesheet" href="html5boilerplate.css"/>
+    <link type="text/css" rel="stylesheet" href="binnedLines.css"/>
+
+    <title>Bridge Data Analysis</title>
+  </head>
+  <body>
+
+    <script type="text/javascript">
+      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+        document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
+      }
+    </script>
+
+    <div id="charts" style="overflow:none; width:70%; overflow:none; float:left;"></div>
+    <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
+    <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
+    <div id="diagram" style="overflow:none; width:30%; float:right;"><p>This is where a nice bridge-looking diagram will be</p></div>
+    <div id="undercharts" style="clear:left">
+      <button id='zoomin' onclick='zoomin()' title="zoom in">+</button>
+      <button id='zoomout' onclick='zoomout()' title="zoom out">-</button>
+      Speed: <input type="number" name="quantity" min="1" max="5" value="0" title="0 means infinity" /><select id = "speedunits">
+        <option value = "kmph">km/h</option>
+        <option value = "mps">m/s</option>
+        <option value = "mph">mph</option>
+      </select>
+
+
+      <input type="checkbox"                   id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
+      <label for="isexpanded" id="expand-btn">Controls</label>
+
+      </br> <!-- to keep the controls on the next line -->
+
+      <div id="controls">
+        <form>
+          <ul id="render-lines">
+            Which functions to render:
+            <li><label><input type="checkbox"                   value="rawData"/>Raw Data</label></li>
+            <li><label><input type="checkbox" checked="checked" value="averages"/>Averages</label></li>
+            <li><label><input type="checkbox" checked="checked" value="mins"/>Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox" checked="checked" value="maxes"/>Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox"                   value="q3"/>1st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox"                   value="q1"/>3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox" checked="checked" value="quartiles"/>Quartile Area</label></li>
+          </ul>
+
+          <ul id="render-depth">
+            <!-- Idea: instead of all this, we could have more bullets which would be options for how many pixels per bin. It would automatically update still, but you'd have some control over when and how much this way. -->
+            Bin Render Size:
+            <br />
+            <label><input type="range" min="1" max="200" id="renderdepth" value="32"/>
+          </ul>
+
+          <ul id="render-method">
+            Interpolation Method:
+            <li><label><input type="radio" name="render-method" value="linear"/>Linear</li>
+            <li><label><input type="radio"  checked="checked"                  name="render-method" value="step-after"/>Step-After</li>
+            <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>
+              <li><label><input type="radio"                   name="render-method" value="monotone"/>Monotone</li>-->
+          </ul>
+        </form>
+      </div>
+    </div>
+
+    <!--<button id='fade' onclick='fade()'>fade</button>-->
+
+  </body>
+  <script src="d3.v2.js"></script>
+  <script src="underscore.js"></script>
+  <script src="binnedLineChart.js"></script>
+  <script src="bridgecharts.js"></script>
+</html>
+
