@@ -5,6 +5,7 @@
 //      Threshold integration to show all points over a certain value in a certain colour?
 //      - maybe just have a movable dashed line which a user can use to look at thresholds
 //      Integrate all the amazing things I drew up last night.
+//      Fix zooming so that it zooms to exactly where the cursor is
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
@@ -348,13 +349,12 @@ var binnedLineChart = function () {
 
       //update
       currentSelection
-        .transition().duration(500)
+        //.transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", strokeWidth)
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .transition().duration(500)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
       //enter
@@ -384,13 +384,12 @@ var binnedLineChart = function () {
 
       //update area
       currentSelection
-        .transition().duration(500)
+        //.transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
         .style("stroke-width", strokeWidth)
         //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .transition().duration(500)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
       //enter area
