@@ -16,10 +16,13 @@
       }
     </script>
 
-    <div id="charts" style="overflow:none; width:70%; overflow:none; float:left;"></div>
-    <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
-    <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
-    <div id="diagram" style="overflow:none; width:30%; float:right;"><p>This is where a nice bridge-looking diagram will be</p></div>
+    <div id="draggables" style="position:fixed; width:15px; overflow:none"><p>a a a a a a</p></div>
+    <div style="overflow:none; padding:0px 0px 0px 15px">
+      <div id="charts" style="overflow:none; width:70%; overflow:none; float:left;"></div>
+      <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
+      <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
+      <div id="diagram" style="overflow:none; width:30%; float:right;"><p>This is where a nice bridge-looking diagram will be</p></div>
+    </div>
     <div id="undercharts" style="clear:left">
       <button id='zoomin' onclick='zoomin()' title="zoom in">+</button>
       <button id='zoomout' onclick='zoomout()' title="zoom out">-</button>
