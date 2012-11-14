@@ -16,13 +16,10 @@
       }
     </script>
 
-    <div id="draggables" style="position:fixed; width:15px; overflow:none"><p>a a a a a a</p></div>
-    <div style="overflow:none; padding:0px 0px 0px 15px">
-      <div id="charts" style="overflow:none; width:70%; overflow:none; float:left;"></div>
-      <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
-      <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
-      <div id="diagram" style="overflow:none; width:30%; float:right;"><p>This is where a nice bridge-looking diagram will be</p></div>
-    </div>
+    <div id="charts" style="overflow:none; width:70%; overflow:none; float:left;"></div>
+    <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
+    <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
+    <div id="diagram" style="overflow:none; width:30%; float:right;"><p>This is where a nice bridge-looking diagram will be</p></div>
     <div id="undercharts" style="clear:left">
       <button id='zoomin' onclick='zoomin()' title="zoom in">+</button>
       <button id='zoomout' onclick='zoomout()' title="zoom out">-</button>
@@ -33,7 +30,7 @@
       </select>
 
 
-      <input type="checkbox"                   id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
+      <input type="checkbox" checked="checked" id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
       <label for="isexpanded" id="expand-btn">Controls</label>
 
       </br> <!-- to keep the controls on the next line -->
@@ -41,7 +38,7 @@
       <div id="controls">
         <form>
           <ul id="render-lines">
-            Which functions to render:
+            Which functions<br />to render:
             <li><label><input type="checkbox"                   value="rawData"/>Raw Data</label></li>
             <li><label><input type="checkbox" checked="checked" value="averages"/>Averages</label></li>
             <li><label><input type="checkbox" checked="checked" value="mins"/>Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
@@ -53,13 +50,14 @@
 
           <ul id="render-depth">
             <!-- Idea: instead of all this, we could have more bullets which would be options for how many pixels per bin. It would automatically update still, but you'd have some control over when and how much this way. -->
-            Bin Render Size:
+            Maximum Bin<br />Render Size:
+            <! -- TODO: replace this with something made in d3 which is much more visual. Perhaps a slider which is the same size as the desired max bin size -->
             <br />
-            <label><input type="range" min="1" max="200" id="renderdepth" value="32"/>
+            <label><input type="range" min="1" max="200" id="renderdepth" value="32" style="width:200px"/>
           </ul>
 
           <ul id="render-method">
-            Interpolation Method:
+            Interpolation<br />Method:
             <li><label><input type="radio" name="render-method" value="linear"/>Linear</li>
             <li><label><input type="radio"  checked="checked"                  name="render-method" value="step-after"/>Step-After</li>
             <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>

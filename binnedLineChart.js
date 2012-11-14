@@ -504,33 +504,34 @@ var binnedLineChart = function () {
 
     //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
     //whichLevelsToRender = b;
-    pixelsPerBin = document.getElementById("renderdepth").value;
-    ////binSizePerSamples = Math.pow(2, whichlevel);
-    ////whichlevel = Math.log(2, binsizepersamples);
 
-    //find how many samples are in each pixelsPerBin
+
+    //Want: samples/bin --> level
+    //Have: pixels/bin, screen/pixels, samples/screen
+
+    // pixels/bin:
+    var pixelsPerBin = document.getElementById("renderdepth").value;
+    // screen/pixels:
+    var screenPerPixels = 1/width;
+    // samples/screen:
     if (xScale) { // isn't there on the first rendering
-      var totalSamplesShown = xScale.domain()[1] - xScale.domain()[0]
+      var samplesPerScreen = xScale.domain()[1] - xScale.domain()[0]
     }else{
-      var totalSamplesShown = 100; //dummy value
+      var samplesPerScreen = 100; //dummy value
     }
 
-    var totalPixelsShown = width;
-    var SamplesPerPixel = totalSamplesShown / totalPixelsShown;
-    //round down to the nearest 2**binsize
-    whichLevelsToRender = [ d3.min([
-        d3.max([
-          0,
-          Math.round(Math.log( SamplesPerPixel*pixelsPerBin, 2))
-          ]),
-        (howManyBinLevels - 1)
-        ])];
-    //TODO: fix this so that it fits with the "Bin Render Size" mentality properly
-    //       whichLevelsToRender = [ Math.round(Math.log(SamplesPerPixel, 2)*pixelsPerBin) ]; ?????
+    // sam   pix   scr   sam
+    // --- = --- * --- * ---
+    // bin   bin   pix   scr
+    var samplesPerBin = pixelsPerBin * screenPerPixels * samplesPerScreen;
 
-    console.log(pixelsPerBin);
-    console.log(whichLevelsToRender);
-    //console.log( Math.log(SamplesPerPixel*pixelsPerBin, 2) );
+    //now convert to level and floor
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var toLevel = Math.floor(toLevel);
+    var toLevel = d3.max([0, toLevel]);
+    var toLevel = d3.min([howManyBinLevels - 1, toLevel]);
+
+    whichLevelsToRender = [ toLevel ];
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;
