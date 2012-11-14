@@ -502,8 +502,36 @@ var binnedLineChart = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     whichLinesToRender = a;
 
-    var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
-    whichLevelsToRender = b;
+    //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
+    //whichLevelsToRender = b;
+
+
+    //Want: samples/bin --> level
+    //Have: pixels/bin, screen/pixels, samples/screen
+
+    // pixels/bin:
+    var pixelsPerBin = document.getElementById("renderdepth").value;
+    // screen/pixels:
+    var screenPerPixels = 1/width;
+    // samples/screen:
+    if (xScale) { // isn't there on the first rendering
+      var samplesPerScreen = xScale.domain()[1] - xScale.domain()[0]
+    }else{
+      var samplesPerScreen = 100; //dummy value
+    }
+
+    // sam   pix   scr   sam
+    // --- = --- * --- * ---
+    // bin   bin   pix   scr
+    var samplesPerBin = pixelsPerBin * screenPerPixels * samplesPerScreen;
+
+    //now convert to level and floor
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var toLevel = Math.floor(toLevel);
+    var toLevel = d3.max([0, toLevel]);
+    var toLevel = d3.min([howManyBinLevels - 1, toLevel]);
+
+    whichLevelsToRender = [ toLevel ];
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;
@@ -512,4 +540,3 @@ var binnedLineChart = function () {
 
   return my;
 };
-
