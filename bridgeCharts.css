@@ -1,5 +1,5 @@
 body {
-  background-color: #ccc;
+  background-color: #FFF;
   font-family: sans-serif;
   color: #000;
   font-size: 20px;
@@ -14,6 +14,9 @@ body {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
+}
+
+.paths, .axis {
   cursor: col-resize;
 }
 
@@ -35,7 +38,7 @@ body {
 
   overflow: hidden;
   max-height: 0;
-  background: #cccccc;
+  background-color: #eee;
   border: solid;
   border-width: 0px;
   border-radius: 1em;
@@ -49,7 +52,7 @@ body {
 
   overflow: hidden;
   max-height: 35em; /* this is a bit of a hack */
-  background: #cccccc;
+  background: #eee;
   border: solid;
   border-width: 0px;
   border-radius: 1em;
