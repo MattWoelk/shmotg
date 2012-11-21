@@ -1,11 +1,15 @@
 // TODO:
-//      Fade based on how many pixels are being rendered.
 //      Bin Size of 1 should show data points as circles
 //      - mouseover data points to show exact values
+//      - ... maybe
 //      Threshold integration to show all points over a certain value in a certain colour?
 //      - maybe just have a movable dashed line which a user can use to look at thresholds
-//      Integrate all the amazing things I drew up last night.
+//      - maybe only show values which are above a threshold
 //      Fix zooming so that it zooms to exactly where the cursor is
+//      Fix weird hangups on axes when browser size is changed
+//      Make fading-out lines transition their location, too.
+//      Make fading-in lines transition their location, too.
+//      Fix weird error where the 2nd and 3rd graphs change their visible values when moved (dragged) very slightly at the start with the mouse
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
@@ -22,8 +26,6 @@ var binnedLineChart = function () {
   var interpolationMethod = ['linear'];
   var easingMethod = 'cubic-out';
 
-  var bkgrect;
-  var frgrect;
   var defclip;
   var xAxisContainer;
   var xAxis;
@@ -35,6 +37,7 @@ var binnedLineChart = function () {
 
   var chart;
   var paths;
+  var dataObjectForKeyFanciness;
 
   var slctn; // Save the selection so that my.update() works.
 
@@ -202,6 +205,7 @@ var binnedLineChart = function () {
 
       binData.levels[0].rawData = data;
 
+      //TODO: oldData = 
 
       // Bin the data into abstracted bins
       var binTheDataWithFunction = function (curLevelData, key, func) {
@@ -273,6 +277,7 @@ var binnedLineChart = function () {
         .y(function (d, i) { return yScale(binData.levels[0].rawData[i]); })
         .interpolate(interpolationMethod)(binData.levels[0].rawData);
 
+      //For the lines:
       for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
         var j = 0;
         var key = binData['keys'][keyValue];
@@ -287,6 +292,7 @@ var binnedLineChart = function () {
         }
       }
 
+      //For the areas:
       binData.levels[0]["q1d0"] = binData.levels[0]['rawDatad0'];
       binData.levels[0]["q3d0"] = binData.levels[0]['rawDatad0'];
 
@@ -316,16 +322,6 @@ var binnedLineChart = function () {
       //selection.call(d3.behavior.zoom().x(xAxisScale));
 
 
-      //Draw the background for the chart
-      if (!bkgrect) { bkgrect = chart.insert("svg:rect"); }
-      bkgrect
-        //.transition().duration(500)
-        .attr("width", width)
-        .attr("height", height)
-        .attr("class", "bkgrect")
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .style("fill", "#FFF");
-
       //Make the clipPath (for cropping the paths)
       if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip").append("rect"); }
       defclip
@@ -342,6 +338,9 @@ var binnedLineChart = function () {
         .attr("height", height);
 
 
+      tmpObjectForKeyFanciness = dataObjectForKeyFanciness;
+      //TODO: use this ^^^ to deep copy whatever has been removed, so that we can have the entering paths transition properly.
+
       //CURVES
       //Make and render the Positive curves.
       var currentSelection = paths.selectAll(".posPath")
@@ -349,7 +348,7 @@ var binnedLineChart = function () {
 
       //update
       currentSelection
-        //.transition().duration(500)
+        .transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", strokeWidth)
@@ -362,17 +361,18 @@ var binnedLineChart = function () {
         .attr("class", "posPath")
         .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
         .style("stroke-width", strokeWidth)
-        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
         .attr("opacity", 0)
         .transition().ease(easingMethod).duration(500)
+        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit
       currentSelection.exit()
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .transition().ease(easingMethod).duration(500)
+        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("opacity", 0)
         .remove();
 
@@ -384,7 +384,7 @@ var binnedLineChart = function () {
 
       //update area
       currentSelection
-        //.transition().duration(500)
+        .transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
         .style("stroke-width", strokeWidth)
@@ -422,17 +422,6 @@ var binnedLineChart = function () {
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       xAxisContainer.transition().duration(500).call(xAxis);
-
-      //Draw the outline for the chart
-      if (!frgrect) { frgrect = chart.append("svg:rect"); }
-      frgrect
-        .attr("width", width)
-        .attr("height", height)
-        .attr("class", "frgrect")
-        .style("fill", "rgba(0,0,0,0)")
-        .style("stroke-width", 3)
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .style("stroke", "#000");
 
     });
   };
