@@ -10,11 +10,12 @@
 //      Make fading-out lines transition their location, too.
 //      Make fading-in lines transition their location, too.
 //      Fix weird error where the 2nd and 3rd graphs change their visible values when moved (dragged) very slightly at the start with the mouse
+//      Add a y axis
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
 
-  var margin = {top: 10, right: 10, bottom: 25, left: 10};
+  var margin = {top: 10, right: 10, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
   var offsetWidth = document.getElementById("charts").offsetWidth;
@@ -414,14 +415,26 @@ var binnedLineChart = function () {
 
       // Draw Axes
       xAxis = d3.svg.axis()
+        .tickSize(6)
         .scale(xAxisScale).orient("bottom");
-      //yAxis = d3.svg.axis().scale(yScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
       xAxisContainer.attr("class", "x axis")
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       xAxisContainer.transition().duration(500).call(xAxis);
+
+      yAxis = d3.svg.axis()
+        .scale(yScale)
+        .ticks(3)
+        .tickSubdivide(true)
+        .orient("left");
+
+      if (!yAxisContainer) { yAxisContainer = chart.append("svg:g"); }
+      yAxisContainer.attr("class", "y axis")
+        .attr("transform", "translate(" + margin.left + ", " + 0 + ")");
+        //.attr("transform", "translate(" + margin.left + "," + height + ")");
+      yAxisContainer.transition().duration(500).call(yAxis);
 
     });
   };
