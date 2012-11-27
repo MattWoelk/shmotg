@@ -10,7 +10,8 @@
 //      Make fading-out lines transition their location, too.
 //      Make fading-in lines transition their location, too.
 //      Fix weird error where the 2nd and 3rd graphs change their visible values when moved (dragged) very slightly at the start with the mouse
-//      Add a y axis
+//      Make y axis not upside-down
+//      Turn off transition times when dragging somehow.
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
