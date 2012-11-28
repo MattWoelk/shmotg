@@ -1,3 +1,4 @@
+
 var plots = []; //an array of all plots
 
 var supportsOrientationChange = "onorientationchange" in window,
@@ -34,7 +35,12 @@ var zoomin = function () {
 }
 
 
-d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
+var socket = io.connect('http://wpa-4-1283.cc.umanitoba.ca:8080/');
+
+socket.on('news', function (data) {
+  var json = JSON.parse(data);
+  socket.emit('ack', "Message received!");
+
   var w = json.length;
 
   var jAvg = -d3.mean(json, function (d) { return d.ESGgirder1; });
@@ -43,19 +49,19 @@ d3.json("queries/ESGgirder1_from_SPBRTData_0A.js", function(json) {
 
   var plot10 = binnedLineChart();
 
-  var pl10 = d3.select("#charts").append("svg").datum(json.map(function (d) { return -d.ESGgirder1; })).call(plot10);
+  var pl10 = d3.select("#charts").append("svg").datum(_.map(json, function (d) { return -d.ESGgirder1; })).call(plot10);
 
   var plot11 = binnedLineChart();
 
-  var pl11 = d3.select("#charts").append("svg").datum(json.map(function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot11);
+  var pl11 = d3.select("#charts").append("svg").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot11);
 
   var plot12 = binnedLineChart();
 
-  var pl12 = d3.select("#charts").append("svg").datum(json.map(function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot12);
+  var pl12 = d3.select("#charts").append("svg").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot12);
 
   var plot13 = binnedLineChart();
 
-  var pl13 = d3.select("#charts").append("svg").datum(json.map(function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
+  var pl13 = d3.select("#charts").append("svg").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
 
   plot10.offsetWidth(document.getElementById("charts").offsetWidth).height(75).update();
   plot11.offsetWidth(document.getElementById("charts").offsetWidth).height(75).update();
