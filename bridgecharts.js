@@ -1,3 +1,9 @@
+var socket = io.connect('http://wpa-4-1283.cc.umanitoba.ca:8080/');
+socket.on('news', function (data) {
+  console.log(data.hello); // world
+  socket.emit('swen', {my: 'data'});
+});
+
 var plots = []; //an array of all plots
 
 var supportsOrientationChange = "onorientationchange" in window,
