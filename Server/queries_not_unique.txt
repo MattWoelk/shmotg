@@ -1,0 +1,846 @@
+info: socket.io started
+Server is running on port 8080
+SELECT NumStartTime_DD, NumEndTime_DD, NumStartTime_CC, NumStartTime_CC, ESGgirder1 FROM SPBRTData_Truck LIMIT 15 
+
+ rows:
+ [ { NumStartTime_DD: '101005834154',
+    NumEndTime_DD: '101005838589',
+    NumStartTime_CC: '101005834344',
+    ESGgirder1: 6.616 },
+  { NumStartTime_DD: '101010511484',
+    NumEndTime_DD: '101010515909',
+    NumStartTime_CC: '101010511654',
+    ESGgirder1: 9.0565 },
+  { NumStartTime_DD: '101010743364',
+    NumEndTime_DD: '101010747629',
+    NumStartTime_CC: '101010743614',
+    ESGgirder1: 6.178 },
+  { NumStartTime_DD: '101013600689',
+    NumEndTime_DD: '101013603699',
+    NumStartTime_CC: '101013600689',
+    ESGgirder1: 23.242 },
+  { NumStartTime_DD: '101013950614',
+    NumEndTime_DD: '101013955319',
+    NumStartTime_CC: '101013950804',
+    ESGgirder1: 8.062 },
+  { NumStartTime_DD: '101013958664',
+    NumEndTime_DD: '101014003409',
+    NumStartTime_CC: '101013958834',
+    ESGgirder1: 10.672 },
+  { NumStartTime_DD: '101014045714',
+    NumEndTime_DD: '101014050259',
+    NumStartTime_CC: '101014045824',
+    ESGgirder1: 9.382 },
+  { NumStartTime_DD: '101014636754',
+    NumEndTime_DD: '101014641249',
+    NumStartTime_CC: '101014636884',
+    ESGgirder1: 8.1075 },
+  { NumStartTime_DD: '101020000689',
+    NumEndTime_DD: '101020004089',
+    NumStartTime_CC: '101020000689',
+    ESGgirder1: 7.75 },
+  { NumStartTime_DD: '101020651654',
+    NumEndTime_DD: '101020653699',
+    NumStartTime_CC: '101020651874',
+    ESGgirder1: 7.7415 },
+  { NumStartTime_DD: '101021555864',
+    NumEndTime_DD: '101021559899',
+    NumStartTime_CC: '101021555414',
+    ESGgirder1: 24.097 },
+  { NumStartTime_DD: '101021602574',
+    NumEndTime_DD: '101021606539',
+    NumStartTime_CC: '101021602204',
+    ESGgirder1: 21.717 },
+  { NumStartTime_DD: '101021854274',
+    NumEndTime_DD: '101021858849',
+    NumStartTime_CC: '101021854424',
+    ESGgirder1: 8.437 },
+  { NumStartTime_DD: '101022223984',
+    NumEndTime_DD: '101022228809',
+    NumStartTime_CC: '101022224184',
+    ESGgirder1: 7.272 },
+  { NumStartTime_DD: '101022230144',
+    NumEndTime_DD: '101022234949',
+    NumStartTime_CC: '101022230304',
+    ESGgirder1: 9.272 } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumStartTime_DD',
+    orgName: 'NumStartTime_DD',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 20483,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumEndTime_DD',
+    orgName: 'NumEndTime_DD',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 4097,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumStartTime_CC',
+    orgName: 'NumStartTime_CC',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 20483,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumStartTime_CC',
+    orgName: 'NumStartTime_CC',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 20483,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'ESGgirder1',
+    orgName: 'ESGgirder1',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 4,
+    flags: 0,
+    decimals: 4,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 10 } ] 
+
+
+info: socket.io started
+Server is running on port 8080
+SELECT NumStartTime_DD, NumEndTime_DD, NumStartTime_CC, NumStartTime_CC, ESGgirder1 FROM SPBRTData_Truck LIMIT 15 
+
+ rows:
+ [ { NumStartTime_DD: '101005834154',
+    NumEndTime_DD: '101005838589',
+    NumStartTime_CC: '101005834344',
+    ESGgirder1: 6.616 },
+  { NumStartTime_DD: '101010511484',
+    NumEndTime_DD: '101010515909',
+    NumStartTime_CC: '101010511654',
+    ESGgirder1: 9.0565 },
+  { NumStartTime_DD: '101010743364',
+    NumEndTime_DD: '101010747629',
+    NumStartTime_CC: '101010743614',
+    ESGgirder1: 6.178 },
+  { NumStartTime_DD: '101013600689',
+    NumEndTime_DD: '101013603699',
+    NumStartTime_CC: '101013600689',
+    ESGgirder1: 23.242 },
+  { NumStartTime_DD: '101013950614',
+    NumEndTime_DD: '101013955319',
+    NumStartTime_CC: '101013950804',
+    ESGgirder1: 8.062 },
+  { NumStartTime_DD: '101013958664',
+    NumEndTime_DD: '101014003409',
+    NumStartTime_CC: '101013958834',
+    ESGgirder1: 10.672 },
+  { NumStartTime_DD: '101014045714',
+    NumEndTime_DD: '101014050259',
+    NumStartTime_CC: '101014045824',
+    ESGgirder1: 9.382 },
+  { NumStartTime_DD: '101014636754',
+    NumEndTime_DD: '101014641249',
+    NumStartTime_CC: '101014636884',
+    ESGgirder1: 8.1075 },
+  { NumStartTime_DD: '101020000689',
+    NumEndTime_DD: '101020004089',
+    NumStartTime_CC: '101020000689',
+    ESGgirder1: 7.75 },
+  { NumStartTime_DD: '101020651654',
+    NumEndTime_DD: '101020653699',
+    NumStartTime_CC: '101020651874',
+    ESGgirder1: 7.7415 },
+  { NumStartTime_DD: '101021555864',
+    NumEndTime_DD: '101021559899',
+    NumStartTime_CC: '101021555414',
+    ESGgirder1: 24.097 },
+  { NumStartTime_DD: '101021602574',
+    NumEndTime_DD: '101021606539',
+    NumStartTime_CC: '101021602204',
+    ESGgirder1: 21.717 },
+  { NumStartTime_DD: '101021854274',
+    NumEndTime_DD: '101021858849',
+    NumStartTime_CC: '101021854424',
+    ESGgirder1: 8.437 },
+  { NumStartTime_DD: '101022223984',
+    NumEndTime_DD: '101022228809',
+    NumStartTime_CC: '101022224184',
+    ESGgirder1: 7.272 },
+  { NumStartTime_DD: '101022230144',
+    NumEndTime_DD: '101022234949',
+    NumStartTime_CC: '101022230304',
+    ESGgirder1: 9.272 } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumStartTime_DD',
+    orgName: 'NumStartTime_DD',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 20483,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumEndTime_DD',
+    orgName: 'NumEndTime_DD',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 4097,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumStartTime_CC',
+    orgName: 'NumStartTime_CC',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 20483,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'NumStartTime_CC',
+    orgName: 'NumStartTime_CC',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 8,
+    flags: 20483,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 20 },
+  { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'ESGgirder1',
+    orgName: 'ESGgirder1',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 4,
+    flags: 0,
+    decimals: 4,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 10 } ] 
+
+
+info: socket.io started
+Server is running on port 8080
+SELECT ESGgirder1 FROM SPBRTData_Truck LIMIT 10 
+
+ rows:
+ [ { ESGgirder1: 6.616 },
+  { ESGgirder1: 9.0565 },
+  { ESGgirder1: 6.178 },
+  { ESGgirder1: 23.242 },
+  { ESGgirder1: 8.062 },
+  { ESGgirder1: 10.672 },
+  { ESGgirder1: 9.382 },
+  { ESGgirder1: 8.1075 },
+  { ESGgirder1: 7.75 },
+  { ESGgirder1: 7.7415 } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'ESGgirder1',
+    orgName: 'ESGgirder1',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 4,
+    flags: 0,
+    decimals: 4,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 10 } ] 
+
+
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+connection!
+info: socket.io started
+Server is running on port 8080
+SELECT ESGgirder1 FROM SPBRTData_Truck LIMIT 10 
+
+ rows:
+ [ { ESGgirder1: 6.616 },
+  { ESGgirder1: 9.0565 },
+  { ESGgirder1: 6.178 },
+  { ESGgirder1: 23.242 },
+  { ESGgirder1: 8.062 },
+  { ESGgirder1: 10.672 },
+  { ESGgirder1: 9.382 },
+  { ESGgirder1: 8.1075 },
+  { ESGgirder1: 7.75 },
+  { ESGgirder1: 7.7415 } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'ESGgirder1',
+    orgName: 'ESGgirder1',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 4,
+    flags: 0,
+    decimals: 4,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 10 } ] 
+
+
+info: socket.io started
+{ server: 
+   { domain: null,
+     _events: 
+      { request: [Object],
+        connection: [Function: connectionListener],
+        error: [Function],
+        upgrade: [Function],
+        close: [Function],
+        listening: [Object] },
+     _maxListeners: 10,
+     _connections: 0,
+     connections: [Getter/Setter],
+     allowHalfOpen: true,
+     _handle: 
+      { writeQueueSize: 0,
+        onconnection: [Function: onconnection],
+        owner: [Circular] },
+     httpAllowHalfOpen: false,
+     _connectionKey: '4:0.0.0.0:8080' },
+  namespaces: 
+   { '': 
+      { manager: [Circular],
+        name: '',
+        sockets: {},
+        auth: false,
+        flags: [Object],
+        _events: [Object] } },
+  sockets: 
+   { manager: [Circular],
+     name: '',
+     sockets: {},
+     auth: false,
+     flags: { endpoint: '', exceptions: [] },
+     _events: { connection: [Function] } },
+  _events: 
+   { 'set:transports': [ [Function], [Function] ],
+     'set:store': [Function],
+     'set:origins': [Function],
+     'set:flash policy port': [Function],
+     'set:flash policy server': [Function] },
+  settings: 
+   { origins: '*:*',
+     log: true,
+     store: { options: undefined, clients: {}, manager: [Circular] },
+     logger: { colors: false, level: 3, enabled: true },
+     static: { manager: [Circular], cache: {}, paths: [Object] },
+     heartbeats: true,
+     resource: '/socket.io',
+     transports: [ 'websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling' ],
+     authorization: false,
+     blacklist: [ 'disconnect' ],
+     'log level': 3,
+     'log colors': false,
+     'close timeout': 60,
+     'heartbeat interval': 25,
+     'heartbeat timeout': 60,
+     'polling duration': 20,
+     'flash policy server': true,
+     'flash policy port': 10843,
+     'destroy upgrade': true,
+     'destroy buffer size': 100000000,
+     'browser client': true,
+     'browser client cache': true,
+     'browser client minification': false,
+     'browser client etag': false,
+     'browser client expires': 315360000,
+     'browser client gzip': false,
+     'browser client handler': false,
+     'client store expiration': 15,
+     'match origin protocol': false },
+  handshaken: {},
+  connected: {},
+  open: {},
+  closed: {},
+  rooms: {},
+  roomClients: {},
+  oldListeners: [ [Function] ],
+  sequenceNumber: 1215716519 }
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+connection!
+info: socket.io started
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized oWPtEL74SZ2o60GGm-Zd
+debug: setting request GET /socket.io/1/websocket/oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hellow":"world"}]}
+{ my: 'data' }
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: emitting heartbeat for client oWPtEL74SZ2o60GGm-Zd
+debug: websocket writing 2::
+debug: set heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: set heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+info: transport end (undefined)
+debug: set close timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: cleared close timeout for client oWPtEL74SZ2o60GGm-Zd
+debug: cleared heartbeat interval for client oWPtEL74SZ2o60GGm-Zd
+debug: discarding transport
+debug: client authorized
+info: handshake authorized r6jouGmy2Mk5a0Ldm-Ze
+debug: setting request GET /socket.io/1/websocket/r6jouGmy2Mk5a0Ldm-Ze
+debug: set heartbeat interval for client r6jouGmy2Mk5a0Ldm-Ze
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hellow":"world"}]}
+{ my: 'data' }
+debug: emitting heartbeat for client r6jouGmy2Mk5a0Ldm-Ze
+debug: websocket writing 2::
+debug: set heartbeat timeout for client r6jouGmy2Mk5a0Ldm-Ze
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client r6jouGmy2Mk5a0Ldm-Ze
+debug: set heartbeat interval for client r6jouGmy2Mk5a0Ldm-Ze
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized H8A1dBdE2JmWdutEya2w
+debug: setting request GET /socket.io/1/websocket/H8A1dBdE2JmWdutEya2w
+debug: set heartbeat interval for client H8A1dBdE2JmWdutEya2w
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hellow":"world"}]}
+{ my: 'data' }
+info: transport end (undefined)
+debug: set close timeout for client H8A1dBdE2JmWdutEya2w
+debug: cleared close timeout for client H8A1dBdE2JmWdutEya2w
+debug: cleared heartbeat interval for client H8A1dBdE2JmWdutEya2w
+debug: discarding transport
+debug: client authorized
+info: handshake authorized g6nKaqPdd1PiBYKoya2x
+debug: setting request GET /socket.io/1/websocket/g6nKaqPdd1PiBYKoya2x
+debug: set heartbeat interval for client g6nKaqPdd1PiBYKoya2x
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hellow":"world"}]}
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized u5T5e6O10CUE247l1iBr
+debug: setting request GET /socket.io/1/websocket/u5T5e6O10CUE247l1iBr
+debug: set heartbeat interval for client u5T5e6O10CUE247l1iBr
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hellow":"world"}]}
+{ my: 'data' }
+{ my: 'data' }
+info: transport end (undefined)
+debug: set close timeout for client u5T5e6O10CUE247l1iBr
+debug: cleared close timeout for client u5T5e6O10CUE247l1iBr
+debug: cleared heartbeat interval for client u5T5e6O10CUE247l1iBr
+debug: discarding transport
+debug: client authorized
+info: handshake authorized FEJbrUpQ4jdNQeZu1iBs
+debug: setting request GET /socket.io/1/websocket/FEJbrUpQ4jdNQeZu1iBs
+debug: set heartbeat interval for client FEJbrUpQ4jdNQeZu1iBs
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hellow":"world"}]}
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized o7lUNdgeDM1wwIb112My
+debug: setting request GET /socket.io/1/websocket/o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+debug: emitting heartbeat for client o7lUNdgeDM1wwIb112My
+debug: websocket writing 2::
+debug: set heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+debug: emitting heartbeat for client o7lUNdgeDM1wwIb112My
+debug: websocket writing 2::
+debug: set heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+debug: emitting heartbeat for client o7lUNdgeDM1wwIb112My
+debug: websocket writing 2::
+debug: set heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+debug: emitting heartbeat for client o7lUNdgeDM1wwIb112My
+debug: websocket writing 2::
+debug: set heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+debug: emitting heartbeat for client o7lUNdgeDM1wwIb112My
+debug: websocket writing 2::
+debug: set heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+debug: emitting heartbeat for client o7lUNdgeDM1wwIb112My
+debug: websocket writing 2::
+debug: set heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client o7lUNdgeDM1wwIb112My
+debug: set heartbeat interval for client o7lUNdgeDM1wwIb112My
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized 4xUMdROwEKGeteqa2q-z
+debug: setting request GET /socket.io/1/websocket/4xUMdROwEKGeteqa2q-z
+debug: set heartbeat interval for client 4xUMdROwEKGeteqa2q-z
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+info: transport end (undefined)
+debug: set close timeout for client 4xUMdROwEKGeteqa2q-z
+debug: cleared close timeout for client 4xUMdROwEKGeteqa2q-z
+debug: cleared heartbeat interval for client 4xUMdROwEKGeteqa2q-z
+debug: discarding transport
+debug: client authorized
+info: handshake authorized cSzacLrBPNgjAgbe2q-0
+debug: setting request GET /socket.io/1/websocket/cSzacLrBPNgjAgbe2q-0
+debug: set heartbeat interval for client cSzacLrBPNgjAgbe2q-0
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+debug: emitting heartbeat for client cSzacLrBPNgjAgbe2q-0
+debug: websocket writing 2::
+debug: set heartbeat timeout for client cSzacLrBPNgjAgbe2q-0
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client cSzacLrBPNgjAgbe2q-0
+debug: set heartbeat interval for client cSzacLrBPNgjAgbe2q-0
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized j6so6CyCoIXBRMEa20tz
+debug: setting request GET /socket.io/1/websocket/j6so6CyCoIXBRMEa20tz
+debug: set heartbeat interval for client j6so6CyCoIXBRMEa20tz
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+LOGGING START<
+{ my: 'data' }
+LOGGING END>
+LOGGING START<
+{ my: 'data' }
+LOGGING END>
+info: transport end (undefined)
+debug: set close timeout for client j6so6CyCoIXBRMEa20tz
+debug: cleared close timeout for client j6so6CyCoIXBRMEa20tz
+debug: cleared heartbeat interval for client j6so6CyCoIXBRMEa20tz
+debug: discarding transport
+debug: client authorized
+info: handshake authorized 36VmhS4QkxBwJEqu20t0
+debug: setting request GET /socket.io/1/websocket/36VmhS4QkxBwJEqu20t0
+debug: set heartbeat interval for client 36VmhS4QkxBwJEqu20t0
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+debug: emitting heartbeat for client 36VmhS4QkxBwJEqu20t0
+debug: websocket writing 2::
+debug: set heartbeat timeout for client 36VmhS4QkxBwJEqu20t0
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client 36VmhS4QkxBwJEqu20t0
+debug: set heartbeat interval for client 36VmhS4QkxBwJEqu20t0
+info: socket.io started
+Server is running on port 8080
+debug: client authorized
+info: handshake authorized V2JVOYsKPmosSUWC295j
+debug: setting request GET /socket.io/1/websocket/V2JVOYsKPmosSUWC295j
+debug: set heartbeat interval for client V2JVOYsKPmosSUWC295j
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+{ my: 'data' }
+info: transport end (undefined)
+debug: set close timeout for client V2JVOYsKPmosSUWC295j
+debug: cleared close timeout for client V2JVOYsKPmosSUWC295j
+debug: cleared heartbeat interval for client V2JVOYsKPmosSUWC295j
+debug: discarding transport
+debug: client authorized
+info: handshake authorized cXqK2NqeQRXBlOKh295k
+debug: setting request GET /socket.io/1/websocket/cXqK2NqeQRXBlOKh295k
+debug: set heartbeat interval for client cXqK2NqeQRXBlOKh295k
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+{ my: 'data' }
+debug: emitting heartbeat for client cXqK2NqeQRXBlOKh295k
+debug: websocket writing 2::
+debug: set heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: set heartbeat interval for client cXqK2NqeQRXBlOKh295k
+debug: emitting heartbeat for client cXqK2NqeQRXBlOKh295k
+debug: websocket writing 2::
+debug: set heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: set heartbeat interval for client cXqK2NqeQRXBlOKh295k
+debug: emitting heartbeat for client cXqK2NqeQRXBlOKh295k
+debug: websocket writing 2::
+debug: set heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: set heartbeat interval for client cXqK2NqeQRXBlOKh295k
+debug: emitting heartbeat for client cXqK2NqeQRXBlOKh295k
+debug: websocket writing 2::
+debug: set heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client cXqK2NqeQRXBlOKh295k
+debug: set heartbeat interval for client cXqK2NqeQRXBlOKh295k
+debug: client authorized
+info: handshake authorized IxFJwWkDgKfhmxtC295l
+debug: setting request GET /socket.io/1/websocket/IxFJwWkDgKfhmxtC295l
+debug: set heartbeat interval for client IxFJwWkDgKfhmxtC295l
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+{ my: 'data' }
+info: transport end (undefined)
+debug: set close timeout for client cXqK2NqeQRXBlOKh295k
+debug: cleared close timeout for client cXqK2NqeQRXBlOKh295k
+debug: cleared heartbeat interval for client cXqK2NqeQRXBlOKh295k
+debug: discarding transport
+info: transport end (undefined)
+debug: set close timeout for client IxFJwWkDgKfhmxtC295l
+debug: cleared close timeout for client IxFJwWkDgKfhmxtC295l
+debug: cleared heartbeat interval for client IxFJwWkDgKfhmxtC295l
+debug: discarding transport
+debug: client authorized
+info: handshake authorized 1jMGmqnae10DBtMS295m
+debug: setting request GET /socket.io/1/websocket/1jMGmqnae10DBtMS295m
+debug: set heartbeat interval for client 1jMGmqnae10DBtMS295m
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+{ my: 'data' }
+info: transport end (undefined)
+debug: set close timeout for client 1jMGmqnae10DBtMS295m
+debug: cleared close timeout for client 1jMGmqnae10DBtMS295m
+debug: cleared heartbeat interval for client 1jMGmqnae10DBtMS295m
+debug: discarding transport
+debug: client authorized
+info: handshake authorized y55iCq7w0v7Uqh9p295n
+debug: setting request GET /socket.io/1/websocket/y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: client authorized for 
+debug: websocket writing 1::
+debug: websocket writing 5:::{"name":"news","args":[{"hello":"world"}]}
+{ my: 'data' }
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
+debug: emitting heartbeat for client y55iCq7w0v7Uqh9p295n
+debug: websocket writing 2::
+debug: set heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: got heartbeat packet
+debug: cleared heartbeat timeout for client y55iCq7w0v7Uqh9p295n
+debug: set heartbeat interval for client y55iCq7w0v7Uqh9p295n
