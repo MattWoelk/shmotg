@@ -1,4 +1,3 @@
-
 var plots = []; //an array of all plots
 
 var supportsOrientationChange = "onorientationchange" in window,
