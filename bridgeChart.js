@@ -10,8 +10,13 @@
 //      Make fading-out lines transition their location, too.
 //      Make fading-in lines transition their location, too.
 //      Fix weird error where the 2nd and 3rd graphs change their visible values when moved (dragged) very slightly at the start with the mouse
+//      - This is inconsistent, and can happen for all graphs
+//      - The data from others seem to be affecting each other.
+//        - For instance, the first one can look like it has randomness before it is moved
 //      Make y axis not upside-down
+//      - related: 1st and 3rd quartiles, and min and max are reversed
 //      Turn off transition times when dragging somehow.
+//      Make transitions between levels smooth for outro AND intro
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
