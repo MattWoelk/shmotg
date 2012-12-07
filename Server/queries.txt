@@ -1,0 +1,254 @@
+Show databases 
+
+ rows:
+ [ { Database: 'information_schema' },
+  { Database: 'SPB_SHM_2012MM01' },
+  { Database: 'SPB_SHM_2012MM02' },
+  { Database: 'SPB_SHM_2012MM03' },
+  { Database: 'SPB_SHM_2012MM04' },
+  { Database: 'test' } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: '',
+    table: 'SCHEMATA',
+    orgTable: '',
+    name: 'Database',
+    orgName: 'SCHEMA_NAME',
+    filler1: <Buffer 0c>,
+    charsetNr: 33,
+    length: undefined,
+    type: 253,
+    flags: 1,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 192 } ] 
+
+
+Show tables FROM SPB_SHM_2012MM01 
+
+ rows:
+ [ { Tables_in_spb_shm_2012mm01: 'SPBRTData_0A' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0B' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0C' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0D' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0E' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0F' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_AA' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_CC' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_DD' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_Offset' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_Raw_AA' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_Raw_CC' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_Raw_DD' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_Truck' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_temp' },
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_temp2' } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: '',
+    table: 'TABLE_NAMES',
+    orgTable: '',
+    name: 'Tables_in_spb_shm_2012mm01',
+    orgName: 'TABLE_NAME',
+    filler1: <Buffer 0c>,
+    charsetNr: 33,
+    length: undefined,
+    type: 253,
+    flags: 1,
+    decimals: 0,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 192 } ] 
+
+
+Server is running on port 8080
+Describe SPBRTData_Truck 
+
+ rows:
+ [ { Field: 'NumStartTime_DD' , Type: 'bigint(20)'  , Null: 'NO'  , Key: 'PRI'  , Default: null , Extra: '' }   , 
+ { Field: 'NumEndTime_DD'     , Type: 'bigint(20)'  , Null: 'NO'  , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'NumStartTime_CC'   , Type: 'bigint(20)'  , Null: 'NO'  , Key: 'PRI'  , Default: null , Extra: '' }   , 
+ { Field: 'NumEndTime_CC'     , Type: 'bigint(20)'  , Null: 'NO'  , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'NumStartTime_AA'   , Type: 'bigint(20)'  , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'NumEndTime_AA'     , Type: 'bigint(20)'  , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'LaneNumber'        , Type: 'tinyint(4)'  , Null: 'NO'  , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'MaxSensorDD'       , Type: 'tinyint(4)'  , Null: 'NO'  , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'MaxSGDD'           , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'MaxSensorCC'       , Type: 'tinyint(4)'  , Null: 'NO'  , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'MaxSGCC'           , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'MaxSensorAA'       , Type: 'tinyint(4)'  , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'MaxSGAA'           , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder1'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder2'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder3'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder4'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirderDummy1'   , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder5'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder6'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder7'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder8'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder9'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder10'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder11'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder12'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder13'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder14'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder15'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder16'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder17'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder18'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder19'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder20'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder21'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder22'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder23'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder24'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirderDummy2'   , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap1'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap2'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap3'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap4'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap5'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap6'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'TempDummy1'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'TempFOSDummy1'     , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder25'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder26'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirderDummy3'   , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder27'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder28'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder29'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder30'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder31'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder32'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder33'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder34'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder35'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder36'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder37'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder38'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirderDummy4'   , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder39'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder40'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder41'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder42'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder43'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder44'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder45'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder46'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder47'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGgirder48'       , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap7'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap8'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap9'         , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap10'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap11'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'ESGstrap12'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'LVDT1'             , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'LVDT2'             , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'LVDT3'             , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'LVDT4'             , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'TempDummy3'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'TempDummy4'        , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' }   , 
+ { Field: 'TempFOSDummy4'     , Type: 'float(10,4)' , Null: 'YES' , Key: ''     , Default: null , Extra: '' } ]
+
+fields:
+ [ { catalog: 'def' , db: '' , table: 'COLUMNS' , orgTable: '' , name: 'Field'   , orgName: 'COLUMN_NAME'    , filler1: <Buffer 0c> , charsetNr: 33 , length: undefined , type: 253 , flags: 1  , decimals: 0 , filler2: <Buffer 00 00> , default: undefined , zeroFill: false , fieldLength: 192 }    , 
+ { catalog: 'def'   , db: '' , table: 'COLUMNS' , orgTable: '' , name: 'Type'    , orgName: 'COLUMN_TYPE'    , filler1: <Buffer 0c> , charsetNr: 33 , length: undefined , type: 252 , flags: 17 , decimals: 0 , filler2: <Buffer 00 00> , default: undefined , zeroFill: false , fieldLength: 589815 } , 
+ { catalog: 'def'   , db: '' , table: 'COLUMNS' , orgTable: '' , name: 'Null'    , orgName: 'IS_NULLABLE'    , filler1: <Buffer 0c> , charsetNr: 33 , length: undefined , type: 253 , flags: 1  , decimals: 0 , filler2: <Buffer 00 00> , default: undefined , zeroFill: false , fieldLength: 9 }      , 
+ { catalog: 'def'   , db: '' , table: 'COLUMNS' , orgTable: '' , name: 'Key'     , orgName: 'COLUMN_KEY'     , filler1: <Buffer 0c> , charsetNr: 33 , length: undefined , type: 253 , flags: 1  , decimals: 0 , filler2: <Buffer 00 00> , default: undefined , zeroFill: false , fieldLength: 9 }      , 
+ { catalog: 'def'   , db: '' , table: 'COLUMNS' , orgTable: '' , name: 'Default' , orgName: 'COLUMN_DEFAULT' , filler1: <Buffer 0c> , charsetNr: 33 , length: undefined , type: 252 , flags: 16 , decimals: 0 , filler2: <Buffer 00 00> , default: undefined , zeroFill: false , fieldLength: 589815 } , 
+ { catalog: 'def'   , db: '' , table: 'COLUMNS' , orgTable: '' , name: 'Extra'   , orgName: 'EXTRA'          , filler1: <Buffer 0c> , charsetNr: 33 , length: undefined , type: 253 , flags: 1  , decimals: 0 , filler2: <Buffer 00 00> , default: undefined , zeroFill: false , fieldLength: 60 } ]
+
+
+Server is running on port 8080
+SELECT ESGgirder1 FROM SPBRTData_Truck 
+
+ rows:
+ [ { ESGgirder1: 6.616 },
+  { ESGgirder1: 9.0565 },
+  { ESGgirder1: 6.178 },
+/////// ... MANY IN BETWEEN ... ///////
+  { ESGgirder1: 7.5185 },
+  { ESGgirder1: 14.7555 },
+  { ESGgirder1: 48.1155 },
+  { ESGgirder1: 25.4355 },
+  { ESGgirder1: 60.6755 } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'ESGgirder1',
+    orgName: 'ESGgirder1',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 4,
+    flags: 0,
+    decimals: 4,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 10 } ] 
+
+
+Server is running on port 8080
+SELECT ESGgirder1 FROM SPBRTData_Truck LIMIT 10 
+
+ rows:
+ [ { ESGgirder1: 6.616 },
+  { ESGgirder1: 9.0565 },
+  { ESGgirder1: 6.178 },
+  { ESGgirder1: 23.242 },
+  { ESGgirder1: 8.062 },
+  { ESGgirder1: 10.672 },
+  { ESGgirder1: 9.382 },
+  { ESGgirder1: 8.1075 },
+  { ESGgirder1: 7.75 },
+  { ESGgirder1: 7.7415 } ] 
+
+fields:
+ [ { catalog: 'def',
+    db: 'spb_shm_2012mm01',
+    table: 'SPBRTData_Truck',
+    orgTable: 'spbrtdata_truck',
+    name: 'ESGgirder1',
+    orgName: 'ESGgirder1',
+    filler1: <Buffer 0c>,
+    charsetNr: 63,
+    length: undefined,
+    type: 4,
+    flags: 0,
+    decimals: 4,
+    filler2: <Buffer 00 00>,
+    default: undefined,
+    zeroFill: false,
+    fieldLength: 10 } ] 
+
+
+Server is running on port 8080
+SELECT NumStartTime_DD, NumEndTime_DD, NumStartTime_CC, NumStartTime_CC, ESGgirder1 FROM SPBRTData_Truck LIMIT 15 
+
+ rows:
+ [ { NumStartTime_DD: '101005834154',
+    NumEndTime_DD:    '101005838589',
+    NumStartTime_CC:  '101005834344',
+    ESGgirder1: 6.616 },
+  { NumStartTime_DD: '101010511484',
+    NumEndTime_DD: '101010515909',
+    NumStartTime_CC: '101010511654',
+    ESGgirder1: 9.0565 },
+// .... //
+  { NumStartTime_DD: '101022230144',
+    NumEndTime_DD: '101022234949',
+    NumStartTime_CC: '101022230304',
+    ESGgirder1: 9.272 } ] 
+
+
