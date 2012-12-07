@@ -34,7 +34,7 @@
       </select>
 
 
-      <input type="checkbox"                   id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
+      <input type="checkbox"  id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
       <label for="isexpanded" id="expand-btn">Controls</label>
 
       </br> <!-- to keep the controls on the next line -->
@@ -43,12 +43,12 @@
         <form>
           <ul id="render-lines">
             Which functions<br />to render:
-            <li><label><input type="checkbox"                   value="rawData"/>Raw Data</label></li>
+            <li><label><input type="checkbox"         value="rawData"/>Raw Data</label></li>
             <li><label><input type="checkbox" checked value="averages"/>Averages</label></li>
             <li><label><input type="checkbox" checked value="mins"/>Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
             <li><label><input type="checkbox" checked value="maxes"/>Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-            <li><label><input type="checkbox"                   value="q3"/>1st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-            <li><label><input type="checkbox"                   value="q1"/>3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox"         value="q3"/>1st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox"         value="q1"/>3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
             <li><label><input type="checkbox" checked value="quartiles"/>Quartile Area</label></li>
           </ul>
 
@@ -62,8 +62,8 @@
 
           <ul id="render-method">
             Interpolation<br />Method:
-            <li><label><input type="radio" name="render-method" value="linear"/>Linear</li>
-            <li><label><input type="radio"  checked                  name="render-method" value="step-after"/>Step-After</li>
+            <li><label><input type="radio"         name="render-method" value="linear"/>Linear</li>
+            <li><label><input type="radio" checked name="render-method" value="step-after"/>Step-After</li>
             <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>
               <li><label><input type="radio"                   name="render-method" value="monotone"/>Monotone</li>-->
           </ul>
@@ -76,7 +76,7 @@
   </body>
   <!-- <script src="node_modules/socket.io/lib/socket.io.js"></script> -->
   <script src="node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
-  <script src="d3.v2.js"></script>
+  <script src="d3.v3.js"></script>
   <script src="underscore.js"></script>
   <script src="bridgeChart.js"></script>
   <script src="bridgecharts.js"></script>
