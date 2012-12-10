@@ -1,22 +1,28 @@
 // TODO:
+// BUGS AND IMPROVEMENTS:
+//      Make the levels-rendering dynamic; as needed
+//      Fix zooming so that it zooms to exactly where the cursor is
+//      Put all the examples in their own folder, etc. Cleanups.
+//      Make dragging move all plots, instead of just one
+//      Don't allow zooming in more than what the max bin size would allow
+//      Make delay in chart size change Android-only
+
+// FEATURE IDEAS:
+//      Threshold integration to show all points over a certain value in a certain color?
+//      - maybe just have a movable dashed line which a user can use to look at thresholds
+//      - maybe only show values which are above a threshold
 //      Bin Size of 1 should show data points as circles
 //      - mouseover data points to show exact values
 //      - ... maybe
-//      Threshold integration to show all points over a certain value in a certain colour?
-//      - maybe just have a movable dashed line which a user can use to look at thresholds
-//      - maybe only show values which are above a threshold
-//      Fix zooming so that it zooms to exactly where the cursor is
-//      Fix weird hangups on axes when browser size is changed
-//      Make fading-out lines transition their location, too.
-//      Make fading-in lines transition their location, too.
-//      Make y axis not upside-down
-//      - related: 1st and 3rd quartiles, and min and max are reversed
-//      Turn off transition times when dragging somehow.
+
+// PERHAPS DONE:
 //      Make transitions between levels smooth for outro AND intro
 //      Make dragging smooth (so, don't use a transition when the mouse is being used)
 //      - Solution: do it like the transition_chaining.html example
 //      - wherein there's a separate function (which + and - buttons would use)
 //      - which does a transition on the data.
+//      Make fading-out lines transition their location, too.
+//      Make fading-in lines transition their location, too.
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
@@ -140,36 +146,36 @@ var binnedLineChart = function () {
         keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
         properties : {
           rawData : {
-            colour: '#000',
+            color: '#000',
             opacity: 0.5
           },
           averages : {
-            colour : '#F00',
+            color : '#F00',
             opacity: 1,
-            func   : function (a, b) { return (a+b)/2; } //This is actually the mean AND the median ???
+            func   : function (a, b) { return (a+b)/2; }
           },
           maxes : {
-            colour : '#00B515',
+            color : '#00F',
             opacity: 1,
             func   : function (a, b) { return d3.max([a,b]); }
           },
           mins : {
-            colour : '#00F',
+            color : '#00B515',
             opacity: 1,
             func   : function (a, b) { return d3.min([a,b]); }
           },
           q1 : {
-            colour : '#800',
+            color : '#800',
             opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
           },
           q3 : {
-            colour : '#800',
+            color : '#800',
             opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
           },
           quartiles : {
-            colour : '#800',
+            color : '#800',
             opacity: 0.3,
             //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
           }
@@ -270,7 +276,7 @@ var binnedLineChart = function () {
       if (!yScale){ yScale = d3.scale.linear(); }
       yScale
         .domain([d3.min(data), d3.max(data)])
-        .range([0, height]);
+        .range([height, 0]);
 
       var fillScale = d3.scale.linear()
         .domain([0, d3.max(data)])
@@ -355,11 +361,11 @@ var binnedLineChart = function () {
 
       //update
       currentSelection
-        .transition().duration(500)
+        /////.transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
         .style("stroke-width", strokeWidth)
-        .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        .style("stroke", function (d, i) { return binData.properties[d.type].color; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
@@ -369,16 +375,16 @@ var binnedLineChart = function () {
         .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
         .style("stroke-width", strokeWidth)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        .style("stroke", function (d, i) { return binData.properties[d.type].color; })
         .attr("opacity", 0)
-        .transition().ease(easingMethod).duration(500)
+        /////.transition().ease(easingMethod).duration(500)
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit
       currentSelection.exit()
         .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-        .transition().ease(easingMethod).duration(500)
+        /////.transition().ease(easingMethod).duration(500)
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("opacity", 0)
         .remove();
@@ -391,31 +397,31 @@ var binnedLineChart = function () {
 
       //update area
       currentSelection
-        .transition().duration(500)
+        /////.transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-        //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].colour; })
+        //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].color; })
         .style("stroke-width", strokeWidth)
-        //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        //.style("stroke", function (d, i) { return binData.properties[d.type].color; })
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
       //enter area
       currentSelection.enter().append("path")
         .attr("class", "posArea")
-        .attr("fill", function (d, i) {return binData.properties[d.type].colour; })
+        .attr("fill", function (d, i) {return binData.properties[d.type].color; })
         .style("stroke-width", strokeWidth)
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
         //.attr("transform", function (d, i) {return "translate(" + margin.left + ", 0)"; })
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        //.style("stroke", function (d, i) { return binData.properties[d.type].colour; })
+        //.style("stroke", function (d, i) { return binData.properties[d.type].color; })
         .attr("opacity", 0.0)
-        .transition().duration(500).ease(easingMethod)
+        /////.transition().duration(500).ease(easingMethod)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
 
       //exit area
       currentSelection.exit()
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-        .transition().duration(500).ease(easingMethod)
+        /////.transition().duration(500).ease(easingMethod)
         .attr("opacity", 0.0)
         .remove();
 
@@ -428,7 +434,7 @@ var binnedLineChart = function () {
       xAxisContainer.attr("class", "x axis")
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
-      xAxisContainer.transition().duration(500).call(xAxis);
+      xAxisContainer/*.transition().duration(500)*/.call(xAxis);
 
       yAxis = d3.svg.axis()
         .scale(yScale)
@@ -440,7 +446,7 @@ var binnedLineChart = function () {
       yAxisContainer.attr("class", "y axis")
         .attr("transform", "translate(" + margin.left + ", " + 0 + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
-      yAxisContainer.transition().duration(500).call(yAxis);
+      yAxisContainer/*.transition().duration(500)*/.call(yAxis);
 
     });
   };
