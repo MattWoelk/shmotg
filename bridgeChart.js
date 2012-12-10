@@ -6,6 +6,7 @@
 //      Make dragging move all plots, instead of just one
 //      Don't allow zooming in more than what the max bin size would allow
 //      Make delay in chart size change Android-only
+//      Add back in the transitions for using the + and - buttons somehow :/
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -218,8 +219,6 @@ var binnedLineChart = function () {
 
       binData.levels[0].rawData = data;
 
-      //TODO: oldData = 
-
       // Bin the data into abstracted bins
       var binTheDataWithFunction = function (curLevelData, key, func) {
         var bDat = new Array();
@@ -351,8 +350,8 @@ var binnedLineChart = function () {
         .attr("height", height);
 
 
-      tmpObjectForKeyFanciness = dataObjectForKeyFanciness;
-      //TODO: use this ^^^ to deep copy whatever has been removed, so that we can have the entering paths transition properly.
+      //TODO: use this to deep copy whatever has been removed, so that we can have the entering paths transition properly.
+      //tmpObjectForKeyFanciness = dataObjectForKeyFanciness;
 
       //CURVES
       //Make and render the Positive curves.
@@ -491,14 +490,25 @@ var binnedLineChart = function () {
   };
 
   my.zoomout = function () {
-    xScale.domain([0, xScale.domain()[1] * 2]); // TODO: modify a constant instead? That way we can re-do each domain each time without worrying or hacking around.
-    xAxisScale.domain([0, xAxisScale.domain()[1] * 2]);
+    xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [xScale.domain()[0] - (xdist*1/2)
+                   , xScale.domain()[1] + (xdist*1/2)]);
+
+    xAxisdist = xAxisScale.domain()[1] - xAxisScale.domain()[0];
+    xAxisScale.domain( [xAxisScale.domain()[0] - (xAxisdist*1/2)
+                       , xAxisScale.domain()[1] + (xAxisdist*1/2)]);
+
     return my;
   };
 
   my.zoomin = function () {
-    xScale.domain([0, xScale.domain()[1] / 2]);
-    xAxisScale.domain([0, xAxisScale.domain()[1] / 2]);
+    xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [xScale.domain()[0] + (xdist*1/4)
+                   , xScale.domain()[1] - (xdist*1/4)]);
+
+    xAxisdist = xAxisScale.domain()[1] - xAxisScale.domain()[0];
+    xAxisScale.domain( [xAxisScale.domain()[0] + (xAxisdist*1/4)
+                       , xAxisScale.domain()[1] - (xAxisdist*1/4)]);
     return my;
   };
 
