@@ -45,17 +45,16 @@
             Which functions<br />to render:
             <li><label><input type="checkbox"         value="rawData"/>Raw Data</label></li>
             <li><label><input type="checkbox" checked value="averages"/>Averages</label></li>
-            <li><label><input type="checkbox" checked value="mins"/>Maximums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-            <li><label><input type="checkbox" checked value="maxes"/>Minimums</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-            <li><label><input type="checkbox"         value="q3"/>1st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
-            <li><label><input type="checkbox"         value="q1"/>3st Quartile</label></li> <!-- TODO: please fix! fix fix! These are backwards because the data is negative or something weird -->
+            <li><label><input type="checkbox" checked value="maxes"/>Maximums</label></li>
+            <li><label><input type="checkbox" checked value="mins"/>Minimums</label></li>
+            <li><label><input type="checkbox"         value="q1"/>1st Quartile</label></li>
+            <li><label><input type="checkbox"         value="q3"/>3st Quartile</label></li>
             <li><label><input type="checkbox" checked value="quartiles"/>Quartile Area</label></li>
           </ul>
 
           <ul id="render-depth">
             <!-- Idea: instead of all this, we could have more bullets which would be options for how many pixels per bin. It would automatically update still, but you'd have some control over when and how much this way. -->
             Maximum Bin<br />Render Size:
-            <! -- TODO: replace this with something made in d3 which is much more visual. Perhaps a slider which is the same size as the desired max bin size -->
             <br />
             <label><input type="range" min="1" max="200" id="renderdepth" value="32" style="width:200px"/>
           </ul>

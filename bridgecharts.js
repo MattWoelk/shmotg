@@ -42,10 +42,6 @@ socket.on('news', function (data) {
 
   var w = json.length;
 
-  var jAvg = -d3.mean(json, function (d) { return d.ESGgirder1; });
-  var jRange = d3.max(json, function (d) { return d.ESGgirder1; })
-    - d3.min(json, function (d) { return d.ESGgirder1; });
-
   var plot10 = binnedLineChart();
 
   var pl10 = d3.select("#charts").append("svg").datum(_.map(json, function (d) { return -d.ESGgirder1; })).call(plot10);
