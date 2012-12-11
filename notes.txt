@@ -1,0 +1,11 @@
+To communicate to/from server we need the following information:
+- which bin level
+- which sensor
+- date range
+- date and time have to be stored in all of this somehow
+  - this will affect how rendering is being done perhaps
+  - xScale will be affected
+- have to choose whether to render based on what we have, or to request more data
+  - the default rendering should be in the client, then requested to the server
+- when to free up ram by deleting things? Otherwise browsing for a long time will get ridiculous.
+  - only delete data lower than a certain level?

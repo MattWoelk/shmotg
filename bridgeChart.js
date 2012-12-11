@@ -5,8 +5,8 @@
 //      Put all the examples in their own folder, etc. Cleanups.
 //      Make dragging move all plots, instead of just one
 //      Don't allow zooming in more than what the max bin size would allow
-//      Make delay in chart size change Android-only
 //      Add back in the transitions for using the + and - buttons somehow :/
+//      Steal time format for x axis from here: http://bl.ocks.org/4015254
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -32,6 +32,7 @@ var binnedLineChart = function () {
 
   var height = 150 - margin.top - margin.bottom;
   var offsetWidth = document.getElementById("charts").offsetWidth;
+  //TODO: ^^ get rid of this??? What is it for???
   var width = offsetWidth - margin.left - margin.right;
 
   var howManyBinLevels = 6;
@@ -156,7 +157,7 @@ var binnedLineChart = function () {
             func   : function (a, b) { return (a+b)/2; }
           },
           maxes : {
-            color : '#00F',
+            color : '#000FB5',
             opacity: 1,
             func   : function (a, b) { return d3.max([a,b]); }
           },
@@ -443,7 +444,7 @@ var binnedLineChart = function () {
 
       if (!yAxisContainer) { yAxisContainer = chart.append("svg:g"); }
       yAxisContainer.attr("class", "y axis")
-        .attr("transform", "translate(" + margin.left + ", " + 0 + ")");
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(500)*/.call(yAxis);
 
@@ -462,6 +463,12 @@ var binnedLineChart = function () {
   my.height = function (value) {
     if (!arguments.length) return height;
     height = value;
+    return my;
+  };
+
+  my.margin_top = function (value) {
+    if (!arguments.length) return margin.top;
+    margin.top = value;
     return my;
   };
 
