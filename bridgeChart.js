@@ -325,7 +325,6 @@ var binnedLineChart = function () {
 
       //Set it's container's dimensions
       selection
-        .attr("height", height + margin.bottom)
         .attr("width", width);
 
       //Set the chart's dimensions
@@ -531,6 +530,12 @@ var binnedLineChart = function () {
   my.xScale = function (value) {
     if (!arguments.length) return xScale;
     xScale = value;
+    return my;
+  }
+
+  my.xAxisScale = function (value) {
+    if (!arguments.length) return xAxisScale;
+    xAxisScale = value;
     return my;
   }
 

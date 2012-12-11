@@ -20,7 +20,23 @@ path, line {
   shape-rendering: crispEdges;
 }
 
-rect {
+#chartdiv {
+  position: relative;
+}
+
+#charts {
+  overflow: none;
+}
+
+#zoom_svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#zoom_rect {
+  border-style: solid;
+  border-width: 1px;
   cursor: col-resize;
 }
 

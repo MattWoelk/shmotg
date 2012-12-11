@@ -10,10 +10,17 @@ window.addEventListener(orientationEvent, function() {
   }
 }, false);
 
+var zoom_svg = d3.select("#zoom_svg");
+var zoom_rect = d3.select("#zoom_rect");
+
 var redraw = function () {
   plots.forEach(function (plt) {
     plt.offsetWidth(document.getElementById("charts").offsetWidth).update();
   });
+  zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
+          .attr("height", document.getElementById("charts").offsetHeight);
+  zoom_rect.attr("width", document.getElementById("charts").offsetWidth)
+           .attr("height", document.getElementById("charts").offsetHeight);
 }
 
 var changeLines = function () {
@@ -61,6 +68,7 @@ socket.on('news', function (data) {
 
   var pl13 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
 
+  // TODO: make the margin_top values dynamic
   plot10.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
   plot11.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(120*1 + 10).update();
   plot12.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(120*2 + 10).update();
@@ -70,35 +78,37 @@ socket.on('news', function (data) {
   plots.push(plot12);
   plots.push(plot13);
   redraw();
+
+  d3.select("#charts").attr("height", 120*4); //TODO: make this dynamic
+
+  zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
+          .attr("height", document.getElementById("charts").offsetHeight);
+  zoom_rect.attr("stroke", "#000")
+    .attr("width", document.getElementById("charts").offsetWidth)
+    .attr("height", document.getElementById("charts").offsetHeight);
+  var zoom = d3.behavior.zoom()
+    .on("zoom", zoom_all);
+
+  zoom_rect.attr("fill", "rgba(0,0,0,0)")
+    .call(zoom);
+
+  var x = plot12.xScale();
+  var y = plot12.yScale();
+
+  zoom.x(x);
+  zoom.y(y);
+
+  function zoom_all() {
+    plots.forEach(function (plt) {
+      plt.xScale(x).xAxisScale(x).update();
+    });
+  }
+
+  //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
+  //
+  //var redraw = function () {
+  //  plots.forEach(function (plt) {
+  //    plt.offsetWidth(document.getElementById("charts").offsetWidth).update();
+  //  });
+  //}
 });
-
-
-//TODO: ongoing. get zoom to zoom ALL graphs
-var zoom_rect = d3.select("#charts").append("rect").attr("width", 700).attr("height", 700);
-var zoom = d3.behavior.zoom()
-  .on("zoom", zoom_all);
-
-zoom_rect.attr("fill", "rgba(0,0,0,0)")
-  .attr("z-index", 200)
-  .call(zoom);
-
-var x = plot12.xScale();
-var y = plot12.yScale();
-
-zoom.x(x);
-zoom.y(y);
-
-function zoom_all() {
-  console.log("yes: " + x.domain() + ", " + y.domain());
-  plots.forEach(function (plt) {
-    plt.xScale(x).update();
-  });
-}
-
-//chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
-//
-//var redraw = function () {
-//  plots.forEach(function (plt) {
-//    plt.offsetWidth(document.getElementById("charts").offsetWidth).update();
-//  });
-//}
