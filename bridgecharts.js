@@ -31,18 +31,6 @@ var changeLines = function () {
 
 document.getElementById("controls").addEventListener ("change", changeLines, false);
 
-var zoomout = function () {
-  plots.forEach(function (plt) {
-    plt.zoomout().update();
-  });
-}
-
-var zoomin = function () {
-  plots.forEach(function (plt) {
-    plt.zoomin().update();
-  });
-}
-
 
 var socket = io.connect('http://shm1.eng.umanitoba.ca:8080/');
 
@@ -102,6 +90,25 @@ socket.on('news', function (data) {
     plots.forEach(function (plt) {
       plt.xScale(x).xAxisScale(x).update();
     });
+  }
+
+  d3.select("#zoomin").on("click", zoomin);
+  d3.select("#zoomout").on("click", zoomout);
+
+  function zoomin() {
+    var xdist = x.domain()[1] - x.domain()[0];
+    x.domain( [ x.domain()[0] + (xdist*1/4)
+              , x.domain()[1] - (xdist*1/4) ]);
+    zoom.x(x);
+    zoom_all();
+  }
+
+  function zoomout() {
+    var xdist = x.domain()[1] - x.domain()[0];
+    x.domain( [ x.domain()[0] - (xdist*1/2)
+              , x.domain()[1] + (xdist*1/2) ]);
+    zoom.x(x);
+    zoom_all();
   }
 
   //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
