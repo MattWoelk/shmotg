@@ -34,7 +34,7 @@ var zoomin = function () {
 }
 
 
-var socket = io.connect('http://wpa-4-1283.cc.umanitoba.ca:8080/');
+var socket = io.connect('http://shm1.eng.umanitoba.ca:8080/');
 
 socket.on('news', function (data) {
   var json = JSON.parse(data);
