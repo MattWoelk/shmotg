@@ -20,7 +20,7 @@ path, line {
   shape-rendering: crispEdges;
 }
 
-.paths, .axis {
+rect {
   cursor: col-resize;
 }
 

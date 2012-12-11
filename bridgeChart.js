@@ -15,6 +15,9 @@
 //      Bin Size of 1 should show data points as circles
 //      - mouseover data points to show exact values
 //      - ... maybe
+//      Use nice sliders like these:
+//      - http://moebio.com/research/orderoutofchaos/
+//      - http://css-tricks.com/value-bubbles-for-range-inputs/
 
 // PERHAPS DONE:
 //      Make transitions between levels smooth for outro AND intro
@@ -331,7 +334,7 @@ var binnedLineChart = function () {
         .attr("height", height + margin.top + margin.bottom);
 
       //Allow dragging and zooming.
-      chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
+      //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
       //selection.call(d3.behavior.zoom().x(xAxisScale));
 
 
@@ -524,6 +527,18 @@ var binnedLineChart = function () {
     xAxisContainer.call(xAxis);
     my.update();
   };
+
+  my.xScale = function (value) {
+    if (!arguments.length) return xScale;
+    xScale = value;
+    return my;
+  }
+
+  my.yScale = function (value) {
+    if (!arguments.length) return yScale;
+    yScale = value;
+    return my;
+  }
 
   my.update = function () {
     my(slctn);
