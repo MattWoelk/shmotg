@@ -1,9 +1,0 @@
-So document.documentElement.clientWidth and -Height always gives the viewport dimensions, regardless of the dimensions of the <html> element.
-
-ON MOBILE:
-document.documentElement.clientWidth give the "layout viewport"'s dimensions
-window.innerWidth/Height give the visual viewport
-
-ON DESKTOP:
-document.documentElement.clientWidth without scrollbars
-window.innerWidth/Height with scrollbars
