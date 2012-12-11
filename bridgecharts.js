@@ -1,5 +1,4 @@
 var plots = []; //an array of all plots
-console.log("useragent: " + navigator.userAgent);
 
 var supportsOrientationChange = "onorientationchange" in window,
     orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
@@ -75,8 +74,26 @@ socket.on('news', function (data) {
 
 
 //TODO: ongoing. get zoom to zoom ALL graphs
+var zoom_rect = d3.select("#charts").append("rect").attr("width", 700).attr("height", 700);
 var zoom = d3.behavior.zoom()
-  .on("zoom", zoom);
+  .on("zoom", zoom_all);
+
+zoom_rect.attr("fill", "rgba(0,0,0,0)")
+  .attr("z-index", 200)
+  .call(zoom);
+
+var x = plot12.xScale();
+var y = plot12.yScale();
+
+zoom.x(x);
+zoom.y(y);
+
+function zoom_all() {
+  console.log("yes: " + x.domain() + ", " + y.domain());
+  plots.forEach(function (plt) {
+    plt.xScale(x).update();
+  });
+}
 
 //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
 //
