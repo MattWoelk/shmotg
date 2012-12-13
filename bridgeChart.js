@@ -1,17 +1,29 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
-//      Make the levels-rendering dynamic; as needed
 //      Fix zooming so that it zooms to exactly where the cursor is
-//      Put all the examples in their own folder, etc. Cleanups.
-//      Make dragging move all plots, instead of just one
+//      Make the levels-calculating dynamic; as needed
+//      Only render what is on-screen.
+//      - this involves dynamically changing the size of the curves based on what is on-screen.
+//      Make an animation to show that data is being downloaded
+//      - background could have a color sweet in from one side
+//        - so the whole thing would look like a progress bar, but classier
+//      - could have a spinner in some corner
+//      - could load data into the lines as it's generated
+//      - could have a flat, grey line which comes out of the last data point (or the average only or something) which would then transition to the right location and become the right colour as data comes in
 //      Don't allow zooming in more than what the max bin size would allow
-//      Add back in the transitions for using the + and - buttons somehow :/
 //      Steal time format for x axis from here: http://bl.ocks.org/4015254
+//      - wait until it's using the time data from the json feed
 //      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside eachother
 //      - They could be staggered, then. Which would look cool.
 //      - They could be appreviated
 //      - There could be less of them (most likely scenario)
+//      - could be worth a pull request. :D
 //      Whenever the server restarts, more graphs get overlapped
+//      - Fix this.
+//      Fix terrible-looking "crispEdges" in linear interpolation mode.
+
+// PERHAPS DONE:
+//      Put transitions back in for curves when zoom buttons are used. Tricky, but perhaps worth-it.
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -23,15 +35,6 @@
 //      Use nice sliders like these:
 //      - http://moebio.com/research/orderoutofchaos/
 //      - http://css-tricks.com/value-bubbles-for-range-inputs/
-
-// PERHAPS DONE:
-//      Make transitions between levels smooth for outro AND intro
-//      Make dragging smooth (so, don't use a transition when the mouse is being used)
-//      - Solution: do it like the transition_chaining.html example
-//      - wherein there's a separate function (which + and - buttons would use)
-//      - which does a transition on the data.
-//      Make fading-out lines transition their location, too.
-//      Make fading-in lines transition their location, too.
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
