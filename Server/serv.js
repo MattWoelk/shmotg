@@ -47,7 +47,7 @@ io.sockets.on('connection', function (socket) {
 //  res.end(); // if this isn't there, the client will just hang and wait for a long time
 //}).listen(8080);
 
-
+/*
 var send_to_user = "";
 
 var mysqlconnection = mysql.createConnection({

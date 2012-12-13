@@ -95,11 +95,18 @@ socket.on('news', function (data) {
   d3.select("#zoomin").on("click", zoomin);
   d3.select("#zoomout").on("click", zoomout);
 
+  function transition_all_next_time() {
+    plots.forEach(function (plt) {
+      plt.transition_the_next_time(true);
+    });
+  }
+
   function zoomin() {
     var xdist = x.domain()[1] - x.domain()[0];
     x.domain( [ x.domain()[0] + (xdist*1/4)
               , x.domain()[1] - (xdist*1/4) ]);
     zoom.x(x);
+    transition_all_next_time();
     zoom_all();
   }
 
@@ -108,6 +115,7 @@ socket.on('news', function (data) {
     x.domain( [ x.domain()[0] - (xdist*1/2)
               , x.domain()[1] + (xdist*1/2) ]);
     zoom.x(x);
+    transition_all_next_time();
     zoom_all();
   }
 
