@@ -7,6 +7,11 @@
 //      Don't allow zooming in more than what the max bin size would allow
 //      Add back in the transitions for using the + and - buttons somehow :/
 //      Steal time format for x axis from here: http://bl.ocks.org/4015254
+//      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside eachother
+//      - They could be staggered, then. Which would look cool.
+//      - They could be appreviated
+//      - There could be less of them (most likely scenario)
+//      Transition x axis on zoom change
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
