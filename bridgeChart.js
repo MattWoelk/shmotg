@@ -11,7 +11,7 @@
 //      - They could be staggered, then. Which would look cool.
 //      - They could be appreviated
 //      - There could be less of them (most likely scenario)
-//      Transition x axis on zoom change
+//      Whenever the server restarts, more graphs get overlapped
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -63,6 +63,8 @@ var binnedLineChart = function () {
   var dataObjectForKeyFanciness;
 
   var slctn; // Save the selection so that my.update() works.
+
+  var transition_the_next_time = false;
 
   // The following function returns something which looks like this:
   // [
@@ -441,7 +443,12 @@ var binnedLineChart = function () {
       xAxisContainer.attr("class", "x axis")
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
-      xAxisContainer/*.transition().duration(500)*/.call(xAxis);
+      if (transition_the_next_time) {
+        xAxisContainer.transition().duration(500).call(xAxis);
+        transition_the_next_time = false;
+      } else {
+        xAxisContainer/*.transition().duration(500)*/.call(xAxis);
+      }
 
       yAxis = d3.svg.axis()
         .scale(yScale)
@@ -535,6 +542,12 @@ var binnedLineChart = function () {
   my.xScale = function (value) {
     if (!arguments.length) return xScale;
     xScale = value;
+    return my;
+  }
+
+  my.transition_the_next_time = function (value) {
+    if (!arguments.length) return transition_the_next_time;
+    transition_the_next_time = value;
     return my;
   }
 
