@@ -32,7 +32,7 @@ var changeLines = function () {
 document.getElementById("controls").addEventListener ("change", changeLines, false);
 
 
-var socket = io.connect('http://shm1.eng.umanitoba.ca:8080/');
+var socket = io.connect('130.179.231.28:8080/');
 
 socket.on('news', function (data) {
   var json = JSON.parse(data);
