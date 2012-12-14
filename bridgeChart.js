@@ -4,7 +4,7 @@
 //      Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
-//      Make an animation to show that data is being downloaded
+//      Make a progress animation to show that data is being downloaded
 //      - background could have a color sweet in from one side
 //        - so the whole thing would look like a progress bar, but classier
 //      - could have a spinner in some corner
