@@ -21,6 +21,7 @@
 //      Whenever the server restarts, more graphs get overlapped
 //      - Fix this.
 //      Fix terrible-looking "crispEdges" in linear interpolation mode.
+//      Zooming is not calibrated anymore when window size is changed
 
 // PERHAPS DONE:
 //      Put transitions back in for curves when zoom buttons are used. Tricky, but perhaps worth-it.
