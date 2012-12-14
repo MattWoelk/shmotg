@@ -36,7 +36,7 @@ var y;
 
 function zoom_all() {
   plots.forEach(function (plt) {
-    plt.xScale(x).xAxisScale(x).update();
+    plt.xScale(x).xScale(x).update();
   });
 }
 
