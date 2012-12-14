@@ -4,7 +4,7 @@
 //      Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
-//      Make a progress animation to show that data is being downloaded
+//      Make an animation to show that data is being downloaded
 //      - background could have a color sweet in from one side
 //        - so the whole thing would look like a progress bar, but classier
 //      - could have a spinner in some corner
@@ -42,8 +42,9 @@ var binnedLineChart = function () {
   var margin = {top: 10, right: 10, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
+
+  // the width of the chart, including margins
   var offsetWidth = document.getElementById("charts").offsetWidth;
-  //TODO: ^^ get rid of this??? What is it for???
   var width = offsetWidth - margin.left - margin.right;
 
   var howManyBinLevels = 6;
@@ -59,7 +60,6 @@ var binnedLineChart = function () {
   var yAxis;
   var xScale;
   var yScale;
-  var xAxisScale;
 
   var chart;
   var paths;
@@ -282,10 +282,6 @@ var binnedLineChart = function () {
       xScale
         .range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
-      if (!xAxisScale) { xAxisScale = d3.scale.linear().domain([0, data.length - 1]); } //different than xScale because we want the right-most point to be at the right edge of the chart
-      xAxisScale
-        .range([0, width]);
-
       if (!yScale){ yScale = d3.scale.linear(); }
       yScale
         .domain([d3.min(data), d3.max(data)])
@@ -344,7 +340,6 @@ var binnedLineChart = function () {
 
       //Allow dragging and zooming.
       //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
-      //selection.call(d3.behavior.zoom().x(xAxisScale));
 
 
       //Make the clipPath (for cropping the paths)
@@ -440,7 +435,7 @@ var binnedLineChart = function () {
       // Draw Axes
       xAxis = d3.svg.axis()
         .tickSize(6)
-        .scale(xAxisScale).orient("bottom");
+        .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
       xAxisContainer.attr("class", "x axis")
@@ -518,10 +513,6 @@ var binnedLineChart = function () {
     xScale.domain( [xScale.domain()[0] - (xdist*1/2)
                    , xScale.domain()[1] + (xdist*1/2)]);
 
-    xAxisdist = xAxisScale.domain()[1] - xAxisScale.domain()[0];
-    xAxisScale.domain( [xAxisScale.domain()[0] - (xAxisdist*1/2)
-                       , xAxisScale.domain()[1] + (xAxisdist*1/2)]);
-
     return my;
   };
 
@@ -529,17 +520,7 @@ var binnedLineChart = function () {
     xdist = xScale.domain()[1] - xScale.domain()[0];
     xScale.domain( [xScale.domain()[0] + (xdist*1/4)
                    , xScale.domain()[1] - (xdist*1/4)]);
-
-    xAxisdist = xAxisScale.domain()[1] - xAxisScale.domain()[0];
-    xAxisScale.domain( [xAxisScale.domain()[0] + (xAxisdist*1/4)
-                       , xAxisScale.domain()[1] - (xAxisdist*1/4)]);
     return my;
-  };
-
-  my.zoom = function () {
-    xAxisScale.domain(xScale.domain());
-    xAxisContainer.call(xAxis);
-    my.update();
   };
 
   my.xScale = function (value) {
@@ -551,12 +532,6 @@ var binnedLineChart = function () {
   my.transition_the_next_time = function (value) {
     if (!arguments.length) return transition_the_next_time;
     transition_the_next_time = value;
-    return my;
-  }
-
-  my.xAxisScale = function (value) {
-    if (!arguments.length) return xAxisScale;
-    xAxisScale = value;
     return my;
   }
 
