@@ -1,6 +1,5 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
-//      Fix zooming so that it zooms to exactly where the cursor is
 //      Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
@@ -39,6 +38,7 @@
 var binnedLineChart = function () {
   var strokeWidth = 1;
 
+  // sync this with the one in bridgecharts.js
   var margin = {top: 10, right: 10, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
@@ -418,7 +418,6 @@ var binnedLineChart = function () {
         .attr("fill", function (d, i) {return binData.properties[d.type].color; })
         .style("stroke-width", strokeWidth)
         .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        //.attr("transform", function (d, i) {return "translate(" + margin.left + ", 0)"; })
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         //.style("stroke", function (d, i) { return binData.properties[d.type].color; })
         .attr("opacity", 0.0)
