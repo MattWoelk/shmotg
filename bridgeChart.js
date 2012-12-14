@@ -44,8 +44,8 @@ var binnedLineChart = function () {
   var height = 150 - margin.top - margin.bottom;
 
   // the width of the chart, including margins
-  var offsetWidth = document.getElementById("charts").offsetWidth;
-  var width = offsetWidth - margin.left - margin.right;
+  var container_width = document.getElementById("charts").offsetWidth;
+  var width = container_width - margin.left - margin.right;
 
   var howManyBinLevels = 6;
   var whichLevelsToRender = [1, 2, 3];
@@ -152,7 +152,7 @@ var binnedLineChart = function () {
     my.setSelectedLines();
     slctn = selection; // Saving the selection so that my.update() works.
 
-    width = offsetWidth - margin.left - margin.right;
+    width = container_width - margin.left - margin.right;
 
     selection.each(function (data) {
 
@@ -466,9 +466,9 @@ var binnedLineChart = function () {
 
   // == Getters and Setters ==
 
-  my.offsetWidth = function (value) {
-    if (!arguments.length) return offsetWidth;
-    offsetWidth = value;
+  my.container_width = function (value) {
+    if (!arguments.length) return container_width;
+    container_width = value;
     return my;
   };
 
