@@ -21,7 +21,28 @@ var redraw = function () {
           .attr("height", document.getElementById("charts").offsetHeight);
   zoom_rect.attr("width", document.getElementById("charts").offsetWidth)
            .attr("height", document.getElementById("charts").offsetHeight);
+
+  //update the zoom for the new plot size
+  update_zoom();
 }
+
+// this will be changed once 'news' is sent from the server
+// for now it's just a dummy
+var update_zoom = function () { return 0; };
+
+// these are the overall scales which are modified by zooming
+var x;
+var y;
+
+function zoom_all() {
+  plots.forEach(function (plt) {
+    plt.xScale(x).xAxisScale(x).update();
+  });
+}
+
+var zoom = d3.behavior.zoom()
+  .on("zoom", zoom_all);
+
 
 var changeLines = function () {
   plots.forEach(function (plt) {
@@ -74,23 +95,19 @@ socket.on('news', function (data) {
   zoom_rect.attr("stroke", "#000")
     .attr("width", document.getElementById("charts").offsetWidth)
     .attr("height", document.getElementById("charts").offsetHeight);
-  var zoom = d3.behavior.zoom()
-    .on("zoom", zoom_all);
 
   zoom_rect.attr("fill", "rgba(0,0,0,0)")
     .call(zoom);
 
-  var x = plot12.xScale();
-  var y = plot12.yScale();
+  //redefine this function now that we have data for it to work from
+  update_zoom = function () {
+    x = plot12.xScale();
+    y = plot12.yScale();
+    zoom.x(x);
+    zoom.y(y);
+  };
 
-  zoom.x(x);
-  zoom.y(y);
-
-  function zoom_all() {
-    plots.forEach(function (plt) {
-      plt.xScale(x).xAxisScale(x).update();
-    });
-  }
+  update_zoom();
 
   d3.select("#zoomin").on("click", zoomin);
   d3.select("#zoomout").on("click", zoomout);
