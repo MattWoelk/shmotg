@@ -1,5 +1,8 @@
 var plots = []; //an array of all plots
 
+// sync this with the one in bridgeChart.js
+var margin = {top: 10, right: 10, bottom: 25, left: 40};
+
 var supportsOrientationChange = "onorientationchange" in window,
     orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
 window.addEventListener(orientationEvent, function() {
@@ -19,8 +22,9 @@ var redraw = function () {
   });
   zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
           .attr("height", document.getElementById("charts").offsetHeight);
-  zoom_rect.attr("width", document.getElementById("charts").offsetWidth)
-           .attr("height", document.getElementById("charts").offsetHeight);
+  zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
+           .attr("height", document.getElementById("charts").offsetHeight)
+           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   //update the zoom for the new plot size
   update_zoom();
@@ -91,10 +95,12 @@ socket.on('news', function (data) {
   d3.select("#charts").attr("height", 120*4); //TODO: make this dynamic
 
   zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
-          .attr("height", document.getElementById("charts").offsetHeight);
-  zoom_rect.attr("stroke", "#000")
-    .attr("width", document.getElementById("charts").offsetWidth)
-    .attr("height", document.getElementById("charts").offsetHeight);
+          .attr("height", document.getElementById("charts").offsetHeight)
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+  zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
+    .attr("height", document.getElementById("charts").offsetHeight)
+    .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoom_rect.attr("fill", "rgba(0,0,0,0)")
     .call(zoom);
