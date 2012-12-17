@@ -11,7 +11,7 @@ body {
 }
 
 path, line {
-  shape-rendering: crispEdges;
+  /*shape-rendering: crispEdges;*/
 }
 
 .axis path, .axis line {
