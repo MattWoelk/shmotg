@@ -99,7 +99,7 @@ socket.on('news', function (data) {
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
-    .attr("height", document.getElementById("charts").offsetHeight)
+    .attr("height", document.getElementById("charts").offsetHeight - margin.top)
     .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoom_rect.attr("fill", "rgba(0,0,0,0)")
