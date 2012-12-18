@@ -17,9 +17,6 @@
 //      - They could be appreviated
 //      - There could be less of them (most likely scenario)
 //      - could be worth a pull request. :D
-//      Whenever the server restarts, more graphs get overlapped
-//      - Fix this.
-//      Fix terrible-looking "crispEdges" in linear interpolation mode.
 
 // PERHAPS DONE:
 //      Make transitions happen between levels on zoom button presses.

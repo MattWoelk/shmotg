@@ -58,6 +58,7 @@ document.getElementById("controls").addEventListener ("change", changeLines, fal
 
 
 var socket = io.connect('130.179.231.28:8080/');
+var first_time = true;
 
 socket.on('connect_failed', function () {
   console.log("connect_failed :(");
@@ -145,6 +146,11 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 });
 
 socket.on('news', function (data) {
+  //only do this once, so that plots don't get overlapped whenever the server restarts.
+  if (!first_time) {
+    return;
+  }
+  first_time = false;
 
   // delete all example plots -->
   _.times(plots.length, function (i) {
@@ -154,8 +160,6 @@ socket.on('news', function (data) {
   while (svg.lastChild) {
     svg.removeChild(svg.lastChild);
   }
-//  document.getElementById("chartdiv").innerHTML = '';
-//  d3.select("#chartdiv").append("svg").attr("id", "charts");
   plots = []; // delete the previous plots
   // <-- done deleting all example plots
 
