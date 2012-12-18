@@ -1,10 +1,10 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
-//      Make the levels-calculating dynamic; as needed
+//      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
 //      Make an animation to show that data is being downloaded
-//      - background could have a color sweet in from one side
+//      - background could have a color sweep in from one side
 //        - so the whole thing would look like a progress bar, but classier
 //      - could have a spinner in some corner
 //      - could load data into the lines as it's generated
@@ -32,6 +32,7 @@
 //      Use nice sliders like these:
 //      - http://moebio.com/research/orderoutofchaos/
 //      - http://css-tricks.com/value-bubbles-for-range-inputs/
+//      Make a small multiples mode which allows comparisons between years (or between whatever the user likes)
 
 var binnedLineChart = function () {
   var strokeWidth = 1;
@@ -46,7 +47,7 @@ var binnedLineChart = function () {
   var width = container_width - margin.left - margin.right;
 
   var howManyBinLevels = 6;
-  var whichLevelsToRender = [1, 2, 3];
+  var whichLevelsToRender = []; // example: [1, 2, 3];
   var whichLinesToRender = ['rawData', 'averages', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
   var easingMethod = 'cubic-out';
@@ -152,6 +153,7 @@ var binnedLineChart = function () {
 
     width = container_width - margin.left - margin.right;
 
+    // TODO: this 'data' object should contain something which explains the frequency of the data (or the level if we want to be a little more abstracted)
     selection.each(function (data) {
 
       //Where everything is stored:
