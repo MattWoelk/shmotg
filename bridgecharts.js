@@ -85,6 +85,10 @@ socket.on('disconnect', function () {
 // TODO: find a way to check if the server is down, so this doesn't always happen
 
 d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
+  if (error) {
+    return;
+  }
+
   var json = data;
 
   var plot10 = binnedLineChart();
