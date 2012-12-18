@@ -20,6 +20,11 @@ path, line {
   shape-rendering: crispEdges;
 }
 
+.axis path {
+  /* Don't show the axis lines. */
+  display: none;
+}
+
 #chartdiv {
   position: relative;
 }
