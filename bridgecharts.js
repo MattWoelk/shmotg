@@ -1,3 +1,7 @@
+// TODO
+// How to store all of these different layers of data:
+// - asdf
+
 var plots = []; //an array of all plots
 
 // sync this with the one in bridgeChart.js
@@ -150,6 +154,10 @@ socket.on('news', function (data) {
   if (!first_time) {
     return;
   }
+  // TODO: extract data about which "level" the data is for.
+  // SPB is 200Hz
+  // each data point should have 
+
   first_time = false;
 
   // delete all example plots -->
@@ -169,6 +177,10 @@ socket.on('news', function (data) {
   var plot10 = binnedLineChart();
 
   var pl10 = d3.select("#charts").append("g").datum(_.map(json, function (d) { return -d.ESGgirder1; })).call(plot10);
+  // TODO: NEW WAY:
+  //   Must have time_value be sent to us from the server for every data point.
+  //   This will accumulate data ????? Is this bad? Good/Necessary?
+  //var pl10 = d3.select("#charts").append("g").datum(_.map(json, function (d) { return {val: -d.ESGgirder1, time: d.time_value}; })).call(plot10);
 
   var plot11 = binnedLineChart();
 
