@@ -22,7 +22,8 @@
 //      Fix terrible-looking "crispEdges" in linear interpolation mode.
 
 // PERHAPS DONE:
-//      Put transitions back in for curves when zoom buttons are used. Tricky, but perhaps worth-it.
+//      Make transitions happen between levels on zoom button presses.
+//      - This now looks great, but is not COMPLETELY perfect. Making it perfect would require much work and storage and brain injury.
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -367,34 +368,64 @@ var binnedLineChart = function () {
         .data(makeDataObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
       //update
-      currentSelection
-        /////.transition().duration(500)
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-        .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-        .style("stroke-width", strokeWidth)
-        .style("stroke", function (d, i) { return binData.properties[d.type].color; })
-        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+      if (transition_the_next_time) {
+        currentSelection
+          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+          .style("stroke-width", strokeWidth)
+          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .transition().duration(500).ease(easingMethod)
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+      } else {
+        currentSelection
+          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+          .style("stroke-width", strokeWidth)
+          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+      }
 
       //enter
-      currentSelection.enter().append("path")
-        .attr("class", "posPath")
-        .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
-        .style("stroke-width", strokeWidth)
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .style("stroke", function (d, i) { return binData.properties[d.type].color; })
-        .attr("opacity", 0)
-        /////.transition().ease(easingMethod).duration(500)
-        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+      if (transition_the_next_time) {
+        currentSelection.enter().append("path")
+          .attr("class", "posPath")
+          .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
+          .style("stroke-width", strokeWidth)
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .attr("opacity", 0)
+          .transition().ease(easingMethod).duration(500)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+      } else {
+        currentSelection.enter().append("path")
+          .attr("class", "posPath")
+          .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
+          .style("stroke-width", strokeWidth)
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .attr("opacity", 0)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+      }
 
       //exit
-      currentSelection.exit()
-        .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-        /////.transition().ease(easingMethod).duration(500)
-        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("opacity", 0)
-        .remove();
+      if (transition_the_next_time) {
+        currentSelection.exit()
+          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+          .transition().ease(easingMethod).duration(500)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", 0)
+          .remove();
+      } else {
+        currentSelection.exit()
+          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", 0)
+          .remove();
+      }
 
 
       // AREAS
@@ -404,32 +435,54 @@ var binnedLineChart = function () {
 
       //update area
       currentSelection
-        /////.transition().duration(500)
         .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-        //.attr("fill", function (d, i) { console.log("this happens to "); console.log(d); return binData.properties[d.type].color; })
-        .style("stroke-width", strokeWidth)
-        //.style("stroke", function (d, i) { return binData.properties[d.type].color; })
-        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+        .style("stroke-width", strokeWidth);
+
+      if (transition_the_next_time) {
+        currentSelection.transition().duration(500).ease(easingMethod)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+      } else {
+        currentSelection.attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+      }
 
       //enter area
-      currentSelection.enter().append("path")
-        .attr("class", "posArea")
-        .attr("fill", function (d, i) {return binData.properties[d.type].color; })
-        .style("stroke-width", strokeWidth)
-        .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        //.style("stroke", function (d, i) { return binData.properties[d.type].color; })
-        .attr("opacity", 0.0)
-        /////.transition().duration(500).ease(easingMethod)
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+      if (transition_the_next_time) {
+        currentSelection.enter().append("path")
+          .attr("class", "posArea")
+          .attr("fill", function (d, i) {return binData.properties[d.type].color; })
+          .style("stroke-width", strokeWidth)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("opacity", 0.0)
+          .transition().duration(500).ease(easingMethod)
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+      } else {
+        currentSelection.enter().append("path")
+          .attr("class", "posArea")
+          .attr("fill", function (d, i) {return binData.properties[d.type].color; })
+          .style("stroke-width", strokeWidth)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+      }
 
       //exit area
-      currentSelection.exit()
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-        /////.transition().duration(500).ease(easingMethod)
-        .attr("opacity", 0.0)
-        .remove();
+      if (transition_the_next_time) {
+        currentSelection.exit()
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+          .transition().duration(500).ease(easingMethod)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", 0.0)
+          .remove();
+      } else {
+        currentSelection.exit()
+          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", 0.0)
+          .remove();
+      }
 
       // Draw Axes
       xAxis = d3.svg.axis()
@@ -441,8 +494,7 @@ var binnedLineChart = function () {
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       if (transition_the_next_time) {
-        xAxisContainer.transition().duration(500).call(xAxis);
-        transition_the_next_time = false;
+        xAxisContainer.transition().duration(500).ease(easingMethod).call(xAxis);
       } else {
         xAxisContainer/*.transition().duration(500)*/.call(xAxis);
       }
@@ -458,6 +510,11 @@ var binnedLineChart = function () {
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(500)*/.call(yAxis);
+
+      if (transition_the_next_time) {
+        // So that this only happens once per button click
+        transition_the_next_time = false;
+      }
 
     });
   };
