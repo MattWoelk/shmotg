@@ -3,6 +3,11 @@
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
+//      - might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
+//        - create a new data structure called "renderData"
+//        - add new functions which add data to binData (based on level and time)
+//          - might need to keep it all sorted by date
+//          - might need to change the way things are initialized
 //      Make an animation to show that data is being downloaded
 //      - background could have a color sweep in from one side
 //        - so the whole thing would look like a progress bar, but classier
