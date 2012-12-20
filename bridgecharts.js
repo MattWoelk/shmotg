@@ -1,7 +1,3 @@
-// TODO
-// How to store all of these different layers of data:
-// - asdf
-
 var plots = []; //an array of all plots
 
 // sync this with the one in bridgeChart.js
@@ -38,13 +34,15 @@ var redraw = function () {
 // for now it's just a dummy
 var update_zoom = function () { return 0; };
 
+
 // these are the overall scales which are modified by zooming
-var x;
-var y;
+// they should be set as the default for new plots
+var xScale = d3.scale.linear().domain([100, 900]).range([0, document.getElementById("charts").offsetWidth]);
+var yScale = d3.scale.linear();
 
 function zoom_all() {
   plots.forEach(function (plt) {
-    plt.xScale(x).xScale(x).update();
+    plt.xScale(xScale).xScale(xScale).update();
   });
 }
 
@@ -91,9 +89,10 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   var json = data;
 
-  var plot10 = binnedLineChart();
+  var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
+  plot10.xScale(xScale)
 
-  var pl10 = d3.select("#charts").append("g").datum(_.map(json, function (d) { return -d.ESGgirder1; })).call(plot10);
+  var pl10 = d3.select("#charts").append("g").call(plot10);
 
   plot10.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
 
@@ -160,7 +159,6 @@ socket.on('news', function (data) {
   }
   // TODO: extract data about which "level" the data is for.
   // SPB is 200Hz
-  // each data point should have 
 
   first_time = false;
 
@@ -178,38 +176,36 @@ socket.on('news', function (data) {
   var json = JSON.parse(data);
   socket.emit('ack', "Message received!");
 
-  var plot10 = binnedLineChart();
+  var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
+  plot10.xScale(xScale)
 
-  var pl10 = d3.select("#charts").append("g").datum(_.map(json, function (d) { return -d.ESGgirder1; })).call(plot10);
-  // TODO: NEW WAY:
-  //   Must have time_value be sent to us from the server for every data point.
-  //   This will accumulate data ????? Is this bad? Good/Necessary?
-  //var pl10 = d3.select("#charts").append("g").datum(_.map(json, function (d) { return {val: -d.ESGgirder1, time: d.time_value}; })).call(plot10);
+  var pl10 = d3.select("#charts").append("g").call(plot10);
 
-  var plot11 = binnedLineChart();
+  var plot11 = binnedLineChart(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; }));
+  plot11.xScale(xScale)
 
-  var pl11 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot11);
+  var pl11 = d3.select("#charts").append("g").call(plot11);
 
-  var plot12 = binnedLineChart();
-
-  var pl12 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot12);
-
-  var plot13 = binnedLineChart();
-
-  var pl13 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
+//  var plot12 = binnedLineChart();
+//
+//  var pl12 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot12);
+//
+//  var plot13 = binnedLineChart();
+//
+//  var pl13 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
 
   // TODO: make the margin_top values dynamic
   plot10.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
   plot11.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*1 + 10).update();
-  plot12.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*2 + 10).update();
-  plot13.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*3 + 10).update();
+//  plot12.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*2 + 10).update();
+//  plot13.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*3 + 10).update();
   plots.push(plot10);
   plots.push(plot11);
-  plots.push(plot12);
-  plots.push(plot13);
+//  plots.push(plot12);
+//  plots.push(plot13);
   redraw();
 
-  d3.select("#charts").attr("height", 120*4); //TODO: make this dynamic
+  d3.select("#charts").attr("height", 120*plots.length);
 
   zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
           .attr("height", document.getElementById("charts").offsetHeight)
@@ -224,10 +220,10 @@ socket.on('news', function (data) {
 
   //redefine this function now that we have data for it to work from
   update_zoom = function () {
-    x = plot12.xScale();
-    y = plot12.yScale();
-    zoom.x(x);
-    zoom.y(y);
+    xScale = plot10.xScale();
+    yScale = plot10.yScale();
+    zoom.x(xScale);
+    zoom.y(yScale);
   };
 
   update_zoom();
@@ -242,19 +238,19 @@ socket.on('news', function (data) {
   }
 
   function zoomin() {
-    var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] + (xdist*1/4)
-              , x.domain()[1] - (xdist*1/4) ]);
-    zoom.x(x);
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [ xScale.domain()[0] + (xdist*1/4)
+              , xScale.domain()[1] - (xdist*1/4) ]);
+    zoom.x(xScale);
     transition_all_next_time();
     zoom_all();
   }
 
   function zoomout() {
-    var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] - (xdist*1/2)
-              , x.domain()[1] + (xdist*1/2) ]);
-    zoom.x(x);
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [ xScale.domain()[0] - (xdist*1/2)
+              , xScale.domain()[1] + (xdist*1/2) ]);
+    zoom.x(xScale);
     transition_all_next_time();
     zoom_all();
   }
