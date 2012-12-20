@@ -601,6 +601,10 @@ var binnedLineChart = function () {
     my(slctn);
   };
 
+  my.deleteSelf = function () {
+    // Delete all elements and data that this chart has
+  };
+
   my.setSelectedLines = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     whichLinesToRender = a;
