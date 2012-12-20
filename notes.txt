@@ -22,6 +22,10 @@ Data is initialized
 The plot is formed, and its scales are set
 - renderData is checked to see if it contains the data for the current scale's level
 - if it is not all there, request it from binData
+- if binData does not have it, see if it can render it from what it knows
+  - if so, do it and then put it in renderData, and update the plot
+    - perhaps just return it, so that it's all synchronous and nice
+  - OR we could just have binData always be rendered as high as it can go
 - if binData does not have it, request it from the server
   - do this asynchronously
   - activate some sort of loading animation
