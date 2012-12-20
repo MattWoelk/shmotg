@@ -59,11 +59,108 @@ document.getElementById("controls").addEventListener ("change", changeLines, fal
 
 var socket = io.connect('130.179.231.28:8080/');
 
+socket.on('connect_failed', function () {
+  console.log("connect_failed :(");
+});
+
+socket.on('connecting', function () {
+  console.log("connecting :!");
+});
+
+socket.on('connect', function () {
+  console.log("connected !!");
+});
+
+socket.on('disconnect', function () {
+  console.log("disconnected !!");
+});
+
+
+// Set up the demo in case the server is down:
+// TODO: find a way to check if the server is down, so this doesn't always happen
+
+d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
+  var json = data;
+
+  var plot10 = binnedLineChart();
+
+  var pl10 = d3.select("#charts").append("g").datum(_.map(json, function (d) { return -d.ESGgirder1; })).call(plot10);
+
+  plot10.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
+
+  plots.push(plot10);
+
+  // TODO: trim this all; put it into a separate function, so both this and the from-server code run the same identical code.
+  redraw();
+
+  d3.select("#charts").attr("height", 120*plots.length); //TODO: make this dynamic
+
+  zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
+          .attr("height", document.getElementById("charts").offsetHeight)
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+  zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
+    .attr("height", document.getElementById("charts").offsetHeight - margin.top)
+    .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+  zoom_rect.attr("fill", "rgba(0,0,0,0)")
+    .call(zoom);
+
+  //redefine this function now that we have data for it to work from
+  update_zoom = function () {
+    x = plot10.xScale();
+    y = plot10.yScale();
+    zoom.x(x);
+    zoom.y(y);
+  };
+
+  update_zoom();
+
+  d3.select("#zoomin").on("click", zoomin);
+  d3.select("#zoomout").on("click", zoomout);
+
+  function transition_all_next_time() {
+    plots.forEach(function (plt) {
+      plt.transition_the_next_time(true);
+    });
+  }
+
+  function zoomin() {
+    var xdist = x.domain()[1] - x.domain()[0];
+    x.domain( [ x.domain()[0] + (xdist*1/4)
+              , x.domain()[1] - (xdist*1/4) ]);
+    zoom.x(x);
+    transition_all_next_time();
+    zoom_all();
+  }
+
+  function zoomout() {
+    var xdist = x.domain()[1] - x.domain()[0];
+    x.domain( [ x.domain()[0] - (xdist*1/2)
+              , x.domain()[1] + (xdist*1/2) ]);
+    zoom.x(x);
+    transition_all_next_time();
+    zoom_all();
+  }
+});
+
 socket.on('news', function (data) {
+
+  // delete all example plots -->
+  _.times(plots.length, function (i) {
+    delete plots[i];
+  });
+  svg = document.getElementById("charts");
+  while (svg.lastChild) {
+    svg.removeChild(svg.lastChild);
+  }
+//  document.getElementById("chartdiv").innerHTML = '';
+//  d3.select("#chartdiv").append("svg").attr("id", "charts");
+  plots = []; // delete the previous plots
+  // <-- done deleting all example plots
+
   var json = JSON.parse(data);
   socket.emit('ack', "Message received!");
-
-  var w = json.length;
 
   var plot10 = binnedLineChart();
 
