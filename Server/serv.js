@@ -47,14 +47,13 @@ io.sockets.on('connection', function (socket) {
 //  res.end(); // if this isn't there, the client will just hang and wait for a long time
 //}).listen(8080);
 
-
 /*
 var send_to_user = "";
 
 var mysqlconnection = mysql.createConnection({
   host     : 'shm1.ee.umanitoba.ca',
   user     : 'mattwoelk',
-  password : fs.readFileSync('ps').toString().trim(),
+  password : fs.readFileSync(__dirname + '/ps').toString().trim(),
   database : 'SPB_SHM_2012MM01',
 });
 
@@ -74,6 +73,7 @@ query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck';
 query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
 query = 'SELECT NumStartTime_DD, NumEndTime_DD, NumStartTime_CC, NumStartTime_CC, ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 15';
 query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
+query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_0A LIMIT 10'; // grab 10 entries (LIMIT 10)
 
 mysqlconnection.query(query, function (err, rows, fields) {
   if (err) throw err;
