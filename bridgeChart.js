@@ -382,12 +382,12 @@ var binnedLineChart = function (data) {
         //.transition().duration(500)
         .attr("width", width)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .attr("height", height);
+        .attr("height", document.getElementById("chart_container").offsetHeight); // this is a hack. it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
 
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
       paths
-        .attr("clip-path", "url(#clip)")
+        .attr("clip-path", "url(#clip)") // Firefox issue: We're using the same "clip" id more than once; once for each bridgeChart that exists. :S
         .attr("class", "paths")
         .attr("height", height);
 
