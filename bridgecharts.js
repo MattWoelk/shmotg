@@ -18,12 +18,12 @@ var zoom_rect = d3.select("#zoom_rect");
 
 var redraw = function () {
   plots.forEach(function (plt) {
-    plt.container_width(document.getElementById("charts").offsetWidth).update();
+    plt.container_width(document.getElementById("chart_container").offsetWidth).update();
   });
-  zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
-          .attr("height", document.getElementById("charts").offsetHeight);
-  zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
-           .attr("height", document.getElementById("charts").offsetHeight)
+  zoom_svg.attr("width", document.getElementById("chart_container").offsetWidth)
+          .attr("height", document.getElementById("chart_container").offsetHeight);
+  zoom_rect.attr("width", document.getElementById("chart_container").offsetWidth - margin.left - margin.right)
+           .attr("height", document.getElementById("chart_container").offsetHeight)
            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   //update the zoom for the new plot size
@@ -37,7 +37,7 @@ var update_zoom = function () { return 0; };
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
-var xScale = d3.scale.linear().domain([100, 900]).range([0, document.getElementById("charts").offsetWidth]);
+var xScale = d3.scale.linear().domain([100, 900]).range([0, document.getElementById("chart_container").offsetWidth]);
 var yScale = d3.scale.linear();
 
 function zoom_all() {
@@ -94,8 +94,12 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   var pl10 = d3.select("#charts").append("g").call(plot10);
 
-  plot10.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
+  plot10.container_width(document.getElementById("chart_container").offsetWidth).height(75).margin_top(10).update();
 
+  //plot10.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(10).update();
+  //plot11.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*1 + 10).update();
+  //plot12.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*2 + 10).update();
+  //plot13.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*3 + 10).update();
   plots.push(plot10);
 
   // TODO: trim this all; put it into a separate function, so both this and the from-server code run the same identical code.
@@ -103,12 +107,12 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   d3.select("#charts").attr("height", 120*plots.length); //TODO: make this dynamic
 
-  zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
-          .attr("height", document.getElementById("charts").offsetHeight)
+  zoom_svg.attr("width", document.getElementById("chart_container").offsetWidth)
+          .attr("height", document.getElementById("chart_container").offsetHeight)
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-  zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
-    .attr("height", document.getElementById("charts").offsetHeight - margin.top)
+  zoom_rect.attr("width", document.getElementById("chart_container").offsetWidth - margin.left - margin.right)
+    .attr("height", document.getElementById("chart_container").offsetHeight - margin.top)
     .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoom_rect.attr("fill", "rgba(0,0,0,0)")
@@ -195,8 +199,8 @@ socket.on('news', function (data) {
 //  var pl13 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
 
   // TODO: make the margin_top values dynamic
-  plot10.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
-  plot11.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*1 + 10).update();
+  plot10.container_width(document.getElementById("chart_container").offsetWidth).height(75).margin_top(10).update();
+  plot11.container_width(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*1 + 10).update();
 //  plot12.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*2 + 10).update();
 //  plot13.container_width(document.getElementById("charts").offsetWidth).height(75).margin_top(120*3 + 10).update();
   plots.push(plot10);
@@ -205,14 +209,14 @@ socket.on('news', function (data) {
 //  plots.push(plot13);
   redraw();
 
-  d3.select("#charts").attr("height", 120*plots.length);
+  d3.select("#charts").attr("height", 120*plots.length).attr("width", document.getElementById("chart_container").offsetWidth);
 
-  zoom_svg.attr("width", document.getElementById("charts").offsetWidth)
-          .attr("height", document.getElementById("charts").offsetHeight)
+  zoom_svg.attr("width", document.getElementById("chart_container").offsetWidth)
+          .attr("height", document.getElementById("chart_container").offsetHeight)
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-  zoom_rect.attr("width", document.getElementById("charts").offsetWidth - margin.left - margin.right)
-    .attr("height", document.getElementById("charts").offsetHeight - margin.top)
+  zoom_rect.attr("width", document.getElementById("chart_container").offsetWidth - margin.left - margin.right)
+    .attr("height", document.getElementById("chart_container").offsetHeight - margin.top)
     .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoom_rect.attr("fill", "rgba(0,0,0,0)")

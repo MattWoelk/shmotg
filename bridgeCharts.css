@@ -30,7 +30,7 @@ path, line {
   stroke-dasharray: 3, 3;
 }
 
-#chartdiv {
+#chart_container {
   position: relative;
 }
 
