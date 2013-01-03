@@ -20,15 +20,16 @@
       }
     </script>
 
-    <div id="chart_container" style="overflow:auto; width:70%; overflow:none; float:left;">
+    <div id="chart_container" style="overflow:none; width:70%; overflow:none; float:left;">
       <svg id="charts"></svg>
+      <svg id="zoom_svg"><rect id="zoom_rect" /></svg>
     </div>
     <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
     <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
     <div id="diagram" style="overflow:none; width:30%; float:right;"><p>This is where a nice bridge-looking diagram will be</p></div>
     <div id="undercharts" style="clear:left">
-      <button id='zoomin' onclick='zoomin()' title="zoom in">+</button>
-      <button id='zoomout' onclick='zoomout()' title="zoom out">-</button>
+      <button id='zoomin' title="zoom in">+</button>
+      <button id='zoomout' title="zoom out">-</button>
       Speed: <input type="number" name="quantity" min="1" max="5" value="0" title="0 means infinity" /><select id = "speedunits">
         <option value = "kmph">km/h</option>
         <option value = "mps">m/s</option>
@@ -36,7 +37,7 @@
       </select>
 
 
-      <input type="checkbox"  id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
+      <input type="checkbox" checked id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
       <label for="isexpanded" id="expand-btn">Controls</label>
 
       </br> <!-- to keep the controls on the next line -->

@@ -11,7 +11,7 @@ body {
 }
 
 path, line {
-  shape-rendering: crispEdges;
+  /*shape-rendering: crispEdges;*/
 }
 
 .axis path, .axis line {
@@ -20,7 +20,28 @@ path, line {
   shape-rendering: crispEdges;
 }
 
-.paths, .axis {
+.axis path {
+  /* Don't show the axis lines. */
+  display: none;
+}
+
+#chart_container {
+  position: relative;
+}
+
+#charts {
+  overflow: none;
+}
+
+#zoom_svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#zoom_rect {
+  border-style: solid;
+  border-width: 1px;
   cursor: col-resize;
 }
 

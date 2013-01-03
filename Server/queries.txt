@@ -30,15 +30,15 @@ fields:
 Show tables FROM SPB_SHM_2012MM01 
 
  rows:
- [ { Tables_in_spb_shm_2012mm01: 'SPBRTData_0A' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0B' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0C' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0D' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0E' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0F' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_AA' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_CC' },
-  { Tables_in_spb_shm_2012mm01: 'SPBRTData_DD' },
+ [ { Tables_in_spb_shm_2012mm01: 'SPBRTData_0A' },  # raw data. days 01-05  of current month
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0B' },   # raw data. days 06-10  of current month
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0C' },   # raw data. days 11-15  of current month
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0D' },   # raw data. days 16-20  of current month
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0E' },   # raw data. days 21-25  of current month
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_0F' },   # raw data. days 26-end of current month
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_AA' },   # raw event data of section AA
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_CC' },   # raw event data of section CC
+  { Tables_in_spb_shm_2012mm01: 'SPBRTData_DD' },   # raw event data of section DD
   { Tables_in_spb_shm_2012mm01: 'SPBRTData_Offset' },
   { Tables_in_spb_shm_2012mm01: 'SPBRTData_Raw_AA' },
   { Tables_in_spb_shm_2012mm01: 'SPBRTData_Raw_CC' },
