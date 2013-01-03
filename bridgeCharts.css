@@ -25,6 +25,11 @@ path, line {
   display: none;
 }
 
+.y.axis line {
+  stroke: #999;
+  stroke-dasharray: 3, 3;
+}
+
 #chartdiv {
   position: relative;
 }
