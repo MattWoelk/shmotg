@@ -536,11 +536,12 @@ var binnedLineChart = function (data) {
         .scale(yScale)
         .ticks(3)
         .tickSubdivide(true)
+        .tickSize(width, 0, 0) // major, minor, end
         .orient("left");
 
       if (!yAxisContainer) { yAxisContainer = chart.append("svg:g"); }
       yAxisContainer.attr("class", "y axis")
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+        .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(500)*/.call(yAxis);
 
