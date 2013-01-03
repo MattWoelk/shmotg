@@ -31,7 +31,7 @@ var binnedLineChart = function () {
   var margin = {top: 10, right: 10, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
-  var offsetWidth = document.getElementById("charts").offsetWidth;
+  var offsetWidth = document.getElementById("chart_container").offsetWidth;
   //TODO: ^^ get rid of this??? What is it for???
   var width = offsetWidth - margin.left - margin.right;
 

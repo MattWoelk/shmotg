@@ -13,7 +13,7 @@ window.addEventListener(orientationEvent, function() {
 
 var redraw = function () {
   plots.forEach(function (plt) {
-    plt.offsetWidth(document.getElementById("charts").offsetWidth).update();
+    plt.offsetWidth(document.getElementById("chart_container").offsetWidth).update();
   });
 }
 
@@ -38,7 +38,7 @@ var zoomin = function () {
 }
 
 
-var socket = io.connect('http://wpa-4-1283.cc.umanitoba.ca:8080/');
+var socket = io.connect('130.179.231.28:8080');
 
 socket.on('news', function (data) {
   var json = JSON.parse(data);
@@ -62,10 +62,10 @@ socket.on('news', function (data) {
 
   var pl13 = d3.select("#charts").append("g").datum(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; })).call(plot13);
 
-  plot10.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(10).update();
-  plot11.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(120*1 + 10).update();
-  plot12.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(120*2 + 10).update();
-  plot13.offsetWidth(document.getElementById("charts").offsetWidth).height(75).margin_top(120*3 + 10).update();
+  plot10.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(10).update();
+  plot11.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*1 + 10).update();
+  plot12.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*2 + 10).update();
+  plot13.offsetWidth(document.getElementById("chart_container").offsetWidth).height(75).margin_top(120*3 + 10).update();
   plots.push(plot10);
   plots.push(plot11);
   plots.push(plot12);
