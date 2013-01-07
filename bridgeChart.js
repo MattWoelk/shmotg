@@ -1,5 +1,6 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
+//      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
@@ -17,9 +18,9 @@
 //      Don't allow zooming in more than what the max bin size would allow
 //      Steal time format for x axis from here: http://bl.ocks.org/4015254
 //      - wait until it's using the time data from the json feed
-//      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside eachother
+//      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside each other
 //      - They could be staggered, then. Which would look cool.
-//      - They could be appreviated
+//      - They could be abbreviated
 //      - There could be less of them (most likely scenario)
 //      - could be worth a pull request. :D
 
@@ -72,6 +73,82 @@ var binnedLineChart = function (data) {
   var slctn; // Save the selection so that my.update() works.
 
   var transition_the_next_time = false;
+
+
+  //Where everything is stored:
+  var binData = {
+    keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
+    properties : {
+      rawData : {
+        color: '#000',
+        opacity: 0.5
+      },
+      averages : {
+        color : '#F00',
+        opacity: 1,
+        func   : function (a, b) { return (a+b)/2; }
+      },
+      maxes : {
+        color : '#000FB5',
+        opacity: 1,
+        func   : function (a, b) { return d3.max([a,b]); }
+      },
+      mins : {
+        color : '#00B515',
+        opacity: 1,
+        func   : function (a, b) { return d3.min([a,b]); }
+      },
+      q1 : {
+        color : '#800',
+        opacity: 1,
+        func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
+      },
+      q3 : {
+        color : '#800',
+        opacity: 1,
+        func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
+      },
+      quartiles : {
+        color : '#800',
+        opacity: 0.3,
+        //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
+      }
+    },
+    levels : [
+      { // level 0
+        rawData   : new Array(),
+        rawDatad0 : new Array(),
+        average   : new Array(),
+        averaged0 : new Array(),
+        maxes     : new Array(),
+        maxesd0   : new Array(),
+        mins      : new Array(),
+        minsd0    : new Array(),
+        q1        : new Array(),
+        q1d0      : new Array(),
+        q2        : new Array(),
+        q2d0      : new Array(),
+        q3        : new Array(),
+        q3d0      : new Array(),
+        quartilesd0: new Array()
+      },
+      { // level 1
+        average   : new Array(),
+        averaged0 : new Array(),
+        maxes     : new Array(),
+        maxesd0   : new Array(),
+        mins      : new Array(),
+        minsd0    : new Array(),
+        q1        : new Array(),
+        q1d0      : new Array(),
+        q2        : new Array(),
+        q2d0      : new Array(),
+        q3        : new Array(),
+        q3d0      : new Array(),
+        quartilesd0: new Array()
+      } // etc.
+    ]
+  }
 
   // The following function returns something which looks like this:
   // [
@@ -151,128 +228,52 @@ var binnedLineChart = function (data) {
     return [first, second];
   };
 
-
-  //Where everything is stored:
-  var binData = {
-    keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
-    properties : {
-      rawData : {
-        color: '#000',
-        opacity: 0.5
-      },
-      averages : {
-        color : '#F00',
-        opacity: 1,
-        func   : function (a, b) { return (a+b)/2; }
-      },
-      maxes : {
-        color : '#000FB5',
-        opacity: 1,
-        func   : function (a, b) { return d3.max([a,b]); }
-      },
-      mins : {
-        color : '#00B515',
-        opacity: 1,
-        func   : function (a, b) { return d3.min([a,b]); }
-      },
-      q1 : {
-        color : '#800',
-        opacity: 1,
-        func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
-      },
-      q3 : {
-        color : '#800',
-        opacity: 1,
-        func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
-      },
-      quartiles : {
-        color : '#800',
-        opacity: 0.3,
-        //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
+  // Bin the data into abstracted bins
+  var binTheDataWithFunction = function (curLevelData, key, func) {
+    var bDat = new Array();
+    var i = 0;
+    for(i = 0; i < curLevelData[key].length; i = i + 2){
+      if (curLevelData[key][i+1]){
+        if (key === 'q1' || key === 'q3') {
+          bDat.push( func(
+                curLevelData['q1'][i],
+                curLevelData['q1'][i+1],
+                curLevelData['q3'][i],
+                curLevelData['q3'][i+1])); // This is messy and depends on a lot of things
+        }else{
+          bDat.push( func(
+                curLevelData[key][i],
+                curLevelData[key][i+1]));
+        }
+      }else{
+        bDat.push( curLevelData[key][i] );
       }
-    },
-    levels : [
-      { // level 0
-        rawData   : new Array(),
-        rawDatad0 : new Array(),
-        average   : new Array(),
-        averaged0 : new Array(),
-        maxes     : new Array(),
-        maxesd0   : new Array(),
-        mins      : new Array(),
-        minsd0    : new Array(),
-        q1        : new Array(),
-        q1d0      : new Array(),
-        q2        : new Array(),
-        q2d0      : new Array(),
-        q3        : new Array(),
-        q3d0      : new Array(),
-        quartilesd0: new Array()
-      },
-      { // level 1
-        average   : new Array(),
-        averaged0 : new Array(),
-        maxes     : new Array(),
-        maxesd0   : new Array(),
-        mins      : new Array(),
-        minsd0    : new Array(),
-        q1        : new Array(),
-        q1d0      : new Array(),
-        q2        : new Array(),
-        q2d0      : new Array(),
-        q3        : new Array(),
-        q3d0      : new Array(),
-        quartilesd0: new Array()
-      } // etc.
-    ]
+    }
+    return bDat;
+  };
+
+  // populate the binned datas (binData):
+
+  binData.levels[0].rawData = data;
+
+  var j = 0;
+  for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
+    binData.levels.push({});
   }
 
-      // Bin the data into abstracted bins
-      var binTheDataWithFunction = function (curLevelData, key, func) {
-        var bDat = new Array();
-        var i = 0;
-        for(i = 0; i < curLevelData[key].length; i = i + 2){
-          if (curLevelData[key][i+1]){
-            if (key === 'q1' || key === 'q3') {
-              bDat.push( func(
-                    curLevelData['q1'][i],
-                    curLevelData['q1'][i+1],
-                    curLevelData['q3'][i],
-                    curLevelData['q3'][i+1])); // This is messy and depends on a lot of things
-            }else{
-              bDat.push( func(
-                    curLevelData[key][i],
-                    curLevelData[key][i+1]));
-            }
-          }else{
-            bDat.push( curLevelData[key][i] );
-          }
-        }
-        return bDat;
-      };
+  for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
+    binData.levels[0][binData.keys[keyValue]] = data;
+  }
 
-      // populate the binned datas (binData):
+  for (j = 1; j < howManyBinLevels; j++){ // for each bin level
+    for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
+      var key = binData.keys[keyValue];
+      binData.levels[0][key] = data;
 
-      binData.levels[0].rawData = data;
-
-      var j = 0;
-      for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
-        binData.levels.push({});
-      }
-
-      for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
-        binData.levels[0][binData.keys[keyValue]] = data;
-      }
-
-      for (j = 1; j < howManyBinLevels; j++){ // for each bin level
-        for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
-          var key = binData.keys[keyValue];
-          binData.levels[0][key] = data;
-
-          binData.levels[j][key] = new Array(0);
-          binData.levels[j][key] = binTheDataWithFunction(binData.levels[j-1], key, binData.properties[key]['func']);
-        }
-      }
+      binData.levels[j][key] = new Array(0);
+      binData.levels[j][key] = binTheDataWithFunction(binData.levels[j-1], key, binData.properties[key]['func']);
+    }
+  }
 
   var my = function (selection) {
     my.setSelectedLines();
@@ -393,12 +394,13 @@ var binnedLineChart = function (data) {
 
 
       //TODO: use this to deep copy whatever has been removed, so that we can have the entering paths transition properly.
+      dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
       //tmpObjectForKeyFanciness = dataObjectForKeyFanciness;
 
       //CURVES
       //Make and render the Positive curves.
       var currentSelection = paths.selectAll(".posPath")
-        .data(makeDataObjectForKeyFanciness(binData), function (d) {return d.type + d.which + d.interpolate; });
+        .data(dataObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
 
       //update
       if (transition_the_next_time) {
@@ -429,6 +431,13 @@ var binnedLineChart = function (data) {
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
           .style("stroke", function (d, i) { return binData.properties[d.type].color; })
           .attr("opacity", 0)
+          //TODO:
+          //render the "d" where it would have been in the previous location
+          //  this will use d.which, d.type + "d0"
+          //  we need to store:
+          //  - the previous data domain (from xScale).
+          //  - the previous render level
+          //  - (Won't Work: ) OR the previous renderData along with the previous data domain
           .transition().ease(easingMethod).duration(500)
           .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
