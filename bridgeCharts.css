@@ -32,6 +32,7 @@ path, line {
 
 #chart_container {
   position: relative;
+  overflow: none;
 }
 
 #charts {

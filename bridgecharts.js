@@ -14,12 +14,15 @@ window.addEventListener(orientationEvent, function() {
 }, false);
 
 var zoom_svg = d3.select("#zoom_svg");
+var chart_svg = d3.select("#charts");
 var zoom_rect = d3.select("#zoom_rect");
 
 var redraw = function () {
   plots.forEach(function (plt) {
     plt.container_width(document.getElementById("chart_container").offsetWidth).update();
   });
+  chart_svg = d3.select("#charts");
+  chart_svg.attr("width", document.getElementById("chart_container").offsetWidth);
   zoom_svg.attr("width", document.getElementById("chart_container").offsetWidth)
           .attr("height", document.getElementById("chart_container").offsetHeight);
   zoom_rect.attr("width", document.getElementById("chart_container").offsetWidth - margin.left - margin.right)
@@ -159,8 +162,8 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   function scrollleft() {
     var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] - (xdist*1/2)
-              , x.domain()[1] - (xdist*1/2) ]);
+    x.domain( [ x.domain()[0] + (xdist*1/2)
+              , x.domain()[1] + (xdist*1/2) ]);
     zoom.x(x);
     transition_all_next_time();
     zoom_all();
@@ -168,8 +171,8 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   function scrollright() {
     var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] + (xdist*1/2)
-              , x.domain()[1] + (xdist*1/2) ]);
+    x.domain( [ x.domain()[0] - (xdist*1/2)
+              , x.domain()[1] - (xdist*1/2) ]);
     zoom.x(x);
     transition_all_next_time();
     zoom_all();
