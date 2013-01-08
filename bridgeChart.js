@@ -1,6 +1,7 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
+//      When rendering on chrome, sometimes the new data arrives before the old one is rendered. This should be synchronous somehow instead so that they don't both render and overlap each other.
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
@@ -23,10 +24,6 @@
 //      - They could be abbreviated
 //      - There could be less of them (most likely scenario)
 //      - could be worth a pull request. :D
-
-// PERHAPS DONE:
-//      Make transitions happen between levels on zoom button presses.
-//      - This now looks great, but is not COMPLETELY perfect. Making it perfect would require much work and storage and brain injury.
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -56,7 +53,9 @@ var binnedLineChart = function (data) {
   var whichLevelsToRender = []; // example: [1, 2, 3];
   var whichLinesToRender = ['rawData', 'averages', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
-  var easingMethod = 'cubic-out';
+
+  var transition_duration = 500;
+  var easingMethod = 'cubic-in-out';
 
   var defclip;
   var xAxisContainer;
@@ -65,6 +64,7 @@ var binnedLineChart = function (data) {
   var yAxis;
   var xScale;
   var yScale;
+  var previous_xScale;
 
   var chart;
   var paths;
@@ -73,6 +73,11 @@ var binnedLineChart = function (data) {
   var slctn; // Save the selection so that my.update() works.
 
   var transition_the_next_time = false;
+
+  function copy_scale(scal) {
+    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+  }
+
 
 
   //Where everything is stored:
@@ -380,7 +385,7 @@ var binnedLineChart = function (data) {
       //Make the clipPath (for cropping the paths)
       if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip").append("rect"); }
       defclip
-        //.transition().duration(500)
+        //.transition().duration(transition_duration)
         .attr("width", width)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .attr("height", document.getElementById("chart_container").offsetHeight); // this is a hack. it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
@@ -394,6 +399,7 @@ var binnedLineChart = function (data) {
 
 
       //TODO: use this to deep copy whatever has been removed, so that we can have the entering paths transition properly.
+      //      - INSTEAD, maybe split binData into what is rendered, and what is pure data. Separating this will ease things I think.
       dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
       //tmpObjectForKeyFanciness = dataObjectForKeyFanciness;
 
@@ -408,7 +414,7 @@ var binnedLineChart = function (data) {
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .style("stroke", function (d, i) { return binData.properties[d.type].color; })
-          .transition().duration(500).ease(easingMethod)
+          .transition().duration(transition_duration).ease(easingMethod)
           .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
           .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
@@ -424,6 +430,20 @@ var binnedLineChart = function (data) {
 
       //enter
       if (transition_the_next_time) {
+        // TODO: make this into a nice function!
+        //       this will need to happen when we switch from indices to time-stamps
+        var prevd0s = [];
+        for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
+          var j = 0;
+          var key = binData['keys'][keyValue];
+          var xdiff = xScale.domain()[1] - xScale.domain()[0];
+          var xScale2 = d3.scale.linear().domain([ xScale.domain()[0] + (xdiff / 2), xScale.domain()[1] + (xdiff / 2) ]).range(xScale.range());
+
+          prevd0s[key] = d3.svg.line()
+            .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelsToRender[0])); })
+            .y(function (d, i) { return yScale(binData.levels[whichLevelsToRender[0]][key][i]); })
+            .interpolate( interpolationMethod )(binData.levels[whichLevelsToRender[0]][key]);
+        }
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
@@ -431,14 +451,8 @@ var binnedLineChart = function (data) {
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
           .style("stroke", function (d, i) { return binData.properties[d.type].color; })
           .attr("opacity", 0)
-          //TODO:
-          //render the "d" where it would have been in the previous location
-          //  this will use d.which, d.type + "d0"
-          //  we need to store:
-          //  - the previous data domain (from xScale).
-          //  - the previous render level
-          //  - (Won't Work: ) OR the previous renderData along with the previous data domain
-          .transition().ease(easingMethod).duration(500)
+          .attr("d", function (d, i) { return prevd0s[d.type]; })
+          .transition().ease(easingMethod).duration(transition_duration)
           .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
       } else {
@@ -457,7 +471,7 @@ var binnedLineChart = function (data) {
       if (transition_the_next_time) {
         currentSelection.exit()
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          .transition().ease(easingMethod).duration(500)
+          .transition().ease(easingMethod).duration(transition_duration)
           .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("opacity", 0)
           .remove();
@@ -481,7 +495,7 @@ var binnedLineChart = function (data) {
         .style("stroke-width", strokeWidth);
 
       if (transition_the_next_time) {
-        currentSelection.transition().duration(500).ease(easingMethod)
+        currentSelection.transition().duration(transition_duration).ease(easingMethod)
           .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
       } else {
@@ -491,14 +505,21 @@ var binnedLineChart = function (data) {
 
       //enter area
       if (transition_the_next_time) {
+        // TODO: make this into a nice function!
+        var prevd0s_quar = d3.svg.area()
+          .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelsToRender[0])); })
+          .y0(function (d, i) { return yScale(binData.levels[whichLevelsToRender[0]]["q1"][i]); })
+          .y1(function (d, i) { return yScale(binData.levels[whichLevelsToRender[0]]["q3"][i]); })
+          .interpolate( interpolationMethod )(binData.levels[whichLevelsToRender[0]]["q1"]);
         currentSelection.enter().append("path")
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData.properties[d.type].color; })
           .style("stroke-width", strokeWidth)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
           .attr("opacity", 0.0)
-          .transition().duration(500).ease(easingMethod)
+          .attr("d", function (d, i) { return prevd0s_quar; })
+          .transition().ease(easingMethod).duration(transition_duration)
+          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
       } else {
         currentSelection.enter().append("path")
@@ -514,7 +535,7 @@ var binnedLineChart = function (data) {
       if (transition_the_next_time) {
         currentSelection.exit()
           .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-          .transition().duration(500).ease(easingMethod)
+          .transition().duration(transition_duration).ease(easingMethod)
           .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
           .attr("opacity", 0.0)
           .remove();
@@ -536,9 +557,9 @@ var binnedLineChart = function (data) {
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       if (transition_the_next_time) {
-        xAxisContainer.transition().duration(500).ease(easingMethod).call(xAxis);
+        xAxisContainer.transition().duration(transition_duration).ease(easingMethod).call(xAxis);
       } else {
-        xAxisContainer/*.transition().duration(500)*/.call(xAxis);
+        xAxisContainer/*.transition().duration(transition_duration)*/.call(xAxis);
       }
 
       yAxis = d3.svg.axis()
@@ -552,7 +573,7 @@ var binnedLineChart = function (data) {
       yAxisContainer.attr("class", "y axis")
         .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
-      yAxisContainer/*.transition().duration(500)*/.call(yAxis);
+      yAxisContainer/*.transition().duration(transition_duration)*/.call(yAxis);
 
       if (transition_the_next_time) {
         // So that this only happens once per button click
@@ -615,6 +636,14 @@ var binnedLineChart = function (data) {
 
   my.xScale = function (value) {
     if (!arguments.length) return xScale;
+
+    // if value is the same as xScale, don't modify previous_xScale
+    if (!xScale) {
+      previous_xScale = d3.scale.linear(); // now it's initialized.
+    }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
+      previous_xScale = copy_scale(xScale);
+    } // else, don't change previous_xScale
+
     xScale = value;
     return my;
   }
@@ -662,7 +691,7 @@ var binnedLineChart = function (data) {
     var toLevel = d3.max([0, toLevel]);
     var toLevel = d3.min([howManyBinLevels - 1, toLevel]);
 
-    whichLevelsToRender = [ toLevel ];
+    my.whichLevelsToRender([ toLevel ]);
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;

@@ -43,9 +43,13 @@ var update_zoom = function () { return 0; };
 var xScale = d3.scale.linear().domain([100, 900]).range([0, document.getElementById("chart_container").offsetWidth]);
 var yScale = d3.scale.linear();
 
+function copy_scale(scal) {
+  return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+}
+
 function zoom_all() {
   plots.forEach(function (plt) {
-    plt.xScale(xScale).xScale(xScale).update();
+    plt.xScale(copy_scale(xScale)).update();
   });
 }
 
@@ -93,7 +97,7 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
   var json = data;
 
   var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
-  plot10.xScale(xScale)
+  plot10.xScale(copy_scale(xScale));
 
   var pl10 = d3.select("#charts").append("g").call(plot10);
 
@@ -123,8 +127,8 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   //redefine this function now that we have data for it to work from
   update_zoom = function () {
-    x = plot10.xScale();
-    y = plot10.yScale();
+    var x = copy_scale( plot10.xScale() );
+    var y = copy_scale( plot10.yScale() );
     zoom.x(x);
     zoom.y(y);
   };
@@ -143,37 +147,37 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
   }
 
   function zoomin() {
-    var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] + (xdist*1/4)
-              , x.domain()[1] - (xdist*1/4) ]);
-    zoom.x(x);
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [ xScale.domain()[0] + (xdist*1/4)
+              , xScale.domain()[1] - (xdist*1/4) ]);
+    zoom.x(xScale);
     transition_all_next_time();
     zoom_all();
   }
 
   function zoomout() {
-    var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] - (xdist*1/2)
-              , x.domain()[1] + (xdist*1/2) ]);
-    zoom.x(x);
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [ xScale.domain()[0] - (xdist*1/2)
+              , xScale.domain()[1] + (xdist*1/2) ]);
+    zoom.x(xScale);
     transition_all_next_time();
     zoom_all();
   }
 
   function scrollleft() {
-    var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] + (xdist*1/2)
-              , x.domain()[1] + (xdist*1/2) ]);
-    zoom.x(x);
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [ xScale.domain()[0] + (xdist*1/4)
+              , xScale.domain()[1] + (xdist*1/4) ]);
+    zoom.x(xScale);
     transition_all_next_time();
     zoom_all();
   }
 
   function scrollright() {
-    var xdist = x.domain()[1] - x.domain()[0];
-    x.domain( [ x.domain()[0] - (xdist*1/2)
-              , x.domain()[1] - (xdist*1/2) ]);
-    zoom.x(x);
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+    xScale.domain( [ xScale.domain()[0] - (xdist*1/4)
+              , xScale.domain()[1] - (xdist*1/4) ]);
+    zoom.x(xScale);
     transition_all_next_time();
     zoom_all();
   }
@@ -205,12 +209,12 @@ socket.on('news', function (data) {
   socket.emit('ack', "Message received!");
 
   var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
-  plot10.xScale(xScale)
+  plot10.xScale(copy_scale(xScale));
 
   var pl10 = d3.select("#charts").append("g").call(plot10);
 
   var plot11 = binnedLineChart(_.map(json,function (d) { return Math.random() * 5 + -d.ESGgirder1; }));
-  plot11.xScale(xScale)
+  plot11.xScale(copy_scale(xScale));
 
   var pl11 = d3.select("#charts").append("g").call(plot11);
 
