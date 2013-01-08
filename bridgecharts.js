@@ -130,6 +130,8 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
 
   d3.select("#zoomin").on("click", zoomin);
   d3.select("#zoomout").on("click", zoomout);
+  d3.select("#scrollleft").on("click", scrollleft);
+  d3.select("#scrollright").on("click", scrollright);
 
   function transition_all_next_time() {
     plots.forEach(function (plt) {
@@ -154,6 +156,25 @@ d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
     transition_all_next_time();
     zoom_all();
   }
+
+  function scrollleft() {
+    var xdist = x.domain()[1] - x.domain()[0];
+    x.domain( [ x.domain()[0] - (xdist*1/2)
+              , x.domain()[1] - (xdist*1/2) ]);
+    zoom.x(x);
+    transition_all_next_time();
+    zoom_all();
+  }
+
+  function scrollright() {
+    var xdist = x.domain()[1] - x.domain()[0];
+    x.domain( [ x.domain()[0] + (xdist*1/2)
+              , x.domain()[1] + (xdist*1/2) ]);
+    zoom.x(x);
+    transition_all_next_time();
+    zoom_all();
+  }
+
 });
 
 socket.on('news', function (data) {
