@@ -1,5 +1,6 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
+//      Update when click-up on the slider, to decrease the amount of rendering.
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      When rendering on chrome, sometimes the new data arrives before the old one is rendered. This should be synchronous somehow instead so that they don't both render and overlap each other.
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
