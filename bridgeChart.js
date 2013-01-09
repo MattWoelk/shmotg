@@ -23,6 +23,7 @@
 //      - They could be abbreviated
 //      - There could be less of them (most likely scenario)
 //      - could be worth a pull request. :D
+//      - OR rotate them when necessary: http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
