@@ -48,7 +48,7 @@ var binnedLineChart = function (data) {
 
   var howManyBinLevels = 6;
   var whichLevelsToRender = []; // example: [1, 2, 3];
-  var whichLinesToRender = ['rawData', 'average', 'maxes', 'mins'];
+  var whichLinesToRender = ['average', 'rawData', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
 
   var transition_duration = 500;
@@ -141,7 +141,7 @@ var binnedLineChart = function (data) {
   //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
   // ]
   // add to it if you want more lines displayed
-  var makeDataObjectForKeyFanciness = function (data) {
+  var makeDataObjectForKeyFanciness = function (bin) {
     var resultArray = new Array();
 
     if (whichLinesToRender.indexOf('rawData') > -1){
@@ -152,8 +152,8 @@ var binnedLineChart = function (data) {
     }
 
     var j = 0;
-    for (var keyValue in data['keys']){ // for each of 'average', 'max', 'min'
-      var key = data.keys[keyValue];
+    for (var keyValue in bin['keys']){ // for each of 'average', 'max', 'min'
+      var key = bin.keys[keyValue];
 
       if (whichLinesToRender.indexOf(key) > -1){
         for (j = 0; j < howManyBinLevels; j++) {
@@ -369,7 +369,8 @@ var binnedLineChart = function (data) {
         //.transition().duration(transition_duration)
         .attr("width", width)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .attr("height", document.getElementById("chart_container").offsetHeight); // this is a hack. it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
+        .attr("height", document.getElementById("chart_container").offsetHeight); // this is a hack:
+          // it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
 
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
