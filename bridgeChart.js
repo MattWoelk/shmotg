@@ -48,7 +48,7 @@ var binnedLineChart = function (data) {
 
   var howManyBinLevels = 6;
   var whichLevelsToRender = []; // example: [1, 2, 3];
-  var whichLinesToRender = ['rawData', 'averages', 'maxes', 'mins'];
+  var whichLinesToRender = ['rawData', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
 
   var transition_duration = 500;
@@ -76,87 +76,68 @@ var binnedLineChart = function (data) {
   }
 
 
-
-  //Where everything is stored:
+  // Where all data is stored, but NOT rendered d0's
   var binData = {
-    keys : ['averages', 'maxes', 'mins', 'q1', 'q3'],
-    properties : {
-      rawData : {
-        color: '#000',
-        opacity: 0.5
-      },
-      averages : {
-        color : '#F00',
-        opacity: 1,
-        func   : function (a, b) { return (a+b)/2; }
-      },
-      maxes : {
-        color : '#000FB5',
-        opacity: 1,
-        func   : function (a, b) { return d3.max([a,b]); }
-      },
-      mins : {
-        color : '#00B515',
-        opacity: 1,
-        func   : function (a, b) { return d3.min([a,b]); }
-      },
-      q1 : {
-        color : '#800',
-        opacity: 1,
-        func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); } // average the two smallest values from q1 and q3
-      },
-      q3 : {
-        color : '#800',
-        opacity: 1,
-        func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
-      },
-      quartiles : {
-        color : '#800',
-        opacity: 0.3,
-        //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); } // average the two largest values from q1 and q3
-      }
+    keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
+    rawData : {
+      color: '#000',
+      opacity: 0.5,
+      levels: [], // stores all of the values for each level in an array.
+                 // example: [[1, 2, 3, 4], [2, 4]]
     },
-    levels : [
-      { // level 0
-        rawData   : new Array(),
-        rawDatad0 : new Array(),
-        average   : new Array(),
-        averaged0 : new Array(),
-        maxes     : new Array(),
-        maxesd0   : new Array(),
-        mins      : new Array(),
-        minsd0    : new Array(),
-        q1        : new Array(),
-        q1d0      : new Array(),
-        q2        : new Array(),
-        q2d0      : new Array(),
-        q3        : new Array(),
-        q3d0      : new Array(),
-        quartilesd0: new Array()
-      },
-      { // level 1
-        average   : new Array(),
-        averaged0 : new Array(),
-        maxes     : new Array(),
-        maxesd0   : new Array(),
-        mins      : new Array(),
-        minsd0    : new Array(),
-        q1        : new Array(),
-        q1d0      : new Array(),
-        q2        : new Array(),
-        q2d0      : new Array(),
-        q3        : new Array(),
-        q3d0      : new Array(),
-        quartilesd0: new Array()
-      } // etc.
-    ]
-  }
+    average : {
+      color : '#F00',
+      opacity: 1,
+      func   : function (a, b) { return (a+b)/2; },
+      levels: [],
+    },
+    maxes : {
+      color : '#000FB5',
+      opacity: 1,
+      func   : function (a, b) { return d3.max([a,b]); },
+      levels: [],
+    },
+    mins : {
+      color : '#00B515',
+      opacity: 1,
+      func   : function (a, b) { return d3.min([a,b]); },
+      levels: [],
+    },
+    q1 : {
+      color : '#800',
+      opacity: 1,
+      func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
+      levels: [],
+    },
+    q3 : {
+      color : '#800',
+      opacity: 1,
+      func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+      levels: [],
+    },
+    quartiles : {
+      color : '#800',
+      opacity: 0.3,
+      //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+      levels: [],
+    }
+  };
+
+  var rendered_d0s = {
+    rawData : new Array(), // an array of levels
+    average : new Array(),
+    maxes   : new Array(),
+    mins    : new Array(),
+    q1      : new Array(),
+    q2      : new Array(),
+    q3      : new Array(),
+    quartiles: new Array()
+  };
 
   // The following function returns something which looks like this:
   // [
   //   {type: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
-  //   {type: 'averages', which: 2, interpolate: blabla}, <-- the current level is 'which'
-  //   {type: 'mins',     which: 2, interpolate: blabla},
+  //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
   //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
   // ]
   // add to it if you want more lines displayed
@@ -231,24 +212,24 @@ var binnedLineChart = function (data) {
   };
 
   // Bin the data into abstracted bins
-  var binTheDataWithFunction = function (curLevelData, key, func) {
+  var binTheDataWithFunction = function (bin, curLevel, key, func) {
     var bDat = new Array();
     var i = 0;
-    for(i = 0; i < curLevelData[key].length; i = i + 2){
-      if (curLevelData[key][i+1]){
+    for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+      if (bin[key].levels[curLevel][i+1]){
         if (key === 'q1' || key === 'q3') {
           bDat.push( func(
-                curLevelData['q1'][i],
-                curLevelData['q1'][i+1],
-                curLevelData['q3'][i],
-                curLevelData['q3'][i+1])); // This is messy and depends on a lot of things
+                bin['q1'].levels[curLevel][i],
+                bin['q1'].levels[curLevel][i+1],
+                bin['q3'].levels[curLevel][i],
+                bin['q3'].levels[curLevel][i+1])); // This is messy and depends on a lot of things
         }else{
           bDat.push( func(
-                curLevelData[key][i],
-                curLevelData[key][i+1]));
+                bin[key].levels[curLevel][i],
+                bin[key].levels[curLevel][i+1]));
         }
       }else{
-        bDat.push( curLevelData[key][i] );
+        bDat.push( bin[key].levels[curLevel][i] );
       }
     }
     return bDat;
@@ -256,24 +237,23 @@ var binnedLineChart = function (data) {
 
   // populate the binned datas (binData):
 
-  binData.levels[0].rawData = data;
-
-  var j = 0;
-  for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
-    binData.levels.push({});
-  }
+  binData.rawData.levels[0] = data;
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
-    binData.levels[0][binData.keys[keyValue]] = data;
+    binData[binData.keys[keyValue]].levels[0] = data;
+
+    var j = 0;
+    for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
+      binData[binData.keys[keyValue]].levels[j] = [];
+    }
   }
 
   for (j = 1; j < howManyBinLevels; j++){ // for each bin level
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
-      binData.levels[0][key] = data;
+      binData[key].levels[0] = data;
 
-      binData.levels[j][key] = new Array(0);
-      binData.levels[j][key] = binTheDataWithFunction(binData.levels[j-1], key, binData.properties[key]['func']);
+      binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key]['func']);
     }
   }
 
@@ -283,21 +263,73 @@ var binnedLineChart = function (data) {
 
     width = container_width - margin.left - margin.right;
 
+
+
+    if (!xScale) { xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]); }
+    xScale
+      .range([0, width]); // So that the furthest-right point is at the right edge of the plot
+
+    if (!yScale){ yScale = d3.scale.linear(); }
+    yScale
+      .domain([d3.min(binData.rawData.levels[0]), d3.max(binData.rawData.levels[0])])
+      .range([height, 0]);
+
+    var fillScale = d3.scale.linear()
+      .domain([0, d3.max(binData.rawData.levels[0])])
+      .rangeRound([255, 0]);
+
+
+    //// GENERATE ALL d0s. (generate the lines paths) ////
+
+    //Raw Data
+    rendered_d0s['rawData'][0] = d3.svg.line()
+      .x(function (d, i) { return xScale(i); })
+      .y(function (d, i) { return yScale(binData.rawData.levels[0][i]); })
+      .interpolate(interpolationMethod)(binData.rawData.levels[0]);
+
+    //For the lines:
+    for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
+      var j = 0;
+      var key = binData['keys'][keyValue];
+
+      rendered_d0s[key][0] = rendered_d0s['rawData'][0];
+
+      for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
+        rendered_d0s[key][j] = d3.svg.line()
+          .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
+          .y(function (d, i) { return yScale(binData[key].levels[j][i]); })
+          .interpolate( interpolationMethod )(binData[key].levels[j]);
+      }
+    }
+
+    //For the areas:
+    rendered_d0s["q1"][0] = rendered_d0s["rawData"][0];
+    rendered_d0s["q3"][0] = rendered_d0s["rawData"][0];
+
+    for (j = 0; j < howManyBinLevels; j++){ // for each level of binning
+      rendered_d0s["quartiles"][j] = d3.svg.area()
+        .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
+        .y0(function (d, i) { return yScale(binData["q1"].levels[j][i]); })
+        .y1(function (d, i) { return yScale(binData["q3"].levels[j][i]); })
+        .interpolate( interpolationMethod )(binData["q1"].levels[j]);
+    }
+
+///////////// vvv START NEW SECTION vvv /////////////
     // This takes binData and trims it so that we are only rendering things which are on the screen.
-    var generateRenderData = function (data) {
+    var generateRenderData = function (bin, render) {
       newobject = {};
-      newobject.keys = data.keys.slice(0); // using slice(0) to make a copy
-      newobject.properties = data.properties; // direct reference; sharing a pointer
+      newobject.keys = bin.keys.slice(0); // using slice(0) to make a copy
+      newobject.properties = bin.properties; // direct reference; sharing a pointer
 
       newobject.levels = [];
       // use _.filter to keep only the data which we want to render
       // this will be much easier once we have timestamps on our data ...
-      _.times(binData.levels.length, function (i) {
+      _.times(bin.levels.length, function (i) {
         //console.log(i); // 0, 1, 2, 3, 4, 5, 6
         newobject.levels.push({});
-        _.forEach(binData.levels[i], function (d, level_name) {
+        _.forEach(bin.levels[i], function (d, level_name) {
           //console.log(level_name); //rawData, rawDatad0, average, etc.
-          newobject.levels[i][level_name] = _.filter(binData.levels[i][level_name], function (dat, iter) {
+          newobject.levels[i][level_name] = _.filter(bin.levels[i][level_name], function (dat, iter) {
             // TODO: filter out what is off-screen.
             // this will be much easier once we have timestamps on our data ...
             // TODO: start using newobject instead of binData in my();
@@ -311,56 +343,8 @@ var binnedLineChart = function (data) {
       return newobject;
     };
 
-    var renderData = generateRenderData(binData);
-
-
-    if (!xScale) { xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]); }
-    xScale
-      .range([0, width]); // So that the furthest-right point is at the right edge of the plot
-
-    if (!yScale){ yScale = d3.scale.linear(); }
-    yScale
-      .domain([d3.min(binData.levels[0].rawData), d3.max(binData.levels[0].rawData)])
-      .range([height, 0]);
-
-    var fillScale = d3.scale.linear()
-      .domain([0, d3.max(binData.levels[0].rawData)])
-      .rangeRound([255, 0]);
-
-
-    //Generate all d0s. (generate the lines paths)
-
-    binData.levels[0]['rawDatad0'] = d3.svg.line()
-      .x(function (d, i) { return xScale(i); })
-      .y(function (d, i) { return yScale(binData.levels[0].rawData[i]); })
-      .interpolate(interpolationMethod)(binData.levels[0].rawData);
-
-    //For the lines:
-    for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
-      var j = 0;
-      var key = binData['keys'][keyValue];
-
-      binData.levels[0][key + "d0"] = binData.levels[0]['rawDatad0'];
-
-      for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
-        binData.levels[j][key + "d0"] = d3.svg.line()
-          .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-          .y(function (d, i) { return yScale(binData.levels[j][key][i]); })
-          .interpolate( interpolationMethod )(binData.levels[j][key]);
-      }
-    }
-
-    //For the areas:
-    binData.levels[0]["q1d0"] = binData.levels[0]['rawDatad0'];
-    binData.levels[0]["q3d0"] = binData.levels[0]['rawDatad0'];
-
-    for (j = 0; j < howManyBinLevels; j++){ // for each level of binning
-      binData.levels[j]["quartilesd0"] = d3.svg.area()
-        .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-        .y0(function (d, i) { return yScale(binData.levels[j]["q1"][i]); })
-        .y1(function (d, i) { return yScale(binData.levels[j]["q3"][i]); })
-        .interpolate( interpolationMethod )(binData.levels[j]["q1"]);
-    }
+    //var renderData = generateRenderData(binData, renderData);
+///////////// ^^^ END NEW SECTION ^^^ /////////////
 
     selection.each(function () {
 
@@ -394,13 +378,9 @@ var binnedLineChart = function (data) {
         .attr("class", "paths")
         .attr("height", height);
 
-
-      //TODO: use this to deep copy whatever has been removed, so that we can have the entering paths transition properly.
-      //      - INSTEAD, maybe split binData into what is rendered, and what is pure data. Separating this will ease things I think.
       dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
-      //tmpObjectForKeyFanciness = dataObjectForKeyFanciness;
 
-      //CURVES
+      //// CURVES ////
       //Make and render the Positive curves.
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
@@ -410,18 +390,18 @@ var binnedLineChart = function (data) {
         currentSelection
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .style("stroke", function (d, i) { return binData[d.type].color; })
           .transition().duration(transition_duration).ease(easingMethod)
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
       } else {
         currentSelection
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .style("stroke", function (d, i) { return binData[d.type].color; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
       }
 
@@ -438,30 +418,30 @@ var binnedLineChart = function (data) {
 
           prevd0s[key] = d3.svg.line()
             .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelsToRender[0])); })
-            .y(function (d, i) { return yScale(binData.levels[whichLevelsToRender[0]][key][i]); })
-            .interpolate( interpolationMethod )(binData.levels[whichLevelsToRender[0]][key]);
+            .y(function (d, i) { return yScale(binData[key].levels[whichLevelsToRender[0]][i]); })
+            .interpolate( interpolationMethod )(binData[key].levels[whichLevelsToRender[0]]);
         }
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .attr("d", function (d, i) { return prevd0s[d.type]; })
           .transition().ease(easingMethod).duration(transition_duration)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .style("stroke", function (d, i) { return binData.properties[d.type].color; })
+          .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
       //exit
@@ -469,34 +449,34 @@ var binnedLineChart = function (data) {
         currentSelection.exit()
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
           .transition().ease(easingMethod).duration(transition_duration)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("opacity", 0)
           .remove();
       } else {
         currentSelection.exit()
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("opacity", 0)
           .remove();
       }
 
 
-      // AREAS
+      //// AREAS ////
       //make and render the area
       currentSelection = paths.selectAll(".posArea")
         .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
       //update area
       currentSelection
-        .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+        .attr("opacity", function (d) { return binData[d.type].opacity; })
         .style("stroke-width", strokeWidth);
 
       if (transition_the_next_time) {
         currentSelection.transition().duration(transition_duration).ease(easingMethod)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
       } else {
-        currentSelection.attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+        currentSelection.attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
       }
 
@@ -505,41 +485,41 @@ var binnedLineChart = function (data) {
         // TODO: make this into a nice function!
         var prevd0s_quar = d3.svg.area()
           .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelsToRender[0])); })
-          .y0(function (d, i) { return yScale(binData.levels[whichLevelsToRender[0]]["q1"][i]); })
-          .y1(function (d, i) { return yScale(binData.levels[whichLevelsToRender[0]]["q3"][i]); })
-          .interpolate( interpolationMethod )(binData.levels[whichLevelsToRender[0]]["q1"]);
+          .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelsToRender[0]][i]); })
+          .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelsToRender[0]][i]); })
+          .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelsToRender[0]]);
         currentSelection.enter().append("path")
           .attr("class", "posArea")
-          .attr("fill", function (d, i) {return binData.properties[d.type].color; })
+          .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
           .attr("opacity", 0.0)
           .attr("d", function (d, i) { return prevd0s_quar; })
           .transition().ease(easingMethod).duration(transition_duration)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         currentSelection.enter().append("path")
           .attr("class", "posArea")
-          .attr("fill", function (d, i) {return binData.properties[d.type].color; })
+          .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; });
+          .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
       //exit area
       if (transition_the_next_time) {
         currentSelection.exit()
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
           .transition().duration(transition_duration).ease(easingMethod)
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("opacity", 0.0)
           .remove();
       } else {
         currentSelection.exit()
-          .attr("opacity", function (d) { return binData.properties[d.type].opacity; })
-          .attr("d", function (d, i) { return binData.levels[d.which][d.type + "d0"]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("opacity", 0.0)
           .remove();
       }
@@ -576,7 +556,6 @@ var binnedLineChart = function (data) {
         // So that this only happens once per button click
         transition_the_next_time = false;
       }
-
     });
   };
 
