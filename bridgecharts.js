@@ -67,6 +67,7 @@ var changeLines = function () {
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
 document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
+document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
 d3.select("#zoomin").on("click", zoomin);
