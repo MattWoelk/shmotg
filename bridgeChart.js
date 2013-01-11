@@ -24,6 +24,9 @@
 //      - There could be less of them (most likely scenario)
 //      - could be worth a pull request. :D
 //      - OR rotate them when necessary: http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
+//      Show the current year/month/day/hour on the left under the scale to give people context.
+//      - should only be down to one higher than what is displayed.
+//        - example: if days are being shown, the current year and month will be displayed.
 
 // FEATURE IDEAS:
 //      Threshold integration to show all points over a certain value in a certain color?
@@ -47,7 +50,7 @@ var binnedLineChart = function (data) {
   var width = container_width - margin.left - margin.right;
 
   var howManyBinLevels = 6;
-  var whichLevelsToRender = []; // example: [1, 2, 3];
+  var whichLevelToRender = 0;
   var whichLinesToRender = ['average', 'rawData', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
 
@@ -62,6 +65,7 @@ var binnedLineChart = function (data) {
   var xScale;
   var yScale;
   var previous_xScale;
+  var new_rendered_x_range = [0, 0];
 
   var chart;
   var paths;
@@ -120,19 +124,30 @@ var binnedLineChart = function (data) {
       opacity: 0.3,
       //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
       levels: [],
-    }
+    },
   };
 
   var rendered_d0s = {
     rawData : new Array(), // an array of levels
+    rawDataRanges : new Array(), // an array of the rendered range for each corresponding level
     average : new Array(),
+    averageRanges : new Array(),
     maxes   : new Array(),
+    maxesRanges   : new Array(),
     mins    : new Array(),
+    minsRanges    : new Array(),
     q1      : new Array(),
+    q1Ranges      : new Array(),
     q2      : new Array(),
+    q2Ranges      : new Array(),
     q3      : new Array(),
-    quartiles: new Array()
+    q3Ranges      : new Array(),
+    quartiles: new Array(),
+    quartilesRanges: new Array(),
   };
+
+
+  //// HELPER FUNCTIONS ////
 
   // The following function returns something which looks like this:
   // [
@@ -140,7 +155,6 @@ var binnedLineChart = function (data) {
   //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
   //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
   // ]
-  // add to it if you want more lines displayed
   var makeDataObjectForKeyFanciness = function (bin) {
     var resultArray = new Array();
 
@@ -157,7 +171,7 @@ var binnedLineChart = function (data) {
 
       if (whichLinesToRender.indexOf(key) > -1){
         for (j = 0; j < howManyBinLevels; j++) {
-          if (whichLevelsToRender.indexOf(j) > -1){
+          if (whichLevelToRender === j){
             resultArray.push({
               type: key,
               which: j,
@@ -179,7 +193,7 @@ var binnedLineChart = function (data) {
     if (whichLinesToRender.indexOf('quartiles') > -1)
     {
       for (j = 0; j < howManyBinLevels; j++) {
-        if (whichLevelsToRender.indexOf(j) > -1){
+        if (whichLevelToRender === j){
           resultArray.push({
             type: key,
             which: j,
@@ -190,6 +204,11 @@ var binnedLineChart = function (data) {
     }
     return resultArray;
   }
+
+  var isWithinRange = function (r1, r2) {
+    // see if r1 is within r2
+    return r1[0] >= r2[0] && r1[1] <= r2[1];
+  };
 
   var getTwoLargest = function (array) {
     var arr = array.slice();
@@ -257,6 +276,9 @@ var binnedLineChart = function (data) {
     }
   }
 
+
+  //// MY ////
+
   var my = function (selection) {
     my.setSelectedLines();
     slctn = selection; // Saving the selection so that my.update() works.
@@ -280,6 +302,48 @@ var binnedLineChart = function (data) {
 
 
     //// GENERATE ALL d0s. (generate the lines paths) ////
+
+    //STRATEGY FOR GENERATING d0s:
+    //see if we have what we need of the d0 generated already
+    //- this requires storing the previous range of data, and comparing it to what we need
+    //- if we have what we need, then just use it again
+    //generate it if we don't have it
+    //- generate MORE than we need, so simple scrolling will be fast.
+
+    //var findTimeRange = function (arr) {
+    //  var max = _.max(arr, function (d) { return d.time; /* TODO: define structure */ }).time; /* TODO: define structure */
+    //  var min = _.min(arr, function (d) { return d.time; /* TODO: define structure */ }).time; /* TODO: define structure */
+    //  return [min, max];
+    //};
+
+    // Currently, we are abandoning non-contiguous values as if they don't exist. This may be just fine. :)
+    // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
+
+    for (var keyValue in whichLinesToRender) {
+      var key = binData['keys'][keyValue];
+
+      if (!rendered_d0s[key + "Ranges"][whichLevelToRender]) {
+        //console.log("FIRST TIME FOR THIS LEVEL");
+        rendered_d0s[key + "Ranges"][whichLevelToRender] = [0, 0];
+      }
+
+      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], rendered_d0s[key + "Ranges"][whichLevelToRender])) {
+        // necessary range is already rendered for this key
+        // render nothing new; just use what is already there
+      } else {
+        //console.log("render new things !");
+
+        var xdiff = xScale.domain()[1] - xScale.domain()[0];
+        new_rendered_x_range[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
+        new_rendered_x_range[1] = xScale.domain()[1] + (xdiff / 2);
+
+        rendered_d0s[key + "Ranges"][whichLevelToRender] = [new_rendered_x_range[0], new_rendered_x_range[1]];
+        // TODO: Do the Rendering:
+        //       when to poll server for more data ???
+      }
+    }
+
+
 
     //Raw Data
     rendered_d0s['rawData'][0] = d3.svg.line()
@@ -414,13 +478,11 @@ var binnedLineChart = function (data) {
         for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
           var j = 0;
           var key = binData['keys'][keyValue];
-          var xdiff = xScale.domain()[1] - xScale.domain()[0];
-          var xScale2 = d3.scale.linear().domain([ xScale.domain()[0] + (xdiff / 2), xScale.domain()[1] + (xdiff / 2) ]).range(xScale.range());
 
           prevd0s[key] = d3.svg.line()
-            .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelsToRender[0])); })
-            .y(function (d, i) { return yScale(binData[key].levels[whichLevelsToRender[0]][i]); })
-            .interpolate( interpolationMethod )(binData[key].levels[whichLevelsToRender[0]]);
+            .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelToRender)); })
+            .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
+            .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
         }
         currentSelection.enter().append("path")
           .attr("class", "posPath")
@@ -485,10 +547,10 @@ var binnedLineChart = function (data) {
       if (transition_the_next_time) {
         // TODO: make this into a nice function!
         var prevd0s_quar = d3.svg.area()
-          .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelsToRender[0])); })
-          .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelsToRender[0]][i]); })
-          .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelsToRender[0]][i]); })
-          .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelsToRender[0]]);
+          .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelToRender)); })
+          .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i]); })
+          .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i]); })
+          .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
         currentSelection.enter().append("path")
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData[d.type].color; })
@@ -587,9 +649,9 @@ var binnedLineChart = function (data) {
     return my;
   };
 
-  my.whichLevelsToRender = function (value) {
-    if (!arguments.length) return whichLevelsToRender  ;
-    whichLevelsToRender = value;
+  my.whichLevelToRender = function (value) {
+    if (!arguments.length) return whichLevelToRender  ;
+    whichLevelToRender = value;
     return my;
   };
 
@@ -640,7 +702,7 @@ var binnedLineChart = function (data) {
     whichLinesToRender = a;
 
     //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
-    //whichLevelsToRender = b;
+    //whichLevelToRender = b[0];
 
 
     //Want: samples/bin --> level
@@ -668,7 +730,7 @@ var binnedLineChart = function (data) {
     var toLevel = d3.max([0, toLevel]);
     var toLevel = d3.min([howManyBinLevels - 1, toLevel]);
 
-    my.whichLevelsToRender([ toLevel ]);
+    my.whichLevelToRender(toLevel);
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;
