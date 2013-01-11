@@ -16,6 +16,11 @@
 //      - could load data into the lines as it's generated
 //      - could have a flat, grey line which comes out of the last data point (or the average only or something) which would then transition to the right location and become the right colour as data comes in
 //      Don't allow zooming in more than what the max bin size would allow
+//      Put bin size slider under the axis, and have it make more sense.
+//      - Do it using d3.
+//      - Should look like this: |____|
+//      - It needs handles for touch screens
+//        - Perhaps on taping it, handles will show up. Tap again to retract them.
 //      Steal time format for x axis from here: http://bl.ocks.org/4015254
 //      - wait until it's using the time data from the json feed
 //      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside each other
@@ -49,7 +54,7 @@ var binnedLineChart = function (data) {
   var container_width = document.getElementById("chart_container").offsetWidth;
   var width = container_width - margin.left - margin.right;
 
-  var howManyBinLevels = 6;
+  var howManyBinLevels = 10; // TODO: phase this out (preferable) OR set it as a really high number
   var whichLevelToRender = 0;
   var whichLinesToRender = ['average', 'rawData', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
@@ -57,28 +62,22 @@ var binnedLineChart = function (data) {
   var transition_duration = 500;
   var easingMethod = 'cubic-in-out';
 
-  var defclip;
+  var defclip; // the clipping region TODO: stop using ids, or have a unique id per chart. This will help the firefox problem. Id should be based on the type of data which is being stored by the chart (AA, CC, DD, etc.) ?
   var xAxisContainer;
   var xAxis;
   var yAxisContainer;
   var yAxis;
   var xScale;
   var yScale;
-  var previous_xScale;
-  var new_rendered_x_range = [0, 0];
+  var previous_xScale; // used for rendering transitions
 
-  var chart;
+  var chart; // the svg element (?)
   var paths;
-  var dataObjectForKeyFanciness;
 
   var slctn; // Save the selection so that my.update() works.
 
+  // whether we used the buttons to zoom
   var transition_the_next_time = false;
-
-  function copy_scale(scal) {
-    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
-  }
-
 
   // Where all data is stored, but NOT rendered d0's
   var binData = {
@@ -127,6 +126,7 @@ var binnedLineChart = function (data) {
     },
   };
 
+  // Where all the rendered d0s are stored.
   var rendered_d0s = {
     rawData : new Array(), // an array of levels
     rawDataRanges : new Array(), // an array of the rendered range for each corresponding level
@@ -155,6 +155,11 @@ var binnedLineChart = function (data) {
   //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
   //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
   // ]
+
+  function copy_scale(scal) {
+    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+  }
+
   var makeDataObjectForKeyFanciness = function (bin) {
     var resultArray = new Array();
 
@@ -303,12 +308,8 @@ var binnedLineChart = function (data) {
 
     //// GENERATE ALL d0s. (generate the lines paths) ////
 
-    //STRATEGY FOR GENERATING d0s:
-    //see if we have what we need of the d0 generated already
-    //- this requires storing the previous range of data, and comparing it to what we need
-    //- if we have what we need, then just use it again
-    //generate it if we don't have it
-    //- generate MORE than we need, so simple scrolling will be fast.
+    // Currently, we are abandoning non-contiguous values as if they don't exist. This may be just fine. :)
+    // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
 
     //var findTimeRange = function (arr) {
     //  var max = _.max(arr, function (d) { return d.time; /* TODO: define structure */ }).time; /* TODO: define structure */
@@ -316,14 +317,12 @@ var binnedLineChart = function (data) {
     //  return [min, max];
     //};
 
-    // Currently, we are abandoning non-contiguous values as if they don't exist. This may be just fine. :)
-    // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
-
     for (var keyValue in whichLinesToRender) {
       var key = binData['keys'][keyValue];
 
+      // initialize the array if it's the first time for this level and key:
       if (!rendered_d0s[key + "Ranges"][whichLevelToRender]) {
-        //console.log("FIRST TIME FOR THIS LEVEL");
+        //console.log("FIRST TIME FOR THIS LEVEL/KEY");
         rendered_d0s[key + "Ranges"][whichLevelToRender] = [0, 0];
       }
 
@@ -334,12 +333,16 @@ var binnedLineChart = function (data) {
         //console.log("render new things !");
 
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
-        new_rendered_x_range[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
-        new_rendered_x_range[1] = xScale.domain()[1] + (xdiff / 2);
+        var new_range = [0, 0];
+        new_range[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
+        new_range[1] = xScale.domain()[1] + (xdiff / 2);
 
-        rendered_d0s[key + "Ranges"][whichLevelToRender] = [new_rendered_x_range[0], new_rendered_x_range[1]];
+        rendered_d0s[key + "Ranges"][whichLevelToRender] = [new_range[0], new_range[1]];
         // TODO: Do the Rendering:
         //       when to poll server for more data ???
+        //       - we will ask binData (through a function) if it has the data
+        //       - if that binData doesn't have it, we'll request information
+        //         from the server througoh bridgecharts.js somehow.
       }
     }
 
@@ -435,6 +438,7 @@ var binnedLineChart = function (data) {
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
         .attr("height", document.getElementById("chart_container").offsetHeight); // this is a hack:
           // it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
+          // should be .attr("height", height);
 
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
@@ -443,7 +447,7 @@ var binnedLineChart = function (data) {
         .attr("class", "paths")
         .attr("height", height);
 
-      dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
+      var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
 
       //// CURVES ////
       //Make and render the Positive curves.
