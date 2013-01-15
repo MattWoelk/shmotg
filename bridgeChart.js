@@ -159,7 +159,7 @@ var binnedLineChart = function (data) {
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value
 
-    var sx = get_scale_value(xScale); // scale x value
+    var sx = 1; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -364,8 +364,8 @@ var binnedLineChart = function (data) {
         rendered_d0s[key + "Ranges"][whichLevelToRender] = [new_range[0], new_range[1]];
 
 
-        // TODO: Do the Rendering
-        //       when to poll server for more data ???
+        // Render the d0s
+        //  TODO:when to poll server for more data ???
         //       - we will ask binData (through a function) if it has the data
         //       - if that binData doesn't have it, we'll request information
         //         from the server througoh bridgecharts.js somehow.
@@ -390,7 +390,7 @@ var binnedLineChart = function (data) {
             rendered_d0s[key][0] = rendered_d0s['rawData'][0]; // TODO: learn to do without this line
 
             rendered_d0s[key][whichLevelToRender] = d3.svg.line()
-              .x(function (d, i) { return /*xScale(*/i * Math.pow(2, whichLevelToRender)/*)*/; })
+              .x(function (d, i) { return get_scale_value(xScale) * i * Math.pow(2, whichLevelToRender); })
               .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
               .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
           }
@@ -400,7 +400,7 @@ var binnedLineChart = function (data) {
           rendered_d0s["q3"][0] = rendered_d0s["rawData"][0]; // TODO: learn to do without this line
 
           rendered_d0s["quartiles"][whichLevelToRender] = d3.svg.area()
-            .x(function (d, i) { return /*xScale(*/i * Math.pow(2, whichLevelToRender)/*)*/; })
+            .x(function (d, i) { return get_scale_value(xScale) * i * Math.pow(2, whichLevelToRender); })
             .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i]); })
             .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i]); })
             .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
