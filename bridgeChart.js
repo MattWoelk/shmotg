@@ -362,7 +362,7 @@ var binnedLineChart = function (data) {
 //        } else {
           //Not at base level
           rendered_d0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
-            .x(function (d, i) { return xScale(i); })
+            .x(function (d, i) { return i/*xScale(i)*/; })
             .y(function (d, i) { return yScale(binData.rawData.levels[0][i]); })
             .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
@@ -373,7 +373,7 @@ var binnedLineChart = function (data) {
             rendered_d0s[key][0] = rendered_d0s['rawData'][0]; // TODO: learn to do without this line
 
             rendered_d0s[key][whichLevelToRender] = d3.svg.line()
-              .x(function (d, i) { return xScale(i * Math.pow(2, whichLevelToRender)); })
+              .x(function (d, i) { return /*xScale(*/i * Math.pow(2, whichLevelToRender)/*)*/; })
               .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
               .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
           }
@@ -383,7 +383,7 @@ var binnedLineChart = function (data) {
           rendered_d0s["q3"][0] = rendered_d0s["rawData"][0]; // TODO: learn to do without this line
 
           rendered_d0s["quartiles"][whichLevelToRender] = d3.svg.area()
-            .x(function (d, i) { return xScale(i * Math.pow(2, whichLevelToRender)); })
+            .x(function (d, i) { return /*xScale(*/i * Math.pow(2, whichLevelToRender)/*)*/; })
             .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i]); })
             .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i]); })
             .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
