@@ -151,17 +151,20 @@ var binnedLineChart = function (data) {
 
   //// HELPER FUNCTIONS ////
 
+  function get_scale_value(scal) {
+    return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
+  }
+
+  function copy_scale(scal) {
+    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+  }
+
   // The following function returns something which looks like this:
   // [
   //   {type: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
   //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
   //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
   // ]
-
-  function copy_scale(scal) {
-    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
-  }
-
   var makeDataObjectForKeyFanciness = function (bin) {
     var resultArray = new Array();
 
@@ -479,7 +482,9 @@ var binnedLineChart = function (data) {
           .transition().duration(transition_duration).ease(easingMethod)
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          //.attr("transform", "translate(" + (margin.left + xScale.domain()[0]) + ", " + (margin.top + yScale.domain()[0]) + ")scale(" + get_scale_value(xScale) + "," + get_scale_value(yScale) + ")");
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
       } else {
         currentSelection
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
@@ -487,11 +492,13 @@ var binnedLineChart = function (data) {
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
       }
 
       //enter
       if (transition_the_next_time) {
+        // With Transition
         // TODO: make this into a nice function!
         //       this will need to happen when we switch from indices to time-stamps
         var prevd0s = [];
@@ -508,7 +515,8 @@ var binnedLineChart = function (data) {
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)")
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .attr("d", function (d, i) { return prevd0s[d.type]; })
@@ -516,11 +524,14 @@ var binnedLineChart = function (data) {
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
+        // No Transition
+        //console.log(get_scale_value(xScale));
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)")
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
@@ -557,10 +568,12 @@ var binnedLineChart = function (data) {
       if (transition_the_next_time) {
         currentSelection.transition().duration(transition_duration).ease(easingMethod)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
       } else {
         currentSelection.attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
       }
 
       //enter area
@@ -575,7 +588,8 @@ var binnedLineChart = function (data) {
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)") // TODO: this is copy and pasted too much, make a nice function for this!
           .attr("opacity", 0.0)
           .attr("d", function (d, i) { return prevd0s_quar; })
           .transition().ease(easingMethod).duration(transition_duration)
@@ -587,7 +601,8 @@ var binnedLineChart = function (data) {
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)")
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
@@ -773,6 +788,7 @@ var binnedLineChart = function (data) {
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;
+    my.re_render_the_next_time(true);
     return my;
   };
 
