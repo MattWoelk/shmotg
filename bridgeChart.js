@@ -1,6 +1,7 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
 //      Fix exits again.
+//      Fix enters again, as well as all transitions.
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
@@ -150,6 +151,19 @@ var binnedLineChart = function (data) {
 
 
   //// HELPER FUNCTIONS ////
+
+  function transform_scale() {
+    var tx = margin.left - (get_scale_value(xScale) * xScale.domain()[0]);
+      // translate x value
+
+    var ty = margin.top; // translate y value
+    //var ty = (margin.top + yScale.domain()[0]); // translate y value
+
+    var sx = get_scale_value(xScale); // scale x value
+    var sy = 1; // scale y value
+
+    return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
+  }
 
   function get_scale_value(scal) {
     return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
@@ -482,9 +496,8 @@ var binnedLineChart = function (data) {
           .transition().duration(transition_duration).ease(easingMethod)
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          //.attr("transform", "translate(" + (margin.left + xScale.domain()[0]) + ", " + (margin.top + yScale.domain()[0]) + ")scale(" + get_scale_value(xScale) + "," + get_scale_value(yScale) + ")");
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
+          .attr("transform", transform_scale);
       } else {
         currentSelection
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
@@ -493,7 +506,7 @@ var binnedLineChart = function (data) {
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
+          .attr("transform", transform_scale);
       }
 
       //enter
@@ -516,7 +529,7 @@ var binnedLineChart = function (data) {
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)")
+          .attr("transform", transform_scale)
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .attr("d", function (d, i) { return prevd0s[d.type]; })
@@ -530,7 +543,7 @@ var binnedLineChart = function (data) {
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)")
+          .attr("transform", transform_scale)
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
@@ -569,11 +582,11 @@ var binnedLineChart = function (data) {
         currentSelection.transition().duration(transition_duration).ease(easingMethod)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
+          .attr("transform", transform_scale);
       } else {
         currentSelection.attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)");
+          .attr("transform", transform_scale);
       }
 
       //enter area
@@ -589,7 +602,7 @@ var binnedLineChart = function (data) {
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)") // TODO: this is copy and pasted too much, make a nice function for this!
+          .attr("transform", transform_scale)
           .attr("opacity", 0.0)
           .attr("d", function (d, i) { return prevd0s_quar; })
           .transition().ease(easingMethod).duration(transition_duration)
@@ -602,7 +615,7 @@ var binnedLineChart = function (data) {
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("transform", "translate(" + (margin.left - (get_scale_value(xScale) * xScale.domain()[0])) + ", " + (margin.top /*+ yScale.domain()[0]*/) + ")scale(" + get_scale_value(xScale) + ",1)")
+          .attr("transform", transform_scale)
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
