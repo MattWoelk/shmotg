@@ -1,5 +1,6 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
+//      Fix exits again.
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
@@ -78,6 +79,7 @@ var binnedLineChart = function (data) {
 
   // whether we used the buttons to zoom
   var transition_the_next_time = false;
+  var re_render_the_next_time = true;
 
   // Where all data is stored, but NOT rendered d0's
   var binData = {
@@ -326,91 +328,105 @@ var binnedLineChart = function (data) {
         rendered_d0s[key + "Ranges"][whichLevelToRender] = [0, 0];
       }
 
-      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], rendered_d0s[key + "Ranges"][whichLevelToRender])) {
+      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], rendered_d0s[key + "Ranges"][whichLevelToRender])
+          && !re_render_the_next_time) {
         // necessary range is already rendered for this key
         // render nothing new; just use what is already there
+        // TODO: add a transform (based on xScale) instead of updating d0s
       } else {
         //console.log("render new things !");
 
+        re_render_the_next_time = false;
+
+        // figure out how much to render:
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
         var new_range = [0, 0];
         new_range[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
         new_range[1] = xScale.domain()[1] + (xdiff / 2);
 
         rendered_d0s[key + "Ranges"][whichLevelToRender] = [new_range[0], new_range[1]];
-        // TODO: Do the Rendering:
+
+
+        // TODO: Do the Rendering
         //       when to poll server for more data ???
         //       - we will ask binData (through a function) if it has the data
         //       - if that binData doesn't have it, we'll request information
         //         from the server througoh bridgecharts.js somehow.
-      }
+
+//        if (whichLevelToRender == 0) {
+//          //Raw Data
+//          rendered_d0s['rawData'][0] = d3.svg.line()
+//            .x(function (d, i) { return xScale(i); })
+//            .y(function (d, i) { return yScale(binData.rawData.levels[0][i]); })
+//            .interpolate(interpolationMethod)(binData.rawData.levels[0]);
+//        } else {
+          //Not at base level
+          rendered_d0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
+            .x(function (d, i) { return xScale(i); })
+            .y(function (d, i) { return yScale(binData.rawData.levels[0][i]); })
+            .interpolate(interpolationMethod)(binData.rawData.levels[0]);
+
+          //For the lines:
+          for (var keyValue in whichLinesToRender){
+            var key = binData['keys'][keyValue];
+
+            rendered_d0s[key][0] = rendered_d0s['rawData'][0]; // TODO: learn to do without this line
+
+            rendered_d0s[key][whichLevelToRender] = d3.svg.line()
+              .x(function (d, i) { return xScale(i * Math.pow(2, whichLevelToRender)); })
+              .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
+              .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
+          }
+
+          //For the areas:
+          rendered_d0s["q1"][0] = rendered_d0s["rawData"][0]; // TODO: learn to do without this line
+          rendered_d0s["q3"][0] = rendered_d0s["rawData"][0]; // TODO: learn to do without this line
+
+          rendered_d0s["quartiles"][whichLevelToRender] = d3.svg.area()
+            .x(function (d, i) { return xScale(i * Math.pow(2, whichLevelToRender)); })
+            .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i]); })
+            .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i]); })
+            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
+
+        }
+      //}
     }
 
 
 
-    //Raw Data
-    rendered_d0s['rawData'][0] = d3.svg.line()
-      .x(function (d, i) { return xScale(i); })
-      .y(function (d, i) { return yScale(binData.rawData.levels[0][i]); })
-      .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
-    //For the lines:
-    for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
-      var j = 0;
-      var key = binData['keys'][keyValue];
 
-      rendered_d0s[key][0] = rendered_d0s['rawData'][0];
-
-      for (j = 1; j < howManyBinLevels; j++){ // for each level of binning
-        rendered_d0s[key][j] = d3.svg.line()
-          .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-          .y(function (d, i) { return yScale(binData[key].levels[j][i]); })
-          .interpolate( interpolationMethod )(binData[key].levels[j]);
-      }
-    }
-
-    //For the areas:
-    rendered_d0s["q1"][0] = rendered_d0s["rawData"][0];
-    rendered_d0s["q3"][0] = rendered_d0s["rawData"][0];
-
-    for (j = 0; j < howManyBinLevels; j++){ // for each level of binning
-      rendered_d0s["quartiles"][j] = d3.svg.area()
-        .x(function (d, i) { return xScale(i * Math.pow(2, j)); })
-        .y0(function (d, i) { return yScale(binData["q1"].levels[j][i]); })
-        .y1(function (d, i) { return yScale(binData["q3"].levels[j][i]); })
-        .interpolate( interpolationMethod )(binData["q1"].levels[j]);
-    }
 
 ///////////// vvv START NEW SECTION vvv /////////////
-    // This takes binData and trims it so that we are only rendering things which are on the screen.
-    var generateRenderData = function (bin, render) {
-      newobject = {};
-      newobject.keys = bin.keys.slice(0); // using slice(0) to make a copy
-      newobject.properties = bin.properties; // direct reference; sharing a pointer
-
-      newobject.levels = [];
-      // use _.filter to keep only the data which we want to render
-      // this will be much easier once we have timestamps on our data ...
-      _.times(bin.levels.length, function (i) {
-        //console.log(i); // 0, 1, 2, 3, 4, 5, 6
-        newobject.levels.push({});
-        _.forEach(bin.levels[i], function (d, level_name) {
-          //console.log(level_name); //rawData, rawDatad0, average, etc.
-          newobject.levels[i][level_name] = _.filter(bin.levels[i][level_name], function (dat, iter) {
-            // TODO: filter out what is off-screen.
-            // this will be much easier once we have timestamps on our data ...
-            // TODO: start using newobject instead of binData in my();
-          });
-        });
-      });
-      var i = 0;
-      //for (i = 0; i < )
-      //newobject.levels
-
-      return newobject;
-    };
-
-    //var renderData = generateRenderData(binData, renderData);
+//    // This takes binData and trims it so that we are only rendering things which are on the screen.
+//    var generateRenderData = function (bin, render) {
+//      newobject = {};
+//      newobject.keys = bin.keys.slice(0); // using slice(0) to make a copy
+//      newobject.properties = bin.properties; // direct reference; sharing a pointer
+//
+//      newobject.levels = [];
+//      // use _.filter to keep only the data which we want to render
+//      // this will be much easier once we have timestamps on our data ...
+//      _.times(bin.levels.length, function (i) {
+//        //console.log(i); // 0, 1, 2, 3, 4, 5, 6
+//        newobject.levels.push({});
+//        _.forEach(bin.levels[i], function (d, level_name) {
+//          //console.log(level_name); //rawData, rawDatad0, average, etc.
+//          newobject.levels[i][level_name] = _.filter(bin.levels[i][level_name], function (dat, iter) {
+//            // TODO: filter out what is off-screen.
+//            // this will be much easier once we have timestamps on our data ...
+//            // TODO: start using newobject instead of binData in my();
+//          });
+//        });
+//      });
+//      var i = 0;
+//      //for (i = 0; i < )
+//      //newobject.levels
+//
+//      return newobject;
+//    };
+//
+//    //var renderData = generateRenderData(binData, renderData);
 ///////////// ^^^ END NEW SECTION ^^^ /////////////
 
     selection.each(function () {
@@ -596,7 +612,7 @@ var binnedLineChart = function (data) {
         .tickSize(6)
         .scale(xScale).orient("bottom");
 
-      if (!xAxisContainer) { xAxisContainer = chart.append("svg:g"); }
+      if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
       xAxisContainer.attr("class", "x axis")
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
@@ -613,7 +629,7 @@ var binnedLineChart = function (data) {
         .tickSize(width, 0, 0) // major, minor, end
         .orient("left");
 
-      if (!yAxisContainer) { yAxisContainer = chart.append("svg:g"); }
+      if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
       yAxisContainer.attr("class", "y axis")
         .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
@@ -631,37 +647,43 @@ var binnedLineChart = function (data) {
 
   my.container_width = function (value) {
     if (!arguments.length) return container_width;
+    if (container_width !== value) my.re_render_the_next_time(true);
     container_width = value;
     return my;
   };
 
   my.height = function (value) {
     if (!arguments.length) return height;
+    if (height !== value) my.re_render_the_next_time(true);
     height = value;
     return my;
   };
 
   my.margin_top = function (value) {
     if (!arguments.length) return margin.top;
+    if (margin.top !== value) my.re_render_the_next_time(true);
     margin.top = value;
     return my;
   };
 
   my.howManyBinLevels = function (value) {
     if (!arguments.length) return howManyBinLevels ;
+    if (howManyBinLevels !== value) my.re_render_the_next_time(true);
     howManyBinLevels = value;
     return my;
   };
 
   my.whichLevelToRender = function (value) {
-    if (!arguments.length) return whichLevelToRender  ;
+    if (!arguments.length) return whichLevelToRender;
+    if (whichLevelToRender !== value) my.re_render_the_next_time(true);
     whichLevelToRender = value;
     return my;
   };
 
   my.whichLinesToRender  = function (value) {
-    if (!arguments.length) return whichLinesToRender   ;
+    if (!arguments.length) return whichLinesToRender;
     whichLinesToRender   = value;
+    //my.re_render_the_next_time(true);
     return my;
   };
 
@@ -677,6 +699,12 @@ var binnedLineChart = function (data) {
     return my;
   }
 
+  my.re_render_the_next_time = function (value) {
+    if (!arguments.length) return re_render_the_next_time;
+    re_render_the_next_time = value;
+    return my;
+  }
+
   my.xScale = function (value) {
     if (!arguments.length) return xScale;
 
@@ -688,17 +716,24 @@ var binnedLineChart = function (data) {
     } // else, don't change previous_xScale
 
     xScale = value;
+    //my.re_render_the_next_time(true);
     return my;
   }
 
   my.yScale = function (value) {
     if (!arguments.length) return yScale;
     yScale = value;
+    //my.re_render_the_next_time(true);
     return my;
   }
 
-  my.update = function () {
-    my(slctn);
+  my.update = function (re_render) {
+    if (!arguments.length) {
+      my(slctn);
+    } else {
+      //my.re_render_the_next_time(re_render);
+      my(slctn);
+    }
   };
 
   my.setSelectedLines = function () {
