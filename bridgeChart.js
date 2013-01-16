@@ -1,26 +1,26 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
-//      Fix exits again.
-//      Fix enters again, as well as all transitions.
-//      Currently, only the necessary lines and levels are being rendered
+//      When changing the slider, things get off-scale.
+//      - probably need to fix something in the update() or enter() sections.
+//      Only render what is on-screen.
+//      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
 //      - See "new section" for the beginnings of a fix for this.
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
-//      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
-//      Only render what is on-screen.
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
 //      - might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
 //        - create a new data structure called "renderData"
 //        - add new functions which add data to binData (based on level and time)
 //          - might need to keep it all sorted by date
 //          - might need to change the way things are initialized
+//      Don't allow zooming in more than what the max bin size would allow
+//      - Fix zooming past the lowest layer. Limits required somewhere.
 //      Make an animation to show that data is being downloaded
 //      - background could have a color sweep in from one side
 //        - so the whole thing would look like a progress bar, but classier
 //      - could have a spinner in some corner
 //      - could load data into the lines as it's generated
 //      - could have a flat, grey line which comes out of the last data point (or the average only or something) which would then transition to the right location and become the right colour as data comes in
-//      Don't allow zooming in more than what the max bin size would allow
 //      Put bin size slider under the axis, and have it make more sense.
 //      - Do it using d3.
 //      - Should look like this: |____|
@@ -155,20 +155,26 @@ var binnedLineChart = function (data) {
 
   //// HELPER FUNCTIONS ////
 
-  function transform_scale() {
-    var tx = margin.left - (get_scale_value(xScale) * xScale.domain()[0]);
+  function transform_scale(scal, prevs) {
+    var tx = margin.left - (get_scale_value(scal) * scal.domain()[0]);
       // translate x value
 
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value
 
     var pixelsPerBin = document.getElementById("renderdepth").value;
-    var pixelsPerSample = get_scale_value(xScale);
+    var pixelsPerSample = get_scale_value(scal);
     var samplesPerBin = pixelsPerBin / pixelsPerSample;
     var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
     var floord = Math.floor(toLevel);
     var nearestPowerOfTwo = Math.pow(2, floord);
     var renderRatio = nearestPowerOfTwo/samplesPerBin;
+
+    if (prevs) {
+      var ratrat = get_scale_value(scal)/get_scale_value(prevs);
+      renderRatio = renderRatio * ratrat;
+    }
+
       // the ratio of how it's being displayed to how it should be displayed.
 
     var sx = renderRatio; // scale x value
@@ -511,8 +517,7 @@ var binnedLineChart = function (data) {
           .transition().duration(transition_duration).ease(easingMethod)
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", transform_scale);
+          .attr("transform", transform_scale(xScale));
       } else {
         currentSelection
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
@@ -520,64 +525,45 @@ var binnedLineChart = function (data) {
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", transform_scale);
+          .attr("transform", transform_scale(xScale));
       }
 
       //enter
       if (transition_the_next_time) {
-        // With Transition
-        // TODO: make this into a nice function!
-        //       this will need to happen when we switch from indices to time-stamps
-        var prevd0s = [];
-        for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
-          var j = 0;
-          var key = binData['keys'][keyValue];
-
-          prevd0s[key] = d3.svg.line()
-            .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelToRender)); })
-            .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
-            .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
-        }
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("transform", transform_scale)
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("transform", transform_scale(previous_xScale, xScale))
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
-          .attr("d", function (d, i) { return prevd0s[d.type]; })
           .transition().ease(easingMethod).duration(transition_duration)
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; });
+            .attr("transform", transform_scale(xScale))
+            .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         // No Transition
-        //console.log(get_scale_value(xScale));
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", transform_scale)
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("transform", transform_scale(xScale))
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
       //exit
       if (transition_the_next_time) {
         currentSelection.exit()
-          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
           .transition().ease(easingMethod).duration(transition_duration)
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("opacity", 0)
-          .remove();
+            .attr("opacity", 0)
+            .attr("transform", transform_scale(xScale, previous_xScale))
+            .remove();
       } else {
         currentSelection.exit()
-          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("transform", transform_scale(xScale, previous_xScale))
           .attr("opacity", 0)
           .remove();
       }
@@ -589,63 +575,49 @@ var binnedLineChart = function (data) {
         .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
       //update area
-      currentSelection
-        .attr("opacity", function (d) { return binData[d.type].opacity; })
-        .style("stroke-width", strokeWidth);
-
       if (transition_the_next_time) {
-        currentSelection.transition().duration(transition_duration).ease(easingMethod)
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", transform_scale);
+        currentSelection
+          .transition().duration(transition_duration).ease(easingMethod)
+            .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+            .attr("transform", transform_scale(xScale));
       } else {
-        currentSelection.attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-          .attr("transform", transform_scale);
+        currentSelection
+          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("transform", transform_scale(xScale));
       }
 
       //enter area
       if (transition_the_next_time) {
-        // TODO: make this into a nice function!
-        var prevd0s_quar = d3.svg.area()
-          .x(function (d, i) { return previous_xScale(i * Math.pow(2, whichLevelToRender)); })
-          .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i]); })
-          .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i]); })
-          .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
         currentSelection.enter().append("path")
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("transform", transform_scale)
+          .attr("transform", transform_scale(previous_xScale, xScale))
           .attr("opacity", 0.0)
-          .attr("d", function (d, i) { return prevd0s_quar; })
-          .transition().ease(easingMethod).duration(transition_duration)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; });
+          .transition().ease(easingMethod).duration(transition_duration)
+            .attr("transform", transform_scale(xScale))
+            .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         currentSelection.enter().append("path")
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          //.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-          .attr("transform", transform_scale)
+          .attr("transform", transform_scale(xScale))
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
       //exit area
       if (transition_the_next_time) {
         currentSelection.exit()
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
           .transition().duration(transition_duration).ease(easingMethod)
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
-          .attr("opacity", 0.0)
-          .remove();
+            .attr("transform", transform_scale(xScale, previous_xScale))
+            .attr("opacity", 0.0)
+            .remove();
       } else {
         currentSelection.exit()
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
-          .attr("d", function (d, i) { return rendered_d0s[d.type][d.which]; })
+          .attr("transform", transform_scale(xScale, previous_xScale))
           .attr("opacity", 0.0)
           .remove();
       }
