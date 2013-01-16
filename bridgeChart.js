@@ -159,6 +159,10 @@ var binnedLineChart = function (data) {
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value
 
+    var pixelsPerBin = document.getElementById("renderdepth").value;
+    var pixelsPerSample = get_scale_value(xScale);
+    var samplesPerBin = pixelsPerBin / pixelsPerSample;
+    var sx = pixelsPerSample/samplesPerBin; // scale x value
     var sx = 1; // scale x value
     var sy = 1; // scale y value
 
@@ -166,6 +170,7 @@ var binnedLineChart = function (data) {
   }
 
   function get_scale_value(scal) {
+    // gives a result which has units pixels / samples
     return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
   }
 
@@ -390,7 +395,9 @@ var binnedLineChart = function (data) {
             rendered_d0s[key][0] = rendered_d0s['rawData'][0]; // TODO: learn to do without this line
 
             rendered_d0s[key][whichLevelToRender] = d3.svg.line()
-              .x(function (d, i) { return get_scale_value(xScale) * i * Math.pow(2, whichLevelToRender); })
+              //TODO: replace get_scale_value(xScale) with something based on howfar or something.
+              .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
+              //.x(function (d, i) { return get_scale_value(xScale) * i * Math.pow(2, whichLevelToRender); })
               .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
               .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
           }
@@ -773,23 +780,16 @@ var binnedLineChart = function (data) {
 
 
     //Want: samples/bin --> level
-    //Have: pixels/bin, screen/pixels, samples/screen
+    //Have: pixels/bin, pixels/sample
 
     // pixels/bin:
     var pixelsPerBin = document.getElementById("renderdepth").value;
-    // screen/pixels:
-    var screenPerPixels = 1/width;
-    // samples/screen:
-    if (xScale) { // isn't there on the first rendering
-      var samplesPerScreen = xScale.domain()[1] - xScale.domain()[0]
-    }else{
-      var samplesPerScreen = 100; //dummy value
-    }
+    var pixelsPerSample = get_scale_value(xScale);
 
-    // sam   pix   scr   sam
-    // --- = --- * --- * ---
-    // bin   bin   pix   scr
-    var samplesPerBin = pixelsPerBin * screenPerPixels * samplesPerScreen;
+    // sam   pix   sam
+    // --- = --- * ---
+    // bin   bin   pix
+    var samplesPerBin = pixelsPerBin / pixelsPerSample;
 
     //now convert to level and floor
     var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
