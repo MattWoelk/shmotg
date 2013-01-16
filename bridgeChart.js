@@ -2,6 +2,9 @@
 // BUGS AND IMPROVEMENTS:
 //      Fix exits again.
 //      Fix enters again, as well as all transitions.
+//      Currently, only the necessary lines and levels are being rendered
+//      - BUT ALL of the data for that level/line is being rendered.
+//      - See "new section" for the beginnings of a fix for this.
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      [ TODO CURRENT TASK!!!!  ]    Make the levels-calculating dynamic; as needed
 //      Only render what is on-screen.
@@ -162,8 +165,13 @@ var binnedLineChart = function (data) {
     var pixelsPerBin = document.getElementById("renderdepth").value;
     var pixelsPerSample = get_scale_value(xScale);
     var samplesPerBin = pixelsPerBin / pixelsPerSample;
-    var sx = pixelsPerSample/samplesPerBin; // scale x value
-    var sx = 1; // scale x value
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var floord = Math.floor(toLevel);
+    var nearestPowerOfTwo = Math.pow(2, floord);
+    var renderRatio = nearestPowerOfTwo/samplesPerBin;
+      // the ratio of how it's being displayed to how it should be displayed.
+
+    var sx = renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -407,7 +415,7 @@ var binnedLineChart = function (data) {
           rendered_d0s["q3"][0] = rendered_d0s["rawData"][0]; // TODO: learn to do without this line
 
           rendered_d0s["quartiles"][whichLevelToRender] = d3.svg.area()
-            .x(function (d, i) { return get_scale_value(xScale) * i * Math.pow(2, whichLevelToRender); })
+            .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
             .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i]); })
             .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i]); })
             .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
@@ -422,7 +430,7 @@ var binnedLineChart = function (data) {
 
 
 ///////////// vvv START NEW SECTION vvv /////////////
-//    // This takes binData and trims it so that we are only rendering things which are on the screen.
+//    // TODO: This takes binData and trims it so that we are only rendering things which are on the screen.
 //    var generateRenderData = function (bin, render) {
 //      newobject = {};
 //      newobject.keys = bin.keys.slice(0); // using slice(0) to make a copy
@@ -801,7 +809,7 @@ var binnedLineChart = function (data) {
 
     var b = document.querySelector("#render-method input:checked").value;
     interpolationMethod = b;
-    my.re_render_the_next_time(true);
+    //my.re_render_the_next_time(true);
     return my;
   };
 
