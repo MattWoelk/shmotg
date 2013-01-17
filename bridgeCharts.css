@@ -39,13 +39,13 @@ path, line {
   overflow: none;
 }
 
-#zoom_svg {
+#zoomSVG {
   position: absolute;
   top: 0;
   left: 0;
 }
 
-#zoom_rect {
+#zoomRect {
   border-style: solid;
   border-width: 1px;
   cursor: col-resize;
