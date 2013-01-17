@@ -368,7 +368,6 @@ var binnedLineChart = function (data) {
           && !re_render_the_next_time) {
         // necessary range is already rendered for this key
         // render nothing new; just use what is already there
-        // TODO: add a transform (based on xScale) instead of updating d0s
       } else {
         //console.log("render new things !");
 
@@ -409,9 +408,7 @@ var binnedLineChart = function (data) {
             rendered_d0s[key][0] = rendered_d0s['rawData'][0]; // TODO: learn to do without this line
 
             rendered_d0s[key][whichLevelToRender] = d3.svg.line()
-              //TODO: replace get_scale_value(xScale) with something based on howfar or something.
               .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
-              //.x(function (d, i) { return get_scale_value(xScale) * i * Math.pow(2, whichLevelToRender); })
               .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i]); })
               .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
           }
