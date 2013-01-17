@@ -1,6 +1,8 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
 //      When changing interpolation, things should be forced to re-render
+//      Update the slider always again; like how it used to be.
+//      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
 //      - probably need to fix something in the update() or enter() sections.
 //      Only render what is on-screen.
@@ -577,11 +579,13 @@ var binnedLineChart = function (data) {
         currentSelection
           .transition().duration(transitionDuration).ease(easingMethod)
             .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-            .attr("transform", transformScale(xScale));
+            .attr("transform", transformScale(xScale))
+            .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         currentSelection
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale));
+          .attr("transform", transformScale(xScale))
+          .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
       //enter area
