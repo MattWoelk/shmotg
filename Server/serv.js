@@ -73,11 +73,20 @@ query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck';
 query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
 query = 'SELECT NumStartTime_DD, NumEndTime_DD, NumStartTime_CC, NumStartTime_CC, ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 15';
 query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
-query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_0A LIMIT 10'; // grab 10 entries (LIMIT 10)
+query = 'SELECT * FROM SPBRTData_0A LIMIT 10'; // grab 10 entries (LIMIT 10)
+
+//-- TODO: new data section --//
+var dat = Date.parse("Thu, 01 Jan 1970 00:00:00 GMT-0400");
+var dat = Date.parse("Mon Jan 02 2012 23:12:33 GMT-0600 (CST)");
+var dat = Date.parse("Thu Jan 01 1970 00:00:00 GMT-0500 (CST)");
+var dates = Date(dat);
+console.log(dat);
+console.log(dates);
+//----------------------------//
 
 mysqlconnection.query(query, function (err, rows, fields) {
   if (err) throw err;
-  console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
+  //console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
   send_to_user = JSON.stringify(rows);
 });
 
