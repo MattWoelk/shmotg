@@ -3,3 +3,4 @@
 *.DS_Store
 Server/queries_not_unique.txt
 Server/ps
+*.vim
