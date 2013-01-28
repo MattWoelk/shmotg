@@ -99,7 +99,7 @@ path, line {
   border-top: dashed grey;
 }
 
-#controls ul:not(:first-child){
+#controls ul:not(:first-child) {
   border-left: dashed grey;
   border-top: dashed grey;
 }
