@@ -1,6 +1,5 @@
 // TODO:
 // BUGS AND IMPROVEMENTS:
-//      When changing interpolation, things should be forced to re-render
 //      Update the slider always again; like how it used to be.
 //      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
@@ -782,8 +781,10 @@ var binnedLineChart = function (data) {
     my.whichLevelToRender(toLevel);
 
     var b = document.querySelector("#render-method input:checked").value;
+    if (b !== interpolationMethod) {
+      my.reRenderTheNextTime(true);
+    }
     interpolationMethod = b;
-    //my.reRenderTheNextTime(true);
     return my;
   };
 
