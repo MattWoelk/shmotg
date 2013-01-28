@@ -6,6 +6,7 @@
 //      When changing the slider, things get off-scale.
 //      - probably need to fix something in the update() or enter() sections.
 //      Sometimes the top graph doesn't appear on start.
+//      Using the same id twice for clipping region is bad news. Fix this.
 //      Make a simplified version of the chart, and use that with static data for the demo. :)
 //      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
 //      Only render what is on-screen.
@@ -54,6 +55,10 @@
 //      Make a small multiples mode which allows comparisons between years (or between whatever the user likes)
 
 var binnedLineChart = function (data, dataRequester) {
+
+
+  //// VARIABLES ////
+
   var datReq = dataRequester;
   var strokeWidth = 1;
 
@@ -335,7 +340,8 @@ var binnedLineChart = function (data, dataRequester) {
     return bDat;
   };
 
-  // populate the binned datas (binData):
+
+  //// POPULATE THE BINNED DATAS (binData): ////
 
   binData.rawData.levels[0] = _.map(data, function (num) { return {val: num};});
 
@@ -360,6 +366,9 @@ var binnedLineChart = function (data, dataRequester) {
   //// MY ////
 
   var my = function (selection) {
+
+    //// SELECTION AND SCALES ////
+
     my.setSelectedLines();
     slctn = selection; // Saving the selection so that my.update() works.
 
@@ -523,7 +532,11 @@ var binnedLineChart = function (data, dataRequester) {
 //    //var renderData = generateRenderData(binData, renderData);
 ///////////// ^^^ END NEW SECTION ^^^ /////////////
 
+    //// SELECTION.EACH ////
+
     selection.each(function () {
+
+      //// CONTAINER AND CLIPPING ////
 
       chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
 
@@ -558,6 +571,7 @@ var binnedLineChart = function (data, dataRequester) {
         .attr("height", height);
 
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
+
 
       //// CURVES ////
       //Make and render the Positive curves.
@@ -716,7 +730,7 @@ var binnedLineChart = function (data, dataRequester) {
   };
 
 
-  // == Getters and Setters ==
+  //// Getters and Setters ////
 
   my.containerWidth = function (value) {
     if (!arguments.length) return containerWidth;
