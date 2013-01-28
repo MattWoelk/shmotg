@@ -5,6 +5,7 @@
 //      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
 //      - probably need to fix something in the update() or enter() sections.
+//      Sometimes the top graph doesn't appear on start.
 //      Make a simplified version of the chart, and use that with static data for the demo. :)
 //      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
 //      Only render what is on-screen.
@@ -317,18 +318,18 @@ var binnedLineChart = function (data, dataRequester) {
     for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       if (bin[key].levels[curLevel][i+1]){
         if (key === 'q1' || key === 'q3') {
-          bDat.push( func(
+          bDat.push({ val :  func(
                 bin['q1'].levels[curLevel][i].val,
                 bin['q1'].levels[curLevel][i+1].val,
                 bin['q3'].levels[curLevel][i].val,
-                bin['q3'].levels[curLevel][i+1].val)); // This is messy and depends on a lot of things
+                bin['q3'].levels[curLevel][i+1].val)}); // This is messy and depends on a lot of things
         }else{
           bDat.push( { val : func(
                 bin[key].levels[curLevel][i].val,
                 bin[key].levels[curLevel][i+1].val)});
         }
       }else{
-        bDat.push( bin[key].levels[curLevel][i] );
+        bDat.push( { val : bin[key].levels[curLevel][i].val} );
       }
     }
     return bDat;
@@ -387,38 +388,71 @@ var binnedLineChart = function (data, dataRequester) {
     //  return [min, max];
     //};
 
-    for (var keyValue in whichLinesToRender) {
-      var key = binData['keys'][keyValue];
+    // Choose which d0s need to be generated
+    var renderThis = [];
+    renderThis = renderThis.concat(whichLinesToRender);
+    if (whichLinesToRender.indexOf("quartiles") !== -1) {
+      // If we're going to render the quartiles, we need to render q1 and q3.
+      if (whichLinesToRender.indexOf("q3") === -1) {
+        renderThis = ['q3'].concat(renderThis);
+      }
+      if (whichLinesToRender.indexOf("q1") === -1) {
+        renderThis = ['q1'].concat(renderThis);
+      }
+    }
 
-      // initialize the array if it's the first time for this level and key:
+    // initialize the array if it's the first time for this level and key:
+    for (var keyValue in renderThis) {
+      var key = renderThis[keyValue];
+
       if (!renderedD0s[key + "Ranges"][whichLevelToRender]) {
-        //console.log("FIRST TIME FOR THIS LEVEL/KEY");
+        //console.log("FIRST TIME FOR THIS LEVEL/KEY, " + key);
         renderedD0s[key + "Ranges"][whichLevelToRender] = [0, 0];
       }
+    }
 
-      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender])
-          && !reRenderTheNextTime) {
-        // necessary range is already rendered for this key
-        // render nothing new; just use what is already there
+    for (var keyValue in whichLinesToRender) {
+      var key = whichLinesToRender[keyValue];
+      if (key === 'quartiles') {
+        //For the areas:
+        renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
+        renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
+
+        if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender])
+            && !reRenderTheNextTime) {
+            // necessary range is already rendered for this key
+            // render nothing new; just use what is already there
+        } else {
+
+          renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
+            .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
+            .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
+            .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
+            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]); // WEIRD
+        }
       } else {
-        //console.log("render new things !");
 
-        reRenderTheNextTime = false;
+        if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender])
+            && !reRenderTheNextTime) {
+          // necessary range is already rendered for this key
+          // render nothing new; just use what is already there
+        } else {
+          //Render New d0s
 
-        // figure out how much to render:
-        var xdiff = xScale.domain()[1] - xScale.domain()[0];
-        var newRange = [0, 0];
-        newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
-        newRange[1] = xScale.domain()[1] + (xdiff / 2);
+          // figure out how much to render:
+          var xdiff = xScale.domain()[1] - xScale.domain()[0];
+          var newRange = [0, 0];
+          newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
+          newRange[1] = xScale.domain()[1] + (xdiff / 2);
 
-        renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
+          renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
 
 
-        // Render the d0s
-        //  TODO:when to poll server for more data ???
-        //       - we will ask binData (through a function) if it has the data
-        //       - if that binData doesn't have it, we'll request information
-        //         from the server througoh bridgecharts.js somehow.
+          // Render the d0s
+          //  TODO:when to poll server for more data ???
+          //       - we will ask binData (through a function) if it has the data
+          //       - if that binData doesn't have it, we'll request information
+          //         from the server througoh bridgecharts.js somehow.
 
 //        if (whichLevelToRender == 0) {
 //          //Raw Data
@@ -434,30 +468,23 @@ var binnedLineChart = function (data, dataRequester) {
             .interpolate(interpolationMethod)(binData.rawData.levels[0]); // WEIRD
 
           //For the lines:
-          for (var keyValue in whichLinesToRender){
-            var key = binData['keys'][keyValue];
+          for (var keyValue in renderThis){
+            var key = renderThis[keyValue];
+            if (key === "quartiles") { continue; }
 
             renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
+
+            //console.log(binData[key].levels[whichLevelToRender][5].val + ", " + key);
 
             renderedD0s[key][whichLevelToRender] = d3.svg.line()
               .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
               .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i].val); })
               .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
           }
-
-          //For the areas:
-          renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
-          renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
-
-          renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
-            .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
-            .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); })
-            .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); })
-            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]); // WEIRD
-
         }
-      //}
+      }
     }
+    reRenderTheNextTime = false;
 
 
 
