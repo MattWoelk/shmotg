@@ -1,4 +1,6 @@
-// TODO:
+/* vim: set foldmethod=marker */
+
+//{{{ TODO:
 // BUGS AND IMPROVEMENTS:
 //      Update the slider always again; like how it used to be.
 //      - Make sure it's fast. :)
@@ -52,11 +54,11 @@
 //      - mouseover data points to show exact values
 //      - ... maybe
 //      Make a small multiples mode which allows comparisons between years (or between whatever the user likes)
+// TODO: }}}
 
 var binnedLineChart = function (data, dataRequester) {
 
-
-  //// VARIABLES ////
+  //{{{ VARIABLES
 
   var datReq = dataRequester;
   var strokeWidth = 1;
@@ -164,8 +166,9 @@ var binnedLineChart = function (data, dataRequester) {
     quartilesRanges: new Array(),
   };
 
+  // VARIABLES }}}
 
-  //// HELPER FUNCTIONS ////
+  //{{{ HELPER FUNCTIONS
 
   //TODO:
   //    - need a function here which requests specific data from bridgecharts.js
@@ -339,8 +342,9 @@ var binnedLineChart = function (data, dataRequester) {
     return bDat;
   };
 
+  // HELPER FUNCTIONS }}}
 
-  //// POPULATE THE BINNED DATAS (binData): ////
+  //{{{ POPULATE THE BINNED DATAS (binData)
 
   binData.rawData.levels[0] = _.map(data, function (num) { return {val: num};});
 
@@ -361,12 +365,13 @@ var binnedLineChart = function (data, dataRequester) {
     }
   }
 
+  // POPULATE THE BINNED DATAS (binData) }}}
 
   //// MY ////
 
   var my = function (selection) {
 
-    //// SELECTION AND SCALES ////
+    //{{{ SELECTION AND SCALES
 
     my.setSelectedLines();
     slctn = selection; // Saving the selection so that my.update() works.
@@ -384,8 +389,9 @@ var binnedLineChart = function (data, dataRequester) {
       .domain([d3.min(binData.rawData.levels[0], function(d) { return d.val; }), d3.max(binData.rawData.levels[0], function(d) { return d.val; })])
       .range([height, 0]);
 
+    // SELECTION AND SCALES }}}
 
-    //// GENERATE ALL d0s. (generate the lines paths) ////
+    //{{{ GENERATE d0s. (generate the lines paths)
 
     // Currently, we are abandoning non-contiguous values as if they don't exist. This may be just fine. :)
     // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
@@ -530,12 +536,13 @@ var binnedLineChart = function (data, dataRequester) {
 //
 //    //var renderData = generateRenderData(binData, renderData);
 ///////////// ^^^ END NEW SECTION ^^^ /////////////
+    // GENERATE ALL d0s. (generate the lines paths) }}}
 
     //// SELECTION.EACH ////
 
     selection.each(function () {
 
-      //// CONTAINER AND CLIPPING ////
+      //{{{ CONTAINER AND CLIPPING
 
       chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
 
@@ -571,8 +578,9 @@ var binnedLineChart = function (data, dataRequester) {
 
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
 
+      // CONTAINER AND CLIPPING }}}
 
-      //// CURVES ////
+      //{{{ CURVES
       //Make and render the Positive curves.
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
@@ -637,8 +645,9 @@ var binnedLineChart = function (data, dataRequester) {
           .remove();
       }
 
+      // CURVES }}}
 
-      //// AREAS ////
+      //{{{ AREAS
       //make and render the area
       currentSelection = paths.selectAll(".posArea")
         .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
@@ -725,11 +734,12 @@ var binnedLineChart = function (data, dataRequester) {
         // So that this only happens once per button click
         transitionNextTime = false;
       }
+      // AREAS }}}
+
     });
   };
 
-
-  //// Getters and Setters ////
+  //{{{ Getters and Setters
 
   my.containerWidth = function (value) {
     if (!arguments.length) return containerWidth;
@@ -857,6 +867,8 @@ var binnedLineChart = function (data, dataRequester) {
     interpolationMethod = b;
     return my;
   };
+
+  // Getters and Setters }}}
 
   return my;
 };
