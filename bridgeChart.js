@@ -1,24 +1,35 @@
-/* vim: set foldmethod=marker */
+/* vim: set foldmethod=marker: */
 
 //{{{ TODO:
-// BUGS AND IMPROVEMENTS:
+//  NEXT THING TO COMPLETE
+//      Make x-axis in terms of date and time.
+//      - convert x scale to be d3.time.scale
+//      Rendering sizes are off again.
+//      - more zoomed-in means thicker lines. :/
+//      Zoom button is off-centre again.
+//      - the further right, the more out-of-line.
+//      Zoom buttons no longer transition properly.
+//      Only render what is on-screen.
+//      - Currently, only the necessary lines and levels are being rendered
+//      - BUT ALL of the data for that level/line is being rendered.
+//      - See "new section" for the beginnings of a fix for this.
+//
+//  BUGS AND IMPROVEMENTS:
 //      Update the slider always again; like how it used to be.
 //      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
 //      - probably need to fix something in the update() or enter() sections.
 //      Sometimes the top graph doesn't appear on start.
+//      When using the demo:
+//      - wild flickering
+//      - doesn't allow scrolling until a zoom or movement button is pressed
 //      Using the same id twice for clipping region is bad news. Fix this.
 //      Make a simplified version of the chart, and use that with static data for the demo. :)
 //      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
-//      Only render what is on-screen.
-//      - Currently, only the necessary lines and levels are being rendered
-//      - BUT ALL of the data for that level/line is being rendered.
-//      - See "new section" for the beginnings of a fix for this.
 //      iOS doesn't load from the server
 //      - may have something to do with the entry I added in Resources/Cordova.plist ExternalHosts
-//      iOS doesn't allow scrolling until a zoom or movement button is pressed
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
-//      - this involves dynamically changing the size of the curves based on what is on-screen.
+//      - this involves dynamically changing the size of the lines based on what is on-screen.
 //      - might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
 //        - create a new data structure called "renderData"
 //        - add new functions which add data to binData (based on level and time)
@@ -66,7 +77,7 @@ var binnedLineChart = function (data, dataRequester) {
   var datReq = dataRequester;
   var strokeWidth = 1;
 
-  // sync this with the one in bridgecharts.js
+  // TODO: sync this with the one in bridgecharts.js
   var margin = {top: 10, right: 10, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
@@ -84,6 +95,7 @@ var binnedLineChart = function (data, dataRequester) {
   var easingMethod = 'cubic-in-out';
 
   var defclip; // the clipping region TODO: stop using ids, or have a unique id per chart. This will help the firefox problem. Id should be based on the type of data which is being stored by the chart (AA, CC, DD, etc.) ?
+              //  - could have this clip path set by bridgecharts.js instead
   var xAxisContainer;
   var xAxis;
   var yAxisContainer;
@@ -109,7 +121,7 @@ var binnedLineChart = function (data, dataRequester) {
       opacity: 0.5,
       levels: [], // stores all of the values for each level in an array.
                  // example: [[1, 2, 3, 4], [2, 4]]
-                 // NEW: TODO: example: [[{val: 1, date: Date()}, {val: 2, date: Date()}], [etc.]]
+                 // NEW: TODO: example: [[{val: 1, date: new Date()}, {val: 2, date: new Date()}], [etc.]]
     },
     average : {
       color : '#F00',
@@ -169,20 +181,6 @@ var binnedLineChart = function (data, dataRequester) {
     quartilesRanges: new Array(),
   };
 
-  // VARIABLES }}}
-
-  //{{{ HELPER FUNCTIONS
-
-  //TODO:
-  //    - need a function here which requests specific data from bridgecharts.js
-  //    - need a function in bridgecharts.js which requests that data from the server
-  //    - each bridgeChart.js will be asking for different data (from different girders) so there won't be redundancy :)
-  function requestForData(dat) {
-    // send a request to bridgecharts.js for specific data
-    // request: [Date(), Date()]
-    // receive: not in this function. TODO: make a new function which updates binData.
-  }
-
   var testTime = "Mon Jan 02 2012 23:12:33 GMT-0600 (CST)";
   var testTime = testTime.substring(0,24);
   var testScale = d3.time.scale()
@@ -196,12 +194,26 @@ var binnedLineChart = function (data, dataRequester) {
   var mils = 196*samplesPerMillisecond;
   var testTimeMilliseconds = testTime + "." + mils;
   // This ^^ combining should be done on the server
-  // good idea: pass Date() objects around. :)
+  // good idea: pass Date objects around. :)
   // - the sacrifice will be timezones (but we don't care about timezones)
 
   var parseDateMilliseconds = d3.time.format("%a %b %d %Y %H:%M:%S.%L").parse;
   //console.log(testTimeMilliseconds);
   //console.log(parseDateMilliseconds(testTimeMilliseconds));
+
+  // VARIABLES }}}
+
+  //{{{ HELPER FUNCTIONS
+
+  //TODO:
+  //    - need a function here which requests specific data from bridgecharts.js
+  //    - need a function in bridgecharts.js which requests that data from the server
+  //    - each bridgeChart.js will be asking for different data (from different girders) so there won't be redundancy :)
+  function requestForData(dat) {
+    // send a request to bridgecharts.js for specific data
+    // request: [Date, Date]
+    // receive: not in this function. TODO: make a new function which updates binData.
+  }
 
   function transformScale(scal, prevs) {
     var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
@@ -216,7 +228,7 @@ var binnedLineChart = function (data, dataRequester) {
     var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
     var floord = Math.floor(toLevel);
     var nearestPowerOfTwo = Math.pow(2, floord);
-    var renderRatio = nearestPowerOfTwo/samplesPerBin;
+    var renderRatio = 1/samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
 
     if (prevs) {
       var ratrat = getScaleValue(scal)/getScaleValue(prevs);
@@ -328,18 +340,23 @@ var binnedLineChart = function (data, dataRequester) {
     for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       if (bin[key].levels[curLevel][i+1]){
         if (key === 'q1' || key === 'q3') {
-          bDat.push({ val :  func(
+          console.log( bin['q1'].levels[curLevel][i+1].date.getTime() );
+
+          bDat.push({ val:  func(
                 bin['q1'].levels[curLevel][i].val,
                 bin['q1'].levels[curLevel][i+1].val,
                 bin['q3'].levels[curLevel][i].val,
-                bin['q3'].levels[curLevel][i+1].val)}); // This is messy and depends on a lot of things
+                bin['q3'].levels[curLevel][i+1].val)
+              , date: new Date(bin['q1'].levels[curLevel][i+1].date.getTime()) }); // This is messy and depends on a lot of things
         }else{
-          bDat.push( { val : func(
+          bDat.push( { val: func(
                 bin[key].levels[curLevel][i].val,
-                bin[key].levels[curLevel][i+1].val)});
+                bin[key].levels[curLevel][i+1].val)
+              , date: new Date(bin['q1'].levels[curLevel][i+1].date.getTime()) });
         }
       }else{
-        bDat.push( { val : bin[key].levels[curLevel][i].val} );
+        bDat.push( { val: bin[key].levels[curLevel][i].val // TODO: FIX
+                   , date: bin[key].levels[curLevel][i].date } );
       }
     }
     return bDat;
@@ -349,10 +366,10 @@ var binnedLineChart = function (data, dataRequester) {
 
   //{{{ POPULATE THE BINNED DATAS (binData)
 
-  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num};});
+  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: new Date(num.SampleIndex) }; });
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
-    binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num};});
+    binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: new Date(num.SampleIndex)}; });
     var j = 0;
     //console.log(_.map(data, function (num) { return {val: num};}));
     for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
@@ -363,7 +380,7 @@ var binnedLineChart = function (data, dataRequester) {
   for (j = 1; j < howManyBinLevels; j++){ // for each bin level
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
-      binData[key].levels[0] = _.map(data, function (num) { return {val: num};});
+      binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.ESGgirder18, date: new Date(num.SampleIndex) }; });
       binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key]['func']);
     }
   }
@@ -383,7 +400,7 @@ var binnedLineChart = function (data, dataRequester) {
 
 
 
-    if (!xScale) { xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]); }
+    if (!xScale) { xScale = d3.time.scale().domain([new Date(0), new Date(binData.levels[0].rawData.length - 1)]); }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
@@ -400,8 +417,9 @@ var binnedLineChart = function (data, dataRequester) {
     // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
 
     //var findTimeRange = function (arr) {
-    //  var max = _.max(arr, function (d) { return d.time; /* TODO: define structure */ }).time; /* TODO: define structure */
-    //  var min = _.min(arr, function (d) { return d.time; /* TODO: define structure */ }).time; /* TODO: define structure */
+    //TODO: use getTime instead
+    //  var max = _.max(arr, function (d) { return d.date; /* TODO: define structure */ }).date; /* TODO: define structure */
+    //  var min = _.min(arr, function (d) { return d.date; /* TODO: define structure */ }).date; /* TODO: define structure */
     //  return [min, max];
     //};
 
@@ -442,12 +460,13 @@ var binnedLineChart = function (data, dataRequester) {
         } else {
 
           renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
-            .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
+            .x(function (d, i) { return new Date(d.date.getTime() * document.getElementById("renderdepth").value); })
             .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
             .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
-            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]); // WEIRD
+            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
         }
       } else {
+        //For the lines
 
         if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender])
             && !reRenderTheNextTime) {
@@ -480,9 +499,9 @@ var binnedLineChart = function (data, dataRequester) {
 //        } else {
           //Not at base level
           renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
-            .x(function (d, i) { return i/*xScale(i)*/; })
+            .x(function (d, i) { return d.date/*xScale(i)*/; })
             .y(function (d, i) { return yScale(binData.rawData.levels[0][i].val); })
-            .interpolate(interpolationMethod)(binData.rawData.levels[0]); // WEIRD
+            .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
           //For the lines:
           for (var keyValue in renderThis){
@@ -494,7 +513,7 @@ var binnedLineChart = function (data, dataRequester) {
             //console.log(binData[key].levels[whichLevelToRender][5].val + ", " + key);
 
             renderedD0s[key][whichLevelToRender] = d3.svg.line()
-              .x(function (d, i) { return i * document.getElementById("renderdepth").value; })
+              .x(function (d, i) { return new Date(d.date.getTime() * document.getElementById("renderdepth").value); })
               .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i].val); })
               .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
           }
@@ -583,8 +602,8 @@ var binnedLineChart = function (data, dataRequester) {
 
       // CONTAINER AND CLIPPING }}}
 
-      //{{{ CURVES
-      //Make and render the Positive curves.
+      //{{{ LINES
+      //Make and render the Positive lines.
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
 
@@ -648,7 +667,7 @@ var binnedLineChart = function (data, dataRequester) {
           .remove();
       }
 
-      // CURVES }}}
+      // LINES }}}
 
       //{{{ AREAS
       //make and render the area
