@@ -14,6 +14,9 @@
 //      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
 //      - See "new section" for the beginnings of a fix for this.
+//      iOS doesn't load from the server
+//      - may have something to do with the entry I added in Resources/Cordova.plist ExternalHosts
+//      iOS doesn't allow scrolling until a zoom or movement button is pressed
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      - this involves dynamically changing the size of the curves based on what is on-screen.
 //      - might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
