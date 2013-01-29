@@ -42,7 +42,7 @@ var updateZoom = function () { return 0; };
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
-var xScale = d3.scale.linear().domain([100, 900]).range([0, document.getElementById("chartContainer").offsetWidth]);
+var xScale = d3.scale.linear().domain([0, 200]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
 function copyScale(scal) {
@@ -223,17 +223,20 @@ socket.on('news', function (data) {
 // A demonstration with example data in case the server is down:
 
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
-setTimeout(rundemo, 2000);
+// TODO: set this back to 2000 or so.
+setTimeout(rundemo, 000);
 
 function rundemo() {
-  d3.json("Server/ESGgirder1_from_SPBRTData_0A.js", function (error, data) {
+  d3.json("Server/esg_sample_index.js", function (error, data) {
     if (error || plots.length > 0) {
       return;
     }
 
-    var json = data;
+    var json = data;//.sort(function (a,b) { return a.SampleIndex >= b.SampleIndex; });
+    //console.log(json);
 
-    var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
+    //var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
+    var plot10 = binnedLineChart(json);
     plot10.xScale(copyScale(xScale));
 
     var pl10 = d3.select("#charts").append("g").call(plot10);
