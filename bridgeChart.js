@@ -8,7 +8,8 @@
 //      - more zoomed-in means thicker lines. :/
 //      Zoom button is off-centre again.
 //      - the further right, the more out-of-line.
-//      Zoom buttons no longer transition properly.
+//      Zoom buttons transition looks off.
+//      - Like there's some sort of offset for either exit our enter, but not both.
 //      Only render what is on-screen.
 //      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
@@ -215,7 +216,7 @@ var binnedLineChart = function (data, dataRequester) {
     // receive: not in this function. TODO: make a new function which updates binData.
   }
 
-  function transformScale(scal, prevs) {
+  function transformScale(scal) {
     var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
       // translate x value
 
@@ -229,11 +230,6 @@ var binnedLineChart = function (data, dataRequester) {
     var floord = Math.floor(toLevel);
     var nearestPowerOfTwo = Math.pow(2, floord);
     var renderRatio = 1/samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
-
-    if (prevs) {
-      var ratrat = getScaleValue(scal)/getScaleValue(prevs);
-      renderRatio = renderRatio * ratrat;
-    }
 
       // the ratio of how it's being displayed to how it should be displayed.
 
@@ -634,7 +630,7 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(previousXScale, xScale))
+          .attr("transform", transformScale(previousXScale))
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .transition().ease(easingMethod).duration(transitionDuration)
@@ -658,11 +654,11 @@ var binnedLineChart = function (data, dataRequester) {
         currentSelection.exit()
           .transition().ease(easingMethod).duration(transitionDuration)
             .attr("opacity", 0)
-            .attr("transform", transformScale(xScale, previousXScale))
+            .attr("transform", transformScale(xScale))
             .remove();
       } else {
         currentSelection.exit()
-          .attr("transform", transformScale(xScale, previousXScale))
+          .attr("transform", transformScale(xScale))
           .attr("opacity", 0)
           .remove();
       }
