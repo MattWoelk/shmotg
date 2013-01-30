@@ -1,5 +1,3 @@
-/* vim: set foldmethod=marker: */
-
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
 //      Make x-axis in terms of date and time.
@@ -890,3 +888,5 @@ var binnedLineChart = function (data, dataRequester) {
 
   return my;
 };
+
+/* vim: set foldmethod=marker: */
