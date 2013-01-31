@@ -224,7 +224,7 @@ var binnedLineChart = function (data, dataRequester) {
     var floord = Math.floor(toLevel);
     var nearestPowerOfTwo = Math.pow(2, floord);
     var renderRatio = nearestPowerOfTwo/samplesPerBin;///samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
-    return new Date(d.date.getTime() / Math.pow(2, whichLevelToRender) );
+    return new Date(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
   };
 
   function transformScale(scal) {
@@ -248,7 +248,8 @@ var binnedLineChart = function (data, dataRequester) {
       // the ratio of how it's being displayed to how it should be displayed.
 
     //var sx = 1; //renderRatio; // scale x value
-    var sx = pixelsPerSample*Math.pow(2, whichLevelToRender); //renderRatio; // scale x value
+    var sx = pixelsPerSample*Math.pow(2, whichLevelToRender) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
+    console.log(document.getElementById("renderdepth").value);
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
