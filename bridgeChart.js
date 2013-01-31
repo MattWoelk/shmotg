@@ -215,10 +215,24 @@ var binnedLineChart = function (data, dataRequester) {
     // receive: not in this function. TODO: make a new function which updates binData.
   }
 
+  var renderFunction = function (d, i) {
+    //return new Date(d.date.getTime() * document.getElementById("renderdepth").value);
+    var pixelsPerBin = document.getElementById("renderdepth").value;
+    var pixelsPerSample = getScaleValue(xScale);
+    var samplesPerBin = pixelsPerBin / pixelsPerSample;
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var floord = Math.floor(toLevel);
+    var nearestPowerOfTwo = Math.pow(2, floord);
+    var renderRatio = nearestPowerOfTwo/samplesPerBin;///samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
+    return d.date;
+  };
+
   function transformScale(scal) {
     // TODO: fix the scrolling offset here
-    var tx = margin.left;// - (getScaleValue(scal)/* * scal.domain()[0]*/);
+    var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
+    //console.log(getScaleValue(scal) * scal.domain()[0]);
       // translate x value
+    //var tx = getScaleValue(scal); //margin.left - (getScaleValue(scal)/* * scal.domain()[0]*/);
 
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value
@@ -226,14 +240,15 @@ var binnedLineChart = function (data, dataRequester) {
     var pixelsPerBin = document.getElementById("renderdepth").value;
     var pixelsPerSample = getScaleValue(scal);
     var samplesPerBin = pixelsPerBin / pixelsPerSample;
-//    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
-//    var floord = Math.floor(toLevel);
-//    var nearestPowerOfTwo = Math.pow(2, floord);
-    var renderRatio = 1/samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var floord = Math.floor(toLevel);
+    var nearestPowerOfTwo = Math.pow(2, floord);
+    var renderRatio = nearestPowerOfTwo/samplesPerBin;///samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
 
       // the ratio of how it's being displayed to how it should be displayed.
 
-    var sx = 1; //renderRatio; // scale x value
+    //var sx = 1; //renderRatio; // scale x value
+    var sx = pixelsPerSample; //renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -336,7 +351,7 @@ var binnedLineChart = function (data, dataRequester) {
     for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       if (bin[key].levels[curLevel][i+1]){
         if (key === 'q1' || key === 'q3') {
-          console.log( bin['q1'].levels[curLevel][i+1].date.getTime() );
+          //console.log( bin['q1'].levels[curLevel][i+1].date.getTime() );
 
           bDat.push({ val:  func(
                 bin['q1'].levels[curLevel][i].val,
@@ -456,7 +471,7 @@ var binnedLineChart = function (data, dataRequester) {
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
         renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
-          .x(function (d, i) { return xScale(d.date); })
+          .x(renderFunction)
           .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
           .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
           .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
@@ -477,14 +492,18 @@ var binnedLineChart = function (data, dataRequester) {
           //       from the server througoh bridgecharts.js somehow.
 
           renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
-            .x(function (d, i) { return xScale(d.date); })
+            //.x(function (d, i) { return xScale(d.date); })
+            .x(renderFunction)
+            //.x(function (d, i) { return new Date(d.date * document.getElementById("renderdepth").value); })
+            // WAS: .x(function (d, i) { return (d.date * docu.gete.renderdepth.val); })
+    //document.getElementById("renderdepth").value;
             .y(function (d, i) { return yScale(binData.rawData.levels[0][i].val); })
             .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
           renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
 
           renderedD0s[key][whichLevelToRender] = d3.svg.line()
-            .x(function (d, i) { return xScale(d.date); })
+            .x(renderFunction)
             .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i].val); })
             .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
         } // if quartiles
