@@ -104,6 +104,7 @@ var binnedLineChart = function (data, dataRequester) {
   var xScale;
   var yScale;
   var previousXScale; // used for rendering transitions
+  var previousLevelToRender; // used for rendering transitions;
 
   var chart; // the svg element (?)
   var paths;
@@ -222,15 +223,15 @@ var binnedLineChart = function (data, dataRequester) {
   };
 
   // This is the transform which is done on the data after it has been rendered.
-  function transformScale(scal) {
+  function transformScale(scal, level) {
+    var pixelsPerSample = getScaleValue(scal);
+
     // TODO: fix the scrolling offset here (likely somewhere else, actually)
     var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
-    var pixelsPerSample = getScaleValue(scal);
-
-    var sx = pixelsPerSample*Math.pow(2, whichLevelToRender) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
+    var sx = pixelsPerSample*Math.pow(2, level) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -588,7 +589,7 @@ var binnedLineChart = function (data, dataRequester) {
           .transition().duration(transitionDuration).ease(easingMethod)
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale));
+          .attr("transform", transformScale(xScale, whichLevelToRender));
       } else {
         currentSelection
           .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
@@ -596,7 +597,7 @@ var binnedLineChart = function (data, dataRequester) {
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale));
+          .attr("transform", transformScale(xScale, whichLevelToRender));
       }
 
       //enter
@@ -606,11 +607,11 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(previousXScale))
+          .attr("transform", transformScale(previousXScale, previousLevelToRender))
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .transition().ease(easingMethod).duration(transitionDuration)
-            .attr("transform", transformScale(xScale))
+            .attr("transform", transformScale(xScale, whichLevelToRender))
             .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         // No Transition
@@ -619,7 +620,7 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale))
+          .attr("transform", transformScale(xScale, whichLevelToRender))
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .attr("opacity", function (d) { return binData[d.type].opacity; });
@@ -630,11 +631,11 @@ var binnedLineChart = function (data, dataRequester) {
         currentSelection.exit()
           .transition().ease(easingMethod).duration(transitionDuration)
             .attr("opacity", 0)
-            .attr("transform", transformScale(xScale))
+            .attr("transform", transformScale(xScale, whichLevelToRender))
             .remove();
       } else {
         currentSelection.exit()
-          .attr("transform", transformScale(xScale))
+          .attr("transform", transformScale(xScale, whichLevelToRender))
           .attr("opacity", 0)
           .remove();
       }
@@ -651,12 +652,12 @@ var binnedLineChart = function (data, dataRequester) {
         currentSelection
           .transition().duration(transitionDuration).ease(easingMethod)
             .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-            .attr("transform", transformScale(xScale))
+            .attr("transform", transformScale(xScale, whichLevelToRender))
             .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         currentSelection
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale))
+          .attr("transform", transformScale(xScale, whichLevelToRender))
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
@@ -666,11 +667,11 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", transformScale(previousXScale))
+          .attr("transform", transformScale(previousXScale, previousLevelToRender))
           .attr("opacity", 0.0)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
           .transition().ease(easingMethod).duration(transitionDuration)
-            .attr("transform", transformScale(xScale))
+            .attr("transform", transformScale(xScale, whichLevelToRender))
             .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
         currentSelection.enter().append("path")
@@ -678,7 +679,7 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale))
+          .attr("transform", transformScale(xScale, whichLevelToRender))
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
@@ -686,12 +687,12 @@ var binnedLineChart = function (data, dataRequester) {
       if (transitionNextTime) {
         currentSelection.exit()
           .transition().duration(transitionDuration).ease(easingMethod)
-            .attr("transform", transformScale(xScale))
+            .attr("transform", transformScale(xScale, whichLevelToRender))
             .attr("opacity", 0.0)
             .remove();
       } else {
         currentSelection.exit()
-          .attr("transform", transformScale(xScale))
+          .attr("transform", transformScale(xScale, whichLevelToRender))
           .attr("opacity", 0.0)
           .remove();
       }
@@ -801,8 +802,10 @@ var binnedLineChart = function (data, dataRequester) {
     // if value is the same as xScale, don't modify previousXScale
     if (!xScale) {
       previousXScale = d3.scale.linear(); // now it's initialized.
+      previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
       previousXScale = copyScale(xScale);
+      previousLevelToRender = whichLevelToRender;
     } // else, don't change previousXScale
 
     xScale = value;
