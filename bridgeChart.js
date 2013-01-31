@@ -219,6 +219,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d, i) {
+    // See transformScale for the inverse.
     return new Date(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
   };
 
@@ -231,6 +232,7 @@ var binnedLineChart = function (data, dataRequester) {
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
+    // See renderFunction for the inverse.
     var sx = pixelsPerSample*Math.pow(2, level) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
     var sy = 1; // scale y value
 
