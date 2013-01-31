@@ -1,5 +1,6 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
+//      Transitions are broken ... again.
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      Rendering sizes are off again.
@@ -215,41 +216,21 @@ var binnedLineChart = function (data, dataRequester) {
     // receive: not in this function. TODO: make a new function which updates binData.
   }
 
+  // This is the function used to render the data at a specific size.
   var renderFunction = function (d, i) {
-    //return new Date(d.date.getTime() * document.getElementById("renderdepth").value);
-    var pixelsPerBin = document.getElementById("renderdepth").value;
-    var pixelsPerSample = getScaleValue(xScale);
-    var samplesPerBin = pixelsPerBin / pixelsPerSample;
-    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
-    var floord = Math.floor(toLevel);
-    var nearestPowerOfTwo = Math.pow(2, floord);
-    var renderRatio = nearestPowerOfTwo/samplesPerBin;///samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
     return new Date(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
   };
 
+  // This is the transform which is done on the data after it has been rendered.
   function transformScale(scal) {
-    // TODO: fix the scrolling offset here
+    // TODO: fix the scrolling offset here (likely somewhere else, actually)
     var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
-    //console.log(getScaleValue(scal) * scal.domain()[0]);
-      // translate x value
-    //var tx = getScaleValue(scal); //margin.left - (getScaleValue(scal)/* * scal.domain()[0]*/);
-
     var ty = margin.top; // translate y value
-    //var ty = (margin.top + yScale.domain()[0]); // translate y value
+    //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
-    var pixelsPerBin = document.getElementById("renderdepth").value;
     var pixelsPerSample = getScaleValue(scal);
-    var samplesPerBin = pixelsPerBin / pixelsPerSample;
-    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
-    var floord = Math.floor(toLevel);
-    var nearestPowerOfTwo = Math.pow(2, floord);
-    var renderRatio = nearestPowerOfTwo/samplesPerBin;///samplesPerBin; //nearestPowerOfTwo/samplesPerBin;
 
-      // the ratio of how it's being displayed to how it should be displayed.
-
-    //var sx = 1; //renderRatio; // scale x value
     var sx = pixelsPerSample*Math.pow(2, whichLevelToRender) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
-    console.log(document.getElementById("renderdepth").value);
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
