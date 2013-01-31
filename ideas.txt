@@ -1,0 +1,4 @@
+Render at the normal size. Re-render when we get too far left, right, or zoomed-in, or when we need to skip over to a new render level.
+- "normal size" means at xScale
+- NOT xScale, but at binrendersize thing
+Otherwise, just scale it over.
