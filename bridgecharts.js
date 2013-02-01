@@ -210,12 +210,6 @@ socket.on('news', function (data) {
   };
 
   updateZoom();
-  function transitionAllNextTime() {
-    plots.forEach(function (plt) {
-      plt.transitionNextTime(true);
-    });
-  }
-
 });
 
 
@@ -224,7 +218,7 @@ socket.on('news', function (data) {
 
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: set this back to 2000 or so.
-setTimeout(rundemo, 000);
+setTimeout(rundemo, 1500);
 
 function rundemo() {
   d3.json("Server/esg_sample_index.js", function (error, data) {
@@ -232,23 +226,22 @@ function rundemo() {
       return;
     }
 
-    var json = data;//.sort(function (a,b) { return a.SampleIndex >= b.SampleIndex; });
-    //console.log(json);
+    var json = data;
 
-    //var plot10 = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
-    var plot10 = binnedLineChart(json);
-    plot10.xScale(copyScale(xScale));
+    //var plotD = binnedLineChart(_.map(json, function (d) { return -d.ESGgirder1; }));
+    var plotD = binnedLineChart(json);
+    plotD.xScale(copyScale(xScale));
 
-    var pl10 = d3.select("#charts").append("g").call(plot10);
+    var pl10 = d3.select("#charts").append("g").call(plotD);
 
-    plot10.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).marginTop(10).update();
+    plotD.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).marginTop(10).update();
 
-    plots.push(plot10);
+    plots.push(plotD);
 
     // TODO: trim this all; put it into a separate function, so both this and the from-server code run the same identical code.
     redraw();
 
-    d3.select("#charts").attr("height", 120*plots.length); //TODO: make this dynamic
+    d3.select("#charts").attr("height", 120*plots.length).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
 
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
             .attr("height", document.getElementById("chartContainer").offsetHeight)
@@ -263,10 +256,10 @@ function rundemo() {
 
     // TODO: redefine this function now that we have data for it to work from
     updateZoom = function () {
-      var x = copyScale( plot10.xScale() );
-      var y = copyScale( plot10.yScale() );
-      zoom.x(x);
-      zoom.y(y);
+      xScale = plotD.xScale();
+      yScale = plotD.yScale();
+      zoom.x(xScale);
+      zoom.y(yScale);
     };
 
     updateZoom();
