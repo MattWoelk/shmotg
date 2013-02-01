@@ -210,7 +210,9 @@ var binnedLineChart = function (data, dataRequester) {
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d, i) {
     // See transformScale for the inverse.
-    return new Date(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
+    var newdate = new Date();
+    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
+    return newdate;
   };
 
   // This is the transform which is done on the data after it has been rendered.
@@ -325,6 +327,9 @@ var binnedLineChart = function (data, dataRequester) {
     var i = 0;
     for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       if (bin[key].levels[curLevel][i+1]){
+        var newdate = new Date();
+        newdate.setTime(bin['q1'].levels[curLevel][i/*+1*/].date.getTime());
+
         if (key === 'q1' || key === 'q3') {
           //console.log( bin['q1'].levels[curLevel][i+1].date.getTime() );
 
@@ -333,16 +338,18 @@ var binnedLineChart = function (data, dataRequester) {
                 bin['q1'].levels[curLevel][i+1].val,
                 bin['q3'].levels[curLevel][i].val,
                 bin['q3'].levels[curLevel][i+1].val)
-              , date: new Date(bin['q1'].levels[curLevel][i/*+1*/].date.getTime()) }); // This is messy and depends on a lot of things
+              , date: newdate }); // This is messy and depends on a lot of things
         }else{
           bDat.push( { val: func(
                 bin[key].levels[curLevel][i].val,
                 bin[key].levels[curLevel][i+1].val)
-              , date: new Date(bin['q1'].levels[curLevel][i/*+1*/].date.getTime()) });
+              , date: newdate });
         }
       }else{
+        var newdate = new Date();
+        newdate.setTime(bin[key].levels[curLevel][i].date);
         bDat.push( { val: bin[key].levels[curLevel][i].val // TODO: FIX
-                   , date: bin[key].levels[curLevel][i].date } );
+                   , date: newdate } );
       }
     }
     return bDat;
@@ -352,10 +359,10 @@ var binnedLineChart = function (data, dataRequester) {
 
   //{{{ POPULATE THE BINNED DATAS (binData)
 
-  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: new Date(num.SampleIndex) }; });
+  binData.rawData.levels[0] = _.map(data, function (num) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate }; });
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
-    binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: new Date(num.SampleIndex)}; });
+    binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate}; });
     var j = 0;
     //console.log(_.map(data, function (num) { return {val: num};}));
     for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
@@ -366,7 +373,7 @@ var binnedLineChart = function (data, dataRequester) {
   for (j = 1; j < howManyBinLevels; j++){ // for each bin level
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
-      binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.ESGgirder18, date: new Date(num.SampleIndex) }; });
+      binData[key].levels[0] = _.map(data, function (num, py) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate }; });
       binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key]['func']);
     }
   }
@@ -386,7 +393,13 @@ var binnedLineChart = function (data, dataRequester) {
 
 
 
-    if (!xScale) { xScale = d3.time.scale().domain([new Date(0), new Date(binData.levels[0].rawData.length - 1)]); }
+    if (!xScale) {
+      var newdate1 = new Date();
+      newdate1.setTime(0);
+      var newdate2 = new Date();
+      newdate2.setTime(binData.levels[0].rawData.length - 1);
+      xScale = d3.time.scale().domain([newdate1, newdate2]);
+    }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
