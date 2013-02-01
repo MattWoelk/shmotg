@@ -1,29 +1,26 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
-//      Transitions are broken ... again.
+//      Something is inaccurate about the rendering.
+//      - Look at most-zoomed in. Then compare with other.
+//      - Something is out of line.
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
-//      Rendering sizes are off again.
-//      - more zoomed-in means thicker lines. :/
+//      - Steal time format for x axis from here: http://bl.ocks.org/4015254
 //      Zoom button is off-centre again.
 //      - the further right, the more out-of-line.
-//      Zoom buttons transition looks off.
-//      - Like there's some sort of offset for either exit our enter, but not both.
 //      Only render what is on-screen.
 //      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
 //      - See "new section" for the beginnings of a fix for this.
 
 //  BUGS AND IMPROVEMENTS:
+//      If the first thing you do is hit the + button, the transition looks funky.
 //      Raw Data view is broken when zooming in or out.
 //      Update the slider always again; like how it used to be.
 //      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
 //      - probably need to fix something in the update() or enter() sections.
 //      Sometimes the top graph doesn't appear on start.
-//      When using the demo:
-//      - wild flickering
-//      - doesn't allow scrolling until a zoom or movement button is pressed
 //      Using the same id twice for clipping region is bad news. Fix this.
 //      Make a simplified version of the chart, and use that with static data for the demo. :)
 //      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
@@ -31,11 +28,11 @@
 //      - may have something to do with the entry I added in Resources/Cordova.plist ExternalHosts
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      - this involves dynamically changing the size of the lines based on what is on-screen.
-//      - might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
-//        - create a new data structure called "renderData"
-//        - add new functions which add data to binData (based on level and time)
-//          - might need to keep it all sorted by date
-//          - might need to change the way things are initialized
+//      Might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
+//      - create a new data structure called "renderData"
+//      - add new functions which add data to binData (based on level and time)
+//        - might need to keep it all sorted by date
+//        - might need to change the way things are initialized
 //      Don't allow zooming in more than what the max bin size would allow
 //      - Fix zooming past the lowest layer. Limits required somewhere.
 //      Make an animation to show that data is being downloaded
@@ -49,8 +46,6 @@
 //      - Should look like this: |____|
 //      - It needs handles for touch screens
 //        - Perhaps on taping it, handles will show up. Tap again to retract them.
-//      Steal time format for x axis from here: http://bl.ocks.org/4015254
-//      - wait until it's using the time data from the json feed
 //      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside each other
 //      - They could be staggered, then. Which would look cool.
 //      - They could be abbreviated
