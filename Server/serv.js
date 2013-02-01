@@ -12,7 +12,8 @@ io.configure(function () { io.set('log level', 2); });
 
 var jsonData = [ { "ESGgirder1" : -47.8500 }, { "ESGgirder1" : -39.3800 }, { "ESGgirder1" : -39.3800 }, { "ESGgirder1" : -44.9100 }, { "ESGgirder1" : -44.9100 } ];
 
-var jsonData = fs.readFileSync(__dirname + '/ESGgirder1_from_SPBRTData_0A.js').toString(); // block while getting the girder contents.
+//var jsonData = fs.readFileSync(__dirname + '/ESGgirder1_from_SPBRTData_0A.js').toString(); // block while getting the girder contents.
+var jsonData = fs.readFileSync(__dirname + '/esg_sample_index.js').toString(); // block while getting the girder contents.
 
 
 var handler = function (req, res) {
