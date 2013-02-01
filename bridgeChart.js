@@ -1,13 +1,8 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
-//      Something is inaccurate about the rendering.
-//      - Look at most-zoomed in. Then compare with other.
-//      - Something is out of line.
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
-//      Zoom button is off-centre again.
-//      - the further right, the more out-of-line.
 //      Only render what is on-screen.
 //      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
