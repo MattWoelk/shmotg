@@ -1,5 +1,6 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
+//      Scrolling is jittery and zoom buttons don't work.
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
@@ -704,7 +705,7 @@ var binnedLineChart = function (data, dataRequester) {
 
       // Draw Axes
       xAxis = d3.svg.axis()
-        .tickSize(6)
+        //.tickSize(6)
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }

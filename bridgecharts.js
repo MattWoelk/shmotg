@@ -37,7 +37,11 @@ var zoomRect = d3.select("#zoomRect");
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
-var xScale = d3.scale.linear().domain([0, 200]).range([0, document.getElementById("chartContainer").offsetWidth]);
+var newdate1 = new Date();
+newdate1.setTime(0);
+var newdate2 = new Date();
+newdate2.setTime(200);
+var xScale = d3.time.scale().domain([newdate1, newdate2]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
 // VARIABLES }}}
@@ -105,9 +109,20 @@ function initPlot(data) {
 // for now it's just a dummy
 var updateZoom = function () { return 0; };
 
+function copyDate(dat) {
+  t = dat.getTime();
+  d = new Date();
+  d.setTime(t);
+  return d;
+}
 
 function copyScale(scal) {
-  return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+  var d_1 = copyDate(scal.domain()[0])
+  var d_2 = copyDate(scal.domain()[1])
+  var d_3 = scal.range()[0]
+  var d_4 = scal.range()[1]
+  var sc = d3.time.scale().domain([d_1, d_2]).range([d_3, d_4]);
+  return sc;
 }
 
 function zoomAll() {
@@ -126,14 +141,20 @@ var changeLines = function () {
   });
 }
 
+var toDate = function (num) {
+  var d = new Date();
+  d.setTime(num);
+  return d;
+}
+
 // func1 is the function which modifies the domain start in terms of the old domain start, and xdist
 // func2 is the function which modifies the domain end in terms of the old domain end, and xdist
 function changeZoom(func1, func2) {
-  var xdist = xScale.domain()[1] - xScale.domain()[0];
+  var xdist = xScale.domain()[1].getTime() - xScale.domain()[0].getTime();
 
   xScale.domain([
-    func1(xScale.domain()[0], xdist),
-    func2(xScale.domain()[1], xdist)
+    toDate(func1(xScale.domain()[0], xdist)),
+    toDate(func2(xScale.domain()[1], xdist))
   ]);
 
   zoom.x(xScale);
