@@ -71,7 +71,7 @@ function initPlot(data) {
 
   var pl = d3.select("#charts").append("g").call(plot);
 
-  plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).marginTop(10).update();
+  plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).marginTop(120*plots.length + 10).update();
 
   plots.push(plot);
 
