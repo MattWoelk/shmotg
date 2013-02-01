@@ -609,7 +609,7 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(previousXScale, previousLevelToRender))
+          .attr("transform", transformScale(previousXScale, whichLevelToRender))
           .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
           .transition().ease(easingMethod).duration(transitionDuration)
@@ -633,11 +633,11 @@ var binnedLineChart = function (data, dataRequester) {
         currentSelection.exit()
           .transition().ease(easingMethod).duration(transitionDuration)
             .attr("opacity", 0)
-            .attr("transform", transformScale(xScale, whichLevelToRender))
+            .attr("transform", transformScale(xScale, previousLevelToRender))
             .remove();
       } else {
         currentSelection.exit()
-          .attr("transform", transformScale(xScale, whichLevelToRender))
+          .attr("transform", transformScale(xScale, previousLevelToRender))
           .attr("opacity", 0)
           .remove();
       }
@@ -669,7 +669,7 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("class", "posArea")
           .attr("fill", function (d, i) {return binData[d.type].color; })
           .style("stroke-width", strokeWidth)
-          .attr("transform", transformScale(previousXScale, previousLevelToRender))
+          .attr("transform", transformScale(previousXScale, whichLevelToRender))
           .attr("opacity", 0.0)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
           .transition().ease(easingMethod).duration(transitionDuration)
@@ -689,12 +689,12 @@ var binnedLineChart = function (data, dataRequester) {
       if (transitionNextTime) {
         currentSelection.exit()
           .transition().duration(transitionDuration).ease(easingMethod)
-            .attr("transform", transformScale(xScale, whichLevelToRender))
+            .attr("transform", transformScale(xScale, previousLevelToRender))
             .attr("opacity", 0.0)
             .remove();
       } else {
         currentSelection.exit()
-          .attr("transform", transformScale(xScale, whichLevelToRender))
+          .attr("transform", transformScale(xScale, previousLevelToRender))
           .attr("opacity", 0.0)
           .remove();
       }
