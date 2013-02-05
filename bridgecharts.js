@@ -153,8 +153,8 @@ function changeZoom(func1, func2) {
   var xdist = xScale.domain()[1].getTime() - xScale.domain()[0].getTime();
 
   xScale.domain([
-    toDate(func1(xScale.domain()[0], xdist)),
-    toDate(func2(xScale.domain()[1], xdist))
+    toDate(func1(xScale.domain()[0].getTime(), xdist)),
+    toDate(func2(xScale.domain()[1].getTime(), xdist))
   ]);
 
   zoom.x(xScale);

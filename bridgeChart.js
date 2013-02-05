@@ -1,6 +1,6 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
-//      Scrolling is jittery and zoom buttons don't work.
+//      Scrolling is jittery.
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
