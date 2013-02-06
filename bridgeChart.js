@@ -5,6 +5,23 @@
 //        - the domain of xScale is always an exact multiple of samples
 //        - this is a fundamental problem with d3.js
 //        - I'm going to try to fix it ;)
+//      - EASY FIX:
+//        - put something between the .getTime() and the xScale's domain
+//        - this would mean going back to a linear scale
+//        - BUT then I need to have it translated from a .getTime() number to correct x-axis formatting.
+//        - easy: make a format function like this one, but better:
+//          - formatMinutes = function(d) { return formatTime(new Date(2012, 0, 1, 0, d)); };
+//        - OR:
+//          - var customTimeFormat = timeFormat([
+//          -  [d3.time.format("%Y"), function() { return true; }],
+//          -  [d3.time.format("%B"), function(d) { return d.getMonth(); }],
+//          -  [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
+//          -  [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
+//          -  [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
+//          -  [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
+//          -  [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
+//          -  [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
+//          - ]);
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
@@ -14,6 +31,8 @@
 //      - See "new section" for the beginnings of a fix for this.
 
 //  BUGS AND IMPROVEMENTS:
+//      Using dates slowed down iPad.
+//      - See tag: jitters_start
 //      If the first thing you do is hit the + button, the transition looks funky.
 //      Raw Data view is broken when zooming in or out.
 //      Update the slider always again; like how it used to be.
@@ -225,7 +244,7 @@ var binnedLineChart = function (data, dataRequester) {
     var pixelsPerSample = getScaleValue(scal);
 
     // TODO: fix the scrolling offset here (likely somewhere else, actually)
-    var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
+    var tx = margin.left - (getScaleValue(scal) * scal.domain()[0].getTime());
     var ty = margin.top; // translate y value
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
@@ -238,11 +257,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   function getScaleValue(scal) {
     // gives a result which has units pixels / samples
-    return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
-  }
-
-  function copyScale(scal) {
-    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+    return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1].getTime() - scal.domain()[0].getTime());
   }
 
   // The following function returns something which looks like this:
