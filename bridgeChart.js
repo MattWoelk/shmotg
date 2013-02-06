@@ -1,6 +1,10 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
 //      Scrolling is jittery.
+//      - this is due to some sort of rounding.
+//        - the domain of xScale is always an exact multiple of samples
+//        - this is a fundamental problem with d3.js
+//        - I'm going to try to fix it ;)
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
