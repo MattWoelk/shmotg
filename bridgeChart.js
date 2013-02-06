@@ -1,5 +1,7 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
+//      Need some rounding because this can happen:
+//      - 06PM     :50      :40
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
@@ -229,10 +231,6 @@ var binnedLineChart = function (data, dataRequester) {
 
   // custom formatting for x axis time
   function todo_format_time_matt(ti) {
-    formatTime = d3.time.format("%H:%M");
-    var newdate = new Date();
-    newdate.setTime(ti);
-
     function timeFormat(formats) {
       return function(date) {
         var newdate = new Date();
@@ -254,7 +252,7 @@ var binnedLineChart = function (data, dataRequester) {
       [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
     ]);
 
-    return function(d) { return customTimeFormat(newdate); }();
+    return function(d) { return customTimeFormat(ti); }();
   }
 
   // This is the function used to render the data at a specific size.
@@ -756,6 +754,7 @@ var binnedLineChart = function (data, dataRequester) {
       xAxis = d3.svg.axis()
         //.tickSize(6)
         .tickFormat(todo_format_time_matt)
+        .ticks(width / 100) // TODO: magic number. It looks good, though.
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
