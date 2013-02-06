@@ -5,6 +5,10 @@
 //        - 06PM   :20    :40   06:01   :20    :40
 //      - Then this:
 //        - 06PM             :50               :40
+//      - Alternative fix:
+//        - create a long tick at the bottom of the plot which
+//          shows how big a second/minute/day/etc. is on screen.
+//          just like google maps does. :)
 //      Make x-axis in terms of date and time.
 //      - fix it somehow to have samples at the exact minute/hour/day/etc.
 //      - this may be difficult, due to using powers of 2 everywhere...
@@ -160,39 +164,39 @@ var binnedLineChart = function (data, dataRequester) {
 
   // Where all the rendered d0s are stored.
   var renderedD0s = {
-    rawData : new Array(), // an array of levels
-    rawDataRanges : new Array(), // an array of the rendered range for each corresponding level
-    average : new Array(),
-    averageRanges : new Array(),
-    maxes   : new Array(),
-    maxesRanges   : new Array(),
-    mins    : new Array(),
-    minsRanges    : new Array(),
-    q1      : new Array(),
-    q1Ranges      : new Array(),
-    q2      : new Array(),
-    q2Ranges      : new Array(),
-    q3      : new Array(),
-    q3Ranges      : new Array(),
-    quartiles: new Array(),
-    quartilesRanges: new Array(),
+    rawData         : new Array(), // an array of levels
+    rawDataRanges   : new Array(), // an array of the rendered range for each corresponding level
+    average         : new Array(),
+    averageRanges   : new Array(),
+    maxes           : new Array(),
+    maxesRanges     : new Array(),
+    mins            : new Array(),
+    minsRanges      : new Array(),
+    q1              : new Array(),
+    q1Ranges        : new Array(),
+    q2              : new Array(),
+    q2Ranges        : new Array(),
+    q3              : new Array(),
+    q3Ranges        : new Array(),
+    quartiles       : new Array(),
+    quartilesRanges : new Array(),
   };
 
   var testTime = "Mon Jan 02 2012 23:12:33 GMT-0600 (CST)";
   var testTime = testTime.substring(0,24);
   var testScale = d3.time.scale()
     .range([0, width]);
-
   var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
   //console.log(parseDate(testTime));
-
   var samplesPerSecond = 200;
   var samplesPerMillisecond = 1000/samplesPerSecond;
   var mils = 196*samplesPerMillisecond;
   var testTimeMilliseconds = testTime + "." + mils;
-  // This ^^ combining should be done on the server
+  // TODO: This ^^ combining should be done on the server
   // good idea: pass Date objects around. :)
   // - the sacrifice will be timezones (but we don't care about timezones)
+  // bad idea : pass Date objects around. :C
+  // - instead: pass around date.getTime()'s
 
   var parseDateMilliseconds = d3.time.format("%a %b %d %Y %H:%M:%S.%L").parse;
   //console.log(testTimeMilliseconds);
@@ -211,6 +215,17 @@ var binnedLineChart = function (data, dataRequester) {
     // request: [Date, Date]
     // receive: not in this function. TODO: make a new function which updates binData.
   }
+
+  // TODO: use this for two things:
+  // - draw a line under the charts to show the size of day/minute/second/etc.
+  // - display the currently-viewed year&day&hour&minutes&etc.
+  //   - display whichever ones are larger than the current domain
+  //   - and by 'domain' I mean getTicks(scal)[-1] - getTicks(scal)[0]
+  // - thought: could the second of these fullfill the purpose of the 1st?
+  function getTicks(scal) {
+    //console.log(scal.ticks(width / 100));
+  }
+
 
   // custom formatting for x axis time
   function todo_format_time_matt(ti) {
@@ -425,14 +440,11 @@ var binnedLineChart = function (data, dataRequester) {
 
 
     if (!xScale) {
-      var newdate1 = new Date();
-      newdate1.setTime(0);
-      var newdate2 = new Date();
-      newdate2.setTime(binData.levels[0].rawData.length - 1);
-      xScale = d3.time.scale().domain([newdate1, newdate2]);
+      xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]);
     }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
+    getTicks(xScale);
 
     if (!yScale){ yScale = d3.scale.linear(); }
     yScale
