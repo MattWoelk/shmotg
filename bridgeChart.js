@@ -28,8 +28,6 @@
 //      Using the same id twice for clipping region is bad news. Fix this.
 //      Make a simplified version of the chart, and use that with static data for the demo. :)
 //      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
-//      iOS doesn't load from the server
-//      - may have something to do with the entry I added in Resources/Cordova.plist ExternalHosts
 //      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
 //      - this involves dynamically changing the size of the lines based on what is on-screen.
 //      Might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
