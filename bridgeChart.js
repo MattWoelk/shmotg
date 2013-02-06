@@ -76,7 +76,7 @@ var binnedLineChart = function (data, dataRequester) {
   var strokeWidth = 1;
 
   // TODO: sync this with the one in bridgecharts.js
-  var margin = {top: 10, right: 10, bottom: 25, left: 40};
+  var margin = {top: 10, right: 27, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
 
