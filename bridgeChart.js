@@ -18,13 +18,13 @@
 //      - See "new section" for the beginnings of a fix for this.
 
 //  BUGS AND IMPROVEMENTS:
+//      Chart isn't updating whenever something in the form is changed.
 //      If the first thing you do is hit the + button, the transition looks funky.
 //      Raw Data view is broken when zooming in or out.
 //      Update the slider always again; like how it used to be.
 //      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
 //      - probably need to fix something in the update() or enter() sections.
-//      Sometimes the top graph doesn't appear on start.
 //      Using the same id twice for clipping region is bad news. Fix this.
 //      Make a simplified version of the chart, and use that with static data for the demo. :)
 //      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
