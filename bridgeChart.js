@@ -3,6 +3,26 @@
 //      Make x-axis in terms of date and time.
 //      - convert x scale to be d3.time.scale
 //      - Steal time format for x axis from here: http://bl.ocks.org/4015254
+//      - formatTime = d3.time.format("%H:%M"),
+//      - formatMinutes = function(d) { return formatTime(new Date(2012, 0, 1, 0, d)); };
+//      - DO THIS ^^^ USING THIS vvv
+//      - var customTimeFormat = timeFormat([
+//        - [d3.time.format("%Y"), function() { return true; }],
+//        - [d3.time.format("%B"), function(d) { return d.getMonth(); }],
+//        - [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
+//        - [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
+//        - [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
+//        - [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
+//        - [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
+//        - [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
+//      - ]);
+//      - function timeFormat(formats) {
+//      -   return function(date) {
+//      -     var i = formats.length - 1, f = formats[i];
+//      -     while (!f[1](date)) f = formats[--i];
+//      -     return f[0](date);
+//      -   };
+//      - }
 //      Only render what is on-screen.
 //      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
@@ -205,6 +225,36 @@ var binnedLineChart = function (data, dataRequester) {
     // send a request to bridgecharts.js for specific data
     // request: [Date, Date]
     // receive: not in this function. TODO: make a new function which updates binData.
+  }
+
+  // custom formatting for x axis time
+  function todo_format_time_matt(ti) {
+    formatTime = d3.time.format("%H:%M");
+    var newdate = new Date();
+    newdate.setTime(ti);
+
+    function timeFormat(formats) {
+      return function(date) {
+        var newdate = new Date();
+        newdate.setTime(date);
+        var i = formats.length - 1, f = formats[i];
+        while (!f[1](newdate)) f = formats[--i];
+        return f[0](newdate);
+      };
+    }
+
+    var customTimeFormat = timeFormat([
+      [d3.time.format("%Y"), function() { return true; }],
+      [d3.time.format("%B"), function(d) { return d.getMonth(); }],
+      [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
+      [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
+      [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
+      [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
+      [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
+      [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
+    ]);
+
+    return function(d) { return customTimeFormat(newdate); }();
   }
 
   // This is the function used to render the data at a specific size.
@@ -704,7 +754,8 @@ var binnedLineChart = function (data, dataRequester) {
 
       // Draw Axes
       xAxis = d3.svg.axis()
-        .tickSize(6)
+        //.tickSize(6)
+        .tickFormat(todo_format_time_matt)
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
