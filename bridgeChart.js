@@ -1,30 +1,13 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
 //      Need some rounding because this can happen:
-//      - 06PM     :50      :40
+//      - This happens:
+//        - 06PM   :20    :40   06:01   :20    :40
+//      - Then this:
+//        - 06PM             :50               :40
 //      Make x-axis in terms of date and time.
-//      - convert x scale to be d3.time.scale
-//      - Steal time format for x axis from here: http://bl.ocks.org/4015254
-//      - formatTime = d3.time.format("%H:%M"),
-//      - formatMinutes = function(d) { return formatTime(new Date(2012, 0, 1, 0, d)); };
-//      - DO THIS ^^^ USING THIS vvv
-//      - var customTimeFormat = timeFormat([
-//        - [d3.time.format("%Y"), function() { return true; }],
-//        - [d3.time.format("%B"), function(d) { return d.getMonth(); }],
-//        - [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
-//        - [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
-//        - [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
-//        - [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
-//        - [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
-//        - [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
-//      - ]);
-//      - function timeFormat(formats) {
-//      -   return function(date) {
-//      -     var i = formats.length - 1, f = formats[i];
-//      -     while (!f[1](date)) f = formats[--i];
-//      -     return f[0](date);
-//      -   };
-//      - }
+//      - fix it somehow to have samples at the exact minute/hour/day/etc.
+//      - this may be difficult, due to using powers of 2 everywhere...
 //      Only render what is on-screen.
 //      - Currently, only the necessary lines and levels are being rendered
 //      - BUT ALL of the data for that level/line is being rendered.
