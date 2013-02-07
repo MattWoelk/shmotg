@@ -21,6 +21,8 @@
 //      Chart isn't updating whenever something in the form is changed.
 //      If the first thing you do is hit the + button, the transition looks funky.
 //      Raw Data view is broken when zooming in or out.
+//      Sometimes the first chart disappears shortly after startup.
+//      - I'm guessing this has something to do with the demo.
 //      Update the slider always again; like how it used to be.
 //      - Make sure it's fast. :)
 //      When changing the slider, things get off-scale.
