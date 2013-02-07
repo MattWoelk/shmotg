@@ -59,6 +59,9 @@
 //        - example: if days are being shown, the current year and month will be displayed.
 
 // FEATURE IDEAS:
+//      Create a version of the following as github gists for bl.ocks.org:
+//      - the chart with static data
+//      - the new time scale I'm creating
 //      Threshold integration to show all points over a certain value in a certain color?
 //      - maybe just have a movable dashed line which a user can use to look at thresholds
 //      - maybe only show values which are above a threshold
@@ -226,6 +229,7 @@ var binnedLineChart = function (data, dataRequester) {
 
 
   // custom formatting for x axis time
+  // TODO: change its name
   function todo_format_time_matt(ti) {
     function timeFormat(formats) {
       return function(date) {
@@ -237,6 +241,12 @@ var binnedLineChart = function (data, dataRequester) {
       };
     }
 
+    // TODO: PROBLEM:
+    // - everything is incrementing nicely,
+    //   until it starts using 50s increments
+    // - everything goes (1, 2, 5, 10, 1, 2, 5, 10)
+    //   - we need to switch it to 1, 2, 5, 10, 30, 60=1
+    //   - 5, 15, 30, 60=1 is what time.scale does
     var customTimeFormat = timeFormat([
       [d3.time.format("%Y"), function() { return true; }],
       [d3.time.format("%B"), function(d) { return d.getMonth(); }],
@@ -244,8 +254,8 @@ var binnedLineChart = function (data, dataRequester) {
       [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
       [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
       [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
-      [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
-      [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
+      [d3.time.format("%Ss"), function(d) { return d.getSeconds(); }],
+      [d3.time.format("%Lms"), function(d) { return d.getMilliseconds(); }]
     ]);
 
     return function(d) { return customTimeFormat(ti); }();
@@ -281,7 +291,7 @@ var binnedLineChart = function (data, dataRequester) {
   }
 
   function copyScale(scal) {
-    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+    return d3.customscale().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
   }
 
   // The following function returns something which looks like this:
@@ -438,7 +448,7 @@ var binnedLineChart = function (data, dataRequester) {
 
 
     if (!xScale) {
-      xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]);
+      xScale = d3.customscale().domain([0, binData.levels[0].rawData.length - 1]);
     }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
@@ -849,7 +859,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     // if value is the same as xScale, don't modify previousXScale
     if (!xScale) {
-      previousXScale = d3.scale.linear(); // now it's initialized.
+      previousXScale = d3.customscale(); // now it's initialized.
       previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
       previousXScale = copyScale(xScale);
