@@ -227,6 +227,46 @@ var binnedLineChart = function (data, dataRequester) {
     //console.log(scal.ticks(width / 100));
   }
 
+  var times = {
+    ms: 1, //milliseconds
+    s: 1000, //seconds
+    // DON'T USE ANY OF THESE:
+    m: 6e4, //minutes
+    h: 36e5, //hours
+    d: 864e5, //days
+    mo: 6e4, //months
+    y: 6e4, //years
+  };
+
+  function roundUpToNearestTime(val, tim) {
+    return Math.floor(val/tim) * tim;
+  }
+
+  function roundDownToNearestTime(val, tim) {
+    return Math.floor(val/tim) * tim;
+  }
+
+  //console.log(roundDownToNearestTime(times.s, 200))
+  //console.log(roundDownToNearestTime(times.s, 2123))
+
+  function todo_tick_values_matt(scal) {
+    var dom = scal.domain();
+
+    if (dom[1]-dom[0] < times.s) {
+      return d3.range(
+            d3.time.second(dom[0]).getTime(),
+            d3.time.second(dom[1]+times.s).getTime(),
+            100);
+    }
+    if (dom[1]-dom[0] < times.m) {
+      console.log("MINUTES");
+      return d3.range(
+            d3.time.minute(dom[0]).getTime(),
+            d3.time.minute(dom[1]+times.m).getTime(),
+            60);
+    }
+    return [1, 111, 200];
+  }
 
   // custom formatting for x axis time
   // TODO: change its name
@@ -291,7 +331,7 @@ var binnedLineChart = function (data, dataRequester) {
   }
 
   function copyScale(scal) {
-    return d3.customscale().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+    return d3.mattScale().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
   }
 
   // The following function returns something which looks like this:
@@ -445,10 +485,8 @@ var binnedLineChart = function (data, dataRequester) {
 
     width = containerWidth - margin.left - margin.right;
 
-
-
     if (!xScale) {
-      xScale = d3.customscale().domain([0, binData.levels[0].rawData.length - 1]);
+      xScale = d3.mattScale().domain([0, binData.levels[0].rawData.length - 1]);
     }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
@@ -757,7 +795,8 @@ var binnedLineChart = function (data, dataRequester) {
       xAxis = d3.svg.axis()
         //.tickSize(6)
         .tickFormat(todo_format_time_matt)
-        .ticks(width / 100) // TODO: magic number. It looks good, though.
+        .tickValues(todo_tick_values_matt(xScale))
+        //.ticks(width / 100) // TODO: magic number. It looks good, though.
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
@@ -859,7 +898,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     // if value is the same as xScale, don't modify previousXScale
     if (!xScale) {
-      previousXScale = d3.customscale(); // now it's initialized.
+      previousXScale = d3.mattScale(); // now it's initialized.
       previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
       previousXScale = copyScale(xScale);
