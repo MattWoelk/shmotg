@@ -199,7 +199,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   var testTime = "Mon Jan 02 2012 23:12:33 GMT-0600 (CST)";
   var testTime = testTime.substring(0,24);
-  var testScale = d3.time.scale()
+  var testScale = d3.time.scale.utc()
     .range([0, width]);
 
   var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
@@ -418,7 +418,7 @@ var binnedLineChart = function (data, dataRequester) {
       newdate1.setTime(0);
       var newdate2 = new Date();
       newdate2.setTime(binData.levels[0].rawData.length - 1);
-      xScale = d3.time.scale().domain([newdate1, newdate2]);
+      xScale = d3.time.scale.utc().domain([newdate1, newdate2]);
     }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
