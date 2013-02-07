@@ -227,30 +227,88 @@ var binnedLineChart = function (data, dataRequester) {
     //console.log(scal.ticks(width / 100));
   }
 
-  var times = {
-    ms: 1, //milliseconds
-    s: 1000, //seconds
-    // DON'T USE ANY OF THESE:
-    m: 6e4, //minutes
-    h: 36e5, //hours
-    d: 864e5, //days
-    mo: 6e4, //months
-    y: 6e4, //years
-  };
-
   function roundUpToNearestTime(val, tim) {
-    return Math.floor(val/tim) * tim;
+    return Math.ceil(val/tim) * tim;
   }
 
   function roundDownToNearestTime(val, tim) {
     return Math.floor(val/tim) * tim;
   }
 
-  //console.log(roundDownToNearestTime(times.s, 200))
-  //console.log(roundDownToNearestTime(times.s, 2123))
+  var times = {
+    ms: 1, //milliseconds
+    s: 1000, //seconds
+    m: 6e4, //minutes
+    h: 36e5, //hours
+    d: 864e5, //days
+    // DON'T USE ANY OF THESE: ???
+    mo: 6e4, //months
+    y: 6e4, //years
+  };
+
+  // what to round to, increments, percent width on screen
+  var rounding_scales = [
+    [d3.time.minute, 1  , ] ,
+    [d3.time.minute, 5  , ] ,
+    [d3.time.minute, 15 , ] ,
+    [d3.time.minute, 30 , ] ,
+    [d3.time.hour,   1  , ] ,
+    [d3.time.hour,   3  , ] ,
+    [d3.time.hour,   6  , ] ,
+    [d3.time.hour,   12 , ] ,
+    [d3.time.day,    1  , ] ,
+    [d3.time.day,    2  , ] ,
+    [d3.time.week,   1  , ] ,
+    [d3.time.month,  1  , ] ,
+    [d3.time.month,  3  , ] ,
+    [d3.time.year,   1  , ]
+  ];
 
   function todo_tick_values_matt(scal) {
     var dom = scal.domain();
+
+    //TODO: make this automatic and amazing.
+    //      - this will require using that variable 'width'
+    //        - likely where times.ms*100 is
+/*{{ variable }}
+    if (dom[1]-dom[0] < {{times.ms*100}}) {
+      console.log(roundDownToNearestTime(dom[0], {{100}}));
+      console.log(roundUpToNearestTime(dom[1], {{100}}));
+      return d3.range(
+            roundDownToNearestTime(dom[0], {{100}}),
+            roundUpToNearestTime(dom[1], {{100}}),
+            {{10}});
+    }
+*/
+    if (dom[1]-dom[0] < times.ms*100) {
+      console.log(roundDownToNearestTime(dom[0], 100));
+      console.log(roundUpToNearestTime(dom[1], 100));
+      return d3.range(
+            roundDownToNearestTime(dom[0], 100),
+            roundUpToNearestTime(dom[1], 100),
+            10);
+    }
+
+    if (dom[1]-dom[0] < times.s/10) {
+      return d3.range(
+            d3.time.second(dom[0]).getTime(),
+            d3.time.second(dom[1]+times.s).getTime(),
+            10);
+    }
+
+    if (dom[1]-dom[0] < times.s/4) {
+      return d3.range(
+            d3.time.second(dom[0]).getTime(),
+            d3.time.second(dom[1]+times.s).getTime(),
+            25);
+    }
+
+    if (dom[1]-dom[0] < times.s/2) {
+      return d3.range(
+            d3.time.second(dom[0]).getTime(),
+            d3.time.second(dom[1]+times.s).getTime(),
+            50);
+    }
 
     if (dom[1]-dom[0] < times.s) {
       return d3.range(
@@ -258,12 +316,12 @@ var binnedLineChart = function (data, dataRequester) {
             d3.time.second(dom[1]+times.s).getTime(),
             100);
     }
+
     if (dom[1]-dom[0] < times.m) {
-      console.log("MINUTES");
       return d3.range(
             d3.time.minute(dom[0]).getTime(),
             d3.time.minute(dom[1]+times.m).getTime(),
-            60);
+            60*10);
     }
     return [1, 111, 200];
   }
@@ -331,7 +389,7 @@ var binnedLineChart = function (data, dataRequester) {
   }
 
   function copyScale(scal) {
-    return d3.mattScale().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
   }
 
   // The following function returns something which looks like this:
@@ -486,7 +544,7 @@ var binnedLineChart = function (data, dataRequester) {
     width = containerWidth - margin.left - margin.right;
 
     if (!xScale) {
-      xScale = d3.mattScale().domain([0, binData.levels[0].rawData.length - 1]);
+      xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]);
     }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
@@ -898,7 +956,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     // if value is the same as xScale, don't modify previousXScale
     if (!xScale) {
-      previousXScale = d3.mattScale(); // now it's initialized.
+      previousXScale = d3.scale.linear(); // now it's initialized.
       previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
       previousXScale = copyScale(xScale);
