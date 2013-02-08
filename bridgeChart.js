@@ -83,6 +83,8 @@ var binnedLineChart = function (data, dataRequester) {
 
   var height = 150 - margin.top - margin.bottom;
 
+  var minDistanceBetweenXAxisLabels = 75;
+
   // the width of the chart, including margins
   var containerWidth = document.getElementById("chartContainer").offsetWidth;
   var width = containerWidth - margin.left - margin.right;
@@ -235,6 +237,12 @@ var binnedLineChart = function (data, dataRequester) {
     return Math.floor(val/tim) * tim;
   }
 
+  function millisecond(val) {
+    var newdate = new Date();
+    newdate.setTime(roundDownToNearestTime(val, times.ms));
+    return newdate;
+  }
+
   var times = {
     ms: 1, //milliseconds
     s: 1000, //seconds
@@ -248,20 +256,32 @@ var binnedLineChart = function (data, dataRequester) {
 
   // what to round to, increments, percent width on screen
   var rounding_scales = [
-    [d3.time.minute, 1  , ] ,
-    [d3.time.minute, 5  , ] ,
-    [d3.time.minute, 15 , ] ,
-    [d3.time.minute, 30 , ] ,
-    [d3.time.hour,   1  , ] ,
-    [d3.time.hour,   3  , ] ,
-    [d3.time.hour,   6  , ] ,
-    [d3.time.hour,   12 , ] ,
-    [d3.time.day,    1  , ] ,
-    [d3.time.day,    2  , ] ,
-    [d3.time.week,   1  , ] ,
-    [d3.time.month,  1  , ] ,
-    [d3.time.month,  3  , ] ,
-    [d3.time.year,   1  , ]
+    [ millisecond    , times.ms , 1  ],
+    [ d3.time.second , times.s  , 100],
+    [ d3.time.second , times.s  , 50 ],
+    [ d3.time.second , times.s  , 25 ],
+    [ d3.time.second , times.s  , 10 ],
+    [ d3.time.second , times.s  , 5  ],
+    [ d3.time.second , times.s  , 2  ],
+    [ d3.time.second , times.s  , 1  ],
+    [ d3.time.minute , times.m  , 30 ],
+    [ d3.time.minute , times.m  , 15 ],
+    [ d3.time.minute , times.m  , 5  ],
+    [ d3.time.minute , times.m  , 2  ],
+    [ d3.time.minute , times.m  , 1  ],
+    [ d3.time.hour   , times.h  , 1  ],
+    [ d3.time.hour   , times.h  , 3  ],
+    [ d3.time.hour   , times.h  , 6  ],
+    [ d3.time.hour   , times.h  , 12 ],
+    [ d3.time.day    , times.d  , 1  ],
+    [ d3.time.day    , times.d  , 2  ],
+    [ d3.time.day    , times.d  , 5  ],
+    [ d3.time.day    , times.d  , 10 ],
+    [ d3.time.day    , times.d  , 15 ],
+    [ d3.time.month  , times.mo , 1  ],
+    [ d3.time.month  , times.mo , 3  ],
+    [ d3.time.month  , times.mo , 6  ],
+    [ d3.time.year   , times.y  , 1  ]
   ];
 
   function todo_tick_values_matt(scal) {
@@ -270,59 +290,56 @@ var binnedLineChart = function (data, dataRequester) {
     //TODO: make this automatic and amazing.
     //      - this will require using that variable 'width'
     //        - likely where times.ms*100 is
-/*{{ variable }}
-    if (dom[1]-dom[0] < {{times.ms*100}}) {
-      console.log(roundDownToNearestTime(dom[0], {{100}}));
-      console.log(roundUpToNearestTime(dom[1], {{100}}));
-      return d3.range(
-            roundDownToNearestTime(dom[0], {{100}}),
-            roundUpToNearestTime(dom[1], {{100}}),
-            {{10}});
+    var i = 0;
+    for (i = 0; i < rounding_scales.length; i++) {
+      var ro = rounding_scales[i];
+      // if there are fewer than 1 of them per 100 pixels
+      //console.log((dom[1] - dom[0]) + " < " + (ro[1]/ro[2]) /**width/50*/);
+      //console.log("step: " + ro[1]/ro[2]*width/3000);
+      if (dom[1] - dom[0] < ro[1]/ro[2])/**width/50*/  { // TODO: magic
+        //console.log(ro);
+        return d3.range(
+            ro[0](dom[0]        ).getTime(),
+            ro[0](dom[1] + ro[1]).getTime(),
+            ro[1]/ro[2]*minDistanceBetweenXAxisLabels/width);
+      }
     }
-*/
-    if (dom[1]-dom[0] < times.ms*100) {
-      console.log(roundDownToNearestTime(dom[0], 100));
-      console.log(roundUpToNearestTime(dom[1], 100));
-      return d3.range(
-            roundDownToNearestTime(dom[0], 100),
-            roundUpToNearestTime(dom[1], 100),
-            10);
-    }
+    //if (dom[1]-dom[0] < times.ms*100) {
+    //  console.log(roundDownToNearestTime(dom[0], 100));
+    //  console.log(roundUpToNearestTime(dom[1], 100));
+    //  return d3.range(
+    //        roundDownToNearestTime(dom[0], 100),
+    //        roundUpToNearestTime(dom[1], 100),
+    //        10);
+    //}
 
-    if (dom[1]-dom[0] < times.s/10) {
-      return d3.range(
-            d3.time.second(dom[0]).getTime(),
-            d3.time.second(dom[1]+times.s).getTime(),
-            10);
-    }
+    //if (dom[1]-dom[0] < times.s/4) {
+    //  return d3.range(
+    //        d3.time.second(dom[0]).getTime(),
+    //        d3.time.second(dom[1]+times.s).getTime(),
+    //        25);
+    //}
 
-    if (dom[1]-dom[0] < times.s/4) {
-      return d3.range(
-            d3.time.second(dom[0]).getTime(),
-            d3.time.second(dom[1]+times.s).getTime(),
-            25);
-    }
+    //if (dom[1]-dom[0] < times.s/2) {
+    //  return d3.range(
+    //        d3.time.second(dom[0]).getTime(),
+    //        d3.time.second(dom[1]+times.s).getTime(),
+    //        50);
+    //}
 
-    if (dom[1]-dom[0] < times.s/2) {
-      return d3.range(
-            d3.time.second(dom[0]).getTime(),
-            d3.time.second(dom[1]+times.s).getTime(),
-            50);
-    }
+    //if (dom[1]-dom[0] < times.s) {
+    //  return d3.range(
+    //        d3.time.second(dom[0]).getTime(),
+    //        d3.time.second(dom[1]+times.s).getTime(),
+    //        100);
+    //}
 
-    if (dom[1]-dom[0] < times.s) {
-      return d3.range(
-            d3.time.second(dom[0]).getTime(),
-            d3.time.second(dom[1]+times.s).getTime(),
-            100);
-    }
-
-    if (dom[1]-dom[0] < times.m) {
-      return d3.range(
-            d3.time.minute(dom[0]).getTime(),
-            d3.time.minute(dom[1]+times.m).getTime(),
-            60*10);
-    }
+    //if (dom[1]-dom[0] < times.m) {
+    //  return d3.range(
+    //        d3.time.minute(dom[0]).getTime(),
+    //        d3.time.minute(dom[1]+times.m).getTime(),
+    //        60*10);
+    //}
     return [1, 111, 200];
   }
 
