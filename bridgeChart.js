@@ -310,6 +310,8 @@ var binnedLineChart = function (data, dataRequester) {
     //      - subtract one second
     //      - round down to nearest day
     //      - check what the number of the day is
+    //      - do this for all possible months being displayed
+    //      - then do this for all years being displayed :/
     var i = 0;
     for (i = 0; i < rounding_scales.length; i++) {
       var ro = rounding_scales[i];
@@ -368,11 +370,17 @@ var binnedLineChart = function (data, dataRequester) {
     return function(d) { return customTimeFormat(ti); }();
   }
 
+  function maxBinRenderSize () {
+    return document.getElementById("renderdepth").value / 4;
+    // the 4 is to balance something which is due to the
+    // sampling rate being 200Hz
+  }
+
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d, i) {
     // See transformScale for the inverse.
     var newdate = new Date();
-    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
+    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * maxBinRenderSize());
     return newdate;
   };
 
@@ -386,7 +394,7 @@ var binnedLineChart = function (data, dataRequester) {
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
     // See renderFunction for the inverse.
-    var sx = pixelsPerSample*Math.pow(2, level) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
+    var sx = pixelsPerSample*Math.pow(2, level) / maxBinRenderSize(); //renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -638,9 +646,9 @@ var binnedLineChart = function (data, dataRequester) {
           renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
             //.x(function (d, i) { return xScale(d.date); })
             .x(renderFunction)
-            //.x(function (d, i) { return new Date(d.date * document.getElementById("renderdepth").value); })
+            //.x(function (d, i) { return new Date(d.date * maxBinRenderSize()); })
             // WAS: .x(function (d, i) { return (d.date * docu.gete.renderdepth.val); })
-    //document.getElementById("renderdepth").value;
+    //maxBinRenderSize();
             .y(function (d, i) { return yScale(binData.rawData.levels[0][i].val); })
             .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
@@ -1005,7 +1013,7 @@ var binnedLineChart = function (data, dataRequester) {
     //Have: pixels/bin, pixels/sample
 
     // pixels/bin:
-    var pixelsPerBin = document.getElementById("renderdepth").value;
+    var pixelsPerBin = maxBinRenderSize();
     var pixelsPerSample = getScaleValue(xScale);
 
     // sam   pix   sam
