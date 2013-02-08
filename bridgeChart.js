@@ -280,8 +280,9 @@ var binnedLineChart = function (data, dataRequester) {
     [ d3.time.hour   , times.h  , 4   ],
     [ d3.time.hour   , times.h  , 2   ],
     [ d3.time.hour   , times.h  , 1   ],
-    [ d3.time.day    , times.d  , 12  ],
-    [ d3.time.day    , times.d  , 8   ],
+    [ d3.time.day    , times.d  , 12  ], // TODO: where problems start
+  //[ d3.time.day    , times.d  , 12  ], // TODO: where problems start
+    [ d3.time.day    , times.d  , 8   ], // - day = 24 hours?
     [ d3.time.day    , times.d  , 4   ],
     [ d3.time.day    , times.d  , 2   ],
     [ d3.time.month  , times.mo , 6   ],
@@ -294,6 +295,43 @@ var binnedLineChart = function (data, dataRequester) {
     var newdate = new Date();
     newdate.setTime(num);
     return newdate;
+  }
+
+  getNumberOfDaysInCurrentMonth(dt(123456789));
+  // TODO: current problem is that this test case isn't working...
+  getNumberOfDaysInCurrentMonth(dt(0));
+  function getNumberOfDaysInCurrentMonth(dat) {
+    var curmo = dat.getMonth();
+    console.log("-----------------");
+    console.log(dat + ", " + dat.getFullYear() + ", " + curmo + ", " + dat.getDate());
+    var newdate = new Date(
+        dat.getFullYear(), // TODO: not working for time 0
+        (curmo + 1) % 12,
+        1,
+        1,
+        1,
+        1,
+        1);
+    newdate = dt(newdate.getTime() - 4000000);
+    console.log(newdate + ", " + newdate.getFullYear() + ", " + newdate.getMonth() + ", " + newdate.getDate());
+    return newdate.getDate();
+  }
+
+  function getNumberOfDaysInCurrentYear(dat) {
+    var curyr = dat.getFullYear();
+    //console.log("---------------");
+    //console.log(dat);
+    //console.log(curyr);
+    var newdate = new Date(
+        dat.getYear(),
+        0,
+        0,
+        0,
+        0,
+        0,
+        0);
+    //console.log(newdate + ", " + newdate.getDate());
+    return newdate.getDate();
   }
 
   function todo_tick_values_matt(scal) {
@@ -318,7 +356,8 @@ var binnedLineChart = function (data, dataRequester) {
       // if there are fewer than 1 of them per 100 pixels
       var compr = ro[1]/ro[2]*width/minDistanceBetweenXAxisLabels;
       if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
-        console.log(ro[1] + ", " + ro[2]);
+        //getNumberOfDaysInCurrentMonth(dt(dom[0]));
+        //etNumberOfDaysInCurrentYear(dt(dom[0]));
         var result = d3.range(
             ro[0]( dt(dom[0])         ).getTime(),
             ro[0]( dt(dom[1] + ro[1]) ).getTime(),
