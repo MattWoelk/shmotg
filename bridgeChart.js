@@ -1,5 +1,7 @@
 //{{{ TODO:
 //  NEXT THING TO COMPLETE
+//      Milliseconds are being rendered (samples likely involved) as 100 per second.
+//      - This is incorrect. Each sample should be 10ms.
 //      Need some rounding because this can happen:
 //      - This happens:
 //        - 06PM   :20    :40   06:01   :20    :40
@@ -249,40 +251,50 @@ var binnedLineChart = function (data, dataRequester) {
     m: 6e4, //minutes
     h: 36e5, //hours
     d: 864e5, //days
-    // DON'T USE ANY OF THESE: ???
+    // DON'T USE ANY OF THESE:
     mo: 6e4, //months
     y: 6e4, //years
   };
 
   // what to round to, increments, percent width on screen
   var rounding_scales = [
-    [ millisecond    , times.ms , 1  ],
-    [ d3.time.second , times.s  , 100],
-    [ d3.time.second , times.s  , 50 ],
-    [ d3.time.second , times.s  , 25 ],
-    [ d3.time.second , times.s  , 10 ],
-    [ d3.time.second , times.s  , 5  ],
-    [ d3.time.second , times.s  , 2  ],
-    [ d3.time.second , times.s  , 1  ],
-    [ d3.time.minute , times.m  , 30 ],
-    [ d3.time.minute , times.m  , 15 ],
-    [ d3.time.minute , times.m  , 5  ],
-    [ d3.time.minute , times.m  , 2  ],
-    [ d3.time.minute , times.m  , 1  ],
-    [ d3.time.hour   , times.h  , 1  ],
-    [ d3.time.hour   , times.h  , 3  ],
-    [ d3.time.hour   , times.h  , 6  ],
-    [ d3.time.hour   , times.h  , 12 ],
-    [ d3.time.day    , times.d  , 1  ],
-    [ d3.time.day    , times.d  , 2  ],
-    [ d3.time.day    , times.d  , 5  ],
-    [ d3.time.day    , times.d  , 10 ],
-    [ d3.time.day    , times.d  , 15 ],
-    [ d3.time.month  , times.mo , 1  ],
-    [ d3.time.month  , times.mo , 3  ],
-    [ d3.time.month  , times.mo , 6  ],
-    [ d3.time.year   , times.y  , 1  ]
+    [ millisecond    , times.ms , 1   ],
+    [ d3.time.second , times.s  , 500 ],
+    [ d3.time.second , times.s  , 200 ],
+    [ d3.time.second , times.s  , 100 ],
+    [ d3.time.second , times.s  , 40  ],
+    [ d3.time.second , times.s  , 25  ],
+    [ d3.time.second , times.s  , 10  ],
+    [ d3.time.second , times.s  , 5   ],
+    [ d3.time.second , times.s  , 2   ],
+    [ d3.time.second , times.s  , 1   ],
+    [ d3.time.minute , times.m  , 30  ],
+    [ d3.time.minute , times.m  , 12  ],
+    [ d3.time.minute , times.m  , 6   ],
+    [ d3.time.minute , times.m  , 4   ],
+    [ d3.time.minute , times.m  , 2   ],
+    [ d3.time.minute , times.m  , 1   ],
+    [ d3.time.hour   , times.h  , 30  ],
+    [ d3.time.hour   , times.h  , 12  ],
+    [ d3.time.hour   , times.h  , 6   ],
+    [ d3.time.hour   , times.h  , 4   ],
+    [ d3.time.hour   , times.h  , 2   ],
+    [ d3.time.hour   , times.h  , 1   ],
+    [ d3.time.day    , times.d  , 12  ],
+    [ d3.time.day    , times.d  , 8   ],
+    [ d3.time.day    , times.d  , 4   ],
+    [ d3.time.day    , times.d  , 2   ],
+    [ d3.time.month  , times.mo , 6   ],
+    [ d3.time.month  , times.mo , 3   ],
+    [ d3.time.month  , times.mo , 1   ],
+    [ d3.time.year   , times.y  , 1   ]
   ];
+
+  function dt (num) {
+    var newdate = new Date();
+    newdate.setTime(num);
+    return newdate;
+  }
 
   function todo_tick_values_matt(scal) {
     var dom = scal.domain();
@@ -290,57 +302,37 @@ var binnedLineChart = function (data, dataRequester) {
     //TODO: make this automatic and amazing.
     //      - this will require using that variable 'width'
     //        - likely where times.ms*100 is
+
+    //TODO: Current Problem:
+    //      - number of days per month is variable. :/
+    //      To fix this:
+    //      - round up to nearest month
+    //      - subtract one second
+    //      - round down to nearest day
+    //      - check what the number of the day is
     var i = 0;
     for (i = 0; i < rounding_scales.length; i++) {
       var ro = rounding_scales[i];
       // if there are fewer than 1 of them per 100 pixels
-      //console.log((dom[1] - dom[0]) + " < " + (ro[1]/ro[2]) /**width/50*/);
-      //console.log("step: " + ro[1]/ro[2]*width/3000);
-      if (dom[1] - dom[0] < ro[1]/ro[2])/**width/50*/  { // TODO: magic
-        //console.log(ro);
-        return d3.range(
-            ro[0](dom[0]        ).getTime(),
-            ro[0](dom[1] + ro[1]).getTime(),
-            ro[1]/ro[2]*minDistanceBetweenXAxisLabels/width);
+      var compr = ro[1]/ro[2]*width/minDistanceBetweenXAxisLabels;
+      if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
+        console.log(ro[1] + ", " + ro[2]);
+        var result = d3.range(
+            ro[0]( dt(dom[0])         ).getTime(),
+            ro[0]( dt(dom[1] + ro[1]) ).getTime(),
+            roundUpToNearestTime(ro[1]/ro[2]*minDistanceBetweenXAxisLabels/width, ro[1]/ro[2]));
+
+        // filter this for only what is actually on-screen.
+        result = _.filter(result, function (num) {
+          return num < dom[1] && num > dom[0];
+        });
+
+        return result;
       }
     }
-    //if (dom[1]-dom[0] < times.ms*100) {
-    //  console.log(roundDownToNearestTime(dom[0], 100));
-    //  console.log(roundUpToNearestTime(dom[1], 100));
-    //  return d3.range(
-    //        roundDownToNearestTime(dom[0], 100),
-    //        roundUpToNearestTime(dom[1], 100),
-    //        10);
-    //}
 
-    //if (dom[1]-dom[0] < times.s/4) {
-    //  return d3.range(
-    //        d3.time.second(dom[0]).getTime(),
-    //        d3.time.second(dom[1]+times.s).getTime(),
-    //        25);
-    //}
-
-    //if (dom[1]-dom[0] < times.s/2) {
-    //  return d3.range(
-    //        d3.time.second(dom[0]).getTime(),
-    //        d3.time.second(dom[1]+times.s).getTime(),
-    //        50);
-    //}
-
-    //if (dom[1]-dom[0] < times.s) {
-    //  return d3.range(
-    //        d3.time.second(dom[0]).getTime(),
-    //        d3.time.second(dom[1]+times.s).getTime(),
-    //        100);
-    //}
-
-    //if (dom[1]-dom[0] < times.m) {
-    //  return d3.range(
-    //        d3.time.minute(dom[0]).getTime(),
-    //        d3.time.minute(dom[1]+times.m).getTime(),
-    //        60*10);
-    //}
-    return [1, 111, 200];
+    // This should never occur
+    return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
   }
 
   // custom formatting for x axis time
