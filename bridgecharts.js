@@ -37,8 +37,10 @@ var zoomRect = d3.select("#zoomRect");
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
-var xScale = d3.scale.linear().domain([0, 200]).range([0, document.getElementById("chartContainer").offsetWidth]);
+var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
+
+var frequency = 200; //Hz
 
 // VARIABLES }}}
 
@@ -218,8 +220,8 @@ socket.on('news', function (data) {
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
-  initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*2}; }));
-  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex*2}; }));
+  initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
+  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
 });
 
 // SERVER COMMUNICATIONS }}}
@@ -239,7 +241,7 @@ function rundemo() {
     var json = data;
 
     //initPlot(json);
-    initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*2}; }));
+    initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
   });
 }
 
