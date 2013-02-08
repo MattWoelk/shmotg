@@ -14,8 +14,10 @@ window.addEventListener(
 );
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
-document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
-document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
+document.getElementById("render-depth").addEventListener("change", changeLines, false);
+//  an alternative so that it waits for you to lift up your mouse/finger:
+//document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
+//document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
 d3.select("#zoomin").on("click", zoomin);
@@ -122,9 +124,11 @@ var zoom = d3.behavior.zoom()
   .on("zoom", zoomAll);
 
 
-var changeLines = function () {
+function changeLines () {
+  console.log("reren");
   plots.forEach(function (plt) {
-    plt.setSelectedLines().update();
+    console.log("reren");
+    plt.setSelectedLines().reRenderTheNextTime(true).update();
   });
 }
 
