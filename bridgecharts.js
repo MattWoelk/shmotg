@@ -217,8 +217,9 @@ socket.on('news', function (data) {
   var json = JSON.parse(data);
   socket.emit('ack', "Message received!");
 
-  initPlot(json);
-  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex}; }));
+  //initPlot(json);
+  initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*2}; }));
+  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex*2}; }));
 });
 
 // SERVER COMMUNICATIONS }}}
@@ -237,7 +238,8 @@ function rundemo() {
 
     var json = data;
 
-    initPlot(json);
+    //initPlot(json);
+    initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*2}; }));
   });
 }
 
