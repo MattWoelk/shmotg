@@ -199,41 +199,6 @@ var binnedLineChart = function (data, dataRequester) {
     y: 6e4, //years
   };
 
-  // what to round to, increments, percent width on screen
-  var rounding_scales = [
-    [ millisecond    , times.ms , 1   ],
-    [ d3.time.second , times.s  , 500 ],
-    [ d3.time.second , times.s  , 200 ],
-    [ d3.time.second , times.s  , 100 ],
-    [ d3.time.second , times.s  , 40  ],
-    [ d3.time.second , times.s  , 25  ],
-    [ d3.time.second , times.s  , 10  ],
-    [ d3.time.second , times.s  , 5   ],
-    [ d3.time.second , times.s  , 2   ],
-    [ d3.time.second , times.s  , 1   ],
-    [ d3.time.minute , times.m  , 30  ],
-    [ d3.time.minute , times.m  , 12  ],
-    [ d3.time.minute , times.m  , 6   ],
-    [ d3.time.minute , times.m  , 4   ],
-    [ d3.time.minute , times.m  , 2   ],
-    [ d3.time.minute , times.m  , 1   ],
-    [ d3.time.hour   , times.h  , 30  ],
-    [ d3.time.hour   , times.h  , 12  ],
-    [ d3.time.hour   , times.h  , 6   ],
-    [ d3.time.hour   , times.h  , 4   ],
-    [ d3.time.hour   , times.h  , 2   ],
-    [ d3.time.hour   , times.h  , 1   ],
-    [ d3.time.day    , times.d  , 12  ], // TODO: where problems start
-  //[ d3.time.day    , times.d  , 12  ], // TODO: where problems start
-    [ d3.time.day    , times.d  , 8   ], // - day = 24 hours?
-    [ d3.time.day    , times.d  , 4   ],
-    [ d3.time.day    , times.d  , 2   ],
-    [ d3.time.month  , times.mo , 6   ],
-    [ d3.time.month  , times.mo , 3   ],
-    [ d3.time.month  , times.mo , 1   ],
-    [ d3.time.year   , times.y  , 1   ]
-  ];
-
   function dt (num) {
     var newdate = new Date();
     newdate.setTime(num);
@@ -269,10 +234,56 @@ var binnedLineChart = function (data, dataRequester) {
     return Math.floor(diff / oneDay);
   }
 
+  // what to round to, increments, percent width on screen
+  // TODO: flip this around, so that it's every x of, rather than every 1/x fraction of.
+  var rounding_scales = [
+    //////////
+    // TODO //
+    // Current Task is switching this all around
+    //   and then getting it all to work again. :/
+    //////////
+    [ millisecond    , times.ms , 500 , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 200 , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 100 , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 50  , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 20  , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 10  , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 5   , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 2   , d3.time.second, d3.time.second],
+    [ millisecond    , times.ms , 1   , d3.time.second, d3.time.second],
+    [ d3.time.second , times.s  , 1   , d3.time.second, d3.time.minute],
+    [ d3.time.second , times.s  , 2   , d3.time.second, d3.time.minute],
+    [ d3.time.second , times.s  , 5   , d3.time.second, d3.time.minute],
+    [ d3.time.second , times.s  , 10  , d3.time.second, d3.time.minute],
+    [ d3.time.second , times.s  , 15  , d3.time.second, d3.time.minute],
+    [ d3.time.second , times.s  , 30  , d3.time.second, d3.time.minute],
+    [ d3.time.minute , times.m  , 30  , d3.time.second, d3.time.hour],
+    [ d3.time.minute , times.m  , 12  , d3.time.second, d3.time.hour],
+    [ d3.time.minute , times.m  , 6   , d3.time.second, d3.time.hour],
+    [ d3.time.minute , times.m  , 4   , d3.time.second, d3.time.hour],
+    [ d3.time.minute , times.m  , 2   , d3.time.second, d3.time.hour],
+    [ d3.time.minute , times.m  , 1   , d3.time.second, d3.time.hour],
+    [ d3.time.hour   , times.h  , 30  , d3.time.second, d3.time.day],
+    [ d3.time.hour   , times.h  , 12  , d3.time.second, d3.time.day],
+    [ d3.time.hour   , times.h  , 6   , d3.time.second, d3.time.day],
+    [ d3.time.hour   , times.h  , 4   , d3.time.second, d3.time.day],
+    [ d3.time.hour   , times.h  , 2   , d3.time.second, d3.time.day],
+    [ d3.time.hour   , times.h  , 1   , d3.time.second, d3.time.day],
+//    [ d3.time.day    , times.d  , 12  ], // TODO: where problems start
+//  //[ d3.time.day    , times.d  , 12  ], // TODO: where problems start
+//    [ d3.time.day    , times.d  , 8   ], // - day = 24 hours?
+//    [ d3.time.day    , times.d  , 4   ],
+//    [ d3.time.day    , times.d  , 2   ],
+//    [ d3.time.month  , times.mo , 6   ],
+//    [ d3.time.month  , times.mo , 3   ],
+//    [ d3.time.month  , times.mo , 1   ],
+//    [ d3.time.year   , times.y  , 1   ]
+  ];
+
   function todo_tick_values_matt(scal) {
     var dom = scal.domain();
 
-    //TODO: make this automatic and amazing.
+    //TODO: make this automatic and amazing.//{{{
     //      - this will require using that variable 'width'
     //        - likely where times.ms*100 is
 
@@ -284,13 +295,15 @@ var binnedLineChart = function (data, dataRequester) {
     //      - round down to nearest day
     //      - check what the number of the day is
     //      - do this for all possible months being displayed
-    //      - then do this for all years being displayed :/
+    //      - then do this for all years being displayed :///}}}
     var i = 0;
     for (i = 0; i < rounding_scales.length; i++) {
       var ro = rounding_scales[i];
       // if there are fewer than 1 of them per 100 pixels
-      var compr = ro[1]/ro[2]*width/minDistanceBetweenXAxisLabels;
+      var compr = ro[3]/ro[2]*width/minDistanceBetweenXAxisLabels;
+      console.log(dom[1] + " - " + dom[0] + " <= " + compr);
       if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
+        break;
         //getNumberOfDaysInCurrentMonth(dt(dom[0]));
         //etNumberOfDaysInCurrentYear(dt(dom[0]));
         var result = d3.range(
