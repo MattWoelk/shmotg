@@ -297,15 +297,17 @@ var binnedLineChart = function (data, dataRequester) {
     return newdate;
   }
 
-  getNumberOfDaysInCurrentMonth(dt(123456789));
-  // TODO: current problem is that this test case isn't working...
-  getNumberOfDaysInCurrentMonth(dt(0));
   function getNumberOfDaysInCurrentMonth(dat) {
     var curmo = dat.getMonth();
-    console.log("-----------------");
-    console.log(dat + ", " + dat.getFullYear() + ", " + curmo + ", " + dat.getDate());
+    var addYear;
+    if (( curmo + 1 ) / 12.0 >= 1.0) {
+      // we rolled over to the next year
+      addYear = dat.getFullYear() + 1;
+    } else {
+      addYear = dat.getFullYear();
+    }
     var newdate = new Date(
-        dat.getFullYear(), // TODO: not working for time 0
+        addYear,
         (curmo + 1) % 12,
         1,
         1,
@@ -313,25 +315,15 @@ var binnedLineChart = function (data, dataRequester) {
         1,
         1);
     newdate = dt(newdate.getTime() - 4000000);
-    console.log(newdate + ", " + newdate.getFullYear() + ", " + newdate.getMonth() + ", " + newdate.getDate());
     return newdate.getDate();
   }
 
   function getNumberOfDaysInCurrentYear(dat) {
-    var curyr = dat.getFullYear();
-    //console.log("---------------");
-    //console.log(dat);
-    //console.log(curyr);
-    var newdate = new Date(
-        dat.getYear(),
-        0,
-        0,
-        0,
-        0,
-        0,
-        0);
-    //console.log(newdate + ", " + newdate.getDate());
-    return newdate.getDate();
+    var newdateStart = new Date(dat.getFullYear()    , 0, 0);
+    var newdateEnd   = new Date(dat.getFullYear() + 1, 0, 0);
+    var diff = newdateEnd.getTime() - newdateStart.getTime();
+    var oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
   }
 
   function todo_tick_values_matt(scal) {
