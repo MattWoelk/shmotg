@@ -1,5 +1,5 @@
-//{{{ TODO:
-//  NEXT THING TO COMPLETE
+//{{{ TODO AND NOTES:
+//  CURRENT TASK:
 //      Milliseconds are being rendered (samples likely involved) as 100 per second.
 //      - This is incorrect. Each sample should be 10ms.
 //      Need some rounding because this can happen:
@@ -11,66 +11,9 @@
 //        - create a long tick at the bottom of the plot which
 //          shows how big a second/minute/day/etc. is on screen.
 //          just like google maps does. :)
-//      Make x-axis in terms of date and time.
-//      - fix it somehow to have samples at the exact minute/hour/day/etc.
-//      - this may be difficult, due to using powers of 2 everywhere...
+
 //      Only render what is on-screen.
-//      - Currently, only the necessary lines and levels are being rendered
-//      - BUT ALL of the data for that level/line is being rendered.
 //      - See "new section" for the beginnings of a fix for this.
-
-//  BUGS AND IMPROVEMENTS:
-//      Chart isn't updating whenever something in the form is changed.
-//      If the first thing you do is hit the + button, the transition looks funky.
-//      Raw Data view is broken when zooming in or out.
-//      Update the slider always again; like how it used to be.
-//      - Make sure it's fast. :)
-//      When changing the slider, things get off-scale.
-//      - probably need to fix something in the update() or enter() sections.
-//      Using the same id twice for clipping region is bad news. Fix this.
-//      Make a simplified version of the chart, and use that with static data for the demo. :)
-//      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
-//      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
-//      - this involves dynamically changing the size of the lines based on what is on-screen.
-//      Might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
-//      - create a new data structure called "renderData"
-//      - add new functions which add data to binData (based on level and time)
-//        - might need to keep it all sorted by date
-//        - might need to change the way things are initialized
-//      Don't allow zooming in more than what the max bin size would allow
-//      - Fix zooming past the lowest layer. Limits required somewhere.
-//      Make an animation to show that data is being downloaded
-//      - background could have a color sweep in from one side
-//        - so the whole thing would look like a progress bar, but classier
-//      - could have a spinner in some corner
-//      - could load data into the lines as it's generated
-//      - could have a flat, grey line which comes out of the last data point (or the average only or something) which would then transition to the right location and become the right colour as data comes in
-//      Put bin size slider under the axis, and have it make more sense.
-//      - Do it using d3.
-//      - Should look like this: |____|
-//      - It needs handles for touch screens
-//        - Perhaps on taping it, handles will show up. Tap again to retract them.
-//      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside each other
-//      - They could be staggered, then. Which would look cool.
-//      - They could be abbreviated
-//      - There could be less of them (most likely scenario)
-//      - could be worth a pull request. :D
-//      - OR rotate them when necessary: http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
-//      Show the current year/month/day/hour on the left under the scale to give people context.
-//      - should only be down to one higher than what is displayed.
-//        - example: if days are being shown, the current year and month will be displayed.
-
-// FEATURE IDEAS:
-//      Create a version of the following as github gists for bl.ocks.org:
-//      - the chart with static data
-//      - the new time scale I'm creating
-//      Threshold integration to show all points over a certain value in a certain color?
-//      - maybe just have a movable dashed line which a user can use to look at thresholds
-//      - maybe only show values which are above a threshold
-//      Bin Size of 1 should show data points as circles
-//      - mouseover data points to show exact values
-//      - ... maybe
-//      Make a small multiples mode which allows comparisons between years (or between whatever the user likes)
 // TODO: }}}
 
 var binnedLineChart = function (data, dataRequester) {
