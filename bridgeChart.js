@@ -348,11 +348,15 @@ var binnedLineChart = function (data, dataRequester) {
           //return new Date(d, f);
           var curnum = getNumberOfDaysInCurrentMonth(new Date(d, f));
           //console.log(curnum);
-          return _.map(d3.range(1, curnum), function (dm) {
-            //console.log(d);
+          return _.map(d3.range(1, curnum + 1), function (dm) {
+            //console.log(dm);
             //var tmp = d3.range(1, curnum);
             //return 
-            return new Date(d, f, dm);
+            if ((dm + 1) % increment == 0 && dm < curnum - 1 ) {
+              return new Date(d, f, dm);
+            } else {
+              return [];
+            }
           });
           //return i % increment == 0;
         });
