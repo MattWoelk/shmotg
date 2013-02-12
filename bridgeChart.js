@@ -327,16 +327,80 @@ var binnedLineChart = function (data, dataRequester) {
       curange = _.flatten(curange);
 
       // TODO: do things this way for everything.
-      console.log("-------------" + increment);
-      console.log(curange);
       curange = _.filter(curange, function (d, i) {
         return i % increment == 0;
       });
-      console.log(curange);
 
       //curange = _.map(curange, function (d) { return new Date(d, 0); });
 
       return curange;
+    } else if (baseFunc === d3.time.month){
+      // make a range of beginnings of years which wrap around start and end
+      // make a range of beginnings of months between each year
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // for each year, get all of the months for it
+      curange = _.map(curange, function (d, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
+          //return new Date(d, f);
+          var curnum = getNumberOfDaysInCurrentMonth(new Date(d, f));
+          //console.log(curnum);
+          return _.map(d3.range(1, curnum), function (dm) {
+            //console.log(d);
+            //var tmp = d3.range(1, curnum);
+            //return 
+            return new Date(d, f, dm);
+          });
+          //return i % increment == 0;
+        });
+      });
+      curange = _.flatten(curange);
+
+      //console.log(curange);
+
+      // for each month, put in all of the days, modding them appropriately
+      //curange = _.map(curange, function (d, i) {
+      //});
+      //console.log(curange);
+      //curange = _.flatten(curange);
+
+      // TODO: do things this way for everything.
+      //curange = _.filter(curange, function (d, i) {
+        //return i % increment == 0;
+      //});
+
+      //curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+
+
+
+
+
+      // Assumption: we will never show more than 2 different scales.
+      // example: we won't show more than one month, with granularity of hours.
+
+      // TODO: make this super general
+      var startBig = baseFunc.floor(dt(start));
+      var endBig   = baseFunc.ceil( dt(end  ));
+
+      var dat = dt(start);
+
+//      var mapper = [//{{{
+//        [ d3.time.year   , 'getFullYear'     , function (d,f) { return new Date(f, 0); }] ,
+//        [ d3.time.month  , 'getMonth'        , function (d,f) { return new Date(d, f); }] ,
+//        [ d3.time.day    , 'getDate'         , function (d,f) { return new Date(dat.getFullYear(), d, f); }] ,
+//        [ d3.time.hour   , 'getHours'        , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), d, f); }] ,
+//        [ d3.time.minute , 'getMinutes'      , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), d, f); }] ,
+//        [ d3.time.second , 'getSeconds'      , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), dat.getHours(), d, f); }] ,
+//        [ millisecond    , 'getMilliseconds' , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), dat.getHours(), dat.getMinutes(), d, f); }]
+//      ];//}}}
+
+      curange = d3.range(startBig)
+      return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
     } else {
       //return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
       return d3.range( baseFunc.floor( dt(start) ).getTime(),
