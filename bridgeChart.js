@@ -196,7 +196,7 @@ var binnedLineChart = function (data, dataRequester) {
     d: 864e5, //days
     // DON'T USE ANY OF THESE:
     mo: 2592e6, //months
-    y: 221184e5, //years
+    y: 31536e6, //years
   };
 
   function dt (num) {
@@ -250,44 +250,104 @@ var binnedLineChart = function (data, dataRequester) {
     // Current Task is switching this all around
     //   and then getting it all to work again. :/
     //////////
-    [ times.ms , times.s , 1   , d3.time.second ],
-    [ times.ms , times.s , 2   , d3.time.second ],
-    [ times.ms , times.s , 5   , d3.time.second ],
-    [ times.ms , times.s , 10  , d3.time.second ],
-    [ times.ms , times.s , 20  , d3.time.second ],
-    [ times.ms , times.s , 50  , d3.time.second ],
-    [ times.ms , times.s , 100 , d3.time.second ],
-    [ times.ms , times.s , 200 , d3.time.second ],
-    [ times.ms , times.s , 500 , d3.time.second ],
-    [ times.s  , times.m  , 1  , d3.time.minute ],
-    [ times.s  , times.m  , 2  , d3.time.minute ],
-    [ times.s  , times.m  , 5  , d3.time.minute ],
-    [ times.s  , times.m  , 15 , d3.time.minute ],
-    [ times.s  , times.m  , 30 , d3.time.minute ],
-    [ times.m  , times.h  , 1  , d3.time.hour   ],
-    [ times.m  , times.h  , 2  , d3.time.hour   ],
-    [ times.m  , times.h  , 5  , d3.time.hour   ],
-    [ times.m  , times.h  , 15 , d3.time.hour   ],
-    [ times.m  , times.h  , 30 , d3.time.hour   ],
-    [ times.h  , times.d  , 1  , d3.time.day    ],
-    [ times.h  , times.d  , 3  , d3.time.day    ],
-    [ times.h  , times.d  , 6  , d3.time.day    ],
-    [ times.h  , times.d  , 12 , d3.time.day    ],
-    [ times.d  , times.mo , 1  , d3.time.month  ], // TODO: replace times.mo with something intelligent.
-    [ times.d  , times.mo , 2  , d3.time.month  ],
-    [ times.d  , times.mo , 5  , d3.time.month  ],
-    [ times.d  , times.mo , 10 , d3.time.month  ],
-    [ times.d  , times.mo , 15 , d3.time.month  ],
-//    [ d3.time.day    , times.d  , 12  ], // TODO: where problems start
-//  //[ d3.time.day    , times.d  , 12  ], // TODO: where problems start
-//    [ d3.time.day    , times.d  , 8   ], // - day = 24 hours?
-//    [ d3.time.day    , times.d  , 4   ],
-//    [ d3.time.day    , times.d  , 2   ],
-//    [ d3.time.month  , times.mo , 6   ],
-//    [ d3.time.month  , times.mo , 3   ],
-//    [ d3.time.month  , times.mo , 1   ],
-//    [ d3.time.year   , times.y  , 1   ]
+    [ times.ms , times.s  , 1   , d3.time.second , millisecond],
+    [ times.ms , times.s  , 2   , d3.time.second , millisecond],
+    [ times.ms , times.s  , 5   , d3.time.second , millisecond],
+    [ times.ms , times.s  , 10  , d3.time.second , millisecond],
+    [ times.ms , times.s  , 20  , d3.time.second , millisecond],
+    [ times.ms , times.s  , 50  , d3.time.second , millisecond],
+    [ times.ms , times.s  , 100 , d3.time.second , millisecond],
+    [ times.ms , times.s  , 200 , d3.time.second , millisecond],
+    [ times.ms , times.s  , 500 , d3.time.second , millisecond],
+    [ times.s  , times.m  , 1   , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 2   , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 5   , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 15  , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 30  , d3.time.minute , d3.time.second],
+    [ times.m  , times.h  , 1   , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 2   , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 5   , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 15  , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 30  , d3.time.hour   , d3.time.minute],
+    [ times.h  , times.d  , 1   , d3.time.day    , d3.time.hour],
+    [ times.h  , times.d  , 3   , d3.time.day    , d3.time.hour],
+    [ times.h  , times.d  , 6   , d3.time.day    , d3.time.hour],
+    [ times.h  , times.d  , 12  , d3.time.day    , d3.time.hour],
+    [ times.d  , times.mo , 1   , d3.time.month  , d3.time.day], // TODO: replace times.mo with something intelligent.
+    [ times.d  , times.mo , 2   , d3.time.month  , d3.time.day], // TODO: get rid of ro[1], it's useless! :D
+    [ times.d  , times.mo , 5   , d3.time.month  , d3.time.day],
+    [ times.d  , times.mo , 10  , d3.time.month  , d3.time.day],
+    [ times.d  , times.mo , 15  , d3.time.month  , d3.time.day],
+    [ times.mo , times.y  , 1   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 2   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 3   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 6   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 12  , d3.time.year   , d3.time.month],
+    [ times.y  , times.y*100 , 1  , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 2  , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 5  , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 10 , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 25 , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 50 , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 100, d3.time.year , d3.time.year],
   ];
+
+  function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc) {
+    // if the range is small enough that we are showing days
+    if ( incrementOf === d3.time.year ) {
+      // make a range of beginnings of years which wrap around start and end
+      // make a range of beginnings of months between each year
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // TODO: do things this way for everything.
+      curange = _.filter(curange, function (d, i) {
+        return d % increment == 0;
+      });
+
+      curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+    } else if ( incrementOf === d3.time.month ) {
+      // make a range of beginnings of years which wrap around start and end
+      // make a range of beginnings of months between each year
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // for each year, get all of the months for it
+      curange = _.map(curange, function (d, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
+          return new Date(d, f);
+        });
+      });
+      curange = _.flatten(curange);
+
+      // TODO: do things this way for everything.
+      console.log("-------------" + increment);
+      console.log(curange);
+      curange = _.filter(curange, function (d, i) {
+        return i % increment == 0;
+      });
+      console.log(curange);
+
+      //curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+    } else {
+      //return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+      return d3.range( baseFunc.floor( dt(start) ).getTime(),
+                       baseFunc.ceil(  dt( end ) ).getTime(),
+                       roundUpToNearestTime(
+                         smallInc*minDistanceBetweenXAxisLabels/width,
+                         smallInc));
+    }// else {
+     // return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+    //}
+  }
 
   function todo_tick_values_matt(scal) {
     var dom = scal.domain();
@@ -312,13 +372,15 @@ var binnedLineChart = function (data, dataRequester) {
       var compr = ro[0]*ro[2]*width/minDistanceBetweenXAxisLabels;
       //console.log("-----------------");
       if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
+        //console.log(ro[0]);
+        //console.log(dom[1] +"-"+ dom[0] +"<="+ compr );
         //if (ro[0] === times.d)
         //console.log(roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[1]*ro[2]));
         //break;
-        var result = d3.range(
-            ro[3]( dt(dom[0])         ).getTime(),
-            ro[3]( dt(dom[1] + ro[1]) ).getTime(),
-            roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[0]*ro[2]));
+        var result = makeTickRange(dom[0], dom[1], ro[2], ro[4], ro[3], ro[0]*ro[2]);
+//            ro[3].floor( dt(dom[0]) ).getTime(),
+//            ro[3].ceil(  dt(dom[1]) ).getTime(),
+//            roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[0]*ro[2]));
 
         // TODO: run result through a filter which rounds each number to the nearest _____ (month/year).
         // - then gets rid of any which are closer than ____ (day/month) ???
@@ -360,15 +422,15 @@ var binnedLineChart = function (data, dataRequester) {
     //   - we need to switch it to 1, 2, 5, 10, 30, 60=1
     //   - 5, 15, 30, 60=1 is what time.scale does
     var customTimeFormat = timeFormat([
-      [d3.time.format("%Y"), function() { return true; }],
-      [d3.time.format("%B"), function(d) { return d.getMonth(); }],
-      [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
-      [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
-      [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
-      [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
-      [d3.time.format("%Ss"), function(d) { return d.getSeconds(); }],
-      [d3.time.format("%Lms"), function(d) { return d.getMilliseconds(); }]
-    ]);
+       [ d3.time.format("%Y")    , function() { return true; }                            ],
+       [ d3.time.format("%B")    , function(d) { return d.getMonth(); }                   ],
+       [ d3.time.format("%b %d") , function(d) { return d.getDate() != 1; }               ],
+       [ d3.time.format("%a %d") , function(d) { return d.getDay() && d.getDate() != 1; } ],
+       [ d3.time.format("%I %p") , function(d) { return d.getHours(); }                   ],
+       [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }                 ],
+       [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }                 ],
+       [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); }            ]
+      ]);
 
     return function(d) { return customTimeFormat(ti); }();
   }
