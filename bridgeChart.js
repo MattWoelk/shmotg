@@ -195,8 +195,8 @@ var binnedLineChart = function (data, dataRequester) {
     h: 36e5, //hours
     d: 864e5, //days
     // DON'T USE ANY OF THESE:
-    mo: 6e4, //months
-    y: 6e4, //years
+    mo: 2592e6, //months
+    y: 221184e5, //years
   };
 
   function dt (num) {
@@ -234,6 +234,14 @@ var binnedLineChart = function (data, dataRequester) {
     return Math.floor(diff / oneDay);
   }
 
+  function inTheSameMonth(dat1, dat2) {
+    return dat1.getMonth() === dat2.getMonth();
+  }
+
+  function inTheSameYear(dat1, dat2) {
+    return dat1.getFullYear() === dat2.getFullYear();
+  }
+
   // what to round to, increments, percent width on screen
   // TODO: flip this around, so that it's every x of, rather than every 1/x fraction of.
   var rounding_scales = [
@@ -242,33 +250,34 @@ var binnedLineChart = function (data, dataRequester) {
     // Current Task is switching this all around
     //   and then getting it all to work again. :/
     //////////
-    [ millisecond    , times.ms , 500 , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 200 , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 100 , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 50  , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 20  , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 10  , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 5   , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 2   , d3.time.second, d3.time.second],
-    [ millisecond    , times.ms , 1   , d3.time.second, d3.time.second],
-    [ d3.time.second , times.s  , 1   , d3.time.second, d3.time.minute],
-    [ d3.time.second , times.s  , 2   , d3.time.second, d3.time.minute],
-    [ d3.time.second , times.s  , 5   , d3.time.second, d3.time.minute],
-    [ d3.time.second , times.s  , 10  , d3.time.second, d3.time.minute],
-    [ d3.time.second , times.s  , 15  , d3.time.second, d3.time.minute],
-    [ d3.time.second , times.s  , 30  , d3.time.second, d3.time.minute],
-    [ d3.time.minute , times.m  , 30  , d3.time.second, d3.time.hour],
-    [ d3.time.minute , times.m  , 12  , d3.time.second, d3.time.hour],
-    [ d3.time.minute , times.m  , 6   , d3.time.second, d3.time.hour],
-    [ d3.time.minute , times.m  , 4   , d3.time.second, d3.time.hour],
-    [ d3.time.minute , times.m  , 2   , d3.time.second, d3.time.hour],
-    [ d3.time.minute , times.m  , 1   , d3.time.second, d3.time.hour],
-    [ d3.time.hour   , times.h  , 30  , d3.time.second, d3.time.day],
-    [ d3.time.hour   , times.h  , 12  , d3.time.second, d3.time.day],
-    [ d3.time.hour   , times.h  , 6   , d3.time.second, d3.time.day],
-    [ d3.time.hour   , times.h  , 4   , d3.time.second, d3.time.day],
-    [ d3.time.hour   , times.h  , 2   , d3.time.second, d3.time.day],
-    [ d3.time.hour   , times.h  , 1   , d3.time.second, d3.time.day],
+    [ times.ms , times.s , 1   , d3.time.second ],
+    [ times.ms , times.s , 2   , d3.time.second ],
+    [ times.ms , times.s , 5   , d3.time.second ],
+    [ times.ms , times.s , 10  , d3.time.second ],
+    [ times.ms , times.s , 20  , d3.time.second ],
+    [ times.ms , times.s , 50  , d3.time.second ],
+    [ times.ms , times.s , 100 , d3.time.second ],
+    [ times.ms , times.s , 200 , d3.time.second ],
+    [ times.ms , times.s , 500 , d3.time.second ],
+    [ times.s  , times.m  , 1  , d3.time.minute ],
+    [ times.s  , times.m  , 2  , d3.time.minute ],
+    [ times.s  , times.m  , 5  , d3.time.minute ],
+    [ times.s  , times.m  , 15 , d3.time.minute ],
+    [ times.s  , times.m  , 30 , d3.time.minute ],
+    [ times.m  , times.h  , 1  , d3.time.hour   ],
+    [ times.m  , times.h  , 2  , d3.time.hour   ],
+    [ times.m  , times.h  , 5  , d3.time.hour   ],
+    [ times.m  , times.h  , 15 , d3.time.hour   ],
+    [ times.m  , times.h  , 30 , d3.time.hour   ],
+    [ times.h  , times.d  , 1  , d3.time.day    ],
+    [ times.h  , times.d  , 3  , d3.time.day    ],
+    [ times.h  , times.d  , 6  , d3.time.day    ],
+    [ times.h  , times.d  , 12 , d3.time.day    ],
+    [ times.d  , times.mo , 1  , d3.time.month  ], // TODO: replace times.mo with something intelligent.
+    [ times.d  , times.mo , 2  , d3.time.month  ],
+    [ times.d  , times.mo , 5  , d3.time.month  ],
+    [ times.d  , times.mo , 10 , d3.time.month  ],
+    [ times.d  , times.mo , 15 , d3.time.month  ],
 //    [ d3.time.day    , times.d  , 12  ], // TODO: where problems start
 //  //[ d3.time.day    , times.d  , 12  ], // TODO: where problems start
 //    [ d3.time.day    , times.d  , 8   ], // - day = 24 hours?
@@ -300,22 +309,26 @@ var binnedLineChart = function (data, dataRequester) {
     for (i = 0; i < rounding_scales.length; i++) {
       var ro = rounding_scales[i];
       // if there are fewer than 1 of them per 100 pixels
-      var compr = ro[3]/ro[2]*width/minDistanceBetweenXAxisLabels;
-      console.log(dom[1] + " - " + dom[0] + " <= " + compr);
+      var compr = ro[0]*ro[2]*width/minDistanceBetweenXAxisLabels;
+      //console.log("-----------------");
       if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
-        break;
-        //getNumberOfDaysInCurrentMonth(dt(dom[0]));
-        //etNumberOfDaysInCurrentYear(dt(dom[0]));
+        //if (ro[0] === times.d)
+        //console.log(roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[1]*ro[2]));
+        //break;
         var result = d3.range(
-            ro[0]( dt(dom[0])         ).getTime(),
-            ro[0]( dt(dom[1] + ro[1]) ).getTime(),
-            roundUpToNearestTime(ro[1]/ro[2]*minDistanceBetweenXAxisLabels/width, ro[1]/ro[2]));
+            ro[3]( dt(dom[0])         ).getTime(),
+            ro[3]( dt(dom[1] + ro[1]) ).getTime(),
+            roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[0]*ro[2]));
+
+        // TODO: run result through a filter which rounds each number to the nearest _____ (month/year).
+        // - then gets rid of any which are closer than ____ (day/month) ???
 
         // filter this for only what is actually on-screen.
         result = _.filter(result, function (num) {
           return num < dom[1] && num > dom[0];
         });
 
+        //console.log("--------------------------");
         return result;
       }
     }
@@ -326,6 +339,9 @@ var binnedLineChart = function (data, dataRequester) {
 
   // custom formatting for x axis time
   // TODO: change its name
+  // TODO: current problem: Fri 16, Sat 17, Jan 18, Mon 19
+  //       - this happens every Sunday ... :/
+  //       add minor ticks :)
   function todo_format_time_matt(ti) {
     function timeFormat(formats) {
       return function(date) {
