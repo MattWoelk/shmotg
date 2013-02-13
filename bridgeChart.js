@@ -396,7 +396,6 @@ var binnedLineChart = function (data, dataRequester) {
     var customTimeFormat = timeFormat([
        [ d3.time.format("%Y")    , function() { return true; }                 ],
        [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
-       [ d3.time.format("%b %d") , function(d) { return d.getDate() != 1; }    ],
        [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
        [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
        [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }      ],
@@ -791,20 +790,20 @@ var binnedLineChart = function (data, dataRequester) {
       //update
       if (transitionNextTime) {
         currentSelection
-          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          .style("stroke-width", strokeWidth)
-          .style("stroke", function (d, i) { return binData[d.type].color; })
+          //.attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+          //.style("stroke-width", strokeWidth)
+          //.style("stroke", function (d, i) { return binData[d.type].color; })
           .transition().duration(transitionDuration).ease(easingMethod)
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("transform", transformScale(xScale, whichLevelToRender));
       } else {
         currentSelection
-          .attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          .style("stroke-width", strokeWidth)
-          .style("stroke", function (d, i) { return binData[d.type].color; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
+          //.attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
+          //.style("stroke-width", strokeWidth)
+          //.style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
           .attr("transform", transformScale(xScale, whichLevelToRender));
       }
 
@@ -814,15 +813,14 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
           .style("stroke-width", strokeWidth)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
           .attr("transform", transformScale(previousXScale, whichLevelToRender))
-          .style("stroke", function (d, i) { return binData[d.type].color; })
           .attr("opacity", 0)
+          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+          .style("stroke", function (d, i) { return binData[d.type].color; })
           .transition().ease(easingMethod).duration(transitionDuration)
             .attr("transform", transformScale(xScale, whichLevelToRender))
             .attr("opacity", function (d) { return binData[d.type].opacity; });
       } else {
-        // No Transition
         currentSelection.enter().append("path")
           .attr("class", "posPath")
           .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
@@ -830,7 +828,6 @@ var binnedLineChart = function (data, dataRequester) {
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
           .attr("transform", transformScale(xScale, whichLevelToRender))
           .style("stroke", function (d, i) { return binData[d.type].color; })
-          .attr("opacity", 0)
           .attr("opacity", function (d) { return binData[d.type].opacity; });
       }
 
@@ -838,13 +835,13 @@ var binnedLineChart = function (data, dataRequester) {
       if (transitionNextTime) {
         currentSelection.exit()
           .transition().ease(easingMethod).duration(transitionDuration)
-            .attr("opacity", 0)
             .attr("transform", transformScale(xScale, previousLevelToRender))
+            .attr("opacity", 0)
             .remove();
       } else {
         currentSelection.exit()
           .attr("transform", transformScale(xScale, previousLevelToRender))
-          .attr("opacity", 0)
+          .attr("opacity", 0.0)
           .remove();
       }
 
@@ -860,13 +857,13 @@ var binnedLineChart = function (data, dataRequester) {
         currentSelection
           .transition().duration(transitionDuration).ease(easingMethod)
             .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-            .attr("transform", transformScale(xScale, whichLevelToRender))
-            .attr("opacity", function (d) { return binData[d.type].opacity; });
+            .attr("opacity", function (d) { return binData[d.type].opacity; })
+            .attr("transform", transformScale(xScale, whichLevelToRender));
       } else {
         currentSelection
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale, whichLevelToRender))
-          .attr("opacity", function (d) { return binData[d.type].opacity; });
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
+          .attr("transform", transformScale(xScale, whichLevelToRender));
       }
 
       //enter area
