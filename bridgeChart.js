@@ -1,17 +1,5 @@
 //{{{ TODO AND NOTES:
 //  CURRENT TASK:
-//      Milliseconds are being rendered (samples likely involved) as 100 per second.
-//      - This is incorrect. Each sample should be 10ms.
-//      Need some rounding because this can happen:
-//      - This happens:
-//        - 06PM   :20    :40   06:01   :20    :40
-//      - Then this:
-//        - 06PM             :50               :40
-//      - Alternative fix:
-//        - create a long tick at the bottom of the plot which
-//          shows how big a second/minute/day/etc. is on screen.
-//          just like google maps does. :)
-
 //      Only render what is on-screen.
 //      - See "new section" for the beginnings of a fix for this.
 // TODO: }}}
@@ -141,10 +129,7 @@ var binnedLineChart = function (data, dataRequester) {
   var mils = 196*samplesPerMillisecond;
   var testTimeMilliseconds = testTime + "." + mils;
   // TODO: This ^^ combining should be done on the server
-  // good idea: pass Date objects around. :)
-  // - the sacrifice will be timezones (but we don't care about timezones)
-  // bad idea : pass Date objects around. :C
-  // - instead: pass around date.getTime()'s
+  // good idea: pass around date.getTime()'s
 
   var parseDateMilliseconds = d3.time.format("%a %b %d %Y %H:%M:%S.%L").parse;
   //console.log(testTimeMilliseconds);
@@ -167,6 +152,7 @@ var binnedLineChart = function (data, dataRequester) {
   // TODO: use this for two things:
   // - draw a line under the charts to show the size of day/minute/second/etc.
   // - display the currently-viewed year&day&hour&minutes&etc.
+  //   - See Issue #11 (https://github.com/MattWoelk/www/issues/11)
   //   - display whichever ones are larger than the current domain
   //   - and by 'domain' I mean getTicks(scal)[-1] - getTicks(scal)[0]
   // - thought: could the second of these fullfill the purpose of the 1st?
@@ -194,11 +180,12 @@ var binnedLineChart = function (data, dataRequester) {
     m: 6e4, //minutes
     h: 36e5, //hours
     d: 864e5, //days
-    // DON'T USE ANY OF THESE:
+    // These are approximations:
     mo: 2592e6, //months
     y: 31536e6, //years
   };
 
+  // Convert milliseconds to a Date object
   function dt (num) {
     var newdate = new Date();
     newdate.setTime(num);
@@ -234,67 +221,64 @@ var binnedLineChart = function (data, dataRequester) {
     return Math.floor(diff / oneDay);
   }
 
-  // what to round to, increments, percent width on screen
-  // TODO: flip this around, so that it's every x of, rather than every 1/x fraction of.
+  // Data object to help make custom axis' tick values
+  // [ estimate size in milliseconds,
+  //   how many to increment,
+  //   precise time rounder for anchoring,
+  //   precise time rounder ]
   var rounding_scales = [
-    //////////
-    // TODO //
-    // Current Task is switching this all around
-    //   and then getting it all to work again. :/
-    //////////
-    [ times.ms , times.s  , 1   , d3.time.second , millisecond],
-    [ times.ms , times.s  , 2   , d3.time.second , millisecond],
-    [ times.ms , times.s  , 5   , d3.time.second , millisecond],
-    [ times.ms , times.s  , 10  , d3.time.second , millisecond],
-    [ times.ms , times.s  , 20  , d3.time.second , millisecond],
-    [ times.ms , times.s  , 50  , d3.time.second , millisecond],
-    [ times.ms , times.s  , 100 , d3.time.second , millisecond],
-    [ times.ms , times.s  , 200 , d3.time.second , millisecond],
-    [ times.ms , times.s  , 500 , d3.time.second , millisecond],
-    [ times.s  , times.m  , 1   , d3.time.minute , d3.time.second],
-    [ times.s  , times.m  , 2   , d3.time.minute , d3.time.second],
-    [ times.s  , times.m  , 5   , d3.time.minute , d3.time.second],
-    [ times.s  , times.m  , 15  , d3.time.minute , d3.time.second],
-    [ times.s  , times.m  , 30  , d3.time.minute , d3.time.second],
-    [ times.m  , times.h  , 1   , d3.time.hour   , d3.time.minute],
-    [ times.m  , times.h  , 2   , d3.time.hour   , d3.time.minute],
-    [ times.m  , times.h  , 5   , d3.time.hour   , d3.time.minute],
-    [ times.m  , times.h  , 15  , d3.time.hour   , d3.time.minute],
-    [ times.m  , times.h  , 30  , d3.time.hour   , d3.time.minute],
-    [ times.h  , times.d  , 1   , d3.time.day    , d3.time.hour],
-    [ times.h  , times.d  , 3   , d3.time.day    , d3.time.hour],
-    [ times.h  , times.d  , 6   , d3.time.day    , d3.time.hour],
-    [ times.h  , times.d  , 12  , d3.time.day    , d3.time.hour],
-    [ times.d  , times.mo , 1   , d3.time.month  , d3.time.day], // TODO: replace times.mo with something intelligent.
-    [ times.d  , times.mo , 2   , d3.time.month  , d3.time.day], // TODO: get rid of ro[1], it's useless! :D
-    [ times.d  , times.mo , 5   , d3.time.month  , d3.time.day],
-    [ times.d  , times.mo , 10  , d3.time.month  , d3.time.day],
-    [ times.d  , times.mo , 15  , d3.time.month  , d3.time.day],
-    [ times.mo , times.y  , 1   , d3.time.year   , d3.time.month],
-    [ times.mo , times.y  , 2   , d3.time.year   , d3.time.month],
-    [ times.mo , times.y  , 3   , d3.time.year   , d3.time.month],
-    [ times.mo , times.y  , 6   , d3.time.year   , d3.time.month],
-    [ times.mo , times.y  , 12  , d3.time.year   , d3.time.month],
-    [ times.y  , times.y*100 , 1  , d3.time.year , d3.time.year],
-    [ times.y  , times.y*100 , 2  , d3.time.year , d3.time.year],
-    [ times.y  , times.y*100 , 5  , d3.time.year , d3.time.year],
-    [ times.y  , times.y*100 , 10 , d3.time.year , d3.time.year],
-    [ times.y  , times.y*100 , 25 , d3.time.year , d3.time.year],
-    [ times.y  , times.y*100 , 50 , d3.time.year , d3.time.year],
-    [ times.y  , times.y*100 , 100, d3.time.year , d3.time.year],
+    [ times.ms , 1   , d3.time.second , millisecond],
+    [ times.ms , 2   , d3.time.second , millisecond],
+    [ times.ms , 5   , d3.time.second , millisecond],
+    [ times.ms , 10  , d3.time.second , millisecond],
+    [ times.ms , 20  , d3.time.second , millisecond],
+    [ times.ms , 50  , d3.time.second , millisecond],
+    [ times.ms , 100 , d3.time.second , millisecond],
+    [ times.ms , 200 , d3.time.second , millisecond],
+    [ times.ms , 500 , d3.time.second , millisecond],
+    [ times.s  , 1   , d3.time.minute , d3.time.second],
+    [ times.s  , 2   , d3.time.minute , d3.time.second],
+    [ times.s  , 5   , d3.time.minute , d3.time.second],
+    [ times.s  , 15  , d3.time.minute , d3.time.second],
+    [ times.s  , 30  , d3.time.minute , d3.time.second],
+    [ times.m  , 1   , d3.time.hour   , d3.time.minute],
+    [ times.m  , 2   , d3.time.hour   , d3.time.minute],
+    [ times.m  , 5   , d3.time.hour   , d3.time.minute],
+    [ times.m  , 15  , d3.time.hour   , d3.time.minute],
+    [ times.m  , 30  , d3.time.hour   , d3.time.minute],
+    [ times.h  , 1   , d3.time.day    , d3.time.hour],
+    [ times.h  , 3   , d3.time.day    , d3.time.hour],
+    [ times.h  , 6   , d3.time.day    , d3.time.hour],
+    [ times.h  , 12  , d3.time.day    , d3.time.hour],
+    [ times.d  , 1   , d3.time.month  , d3.time.day],
+    [ times.d  , 2   , d3.time.month  , d3.time.day],
+    [ times.d  , 5   , d3.time.month  , d3.time.day],
+    [ times.d  , 10  , d3.time.month  , d3.time.day],
+    [ times.d  , 15  , d3.time.month  , d3.time.day],
+    [ times.mo , 1   , d3.time.year   , d3.time.month],
+    [ times.mo , 2   , d3.time.year   , d3.time.month],
+    [ times.mo , 3   , d3.time.year   , d3.time.month],
+    [ times.mo , 6   , d3.time.year   , d3.time.month],
+    [ times.mo , 12  , d3.time.year   , d3.time.month],
+    [ times.y  , 1  , d3.time.year , d3.time.year],
+    [ times.y  , 2  , d3.time.year , d3.time.year],
+    [ times.y  , 5  , d3.time.year , d3.time.year],
+    [ times.y  , 10 , d3.time.year , d3.time.year],
+    [ times.y  , 25 , d3.time.year , d3.time.year],
+    [ times.y  , 50 , d3.time.year , d3.time.year],
+    [ times.y  , 100, d3.time.year , d3.time.year],
+    [ times.y  , 100, d3.time.year , d3.time.year],
   ];
 
   function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc) {
-    // if the range is small enough that we are showing days
     if ( incrementOf === d3.time.year ) {
-      // make a range of beginnings of years which wrap around start and end
-      // make a range of beginnings of months between each year
+      // For Years
       var startyear = d3.time.year.floor(dt(start));
       var endyear   = d3.time.year.ceil( dt(end  ));
 
       var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
-      // TODO: do things this way for everything.
+      // Filter for proper increments
       curange = _.filter(curange, function (d, i) {
         return d % increment == 0;
       });
@@ -302,9 +286,9 @@ var binnedLineChart = function (data, dataRequester) {
       curange = _.map(curange, function (d) { return new Date(d, 0); });
 
       return curange;
+
     } else if ( incrementOf === d3.time.month ) {
-      // make a range of beginnings of years which wrap around start and end
-      // make a range of beginnings of months between each year
+      // For Months
       var startyear = d3.time.year.floor(dt(start));
       var endyear   = d3.time.year.ceil( dt(end  ));
 
@@ -313,158 +297,92 @@ var binnedLineChart = function (data, dataRequester) {
       // for each year, get all of the months for it
       curange = _.map(curange, function (d, i) {
         return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
+          // For each month of the year
           return new Date(d, f);
         });
       });
       curange = _.flatten(curange);
 
-      // TODO: do things this way for everything.
       curange = _.filter(curange, function (d, i) {
+        // Filter for proper increments
         return i % increment == 0;
       });
 
-      //curange = _.map(curange, function (d) { return new Date(d, 0); });
-
       return curange;
+
     } else if (baseFunc === d3.time.month){
-      // make a range of beginnings of years which wrap around start and end
-      // make a range of beginnings of months between each year
+      // For Days
       var startyear = d3.time.year.floor(dt(start));
       var endyear   = d3.time.year.ceil( dt(end  ));
 
       var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
-      // for each year, get all of the months for it
-      curange = _.map(curange, function (d, i) {
-        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
-          //return new Date(d, f);
-          var curnum = getNumberOfDaysInCurrentMonth(new Date(d, f));
-          //console.log(curnum);
-          return _.map(d3.range(1, curnum + 1), function (dm) {
-            //console.log(dm);
-            //var tmp = d3.range(1, curnum);
-            //return 
-            if ((dm - 1) % increment == 0 && curnum + 1 - dm >= increment ) {
-              return new Date(d, f, dm);
+      // For each year, get all of the months for it
+      curange = _.map(curange, function (year, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (month) {
+          // For each month of the year
+          var monthDays = getNumberOfDaysInCurrentMonth(new Date(year, month));
+          return _.map(d3.range(1, monthDays + 1), function (day) {
+            // For each day of the month
+            // Filter for proper increments
+            //   and remove ones which are too close
+            //   together near the ends of the months
+            if ((day - 1) % increment == 0 && monthDays + 1 - day >= increment ) {
+              return new Date(year, month, day);
             } else {
               return [];
             }
           });
-          //return i % increment == 0;
         });
       });
+
       curange = _.flatten(curange);
-
-      //console.log(curange);
-
-      // for each month, put in all of the days, modding them appropriately
-      //curange = _.map(curange, function (d, i) {
-      //});
-      //console.log(curange);
-      //curange = _.flatten(curange);
-
-      // TODO: do things this way for everything.
-      //curange = _.filter(curange, function (d, i) {
-        //return i % increment == 0;
-      //});
-
-      //curange = _.map(curange, function (d) { return new Date(d, 0); });
 
       return curange;
 
-
-
-
-
-      // Assumption: we will never show more than 2 different scales.
-      // example: we won't show more than one month, with granularity of hours.
-
-      // TODO: make this super general
-      var startBig = baseFunc.floor(dt(start));
-      var endBig   = baseFunc.ceil( dt(end  ));
-
-      var dat = dt(start);
-
-//      var mapper = [//{{{
-//        [ d3.time.year   , 'getFullYear'     , function (d,f) { return new Date(f, 0); }] ,
-//        [ d3.time.month  , 'getMonth'        , function (d,f) { return new Date(d, f); }] ,
-//        [ d3.time.day    , 'getDate'         , function (d,f) { return new Date(dat.getFullYear(), d, f); }] ,
-//        [ d3.time.hour   , 'getHours'        , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), d, f); }] ,
-//        [ d3.time.minute , 'getMinutes'      , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), d, f); }] ,
-//        [ d3.time.second , 'getSeconds'      , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), dat.getHours(), d, f); }] ,
-//        [ millisecond    , 'getMilliseconds' , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), dat.getHours(), dat.getMinutes(), d, f); }]
-//      ];//}}}
-
-      curange = d3.range(startBig)
-      return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
     } else {
-      //return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+      // For everything smaller than days
       return d3.range( baseFunc.floor( dt(start) ).getTime(),
                        baseFunc.ceil(  dt( end ) ).getTime(),
                        roundUpToNearestTime(
                          smallInc*minDistanceBetweenXAxisLabels/width,
                          smallInc));
-    }// else {
-     // return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
-    //}
+    }
   }
 
-  function todo_tick_values_matt(scal) {
+  function onScreenSizeOfLabels(millisecondsPerLabel, screenWidth, distanceBtwnLabels) {
+    return millisecondsPerLabel * screenWidth / distanceBtwnLabels;
+  }
+
+  function msToCenturyTickValues(scal) {
     var dom = scal.domain();
 
-    //TODO: make this automatic and amazing.//{{{
-    //      - this will require using that variable 'width'
-    //        - likely where times.ms*100 is
-
-    //TODO: Current Problem:
-    //      - number of days per month is variable. :/
-    //      To fix this:
-    //      - round up to nearest month
-    //      - subtract one second
-    //      - round down to nearest day
-    //      - check what the number of the day is
-    //      - do this for all possible months being displayed
-    //      - then do this for all years being displayed :///}}}
     var i = 0;
     for (i = 0; i < rounding_scales.length; i++) {
       var ro = rounding_scales[i];
-      // if there are fewer than 1 of them per 100 pixels
-      var compr = ro[0]*ro[2]*width/minDistanceBetweenXAxisLabels;
-      //console.log("-----------------");
-      if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
-        //console.log(ro[0]);
-        //console.log(dom[1] +"-"+ dom[0] +"<="+ compr );
-        //if (ro[0] === times.d)
-        //console.log(roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[1]*ro[2]));
-        //break;
-        var result = makeTickRange(dom[0], dom[1], ro[2], ro[4], ro[3], ro[0]*ro[2]);
-//            ro[3].floor( dt(dom[0]) ).getTime(),
-//            ro[3].ceil(  dt(dom[1]) ).getTime(),
-//            roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[0]*ro[2]));
+      var compr = onScreenSizeOfLabels(ro[0]*ro[1], width, minDistanceBetweenXAxisLabels);
 
-        // TODO: run result through a filter which rounds each number to the nearest _____ (month/year).
-        // - then gets rid of any which are closer than ____ (day/month) ???
+      if (dom[1] - dom[0] <= compr ) {
+        var result = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1]);
 
         // filter this for only what is actually on-screen.
         result = _.filter(result, function (num) {
           return num < dom[1] && num > dom[0];
         });
 
-        //console.log("--------------------------");
         return result;
       }
     }
 
     // This should never occur
+    // TODO: set the extents of zoom so that this is indeed the case.
+    // - might have to use compr again.
+    // - and therefore use onScreenSizeOfLabels()
     return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
   }
 
   // custom formatting for x axis time
-  // TODO: change its name
-  // TODO: current problem: Fri 16, Sat 17, Jan 18, Mon 19
-  //       - this happens every Sunday ... :/
-  //       add minor ticks :)
-  function todo_format_time_matt(ti) {
+  function msToCenturyTickFormat(ti) {
     function timeFormat(formats) {
       return function(date) {
         var newdate = new Date();
@@ -475,12 +393,6 @@ var binnedLineChart = function (data, dataRequester) {
       };
     }
 
-    // TODO: PROBLEM:
-    // - everything is incrementing nicely,
-    //   until it starts using 50s increments
-    // - everything goes (1, 2, 5, 10, 1, 2, 5, 10)
-    //   - we need to switch it to 1, 2, 5, 10, 30, 60=1
-    //   - 5, 15, 30, 60=1 is what time.scale does
     var customTimeFormat = timeFormat([
        [ d3.time.format("%Y")    , function() { return true; }                 ],
        [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
@@ -497,6 +409,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   function maxBinRenderSize () {
     return document.getElementById("renderdepth").value / 4;
+    // TODO: magic:
     // the 4 is to balance something which is due to the
     // sampling rate being 200Hz
   }
@@ -570,6 +483,7 @@ var binnedLineChart = function (data, dataRequester) {
     return resultArray;
   };
 
+  // See makeDataObjectForKeyFanciness for explanation of output
   var makeQuartileObjectForKeyFanciness = function () {
     var resultArray = new Array();
     var key = 'quartiles';
@@ -690,7 +604,7 @@ var binnedLineChart = function (data, dataRequester) {
     }
     xScale
       .range([0, width]); // So that the furthest-right point is at the right edge of the plot
-    getTicks(xScale);
+    //getTicks(xScale);
 
     if (!yScale){ yScale = d3.scale.linear(); }
     yScale
@@ -994,8 +908,8 @@ var binnedLineChart = function (data, dataRequester) {
       // Draw Axes
       xAxis = d3.svg.axis()
         //.tickSize(6)
-        .tickFormat(todo_format_time_matt)
-        .tickValues(todo_tick_values_matt(xScale))
+        .tickFormat(msToCenturyTickFormat)
+        .tickValues(msToCenturyTickValues(xScale))
         //.ticks(width / 100) // TODO: magic number. It looks good, though.
         .scale(xScale).orient("bottom");
 
