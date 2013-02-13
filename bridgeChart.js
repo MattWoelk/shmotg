@@ -344,7 +344,7 @@ var binnedLineChart = function (data, dataRequester) {
             //console.log(dm);
             //var tmp = d3.range(1, curnum);
             //return 
-            if ((dm + 1) % increment == 0 && dm < curnum - 1 ) {
+            if ((dm - 1) % increment == 0 && curnum + 1 - dm >= increment ) {
               return new Date(d, f, dm);
             } else {
               return [];
