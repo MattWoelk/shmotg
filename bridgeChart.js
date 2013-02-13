@@ -160,6 +160,63 @@ var binnedLineChart = function (data, dataRequester) {
     //console.log(scal.ticks(width / 100));
   }
 
+  // selection are the objects,
+  // fill and stroke are functions,
+  // scal is the scale
+  function drawElements(sel, fill, stroke, scal) {
+    //update
+    if (transitionNextTime) {
+      sel
+        .transition().duration(transitionDuration).ease(easingMethod)
+          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+          .attr("opacity", function (d) { return binData[d.type].opacity; })
+          .attr("transform", transformScale(xScale, whichLevelToRender));
+    } else {
+      sel
+        .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+        .attr("opacity", function (d) { return binData[d.type].opacity; })
+        .attr("transform", transformScale(xScale, whichLevelToRender));
+    }
+
+    //enter
+    if (transitionNextTime) {
+      sel.enter().append("path")
+        .attr("class", "posPath")
+        .attr("fill", fill)
+        .style("stroke-width", strokeWidth)
+        .attr("transform", transformScale(previousXScale, whichLevelToRender))
+        .attr("opacity", 0)
+        .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+        .style("stroke", stroke)
+        .transition().ease(easingMethod).duration(transitionDuration)
+          .attr("transform", transformScale(xScale, whichLevelToRender))
+          .attr("opacity", function (d) { return binData[d.type].opacity; });
+    } else {
+      sel.enter().append("path")
+        .attr("class", "posPath")
+        .attr("fill", fill)
+        .style("stroke-width", strokeWidth)
+        .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+        .attr("transform", transformScale(xScale, whichLevelToRender))
+        .style("stroke", stroke)
+        .attr("opacity", function (d) { return binData[d.type].opacity; });
+    }
+
+    //exit
+    if (transitionNextTime) {
+      sel.exit()
+        .transition().ease(easingMethod).duration(transitionDuration)
+          .attr("transform", transformScale(xScale, previousLevelToRender))
+          .attr("opacity", 0)
+          .remove();
+    } else {
+      sel.exit()
+        .attr("transform", transformScale(xScale, previousLevelToRender))
+        .attr("opacity", 0.0)
+        .remove();
+    }
+  }
+
   function roundUpToNearestTime(val, tim) {
     return Math.ceil(val/tim) * tim;
   }
@@ -787,63 +844,10 @@ var binnedLineChart = function (data, dataRequester) {
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
 
-      //update
-      if (transitionNextTime) {
-        currentSelection
-          //.attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          //.style("stroke-width", strokeWidth)
-          //.style("stroke", function (d, i) { return binData[d.type].color; })
-          .transition().duration(transitionDuration).ease(easingMethod)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
-          .attr("transform", transformScale(xScale, whichLevelToRender));
-      } else {
-        currentSelection
-          //.attr("fill", function (d, i) { return "rgba(0,0,0,0)"; })
-          //.style("stroke-width", strokeWidth)
-          //.style("stroke", function (d, i) { return binData[d.type].color; })
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
-          .attr("transform", transformScale(xScale, whichLevelToRender));
-      }
-
-      //enter
-      if (transitionNextTime) {
-        currentSelection.enter().append("path")
-          .attr("class", "posPath")
-          .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
-          .style("stroke-width", strokeWidth)
-          .attr("transform", transformScale(previousXScale, whichLevelToRender))
-          .attr("opacity", 0)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .style("stroke", function (d, i) { return binData[d.type].color; })
-          .transition().ease(easingMethod).duration(transitionDuration)
-            .attr("transform", transformScale(xScale, whichLevelToRender))
-            .attr("opacity", function (d) { return binData[d.type].opacity; });
-      } else {
-        currentSelection.enter().append("path")
-          .attr("class", "posPath")
-          .attr("fill", function (d, i) {return "rgba(0,0,0,0)"; })
-          .style("stroke-width", strokeWidth)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale, whichLevelToRender))
-          .style("stroke", function (d, i) { return binData[d.type].color; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; });
-      }
-
-      //exit
-      if (transitionNextTime) {
-        currentSelection.exit()
-          .transition().ease(easingMethod).duration(transitionDuration)
-            .attr("transform", transformScale(xScale, previousLevelToRender))
-            .attr("opacity", 0)
-            .remove();
-      } else {
-        currentSelection.exit()
-          .attr("transform", transformScale(xScale, previousLevelToRender))
-          .attr("opacity", 0.0)
-          .remove();
-      }
+      drawElements(currentSelection,
+                   function (d) { return "rgba(0,0,0,0)"; },
+                   function (d) { return binData[d.type].color; },
+                   xScale);
 
       // LINES }}}
 
@@ -852,56 +856,14 @@ var binnedLineChart = function (data, dataRequester) {
       currentSelection = paths.selectAll(".posArea")
         .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
 
-      //update area
-      if (transitionNextTime) {
-        currentSelection
-          .transition().duration(transitionDuration).ease(easingMethod)
-            .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-            .attr("opacity", function (d) { return binData[d.type].opacity; })
-            .attr("transform", transformScale(xScale, whichLevelToRender));
-      } else {
-        currentSelection
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
-          .attr("transform", transformScale(xScale, whichLevelToRender));
-      }
+      drawElements(currentSelection,
+                   function (d) { return binData[d.type].color; },
+                   function (d) { return "rgba(0,0,0,0)"; },
+                   xScale);
 
-      //enter area
-      if (transitionNextTime) {
-        currentSelection.enter().append("path")
-          .attr("class", "posArea")
-          .attr("fill", function (d, i) {return binData[d.type].color; })
-          .style("stroke-width", strokeWidth)
-          .attr("transform", transformScale(previousXScale, whichLevelToRender))
-          .attr("opacity", 0.0)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .transition().ease(easingMethod).duration(transitionDuration)
-            .attr("transform", transformScale(xScale, whichLevelToRender))
-            .attr("opacity", function (d) { return binData[d.type].opacity; });
-      } else {
-        currentSelection.enter().append("path")
-          .attr("class", "posArea")
-          .attr("fill", function (d, i) {return binData[d.type].color; })
-          .style("stroke-width", strokeWidth)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("transform", transformScale(xScale, whichLevelToRender))
-          .attr("opacity", function (d) { return binData[d.type].opacity; });
-      }
+      // AREAS }}}
 
-      //exit area
-      if (transitionNextTime) {
-        currentSelection.exit()
-          .transition().duration(transitionDuration).ease(easingMethod)
-            .attr("transform", transformScale(xScale, previousLevelToRender))
-            .attr("opacity", 0.0)
-            .remove();
-      } else {
-        currentSelection.exit()
-          .attr("transform", transformScale(xScale, previousLevelToRender))
-          .attr("opacity", 0.0)
-          .remove();
-      }
-
+      //{{{ AXES
       // Draw Axes
       xAxis = d3.svg.axis()
         //.tickSize(6)
@@ -937,7 +899,7 @@ var binnedLineChart = function (data, dataRequester) {
         // So that this only happens once per button click
         transitionNextTime = false;
       }
-      // AREAS }}}
+      // AXES }}}
 
     });
   };
@@ -974,7 +936,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   my.whichLevelToRender = function (value) {
     if (!arguments.length) return whichLevelToRender;
-    if (whichLevelToRender !== value) my.reRenderTheNextTime(true);
+    if (whichLevelToRender !== value) {console.log("asdf"); my.reRenderTheNextTime(true);}
     whichLevelToRender = value;
     return my;
   };
