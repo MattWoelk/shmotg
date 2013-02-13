@@ -234,14 +234,6 @@ var binnedLineChart = function (data, dataRequester) {
     return Math.floor(diff / oneDay);
   }
 
-  function inTheSameMonth(dat1, dat2) {
-    return dat1.getMonth() === dat2.getMonth();
-  }
-
-  function inTheSameYear(dat1, dat2) {
-    return dat1.getFullYear() === dat2.getFullYear();
-  }
-
   // what to round to, increments, percent width on screen
   // TODO: flip this around, so that it's every x of, rather than every 1/x fraction of.
   var rounding_scales = [
@@ -491,7 +483,7 @@ var binnedLineChart = function (data, dataRequester) {
     //   - 5, 15, 30, 60=1 is what time.scale does
     var customTimeFormat = timeFormat([
        [ d3.time.format("%Y")    , function() { return true; }                 ],
-       [ d3.time.format("%B")    , function(d) { return d.getMonth(); }        ],
+       [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
        [ d3.time.format("%b %d") , function(d) { return d.getDate() != 1; }    ],
        [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
        [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
