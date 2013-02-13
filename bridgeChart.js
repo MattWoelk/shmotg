@@ -1,5 +1,7 @@
-//{{{ TODO:
-//  NEXT THING TO COMPLETE
+//{{{ TODO AND NOTES:
+//  CURRENT TASK:
+//      Milliseconds are being rendered (samples likely involved) as 100 per second.
+//      - This is incorrect. Each sample should be 10ms.
 //      Need some rounding because this can happen:
 //      - This happens:
 //        - 06PM   :20    :40   06:01   :20    :40
@@ -9,65 +11,9 @@
 //        - create a long tick at the bottom of the plot which
 //          shows how big a second/minute/day/etc. is on screen.
 //          just like google maps does. :)
-//      Make x-axis in terms of date and time.
-//      - fix it somehow to have samples at the exact minute/hour/day/etc.
-//      - this may be difficult, due to using powers of 2 everywhere...
+
 //      Only render what is on-screen.
-//      - Currently, only the necessary lines and levels are being rendered
-//      - BUT ALL of the data for that level/line is being rendered.
 //      - See "new section" for the beginnings of a fix for this.
-
-//  BUGS AND IMPROVEMENTS:
-//      Chart isn't updating whenever something in the form is changed.
-//      If the first thing you do is hit the + button, the transition looks funky.
-//      Raw Data view is broken when zooming in or out.
-//      Sometimes the first chart disappears shortly after startup.
-//      - I'm guessing this has something to do with the demo.
-//      Update the slider always again; like how it used to be.
-//      - Make sure it's fast. :)
-//      When changing the slider, things get off-scale.
-//      - probably need to fix something in the update() or enter() sections.
-//      Using the same id twice for clipping region is bad news. Fix this.
-//      Make a simplified version of the chart, and use that with static data for the demo. :)
-//      - Then make a separate git repo for it, along with a gist, and put it on bl.ocks.org
-//      When going from a large window to a small window, some background elements are still being rendered as being very large (so a horizontal scroll bar appears).
-//      - this involves dynamically changing the size of the lines based on what is on-screen.
-//      Might need to store all of the data we know about in one place (per girder, so, per bridgeChart) and have a separate data structure which stores the actual data which is to be mapped to a curve.
-//      - create a new data structure called "renderData"
-//      - add new functions which add data to binData (based on level and time)
-//        - might need to keep it all sorted by date
-//        - might need to change the way things are initialized
-//      Don't allow zooming in more than what the max bin size would allow
-//      - Fix zooming past the lowest layer. Limits required somewhere.
-//      Make an animation to show that data is being downloaded
-//      - background could have a color sweep in from one side
-//        - so the whole thing would look like a progress bar, but classier
-//      - could have a spinner in some corner
-//      - could load data into the lines as it's generated
-//      - could have a flat, grey line which comes out of the last data point (or the average only or something) which would then transition to the right location and become the right colour as data comes in
-//      Put bin size slider under the axis, and have it make more sense.
-//      - Do it using d3.
-//      - Should look like this: |____|
-//      - It needs handles for touch screens
-//        - Perhaps on taping it, handles will show up. Tap again to retract them.
-//      Make an equation which calculates the size of the x-axis labels, and changes their format if they can't all fit beside each other
-//      - They could be staggered, then. Which would look cool.
-//      - They could be abbreviated
-//      - There could be less of them (most likely scenario)
-//      - could be worth a pull request. :D
-//      - OR rotate them when necessary: http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
-//      Show the current year/month/day/hour on the left under the scale to give people context.
-//      - should only be down to one higher than what is displayed.
-//        - example: if days are being shown, the current year and month will be displayed.
-
-// FEATURE IDEAS:
-//      Threshold integration to show all points over a certain value in a certain color?
-//      - maybe just have a movable dashed line which a user can use to look at thresholds
-//      - maybe only show values which are above a threshold
-//      Bin Size of 1 should show data points as circles
-//      - mouseover data points to show exact values
-//      - ... maybe
-//      Make a small multiples mode which allows comparisons between years (or between whatever the user likes)
 // TODO: }}}
 
 var binnedLineChart = function (data, dataRequester) {
@@ -81,6 +27,8 @@ var binnedLineChart = function (data, dataRequester) {
   var margin = {top: 10, right: 27, bottom: 25, left: 40};
 
   var height = 150 - margin.top - margin.bottom;
+
+  var minDistanceBetweenXAxisLabels = 75;
 
   // the width of the chart, including margins
   var containerWidth = document.getElementById("chartContainer").offsetWidth;
@@ -226,8 +174,304 @@ var binnedLineChart = function (data, dataRequester) {
     //console.log(scal.ticks(width / 100));
   }
 
+  function roundUpToNearestTime(val, tim) {
+    return Math.ceil(val/tim) * tim;
+  }
+
+  function roundDownToNearestTime(val, tim) {
+    return Math.floor(val/tim) * tim;
+  }
+
+  function millisecond(val) {
+    var newdate = new Date();
+    newdate.setTime(roundDownToNearestTime(val, times.ms));
+    return newdate;
+  }
+
+  var times = {
+    ms: 1, //milliseconds
+    s: 1000, //seconds
+    m: 6e4, //minutes
+    h: 36e5, //hours
+    d: 864e5, //days
+    // DON'T USE ANY OF THESE:
+    mo: 2592e6, //months
+    y: 31536e6, //years
+  };
+
+  function dt (num) {
+    var newdate = new Date();
+    newdate.setTime(num);
+    return newdate;
+  }
+
+  function getNumberOfDaysInCurrentMonth(dat) {
+    var curmo = dat.getMonth();
+    var addYear;
+    if (( curmo + 1 ) / 12.0 >= 1.0) {
+      // we rolled over to the next year
+      addYear = dat.getFullYear() + 1;
+    } else {
+      addYear = dat.getFullYear();
+    }
+    var newdate = new Date(
+        addYear,
+        (curmo + 1) % 12,
+        1,
+        1,
+        1,
+        1,
+        1);
+    newdate = dt(newdate.getTime() - 4000000);
+    return newdate.getDate();
+  }
+
+  function getNumberOfDaysInCurrentYear(dat) {
+    var newdateStart = new Date(dat.getFullYear()    , 0, 0);
+    var newdateEnd   = new Date(dat.getFullYear() + 1, 0, 0);
+    var diff = newdateEnd.getTime() - newdateStart.getTime();
+    var oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
+  }
+
+  function inTheSameMonth(dat1, dat2) {
+    return dat1.getMonth() === dat2.getMonth();
+  }
+
+  function inTheSameYear(dat1, dat2) {
+    return dat1.getFullYear() === dat2.getFullYear();
+  }
+
+  // what to round to, increments, percent width on screen
+  // TODO: flip this around, so that it's every x of, rather than every 1/x fraction of.
+  var rounding_scales = [
+    //////////
+    // TODO //
+    // Current Task is switching this all around
+    //   and then getting it all to work again. :/
+    //////////
+    [ times.ms , times.s  , 1   , d3.time.second , millisecond],
+    [ times.ms , times.s  , 2   , d3.time.second , millisecond],
+    [ times.ms , times.s  , 5   , d3.time.second , millisecond],
+    [ times.ms , times.s  , 10  , d3.time.second , millisecond],
+    [ times.ms , times.s  , 20  , d3.time.second , millisecond],
+    [ times.ms , times.s  , 50  , d3.time.second , millisecond],
+    [ times.ms , times.s  , 100 , d3.time.second , millisecond],
+    [ times.ms , times.s  , 200 , d3.time.second , millisecond],
+    [ times.ms , times.s  , 500 , d3.time.second , millisecond],
+    [ times.s  , times.m  , 1   , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 2   , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 5   , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 15  , d3.time.minute , d3.time.second],
+    [ times.s  , times.m  , 30  , d3.time.minute , d3.time.second],
+    [ times.m  , times.h  , 1   , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 2   , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 5   , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 15  , d3.time.hour   , d3.time.minute],
+    [ times.m  , times.h  , 30  , d3.time.hour   , d3.time.minute],
+    [ times.h  , times.d  , 1   , d3.time.day    , d3.time.hour],
+    [ times.h  , times.d  , 3   , d3.time.day    , d3.time.hour],
+    [ times.h  , times.d  , 6   , d3.time.day    , d3.time.hour],
+    [ times.h  , times.d  , 12  , d3.time.day    , d3.time.hour],
+    [ times.d  , times.mo , 1   , d3.time.month  , d3.time.day], // TODO: replace times.mo with something intelligent.
+    [ times.d  , times.mo , 2   , d3.time.month  , d3.time.day], // TODO: get rid of ro[1], it's useless! :D
+    [ times.d  , times.mo , 5   , d3.time.month  , d3.time.day],
+    [ times.d  , times.mo , 10  , d3.time.month  , d3.time.day],
+    [ times.d  , times.mo , 15  , d3.time.month  , d3.time.day],
+    [ times.mo , times.y  , 1   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 2   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 3   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 6   , d3.time.year   , d3.time.month],
+    [ times.mo , times.y  , 12  , d3.time.year   , d3.time.month],
+    [ times.y  , times.y*100 , 1  , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 2  , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 5  , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 10 , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 25 , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 50 , d3.time.year , d3.time.year],
+    [ times.y  , times.y*100 , 100, d3.time.year , d3.time.year],
+  ];
+
+  function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc) {
+    // if the range is small enough that we are showing days
+    if ( incrementOf === d3.time.year ) {
+      // make a range of beginnings of years which wrap around start and end
+      // make a range of beginnings of months between each year
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // TODO: do things this way for everything.
+      curange = _.filter(curange, function (d, i) {
+        return d % increment == 0;
+      });
+
+      curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+    } else if ( incrementOf === d3.time.month ) {
+      // make a range of beginnings of years which wrap around start and end
+      // make a range of beginnings of months between each year
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // for each year, get all of the months for it
+      curange = _.map(curange, function (d, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
+          return new Date(d, f);
+        });
+      });
+      curange = _.flatten(curange);
+
+      // TODO: do things this way for everything.
+      curange = _.filter(curange, function (d, i) {
+        return i % increment == 0;
+      });
+
+      //curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+    } else if (baseFunc === d3.time.month){
+      // make a range of beginnings of years which wrap around start and end
+      // make a range of beginnings of months between each year
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // for each year, get all of the months for it
+      curange = _.map(curange, function (d, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
+          //return new Date(d, f);
+          var curnum = getNumberOfDaysInCurrentMonth(new Date(d, f));
+          //console.log(curnum);
+          return _.map(d3.range(1, curnum + 1), function (dm) {
+            //console.log(dm);
+            //var tmp = d3.range(1, curnum);
+            //return 
+            if ((dm + 1) % increment == 0 && dm < curnum - 1 ) {
+              return new Date(d, f, dm);
+            } else {
+              return [];
+            }
+          });
+          //return i % increment == 0;
+        });
+      });
+      curange = _.flatten(curange);
+
+      //console.log(curange);
+
+      // for each month, put in all of the days, modding them appropriately
+      //curange = _.map(curange, function (d, i) {
+      //});
+      //console.log(curange);
+      //curange = _.flatten(curange);
+
+      // TODO: do things this way for everything.
+      //curange = _.filter(curange, function (d, i) {
+        //return i % increment == 0;
+      //});
+
+      //curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+
+
+
+
+
+      // Assumption: we will never show more than 2 different scales.
+      // example: we won't show more than one month, with granularity of hours.
+
+      // TODO: make this super general
+      var startBig = baseFunc.floor(dt(start));
+      var endBig   = baseFunc.ceil( dt(end  ));
+
+      var dat = dt(start);
+
+//      var mapper = [//{{{
+//        [ d3.time.year   , 'getFullYear'     , function (d,f) { return new Date(f, 0); }] ,
+//        [ d3.time.month  , 'getMonth'        , function (d,f) { return new Date(d, f); }] ,
+//        [ d3.time.day    , 'getDate'         , function (d,f) { return new Date(dat.getFullYear(), d, f); }] ,
+//        [ d3.time.hour   , 'getHours'        , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), d, f); }] ,
+//        [ d3.time.minute , 'getMinutes'      , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), d, f); }] ,
+//        [ d3.time.second , 'getSeconds'      , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), dat.getHours(), d, f); }] ,
+//        [ millisecond    , 'getMilliseconds' , function (d,f) { return new Date(dat.getFullYear(), dat.getMonth(), dat.getDate(), dat.getHours(), dat.getMinutes(), d, f); }]
+//      ];//}}}
+
+      curange = d3.range(startBig)
+      return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+    } else {
+      //return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+      return d3.range( baseFunc.floor( dt(start) ).getTime(),
+                       baseFunc.ceil(  dt( end ) ).getTime(),
+                       roundUpToNearestTime(
+                         smallInc*minDistanceBetweenXAxisLabels/width,
+                         smallInc));
+    }// else {
+     // return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+    //}
+  }
+
+  function todo_tick_values_matt(scal) {
+    var dom = scal.domain();
+
+    //TODO: make this automatic and amazing.//{{{
+    //      - this will require using that variable 'width'
+    //        - likely where times.ms*100 is
+
+    //TODO: Current Problem:
+    //      - number of days per month is variable. :/
+    //      To fix this:
+    //      - round up to nearest month
+    //      - subtract one second
+    //      - round down to nearest day
+    //      - check what the number of the day is
+    //      - do this for all possible months being displayed
+    //      - then do this for all years being displayed :///}}}
+    var i = 0;
+    for (i = 0; i < rounding_scales.length; i++) {
+      var ro = rounding_scales[i];
+      // if there are fewer than 1 of them per 100 pixels
+      var compr = ro[0]*ro[2]*width/minDistanceBetweenXAxisLabels;
+      //console.log("-----------------");
+      if (dom[1] - dom[0] <= compr )/**width/50*/  { // TODO: magic
+        //console.log(ro[0]);
+        //console.log(dom[1] +"-"+ dom[0] +"<="+ compr );
+        //if (ro[0] === times.d)
+        //console.log(roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[1]*ro[2]));
+        //break;
+        var result = makeTickRange(dom[0], dom[1], ro[2], ro[4], ro[3], ro[0]*ro[2]);
+//            ro[3].floor( dt(dom[0]) ).getTime(),
+//            ro[3].ceil(  dt(dom[1]) ).getTime(),
+//            roundUpToNearestTime(ro[0]*ro[2]*minDistanceBetweenXAxisLabels/width, ro[0]*ro[2]));
+
+        // TODO: run result through a filter which rounds each number to the nearest _____ (month/year).
+        // - then gets rid of any which are closer than ____ (day/month) ???
+
+        // filter this for only what is actually on-screen.
+        result = _.filter(result, function (num) {
+          return num < dom[1] && num > dom[0];
+        });
+
+        //console.log("--------------------------");
+        return result;
+      }
+    }
+
+    // This should never occur
+    return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+  }
 
   // custom formatting for x axis time
+  // TODO: change its name
+  // TODO: current problem: Fri 16, Sat 17, Jan 18, Mon 19
+  //       - this happens every Sunday ... :/
+  //       add minor ticks :)
   function todo_format_time_matt(ti) {
     function timeFormat(formats) {
       return function(date) {
@@ -239,25 +483,37 @@ var binnedLineChart = function (data, dataRequester) {
       };
     }
 
+    // TODO: PROBLEM:
+    // - everything is incrementing nicely,
+    //   until it starts using 50s increments
+    // - everything goes (1, 2, 5, 10, 1, 2, 5, 10)
+    //   - we need to switch it to 1, 2, 5, 10, 30, 60=1
+    //   - 5, 15, 30, 60=1 is what time.scale does
     var customTimeFormat = timeFormat([
-      [d3.time.format("%Y"), function() { return true; }],
-      [d3.time.format("%B"), function(d) { return d.getMonth(); }],
-      [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
-      [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],
-      [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
-      [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
-      [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
-      [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
-    ]);
+       [ d3.time.format("%Y")    , function() { return true; }                 ],
+       [ d3.time.format("%B")    , function(d) { return d.getMonth(); }        ],
+       [ d3.time.format("%b %d") , function(d) { return d.getDate() != 1; }    ],
+       [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
+       [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
+       [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }      ],
+       [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }      ],
+       [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
+      ]);
 
     return function(d) { return customTimeFormat(ti); }();
+  }
+
+  function maxBinRenderSize () {
+    return document.getElementById("renderdepth").value / 4;
+    // the 4 is to balance something which is due to the
+    // sampling rate being 200Hz
   }
 
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d, i) {
     // See transformScale for the inverse.
     var newdate = new Date();
-    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * document.getElementById("renderdepth").value);
+    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * maxBinRenderSize());
     return newdate;
   };
 
@@ -271,7 +527,7 @@ var binnedLineChart = function (data, dataRequester) {
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
     // See renderFunction for the inverse.
-    var sx = pixelsPerSample*Math.pow(2, level) / document.getElementById("renderdepth").value; //renderRatio; // scale x value
+    var sx = pixelsPerSample*Math.pow(2, level) / maxBinRenderSize(); //renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -437,8 +693,6 @@ var binnedLineChart = function (data, dataRequester) {
 
     width = containerWidth - margin.left - margin.right;
 
-
-
     if (!xScale) {
       xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]);
     }
@@ -525,9 +779,9 @@ var binnedLineChart = function (data, dataRequester) {
           renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
             //.x(function (d, i) { return xScale(d.date); })
             .x(renderFunction)
-            //.x(function (d, i) { return new Date(d.date * document.getElementById("renderdepth").value); })
+            //.x(function (d, i) { return new Date(d.date * maxBinRenderSize()); })
             // WAS: .x(function (d, i) { return (d.date * docu.gete.renderdepth.val); })
-    //document.getElementById("renderdepth").value;
+    //maxBinRenderSize();
             .y(function (d, i) { return yScale(binData.rawData.levels[0][i].val); })
             .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
@@ -749,7 +1003,8 @@ var binnedLineChart = function (data, dataRequester) {
       xAxis = d3.svg.axis()
         //.tickSize(6)
         .tickFormat(todo_format_time_matt)
-        .ticks(width / 100) // TODO: magic number. It looks good, though.
+        .tickValues(todo_tick_values_matt(xScale))
+        //.ticks(width / 100) // TODO: magic number. It looks good, though.
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
@@ -891,7 +1146,7 @@ var binnedLineChart = function (data, dataRequester) {
     //Have: pixels/bin, pixels/sample
 
     // pixels/bin:
-    var pixelsPerBin = document.getElementById("renderdepth").value;
+    var pixelsPerBin = maxBinRenderSize();
     var pixelsPerSample = getScaleValue(xScale);
 
     // sam   pix   sam
