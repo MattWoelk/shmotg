@@ -126,7 +126,7 @@ var zoom = d3.behavior.zoom()
 
 function changeLines () {
   plots.forEach(function (plt) {
-    plt.setSelectedLines().reRenderTheNextTime(true).update();
+    plt.setSelectedLines()/*.reRenderTheNextTime(true)*/.update();
   });
 }
 
