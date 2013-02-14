@@ -470,21 +470,13 @@ var binnedLineChart = function (data, dataRequester) {
     // sampling rate being 200Hz
   }
 
-  function goToLevel() {
+  function goToLevel(scal) {
     //Want: samples/bin --> level
     //Have: pixels/bin, pixels/sample
 
     // pixels/bin:
     var pixelsPerBin = maxBinRenderSize();
-    var pixelsPerSample = getScaleValue(xScale);
-
-    // sam   pix   sam
-    // --- = --- * ---
-    // bin   bin   pix
-    var samplesPerBin = pixelsPerBin / pixelsPerSample;
-    // pixels/bin:
-    var pixelsPerBin = maxBinRenderSize();
-    var pixelsPerSample = getScaleValue(xScale);
+    var pixelsPerSample = getScaleValue(scal);
 
     // sam   pix   sam
     // --- = --- * ---
@@ -503,16 +495,17 @@ var binnedLineChart = function (data, dataRequester) {
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d) {
     // See transformScale for the inverse.
-    return d.date.getTime() * maxBinRenderSize() / Math.pow(2, goToLevel());
+    oldxS = getScaleValue(xScale);
+    oldLevel = goToLevel(xScale);
+    return d.date.getTime() * m(oldLevel);
   };
 
-  var m = function () {
-    return 1; // moves with scale
-    return maxBinRenderSize() / Math.pow(2, goToLevel());
-    return getScaleValue(xScale);
-    return 1/goToLevel(); // moves with scale
-    return 1/Math.pow(2, goToLevel()); // moves with slider
-    return 1/(getScaleValue(xScale));
+  var oldxS = 1;
+  var oldLevel = 1;
+
+  function m (lvl) {
+    return 1; // lines change size with zoom
+    return 1/Math.pow(2, lvl); // lines change size with slider
   }
 
   //TODO: instead of using maxBinRenderSize straight-up here ^^^ and here vvv
@@ -521,6 +514,7 @@ var binnedLineChart = function (data, dataRequester) {
   // This is the transform which is done on the data after it has been rendered.
   function transformScale(scal, level) {
     var pixelsPerSample = getScaleValue(scal);
+    var xS = getScaleValue(scal);
 
     // TODO: fix the scrolling offset here (likely somewhere else, actually)
     var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
@@ -528,7 +522,11 @@ var binnedLineChart = function (data, dataRequester) {
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
     // See renderFunction for the inverse.
-    var sx = 1; //pixelsPerSample / m(); //renderRatio; // scale x value
+    // TODO: replace maxBinRenderSize with what it SHOULD be at this level
+
+    // TODO: need some 2^love going on here.
+    var sx = xS / m(oldLevel); //pixelsPerSample / m(); //renderRatio; // scale x value
+    //var sx = pixelsPerSample * Math.pow(2, goToLevel(xScale)); //pixelsPerSample / m(); //renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -752,7 +750,7 @@ var binnedLineChart = function (data, dataRequester) {
           // render nothing new; just use what is already there
       } else if (reRenderTheNextTime){
 
-        console.log(getScaleValue(xScale));
+        // console.log(getScaleValue(xScale));
         if (key === 'quartiles') {
           // render AREA d0s
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
@@ -1043,7 +1041,7 @@ var binnedLineChart = function (data, dataRequester) {
     //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
     //whichLevelToRender = b[0];
 
-    my.whichLevelToRender(goToLevel());
+    my.whichLevelToRender(goToLevel(xScale));
 
     var b = document.querySelector("#render-method input:checked").value;
     if (b !== interpolationMethod) {
