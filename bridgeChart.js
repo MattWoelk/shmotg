@@ -707,21 +707,20 @@ var binnedLineChart = function (data, dataRequester) {
     for (var keyValue in whichLinesToRender) {
       var key = whichLinesToRender[keyValue];
 
-      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender])
-          && !reRenderTheNextTime) {
+      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender]) && !reRenderTheNextTime) {
           // necessary range is already rendered for this key
           // render nothing new; just use what is already there
-      } else {
+      } else if (reRenderTheNextTime){
         if (key === 'quartiles') {
           // render AREA d0s
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
-        renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
-          .x(renderFunction)
-          .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
-          .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
-          .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
+          renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
+            .x(renderFunction)
+            .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
+            .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
+            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
         } else {
           // render LINES d0s
 
@@ -739,11 +738,7 @@ var binnedLineChart = function (data, dataRequester) {
           //       from the server througoh bridgecharts.js somehow.
 
           renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
-            //.x(function (d, i) { return xScale(d.date); })
             .x(renderFunction)
-            //.x(function (d, i) { return new Date(d.date * maxBinRenderSize()); })
-            // WAS: .x(function (d, i) { return (d.date * docu.gete.renderdepth.val); })
-    //maxBinRenderSize();
             .y(function (d, i) { return yScale(binData.rawData.levels[0][i].val); })
             .interpolate(interpolationMethod)(binData.rawData.levels[0]);
 
