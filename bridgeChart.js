@@ -471,12 +471,81 @@ var binnedLineChart = function (data, dataRequester) {
   }
 
   // This is the function used to render the data at a specific size.
-  var renderFunction = function (d, i) {
+  var renderFunction = function (d) {
     // See transformScale for the inverse.
     var newdate = new Date();
-    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * maxBinRenderSize());
+    newdate.setTime(d.date.getTime() / Math.pow(2, whichLevelToRender) * getMult());
     return newdate;
   };
+
+  //TODO: rename:
+  function getMult() {
+    // pixels/bin:
+    var pixelsPerBin = maxBinRenderSize();
+    var pixelsPerSample = getScaleValue(xScale);
+
+    // sam   pix   sam
+    // --- = --- * ---
+    // bin   bin   pix
+    var samplesPerBin = pixelsPerBin / pixelsPerSample;
+
+    //now convert to level and floor
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var toLevel = Math.floor(toLevel);
+    var toLevel = d3.max([0, toLevel]);
+    var toLevel = d3.min([howManyBinLevels - 1, toLevel]);
+
+    //toLevel = Math.pow(2, toLevel);
+
+    //return toLevel;
+    //return maxBinRenderSize();
+    //console.log(5 + ', ' + maxBinRenderSize());
+    //return 5; // TODO: magic number, also, must be related to maxBinRenderSize().
+    //return toLevel*2*0.829; //great at -1 level
+    //return toLevel*2; //great at initial level
+    //return toLevel*2*1.68; //great at second level
+    //return toLevel*2*1.68*1.57; //great at third level
+    //console.log(Math.floor(Math.log(pixelsPerBin) / Math.log(2)));
+    //return Math.floor(Math.log(pixelsPerBin));
+    //return Math.pow(2, toLevel);
+
+    //return Math.pow(2, Math.floor(toLevel) + (Math.log(pixelsPerSample) / Math.log(2)));
+    //return Math.pow(2, Math.log(pixelsPerBin) / Math.log(2));
+
+    // 10    , 3
+    // 13    , 3
+    // 17    , 4
+    // 19.75 , 4
+    // 22.5  , 4
+    // 26    , 4
+    // 29.25 , 5
+
+    // !!!!!!!!!!
+    // We want to output whatever pixelsPerBin would be
+    // if we were EXACTLY where we wanted to be to make
+    // toLevel how it is
+    // Time to work backwards! :)
+
+    //console.log(Math.pow(2, toLevel) /* * pixelsPerSample */);
+    return Math.pow(2, toLevel);//  * pixelsPerSample ;
+
+    // correct sizing, but no rounding
+    return pixelsPerBin;
+
+    // correct sizing, but no rounding
+    return Math.pow(2, Math.log(pixelsPerBin) / Math.log(2));
+
+    // correct sizing and with rounding, but rounding in the wrong places.
+    return Math.pow(2, Math.floor(Math.log(pixelsPerBin) / Math.log(2)));
+
+    // not useful at all
+    return Math.floor(Math.pow(2, Math.log(pixelsPerBin) / Math.log(2)));
+
+    //my.whichLevelToRender(toLevel);
+  }
+
+  //TODO: instead of using maxBinRenderSize straight-up here ^^^ and here vvv
+  //      - we need to round it to powers of 2 or something...
 
   // This is the transform which is done on the data after it has been rendered.
   function transformScale(scal, level) {
@@ -488,8 +557,10 @@ var binnedLineChart = function (data, dataRequester) {
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
     // See renderFunction for the inverse.
-    var sx = pixelsPerSample*Math.pow(2, level) / maxBinRenderSize(); //renderRatio; // scale x value
+    var sx = Math.pow(2, level) * pixelsPerSample / getMult(); //renderRatio; // scale x value
     var sy = 1; // scale y value
+
+    //console.log(getMult() + ", " + sx);
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
   }
