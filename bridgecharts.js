@@ -20,6 +20,9 @@ document.getElementById("render-depth").addEventListener("change", changeLines, 
 //document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
+// TODO: make this relative to maxBinRenderSize
+var zoomExtents = [Math.pow(2, -32), Math.pow(2,3)];
+
 d3.select("#zoomin").on("click", zoomin);
 d3.select("#zoomout").on("click", zoomout);
 d3.select("#scrollleft").on("click", scrollleft);
@@ -121,6 +124,7 @@ function zoomAll() {
 }
 
 var zoom = d3.behavior.zoom()
+  .scaleExtent(zoomExtents)
   .on("zoom", zoomAll);
 
 
@@ -135,14 +139,33 @@ function changeLines () {
 function changeZoom(func1, func2) {
   var xdist = xScale.domain()[1] - xScale.domain()[0];
 
-  xScale.domain([
+  var tmpScale = d3.scale.linear().range(xScale.range());
+  tmpScale.domain([
     func1(xScale.domain()[0], xdist),
     func2(xScale.domain()[1], xdist)
   ]);
 
+  xScale = changeXScale(xScale, tmpScale);
+
   zoom.x(xScale);
   transitionAllNextTime();
   zoomAll();
+}
+
+function getScaleValue(scal) {
+  // gives a result which has units pixels / samples
+  return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
+}
+
+function changeXScale (scal, value) {
+  // set zoom extents for button zooming as well
+  // TODO: set zoom to correspond with this. Currently they don't work together.
+  if (getScaleValue(value) < zoomExtents[1] && getScaleValue(value) > zoomExtents[0] ) {
+    return value;
+  } else {
+    console.log("bad extents: " + getScaleValue(value));
+    return scal;
+  }
 }
 
 function zoomin() {
