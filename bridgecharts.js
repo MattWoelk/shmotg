@@ -118,7 +118,12 @@ function copyScale(scal) {
 }
 
 function zoomAll() {
-  console.log(zoom.translate());
+  // HELPFUL
+  var scalrat = 1/getScaleValue(xScale);
+  console.log(zoom.translate()[0] + ", " + (zoom.translate()[0] * scalrat));
+
+
+
   plots.forEach(function (plt) {
     plt.xScale(copyScale(xScale)).update();
   });
@@ -202,13 +207,16 @@ function changeXScale (scal, value) {
     //zoom.translate([zoom.translate()[0] + diff - (old*ratio), zoom.translate()[1]]);
     //zoom.translate([zoom.translate()[0] + (diff/2), zoom.translate()[1]]);
     //zoom.translate([tr[0] - (diff/4), tr[1]]);
-      console.log("translate: " + zoom.translate());
     //zoom.translate([tr[0]/ratio, tr[1]]);
-    zoom.translate([value.invert(centreValue), tr[1]]);
     var range = value.range()[1] - value.range()[0];
       console.log("range: " + range);
-      console.log("value.invert(centreValue): " + value.invert(centreValue));
+      //console.log("value.invert(centreValue): " + value.invert(centreValue));
+    var scalrat = 1/getScaleValue(value);
+      console.log("scalrat(1000): 829? --> " + 1/scalrat*829);
       console.log( zoom.translate()[0] * (896 / (value.range()[1] - value.range()[0])));
+    zoom.translate([centreValue*scalrat/2, tr[1]]);
+      console.log("translate: " + zoom.translate());
+      console.log("translate without translation: " + zoom.translate()[0]/scalrat);
     zoom.scale(sc / ratio);
       console.log("zoom.scale(): " + zoom.scale());
       console.log(document.getElementById("chartContainer").offsetWidth);
