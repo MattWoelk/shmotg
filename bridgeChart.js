@@ -497,14 +497,24 @@ var binnedLineChart = function (data, dataRequester) {
     // See transformScale for the inverse.
     oldxS = getScaleValue(xScale);
     oldLevel = goToLevel(xScale);
-    return d.date.getTime() * m(oldLevel);
+    return d.date.getTime() * m(oldLevel, oldxS);
   };
 
   var oldxS = 1;
   var oldLevel = 1;
 
-  function m (lvl) {
+  function mB () {
+    return maxBinRenderSize();
+  }
+
+  function lmBl (lvl, scalVal) {
+    return Math.pow(2, lvl) * scalVal;
+  }
+
+  function m (lvl, scalVal) {
     //return 1;                  // lines change size with zoom
+    //console.log("mB: " + mB() + ", |mB|: " + lmBl(lvl));
+    return 1/Math.pow(2, lvl) * lmBl(lvl, scalVal); // lines change size with slider
     return 1/Math.pow(2, lvl - 3); // lines change size with slider
   }
 
@@ -525,8 +535,10 @@ var binnedLineChart = function (data, dataRequester) {
     // TODO: replace maxBinRenderSize with what it SHOULD be at this level
 
     // TODO: need some 2^love going on here.
-    var sx = xS / m(oldLevel); //pixelsPerSample / m(); //renderRatio; // scale x value
-    console.log(sx, oldLevel);
+    var sx = xS / m(oldLevel, oldxS); //pixelsPerSample / m(); //renderRatio; // scale x value
+    console.log("mB: " + (Math.pow(2, mB()) / Math.pow(2, lmBl(oldLevel)))
+               +" sx: " + sx + ", " + oldLevel);
+    //console.log(sx, oldLevel);
     //var sx = pixelsPerSample * Math.pow(2, goToLevel(xScale)); //pixelsPerSample / m(); //renderRatio; // scale x value
     var sy = 1; // scale y value
 
