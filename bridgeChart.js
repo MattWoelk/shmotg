@@ -497,6 +497,7 @@ var binnedLineChart = function (data, dataRequester) {
     // See transformScale for the inverse.
     oldxS = getScaleValue(xScale);
     oldLevel = goToLevel(xScale);
+    //return d.date.getTime() * oldxS;
     return d.date.getTime() * m(oldLevel, oldxS);
   };
 
@@ -535,9 +536,9 @@ var binnedLineChart = function (data, dataRequester) {
     // TODO: replace maxBinRenderSize with what it SHOULD be at this level
 
     // TODO: need some 2^love going on here.
-    var sx = xS / m(oldLevel, oldxS); //pixelsPerSample / m(); //renderRatio; // scale x value
-    console.log("mB: " + (Math.pow(2, mB()) / Math.pow(2, lmBl(oldLevel)))
-               +" sx: " + sx + ", " + oldLevel);
+    var sx = xS / oldxS;
+    //var sx = xS / m(oldLevel, oldxS); //pixelsPerSample / m(); //renderRatio; // scale x value
+
     //console.log(sx, oldLevel);
     //var sx = pixelsPerSample * Math.pow(2, goToLevel(xScale)); //pixelsPerSample / m(); //renderRatio; // scale x value
     var sy = 1; // scale y value
