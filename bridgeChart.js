@@ -170,12 +170,12 @@ var binnedLineChart = function (data, dataRequester) {
         .transition().duration(transitionDuration).ease(easingMethod)
           .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
           .attr("opacity", function (d) { return binData[d.type].opacity; })
-          .attr("transform", transformScale(xScale, whichLevelToRender));
+          .attr("transform", transformScale(xScale, oldxS));
     } else {
       sel
         .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
         .attr("opacity", function (d) { return binData[d.type].opacity; })
-        .attr("transform", transformScale(xScale, whichLevelToRender));
+        .attr("transform", transformScale(xScale, oldxS));
     }
 
     //enter
@@ -184,12 +184,12 @@ var binnedLineChart = function (data, dataRequester) {
         .attr("class", "posPath")
         .attr("fill", fill)
         .style("stroke-width", strokeWidth)
-        .attr("transform", transformScale(previousXScale, whichLevelToRender))
+        .attr("transform", transformScale(previousXScale, oldxS))
         .attr("opacity", 0)
         .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
         .style("stroke", stroke)
         .transition().ease(easingMethod).duration(transitionDuration)
-          .attr("transform", transformScale(xScale, whichLevelToRender))
+          .attr("transform", transformScale(xScale, oldxS))
           .attr("opacity", function (d) { return binData[d.type].opacity; });
     } else {
       sel.enter().append("path")
@@ -197,7 +197,7 @@ var binnedLineChart = function (data, dataRequester) {
         .attr("fill", fill)
         .style("stroke-width", strokeWidth)
         .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-        .attr("transform", transformScale(xScale, whichLevelToRender))
+        .attr("transform", transformScale(xScale, oldxS))
         .style("stroke", stroke)
         .attr("opacity", function (d) { return binData[d.type].opacity; });
     }
@@ -206,12 +206,12 @@ var binnedLineChart = function (data, dataRequester) {
     if (transitionNextTime) {
       sel.exit()
         .transition().ease(easingMethod).duration(transitionDuration)
-          .attr("transform", transformScale(xScale, previousLevelToRender))
+          .attr("transform", transformScale(xScale, getScaleValue(previousXsOld)))
           .attr("opacity", 0)
           .remove();
     } else {
       sel.exit()
-        .attr("transform", transformScale(xScale, previousLevelToRender))
+        .attr("transform", transformScale(xScale, getScaleValue(previousXsOld)))
         .attr("opacity", 0.0)
         .remove();
     }
@@ -498,6 +498,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     // TODO: could replace oldxS with a properly rounded scale value for the current level.
     oldxS = getScaleValue(xScale);
+    previousXsOld = copyScale(previousXScale);
     oldxScale = copyScale(xScale);
     oldLevel = goToLevel(xScale);
 
@@ -506,6 +507,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   var oldxS = 1;
   var oldxScale;
+  var previousXsOld;
   var oldLevel = 1;
 
 //  function mB () {
@@ -517,7 +519,7 @@ var binnedLineChart = function (data, dataRequester) {
 //  }
 
   // This is the transform which is done on the data after it has been rendered.
-  function transformScale(scal, level) {
+  function transformScale(scal, oldScal) {
     var pixelsPerSample = getScaleValue(scal);
     var xS = getScaleValue(scal);
 
@@ -528,7 +530,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     // See renderFunction for the inverse.
 
-    var sx = xS / oldxS;
+    var sx = xS / oldScal;
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -1012,6 +1014,7 @@ var binnedLineChart = function (data, dataRequester) {
       previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
       previousXScale = copyScale(xScale);
+      previousXsOld = copyScale(oldxScale);
       previousLevelToRender = whichLevelToRender;
     } // else, don't change previousXScale
 
