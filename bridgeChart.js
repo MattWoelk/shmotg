@@ -495,32 +495,26 @@ var binnedLineChart = function (data, dataRequester) {
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d) {
     // See transformScale for the inverse.
+
+    // TODO: could replace oldxS with a properly rounded scale value for the current level.
     oldxS = getScaleValue(xScale);
+    oldxScale = copyScale(xScale);
     oldLevel = goToLevel(xScale);
-    //return d.date.getTime() * oldxS;
-    return d.date.getTime() * m(oldLevel, oldxS);
+
+    return d.date.getTime() * oldxS;
   };
 
   var oldxS = 1;
+  var oldxScale;
   var oldLevel = 1;
 
-  function mB () {
-    return maxBinRenderSize();
-  }
-
-  function lmBl (lvl, scalVal) {
-    return Math.pow(2, lvl) * scalVal;
-  }
-
-  function m (lvl, scalVal) {
-    //return 1;                  // lines change size with zoom
-    //console.log("mB: " + mB() + ", |mB|: " + lmBl(lvl));
-    return 1/Math.pow(2, lvl) * lmBl(lvl, scalVal); // lines change size with slider
-    return 1/Math.pow(2, lvl - 3); // lines change size with slider
-  }
-
-  //TODO: instead of using maxBinRenderSize straight-up here ^^^ and here vvv
-  //      - we need to round it to powers of 2 or something...
+//  function mB () {
+//    return maxBinRenderSize();
+//  }
+//
+//  function lmBl (lvl, scalVal) {
+//    return Math.pow(2, lvl) * scalVal;
+//  }
 
   // This is the transform which is done on the data after it has been rendered.
   function transformScale(scal, level) {
@@ -533,14 +527,8 @@ var binnedLineChart = function (data, dataRequester) {
     //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
     // See renderFunction for the inverse.
-    // TODO: replace maxBinRenderSize with what it SHOULD be at this level
 
-    // TODO: need some 2^love going on here.
     var sx = xS / oldxS;
-    //var sx = xS / m(oldLevel, oldxS); //pixelsPerSample / m(); //renderRatio; // scale x value
-
-    //console.log(sx, oldLevel);
-    //var sx = pixelsPerSample * Math.pow(2, goToLevel(xScale)); //pixelsPerSample / m(); //renderRatio; // scale x value
     var sy = 1; // scale y value
 
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
