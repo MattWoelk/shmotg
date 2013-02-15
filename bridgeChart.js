@@ -504,8 +504,8 @@ var binnedLineChart = function (data, dataRequester) {
   var oldLevel = 1;
 
   function m (lvl) {
-    return 1; // lines change size with zoom
-    return 1/Math.pow(2, lvl); // lines change size with slider
+    //return 1;                  // lines change size with zoom
+    return 1/Math.pow(2, lvl - 3); // lines change size with slider
   }
 
   //TODO: instead of using maxBinRenderSize straight-up here ^^^ and here vvv
@@ -526,6 +526,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     // TODO: need some 2^love going on here.
     var sx = xS / m(oldLevel); //pixelsPerSample / m(); //renderRatio; // scale x value
+    console.log(sx, oldLevel);
     //var sx = pixelsPerSample * Math.pow(2, goToLevel(xScale)); //pixelsPerSample / m(); //renderRatio; // scale x value
     var sy = 1; // scale y value
 
