@@ -700,9 +700,7 @@ var binnedLineChart = function (data, dataRequester) {
     if (!xScale) {
       xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]);
     }
-    xScale
-      .range([0, width]); // So that the furthest-right point is at the right edge of the plot
-    //getTicks(xScale);
+    xScale.range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
     if (!yScale){ yScale = d3.scale.linear(); }
     yScale
