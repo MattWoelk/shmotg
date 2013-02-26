@@ -22,6 +22,7 @@ document.getElementById("render-method").addEventListener("change", changeLines,
 
 // TODO: magic: make this relative to maxBinRenderSize
 var zoomExtents = [Math.pow(2, -32), Math.pow(2,3)];
+var zoomExtentsForScale = [zoomExtents[0], zoomExtents[1]];
 
 d3.select("#zoomin").on("click", zoomin);
 d3.select("#zoomout").on("click", zoomout);
@@ -118,19 +119,13 @@ function copyScale(scal) {
 }
 
 function zoomAll() {
-  // HELPFUL
-  var scalrat = 1/getScaleValue(xScale);
-  console.log(zoom.translate()[0] + ", " + (zoom.translate()[0] * scalrat));
-
-
-
   plots.forEach(function (plt) {
     plt.xScale(copyScale(xScale)).update();
   });
 }
 
 var zoom = d3.behavior.zoom()
-  .scaleExtent(zoomExtents)
+  .scaleExtent(zoomExtentsForScale)
   .on("zoom", zoomAll);
 
 
@@ -145,15 +140,35 @@ function changeLines () {
 function changeZoom(func1, func2) {
   var xdist = xScale.domain()[1] - xScale.domain()[0];
 
+  // for later ratio adjustment
+  var oldScaleVal = getScaleValue(xScale);
+  var oldZoomScale = zoom.scale();
+
+  // create an updated scale which the new domain
   var tmpScale = d3.scale.linear().range(xScale.range());
   tmpScale.domain([
     func1(xScale.domain()[0], xdist),
     func2(xScale.domain()[1], xdist)
   ]);
 
-  //xScale =
-    changeXScale(xScale, tmpScale);
+  // update the scale if it's within the extents
+  if ( scaleWithinExtents(tmpScale) ) {
+    xScale = tmpScale;
+  }
 
+  // reset the x scale so zooming still works
+  zoom.x(xScale);
+
+  // since the zoom scale resets to 1 when we
+  // reset its xscale, we need to change its
+  // extents to match the change in ratio
+  var newScaleVal = getScaleValue(xScale);
+  var ratio = (oldScaleVal / newScaleVal ) / oldZoomScale;
+  zoomExtentsForScale[0] *= ratio;
+  zoomExtentsForScale[1] *= ratio;
+  zoom.scaleExtent(zoomExtentsForScale);
+
+  // update
   transitionAllNextTime();
   zoomAll();
 }
@@ -163,68 +178,10 @@ function getScaleValue(scal) {
   return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
 }
 
-function changeXScale (scal, value) {
-  // set zoom extents for button zooming as well
-  // TODO: set zoom to correspond with this. Currently they don't work together.
-  if (getScaleValue(value) < zoomExtents[1] && getScaleValue(value) > zoomExtents[0] ) {
-    // Doing this manually because cursor zooming and button zooming
-    //   don't place nice together when extents are involved.
-    // To be more specific, applying the x scale again resets
-    //   the zoom scale.
-      console.log("----------");
-    var ratio = getScaleValue(scal) / getScaleValue(value);
-    // find the difference between the averages
-    var avg = function (dom) {
-      return (dom[0] + dom[1]) / 2.0;
-    }
-
-    somerat = getScaleValue(scal);
-
-    var old = value.domain()[1] - value.domain()[0];
-    console.log("ratio: " + ratio);
-    console.log("old: " + old);
-    console.log("old/ratio: " + (old*ratio));
-
-    var diff = value.domain()[0] - scal.domain()[0];
-    // centreValue is the offset in PIXELS...
-    // TODO: translate pixels to domain
-    // .invert(val)
-    var centreValue = (scal.domain()[1] - scal.domain()[0]) / 2;
-    console.log("centreValue: " + centreValue);
-    console.log("centreValue * somerat: " + centreValue * somerat);
-    console.log("centreValue / somerat: " + centreValue / somerat);
-    console.log("scal: " + scal.domain() + " val: " + value.domain());
-    console.log("diff: " + diff);
-      //console.log(ratio);
-      console.log("zoom.scale(): " + zoom.scale());
-      //console.log("getscv(xScale): " + getScaleValue(scal))
-      //console.log("getscv(value): " + getScaleValue(value))
-      console.log("translate: " + zoom.translate());
-    //zoom.x(value);
-    var sc = zoom.scale();
-    var tr = zoom.translate();
-      //console.log(sc);
-    //zoom.translate([zoom.translate()[0] + diff - (old*ratio), zoom.translate()[1]]);
-    //zoom.translate([zoom.translate()[0] + (diff/2), zoom.translate()[1]]);
-    //zoom.translate([tr[0] - (diff/4), tr[1]]);
-    //zoom.translate([tr[0]/ratio, tr[1]]);
-    var range = value.range()[1] - value.range()[0];
-      console.log("range: " + range);
-      //console.log("value.invert(centreValue): " + value.invert(centreValue));
-    var scalrat = 1/getScaleValue(value);
-      console.log("scalrat(1000): 829? --> " + 1/scalrat*829);
-      console.log( zoom.translate()[0] * (896 / (value.range()[1] - value.range()[0])));
-    zoom.translate([centreValue*scalrat/2, tr[1]]);
-      console.log("translate: " + zoom.translate());
-      console.log("translate without translation: " + zoom.translate()[0]/scalrat);
-    zoom.scale(sc / ratio);
-      console.log("zoom.scale(): " + zoom.scale());
-      console.log(document.getElementById("chartContainer").offsetWidth);
-    return value;
-  } else {
-    console.log("bad extents: " + getScaleValue(value));
-    return scal;
-  }
+function scaleWithinExtents (value) {
+  // return true if value's scale value is within zoom extents
+  return (getScaleValue(value) < zoomExtents[1] &&
+          getScaleValue(value) > zoomExtents[0] );
 }
 
 function zoomin() {
