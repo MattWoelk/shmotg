@@ -463,6 +463,7 @@ var binnedLineChart = function (data, dataRequester) {
     return function(d) { return customTimeFormat(ti); }();
   }
 
+  // TODO: Phase 2 - make this external
   function maxBinRenderSize () {
     return document.getElementById("renderdepth").value / 4;
     // TODO: magic:

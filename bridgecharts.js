@@ -20,8 +20,12 @@ document.getElementById("render-depth").addEventListener("change", changeLines, 
 //document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
+// The zoom limits for the plot
 // TODO: magic: make this relative to maxBinRenderSize
 var zoomExtents = [Math.pow(2, -32), Math.pow(2,3)];
+
+// The changing zoom extents from the perspective
+// of the mouse scrolling function.
 var zoomExtentsForScale = [zoomExtents[0], zoomExtents[1]];
 
 d3.select("#zoomin").on("click", zoomin);
@@ -152,7 +156,8 @@ function changeZoom(func1, func2) {
   ]);
 
   // update the scale if it's within the extents
-  if ( scaleWithinExtents(tmpScale) ) {
+  var doWeScale = scaleWithinExtents(tmpScale);
+  if (doWeScale) {
     xScale = tmpScale;
   }
 
@@ -169,7 +174,9 @@ function changeZoom(func1, func2) {
   zoom.scaleExtent(zoomExtentsForScale);
 
   // update
-  transitionAllNextTime();
+  if (doWeScale) {
+    transitionAllNextTime();
+  }
   zoomAll();
 }
 
