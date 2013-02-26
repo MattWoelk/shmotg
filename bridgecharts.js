@@ -21,8 +21,8 @@ document.getElementById("render-depth").addEventListener("change", changeLines, 
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
 // The zoom limits for the plot
-// TODO: magic: make this relative to maxBinRenderSize
-var zoomExtents = [Math.pow(2, -32), Math.pow(2,3)];
+// TODO: magic: make this relative to width
+var zoomExtents = setExtents();
 
 // The changing zoom extents from the perspective
 // of the mouse scrolling function.
@@ -56,7 +56,20 @@ var frequency = 200; //Hz
 
 //{{{ HELPER FUNCTIONS
 
+function setExtents() {
+  //var wid = document.getElementById("chartContainer").offsetWidth; // TODO: use this in the following equation.
+  // [ how far zoomed-out , how far zoomed-in ]
+  return [Math.pow(2, -30), Math.pow(2,4)];
+}
+
 var redraw = function () {
+  // reset the zoom extents
+  //var oldE = zoomExtents[0];
+  //zoomExtents = setExtents();
+  //var ratio = zoomExtents[0] / oldE;
+  //zoomExtentsForScale[0]*= ratio;
+  //zoomExtentsForScale[1]*= ratio;
+
   plots.forEach(function (plt) {
     plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
   });
