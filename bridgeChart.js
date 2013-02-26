@@ -165,56 +165,45 @@ var binnedLineChart = function (data, dataRequester) {
   // scal is the scale
   function drawElements(sel, fill, stroke, scal) {
     //update
-    if (transitionNextTime) {
-      sel
-        .transition().duration(transitionDuration).ease(easingMethod)
-          .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-          .attr("opacity", function (d) { return binData[d.type].opacity; })
-          .attr("transform", transformScale(xScale, oldxS));
-    } else {
-      sel
-        .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-        .attr("opacity", function (d) { return binData[d.type].opacity; })
-        .attr("transform", transformScale(xScale, oldxS));
-    }
+    var sels = transitionNextTime ?
+      sel.transition().duration(transitionDuration).ease(easingMethod) :
+      sel;
+
+    sels
+      .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+      .attr("opacity", function (d) { return binData[d.type].opacity; })
+      .attr("transform", transformScale(xScale, oldxS));
+
 
     //enter
+    var sels = sel.enter().append("path")
+      .attr("class", "posPath")
+      .attr("fill", fill)
+      .style("stroke-width", strokeWidth)
+      .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
+      .style("stroke", stroke);
+
     if (transitionNextTime) {
-      sel.enter().append("path")
-        .attr("class", "posPath")
-        .attr("fill", fill)
-        .style("stroke-width", strokeWidth)
-        .attr("transform", transformScale(previousXScale, oldxS))
+      sels.attr("transform", transformScale(previousXScale, oldxS))
         .attr("opacity", 0)
-        .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-        .style("stroke", stroke)
         .transition().ease(easingMethod).duration(transitionDuration)
           .attr("transform", transformScale(xScale, oldxS))
           .attr("opacity", function (d) { return binData[d.type].opacity; });
     } else {
-      sel.enter().append("path")
-        .attr("class", "posPath")
-        .attr("fill", fill)
-        .style("stroke-width", strokeWidth)
-        .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-        .attr("transform", transformScale(xScale, oldxS))
-        .style("stroke", stroke)
+      sels.attr("transform", transformScale(xScale, oldxS))
         .attr("opacity", function (d) { return binData[d.type].opacity; });
     }
 
+
     //exit
-    if (transitionNextTime) {
-      sel.exit()
-        .transition().ease(easingMethod).duration(transitionDuration)
-          .attr("transform", transformScale(xScale, getScaleValue(previousXsOld)))
-          .attr("opacity", 0)
-          .remove();
-    } else {
-      sel.exit()
-        .attr("transform", transformScale(xScale, getScaleValue(previousXsOld)))
-        .attr("opacity", 0.0)
-        .remove();
-    }
+    var sels = transitionNextTime ?
+      sel.exit().transition().ease(easingMethod).duration(transitionDuration) :
+      sel.exit();
+
+    sels
+      .attr("transform", transformScale(xScale, getScaleValue(previousXsOld)))
+      .attr("opacity", 0)
+      .remove();
   }
 
   function roundUpToNearestTime(val, tim) {
