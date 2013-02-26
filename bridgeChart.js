@@ -4,6 +4,481 @@
 //      - See "new section" for the beginnings of a fix for this.
 // TODO: }}}
 
+
+  // {{{ CONSTANTS
+  var minDistanceBetweenXAxisLabels = 75;
+  var maxNumberOfBinLevels = 10; // TODO: phase this out (preferable) OR set it as a really high number
+  // CONSTANTS }}}
+
+  // {{{ HELPER FUNCTIONS
+
+  var isWithinRange = function (r1, r2) {
+    // see if r1 is within r2
+    return r1[0] >= r2[0] && r1[1] <= r2[1];
+  };
+
+  var getTwoLargest = function (array) {
+    var arr = array.slice();
+    first = d3.max(arr);
+    arr.splice(arr.indexOf(first),1);
+    second = d3.max(arr);
+    return [first, second];
+  };
+
+  var average = function (array) {
+    return d3.sum(array)/array.length;
+  };
+
+  var getTwoSmallest = function (array) {
+    var arr = array.slice();
+    first = d3.min(arr);
+    arr.splice(arr.indexOf(first),1);
+    second = d3.min(arr);
+    return [first, second];
+  };
+
+  function getScaleValue(scal) {
+    // gives a result which has units pixels / samples
+    return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
+  }
+
+  function copyScale(scal) {
+    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+  }
+
+  // This is the transform which is done on the data after it has been rendered.
+  function transformScale(scal, oldScal, mar) {
+    var pixelsPerSample = getScaleValue(scal);
+    var xS = getScaleValue(scal);
+
+    // TODO: fix the scrolling offset here (likely somewhere else, actually)
+    var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]);
+    var ty = mar.top; // translate y value
+    //var ty = (mar.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
+
+    // See renderFunction for the inverse.
+
+    var sx = xS / oldScal;
+    var sy = 1; // scale y value
+
+    return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
+  }
+
+  // Convert milliseconds to a Date object
+  function dt (num) {
+    var newdate = new Date();
+    newdate.setTime(num);
+    return newdate;
+  }
+
+  function getNumberOfDaysInCurrentMonth(dat) {
+    var curmo = dat.getMonth();
+    var addYear;
+    if (( curmo + 1 ) / 12.0 >= 1.0) {
+      // we rolled over to the next year
+      addYear = dat.getFullYear() + 1;
+    } else {
+      addYear = dat.getFullYear();
+    }
+    var newdate = new Date(
+        addYear,
+        (curmo + 1) % 12,
+        1,
+        1,
+        1,
+        1,
+        1);
+    newdate = dt(newdate.getTime() - 4000000);
+    return newdate.getDate();
+  }
+
+  function getNumberOfDaysInCurrentYear(dat) {
+    var newdateStart = new Date(dat.getFullYear()    , 0, 0);
+    var newdateEnd   = new Date(dat.getFullYear() + 1, 0, 0);
+    var diff = newdateEnd.getTime() - newdateStart.getTime();
+    var oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
+  }
+
+  var times = {
+    ms: 1, //milliseconds
+    s: 1000, //seconds
+    m: 6e4, //minutes
+    h: 36e5, //hours
+    d: 864e5, //days
+    // These are approximations:
+    mo: 2592e6, //months
+    y: 31536e6, //years
+  };
+
+  function millisecond(val) {
+    var newdate = new Date();
+    newdate.setTime(roundDownToNearestTime(val, times.ms));
+    return newdate;
+  }
+
+  function roundUpToNearestTime(val, tim) {
+    return Math.ceil(val/tim) * tim;
+  }
+
+  function roundDownToNearestTime(val, tim) {
+    return Math.floor(val/tim) * tim;
+  }
+
+  function onScreenSizeOfLabels(millisecondsPerLabel, screenWidth, distanceBtwnLabels) {
+    return millisecondsPerLabel * screenWidth / distanceBtwnLabels;
+  }
+
+  // Data object to help make custom axis' tick values
+  // [ estimate size in milliseconds,
+  //   how many to increment,
+  //   precise time rounder for anchoring,
+  //   precise time rounder ]
+  var rounding_scales = [
+    [ times.ms , 1   , d3.time.second , millisecond],
+    [ times.ms , 2   , d3.time.second , millisecond],
+    [ times.ms , 5   , d3.time.second , millisecond],
+    [ times.ms , 10  , d3.time.second , millisecond],
+    [ times.ms , 20  , d3.time.second , millisecond],
+    [ times.ms , 50  , d3.time.second , millisecond],
+    [ times.ms , 100 , d3.time.second , millisecond],
+    [ times.ms , 200 , d3.time.second , millisecond],
+    [ times.ms , 500 , d3.time.second , millisecond],
+    [ times.s  , 1   , d3.time.minute , d3.time.second],
+    [ times.s  , 2   , d3.time.minute , d3.time.second],
+    [ times.s  , 5   , d3.time.minute , d3.time.second],
+    [ times.s  , 15  , d3.time.minute , d3.time.second],
+    [ times.s  , 30  , d3.time.minute , d3.time.second],
+    [ times.m  , 1   , d3.time.hour   , d3.time.minute],
+    [ times.m  , 2   , d3.time.hour   , d3.time.minute],
+    [ times.m  , 5   , d3.time.hour   , d3.time.minute],
+    [ times.m  , 15  , d3.time.hour   , d3.time.minute],
+    [ times.m  , 30  , d3.time.hour   , d3.time.minute],
+    [ times.h  , 1   , d3.time.day    , d3.time.hour],
+    [ times.h  , 3   , d3.time.day    , d3.time.hour],
+    [ times.h  , 6   , d3.time.day    , d3.time.hour],
+    [ times.h  , 12  , d3.time.day    , d3.time.hour],
+    [ times.d  , 1   , d3.time.month  , d3.time.day],
+    [ times.d  , 2   , d3.time.month  , d3.time.day],
+    [ times.d  , 5   , d3.time.month  , d3.time.day],
+    [ times.d  , 10  , d3.time.month  , d3.time.day],
+    [ times.d  , 15  , d3.time.month  , d3.time.day],
+    [ times.mo , 1   , d3.time.year   , d3.time.month],
+    [ times.mo , 2   , d3.time.year   , d3.time.month],
+    [ times.mo , 3   , d3.time.year   , d3.time.month],
+    [ times.mo , 6   , d3.time.year   , d3.time.month],
+    [ times.mo , 12  , d3.time.year   , d3.time.month],
+    [ times.y  , 1  , d3.time.year , d3.time.year],
+    [ times.y  , 2  , d3.time.year , d3.time.year],
+    [ times.y  , 5  , d3.time.year , d3.time.year],
+    [ times.y  , 10 , d3.time.year , d3.time.year],
+    [ times.y  , 25 , d3.time.year , d3.time.year],
+    [ times.y  , 50 , d3.time.year , d3.time.year],
+    [ times.y  , 100, d3.time.year , d3.time.year],
+    [ times.y  , 100, d3.time.year , d3.time.year],
+  ];
+
+  function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, wid) {
+    if ( incrementOf === d3.time.year ) {
+      // For Years
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // Filter for proper increments
+      curange = _.filter(curange, function (d, i) {
+        return d % increment == 0;
+      });
+
+      curange = _.map(curange, function (d) { return new Date(d, 0); });
+
+      return curange;
+
+    } else if ( incrementOf === d3.time.month ) {
+      // For Months
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // for each year, get all of the months for it
+      curange = _.map(curange, function (d, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
+          // For each month of the year
+          return new Date(d, f);
+        });
+      });
+      curange = _.flatten(curange);
+
+      curange = _.filter(curange, function (d, i) {
+        // Filter for proper increments
+        return i % increment == 0;
+      });
+
+      return curange;
+
+    } else if (baseFunc === d3.time.month){
+      // For Days
+      var startyear = d3.time.year.floor(dt(start));
+      var endyear   = d3.time.year.ceil( dt(end  ));
+
+      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+
+      // For each year, get all of the months for it
+      curange = _.map(curange, function (year, i) {
+        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (month) {
+          // For each month of the year
+          var monthDays = getNumberOfDaysInCurrentMonth(new Date(year, month));
+          return _.map(d3.range(1, monthDays + 1), function (day) {
+            // For each day of the month
+            // Filter for proper increments
+            //   and remove ones which are too close
+            //   together near the ends of the months
+            if ((day - 1) % increment == 0 && monthDays + 1 - day >= increment ) {
+              return new Date(year, month, day);
+            } else {
+              return [];
+            }
+          });
+        });
+      });
+
+      curange = _.flatten(curange);
+
+      return curange;
+
+    } else {
+      // For everything smaller than days
+      return d3.range( baseFunc.floor( dt(start) ).getTime(),
+                       baseFunc.ceil(  dt( end ) ).getTime(),
+                       roundUpToNearestTime(
+                         smallInc*minDistanceBetweenXAxisLabels/wid,
+                         smallInc));
+    }
+  }
+
+  // selection are the objects,
+  // fill and stroke are functions,
+  // scal is the scale
+  function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, oldxS, prevxSOld, strokeW) {
+    //update
+    var sels = toTransition ?
+      sel.transition().duration(dur).ease(ease) :
+      sel;
+
+    sels
+      .attr("d", function (d, i) { return d0s[d.type][d.which]; })
+      .attr("opacity", function (d) { return bin[d.type].opacity; })
+      .attr("transform", transformScale(scal, oldxS, mar));
+
+
+    //enter
+    var sels = sel.enter().append("path")
+      .attr("class", "posPath")
+      .attr("fill", fill)
+      .style("stroke-width", strokeW)
+      .attr("d", function (d, i) { return d0s[d.type][d.which]; })
+      .style("stroke", stroke);
+
+    if (toTransition) {
+      sels.attr("transform", transformScale(scalOld, oldxS, mar))
+        .attr("opacity", 0)
+        .transition().ease(ease).duration(dur)
+          .attr("transform", transformScale(scal, oldxS, mar))
+          .attr("opacity", function (d) { return bin[d.type].opacity; });
+    } else {
+      sels.attr("transform", transformScale(scal, oldxS, mar))
+        .attr("opacity", function (d) { return bin[d.type].opacity; });
+    }
+
+
+    //exit
+    var sels = toTransition ?
+      sel.exit().transition().ease(ease).duration(dur) :
+      sel.exit();
+
+    sels
+      .attr("transform", transformScale(scal, getScaleValue(prevxSOld), mar))
+      .attr("opacity", 0)
+      .remove();
+  }
+
+  function msToCenturyTickValues(scal, wid) {
+    var dom = scal.domain();
+
+    var i = 0;
+    for (i = 0; i < rounding_scales.length; i++) {
+      var ro = rounding_scales[i];
+      var compr = onScreenSizeOfLabels(ro[0]*ro[1], wid, minDistanceBetweenXAxisLabels);
+
+      if (dom[1] - dom[0] <= compr ) {
+        var result = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1], wid);
+
+        // filter this for only what is actually on-screen.
+        result = _.filter(result, function (num) {
+          return num < dom[1] && num > dom[0];
+        });
+
+        return result;
+      }
+    }
+
+    // This should never occur
+    // TODO: set the extents of zoom so that this is indeed the case.
+    // - might have to use compr again.
+    // - and therefore use onScreenSizeOfLabels()
+    return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+  }
+
+  // TODO: Phase 2 - make this external, as in, set from outside this chart object.
+  function maxBinRenderSize () {
+    return document.getElementById("renderdepth").value / 4;
+    // TODO: magic:
+    // the 4 is to balance something which is due to the
+    // sampling rate being 200Hz
+  }
+
+  // The following function returns something which looks like this:
+  // [
+  //   {type: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
+  //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
+  //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
+  // ]
+  var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, interp) {
+    var resultArray = new Array();
+
+    if (whichLines.indexOf('rawData') > -1){
+      resultArray.push({
+        type: 'rawData',
+        which: 0
+      });
+    }
+
+    var j = 0;
+    for (var keyValue in bin['keys']){ // for each of 'average', 'max', 'min'
+      var key = bin.keys[keyValue];
+
+      if (whichLines.indexOf(key) > -1){
+        for (j = 0; j < maxNumberOfBinLevels; j++) {
+          if (whichLevel === j){
+            resultArray.push({
+              type: key,
+              which: j,
+              interpolate: interp
+            });
+          }
+        }
+      }
+    }
+
+    return resultArray;
+  };
+
+  // See makeDataObjectForKeyFanciness for explanation of output
+  var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp) {
+    var resultArray = new Array();
+    var key = 'quartiles';
+
+    var j = 0;
+    if (whichLines.indexOf('quartiles') > -1)
+    {
+      for (j = 0; j < maxNumberOfBinLevels; j++) {
+        if (whichLevel === j){
+          resultArray.push({
+            type: key,
+            which: j,
+            interpolate: interp
+          });
+        }
+      }
+    }
+    return resultArray;
+  }
+
+  function goToLevel(scal) {
+    //Want: samples/bin --> level
+    //Have: pixels/bin, pixels/sample
+
+    // pixels/bin:
+    var pixelsPerBin = maxBinRenderSize();
+    var pixelsPerSample = getScaleValue(scal);
+
+    // sam   pix   sam
+    // --- = --- * ---
+    // bin   bin   pix
+    var samplesPerBin = pixelsPerBin / pixelsPerSample;
+
+    //now convert to level and floor
+    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var toLevel = Math.floor(toLevel);
+    var toLevel = d3.max([0, toLevel]);
+    var toLevel = d3.min([maxNumberOfBinLevels - 1, toLevel]);
+
+    return toLevel;
+  }
+
+  // custom formatting for x axis time
+  function msToCenturyTickFormat(ti) {
+    function timeFormat(formats) {
+      return function(date) {
+        var newdate = new Date();
+        newdate.setTime(date);
+        var i = formats.length - 1, f = formats[i];
+        while (!f[1](newdate)) f = formats[--i];
+        return f[0](newdate);
+      };
+    }
+
+    var customTimeFormat = timeFormat([
+       [ d3.time.format("%Y")    , function() { return true; }                 ],
+       [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
+       [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
+       [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
+       [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }      ],
+       [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }      ],
+       [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
+      ]);
+
+    return function(d) { return customTimeFormat(ti); }();
+  }
+
+  // Bin the data into abstracted bins
+  var binTheDataWithFunction = function (bin, curLevel, key, func) {
+    var bDat = new Array();
+    var i = 0;
+    for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+      if (bin[key].levels[curLevel][i+1]){
+        var newdate = new Date();
+        newdate.setTime(bin['q1'].levels[curLevel][i/*+1*/].date.getTime());
+
+        if (key === 'q1' || key === 'q3') {
+          //console.log( bin['q1'].levels[curLevel][i+1].date.getTime() );
+
+          bDat.push({ val:  func(
+                bin['q1'].levels[curLevel][i].val,
+                bin['q1'].levels[curLevel][i+1].val,
+                bin['q3'].levels[curLevel][i].val,
+                bin['q3'].levels[curLevel][i+1].val)
+              , date: newdate }); // This is messy and depends on a lot of things
+        }else{
+          bDat.push( { val: func(
+                bin[key].levels[curLevel][i].val,
+                bin[key].levels[curLevel][i+1].val)
+              , date: newdate });
+        }
+      }else{
+        var newdate = new Date();
+        newdate.setTime(bin[key].levels[curLevel][i].date);
+        bDat.push( { val: bin[key].levels[curLevel][i].val // TODO: FIX
+                   , date: newdate } );
+      }
+    }
+    return bDat;
+  };
+
+// HELPER FUNCTIONS }}}
+
 var binnedLineChart = function (data, dataRequester) {
 
   //{{{ VARIABLES
@@ -16,13 +491,10 @@ var binnedLineChart = function (data, dataRequester) {
 
   var height = 150 - margin.top - margin.bottom;
 
-  var minDistanceBetweenXAxisLabels = 75;
-
   // the width of the chart, including margins
   var containerWidth = document.getElementById("chartContainer").offsetWidth;
   var width = containerWidth - margin.left - margin.right;
 
-  var howManyBinLevels = 10; // TODO: phase this out (preferable) OR set it as a really high number
   var whichLevelToRender = 0;
   var whichLinesToRender = ['average', 'rawData', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
@@ -137,7 +609,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   // VARIABLES }}}
 
-  //{{{ HELPER FUNCTIONS
+  //{{{ HELPER METHODS
 
   //TODO:
   //    - need a function here which requests specific data from bridgecharts.js
@@ -160,328 +632,6 @@ var binnedLineChart = function (data, dataRequester) {
     //console.log(scal.ticks(width / 100));
   }
 
-  // selection are the objects,
-  // fill and stroke are functions,
-  // scal is the scale
-  function drawElements(sel, fill, stroke, scal) {
-    //update
-    var sels = transitionNextTime ?
-      sel.transition().duration(transitionDuration).ease(easingMethod) :
-      sel;
-
-    sels
-      .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-      .attr("opacity", function (d) { return binData[d.type].opacity; })
-      .attr("transform", transformScale(xScale, oldxS));
-
-
-    //enter
-    var sels = sel.enter().append("path")
-      .attr("class", "posPath")
-      .attr("fill", fill)
-      .style("stroke-width", strokeWidth)
-      .attr("d", function (d, i) { return renderedD0s[d.type][d.which]; })
-      .style("stroke", stroke);
-
-    if (transitionNextTime) {
-      sels.attr("transform", transformScale(previousXScale, oldxS))
-        .attr("opacity", 0)
-        .transition().ease(easingMethod).duration(transitionDuration)
-          .attr("transform", transformScale(xScale, oldxS))
-          .attr("opacity", function (d) { return binData[d.type].opacity; });
-    } else {
-      sels.attr("transform", transformScale(xScale, oldxS))
-        .attr("opacity", function (d) { return binData[d.type].opacity; });
-    }
-
-
-    //exit
-    var sels = transitionNextTime ?
-      sel.exit().transition().ease(easingMethod).duration(transitionDuration) :
-      sel.exit();
-
-    sels
-      .attr("transform", transformScale(xScale, getScaleValue(previousXsOld)))
-      .attr("opacity", 0)
-      .remove();
-  }
-
-  function roundUpToNearestTime(val, tim) {
-    return Math.ceil(val/tim) * tim;
-  }
-
-  function roundDownToNearestTime(val, tim) {
-    return Math.floor(val/tim) * tim;
-  }
-
-  function millisecond(val) {
-    var newdate = new Date();
-    newdate.setTime(roundDownToNearestTime(val, times.ms));
-    return newdate;
-  }
-
-  var times = {
-    ms: 1, //milliseconds
-    s: 1000, //seconds
-    m: 6e4, //minutes
-    h: 36e5, //hours
-    d: 864e5, //days
-    // These are approximations:
-    mo: 2592e6, //months
-    y: 31536e6, //years
-  };
-
-  // Convert milliseconds to a Date object
-  function dt (num) {
-    var newdate = new Date();
-    newdate.setTime(num);
-    return newdate;
-  }
-
-  function getNumberOfDaysInCurrentMonth(dat) {
-    var curmo = dat.getMonth();
-    var addYear;
-    if (( curmo + 1 ) / 12.0 >= 1.0) {
-      // we rolled over to the next year
-      addYear = dat.getFullYear() + 1;
-    } else {
-      addYear = dat.getFullYear();
-    }
-    var newdate = new Date(
-        addYear,
-        (curmo + 1) % 12,
-        1,
-        1,
-        1,
-        1,
-        1);
-    newdate = dt(newdate.getTime() - 4000000);
-    return newdate.getDate();
-  }
-
-  function getNumberOfDaysInCurrentYear(dat) {
-    var newdateStart = new Date(dat.getFullYear()    , 0, 0);
-    var newdateEnd   = new Date(dat.getFullYear() + 1, 0, 0);
-    var diff = newdateEnd.getTime() - newdateStart.getTime();
-    var oneDay = 1000 * 60 * 60 * 24;
-    return Math.floor(diff / oneDay);
-  }
-
-  // Data object to help make custom axis' tick values
-  // [ estimate size in milliseconds,
-  //   how many to increment,
-  //   precise time rounder for anchoring,
-  //   precise time rounder ]
-  var rounding_scales = [
-    [ times.ms , 1   , d3.time.second , millisecond],
-    [ times.ms , 2   , d3.time.second , millisecond],
-    [ times.ms , 5   , d3.time.second , millisecond],
-    [ times.ms , 10  , d3.time.second , millisecond],
-    [ times.ms , 20  , d3.time.second , millisecond],
-    [ times.ms , 50  , d3.time.second , millisecond],
-    [ times.ms , 100 , d3.time.second , millisecond],
-    [ times.ms , 200 , d3.time.second , millisecond],
-    [ times.ms , 500 , d3.time.second , millisecond],
-    [ times.s  , 1   , d3.time.minute , d3.time.second],
-    [ times.s  , 2   , d3.time.minute , d3.time.second],
-    [ times.s  , 5   , d3.time.minute , d3.time.second],
-    [ times.s  , 15  , d3.time.minute , d3.time.second],
-    [ times.s  , 30  , d3.time.minute , d3.time.second],
-    [ times.m  , 1   , d3.time.hour   , d3.time.minute],
-    [ times.m  , 2   , d3.time.hour   , d3.time.minute],
-    [ times.m  , 5   , d3.time.hour   , d3.time.minute],
-    [ times.m  , 15  , d3.time.hour   , d3.time.minute],
-    [ times.m  , 30  , d3.time.hour   , d3.time.minute],
-    [ times.h  , 1   , d3.time.day    , d3.time.hour],
-    [ times.h  , 3   , d3.time.day    , d3.time.hour],
-    [ times.h  , 6   , d3.time.day    , d3.time.hour],
-    [ times.h  , 12  , d3.time.day    , d3.time.hour],
-    [ times.d  , 1   , d3.time.month  , d3.time.day],
-    [ times.d  , 2   , d3.time.month  , d3.time.day],
-    [ times.d  , 5   , d3.time.month  , d3.time.day],
-    [ times.d  , 10  , d3.time.month  , d3.time.day],
-    [ times.d  , 15  , d3.time.month  , d3.time.day],
-    [ times.mo , 1   , d3.time.year   , d3.time.month],
-    [ times.mo , 2   , d3.time.year   , d3.time.month],
-    [ times.mo , 3   , d3.time.year   , d3.time.month],
-    [ times.mo , 6   , d3.time.year   , d3.time.month],
-    [ times.mo , 12  , d3.time.year   , d3.time.month],
-    [ times.y  , 1  , d3.time.year , d3.time.year],
-    [ times.y  , 2  , d3.time.year , d3.time.year],
-    [ times.y  , 5  , d3.time.year , d3.time.year],
-    [ times.y  , 10 , d3.time.year , d3.time.year],
-    [ times.y  , 25 , d3.time.year , d3.time.year],
-    [ times.y  , 50 , d3.time.year , d3.time.year],
-    [ times.y  , 100, d3.time.year , d3.time.year],
-    [ times.y  , 100, d3.time.year , d3.time.year],
-  ];
-
-  function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc) {
-    if ( incrementOf === d3.time.year ) {
-      // For Years
-      var startyear = d3.time.year.floor(dt(start));
-      var endyear   = d3.time.year.ceil( dt(end  ));
-
-      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
-
-      // Filter for proper increments
-      curange = _.filter(curange, function (d, i) {
-        return d % increment == 0;
-      });
-
-      curange = _.map(curange, function (d) { return new Date(d, 0); });
-
-      return curange;
-
-    } else if ( incrementOf === d3.time.month ) {
-      // For Months
-      var startyear = d3.time.year.floor(dt(start));
-      var endyear   = d3.time.year.ceil( dt(end  ));
-
-      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
-
-      // for each year, get all of the months for it
-      curange = _.map(curange, function (d, i) {
-        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
-          // For each month of the year
-          return new Date(d, f);
-        });
-      });
-      curange = _.flatten(curange);
-
-      curange = _.filter(curange, function (d, i) {
-        // Filter for proper increments
-        return i % increment == 0;
-      });
-
-      return curange;
-
-    } else if (baseFunc === d3.time.month){
-      // For Days
-      var startyear = d3.time.year.floor(dt(start));
-      var endyear   = d3.time.year.ceil( dt(end  ));
-
-      var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
-
-      // For each year, get all of the months for it
-      curange = _.map(curange, function (year, i) {
-        return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (month) {
-          // For each month of the year
-          var monthDays = getNumberOfDaysInCurrentMonth(new Date(year, month));
-          return _.map(d3.range(1, monthDays + 1), function (day) {
-            // For each day of the month
-            // Filter for proper increments
-            //   and remove ones which are too close
-            //   together near the ends of the months
-            if ((day - 1) % increment == 0 && monthDays + 1 - day >= increment ) {
-              return new Date(year, month, day);
-            } else {
-              return [];
-            }
-          });
-        });
-      });
-
-      curange = _.flatten(curange);
-
-      return curange;
-
-    } else {
-      // For everything smaller than days
-      return d3.range( baseFunc.floor( dt(start) ).getTime(),
-                       baseFunc.ceil(  dt( end ) ).getTime(),
-                       roundUpToNearestTime(
-                         smallInc*minDistanceBetweenXAxisLabels/width,
-                         smallInc));
-    }
-  }
-
-  function onScreenSizeOfLabels(millisecondsPerLabel, screenWidth, distanceBtwnLabels) {
-    return millisecondsPerLabel * screenWidth / distanceBtwnLabels;
-  }
-
-  function msToCenturyTickValues(scal) {
-    var dom = scal.domain();
-
-    var i = 0;
-    for (i = 0; i < rounding_scales.length; i++) {
-      var ro = rounding_scales[i];
-      var compr = onScreenSizeOfLabels(ro[0]*ro[1], width, minDistanceBetweenXAxisLabels);
-
-      if (dom[1] - dom[0] <= compr ) {
-        var result = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1]);
-
-        // filter this for only what is actually on-screen.
-        result = _.filter(result, function (num) {
-          return num < dom[1] && num > dom[0];
-        });
-
-        return result;
-      }
-    }
-
-    // This should never occur
-    // TODO: set the extents of zoom so that this is indeed the case.
-    // - might have to use compr again.
-    // - and therefore use onScreenSizeOfLabels()
-    return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
-  }
-
-  // custom formatting for x axis time
-  function msToCenturyTickFormat(ti) {
-    function timeFormat(formats) {
-      return function(date) {
-        var newdate = new Date();
-        newdate.setTime(date);
-        var i = formats.length - 1, f = formats[i];
-        while (!f[1](newdate)) f = formats[--i];
-        return f[0](newdate);
-      };
-    }
-
-    var customTimeFormat = timeFormat([
-       [ d3.time.format("%Y")    , function() { return true; }                 ],
-       [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
-       [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
-       [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
-       [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }      ],
-       [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }      ],
-       [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
-      ]);
-
-    return function(d) { return customTimeFormat(ti); }();
-  }
-
-  // TODO: Phase 2 - make this external
-  function maxBinRenderSize () {
-    return document.getElementById("renderdepth").value / 4;
-    // TODO: magic:
-    // the 4 is to balance something which is due to the
-    // sampling rate being 200Hz
-  }
-
-  function goToLevel(scal) {
-    //Want: samples/bin --> level
-    //Have: pixels/bin, pixels/sample
-
-    // pixels/bin:
-    var pixelsPerBin = maxBinRenderSize();
-    var pixelsPerSample = getScaleValue(scal);
-
-    // sam   pix   sam
-    // --- = --- * ---
-    // bin   bin   pix
-    var samplesPerBin = pixelsPerBin / pixelsPerSample;
-
-    //now convert to level and floor
-    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
-    var toLevel = Math.floor(toLevel);
-    var toLevel = d3.max([0, toLevel]);
-    var toLevel = d3.min([howManyBinLevels - 1, toLevel]);
-
-    return toLevel;
-  }
-
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d) {
     // See transformScale for the inverse.
@@ -495,6 +645,11 @@ var binnedLineChart = function (data, dataRequester) {
     return d.date.getTime() * oldxS;
   };
 
+  // TODO: figure out what all these are actually
+  //       for and simplify everything.
+  //       - This includes previousXScale.
+  //       - Also, get rid of the weirdness in renderFunction
+  //         while making it a function instead of a method
   var oldxS = 1;
   var oldxScale;
   var previousXsOld;
@@ -508,149 +663,6 @@ var binnedLineChart = function (data, dataRequester) {
 //    return Math.pow(2, lvl) * scalVal;
 //  }
 
-  // This is the transform which is done on the data after it has been rendered.
-  function transformScale(scal, oldScal) {
-    var pixelsPerSample = getScaleValue(scal);
-    var xS = getScaleValue(scal);
-
-    // TODO: fix the scrolling offset here (likely somewhere else, actually)
-    var tx = margin.left - (getScaleValue(scal) * scal.domain()[0]);
-    var ty = margin.top; // translate y value
-    //var ty = (margin.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
-
-    // See renderFunction for the inverse.
-
-    var sx = xS / oldScal;
-    var sy = 1; // scale y value
-
-    return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
-  }
-
-  function getScaleValue(scal) {
-    // gives a result which has units pixels / samples
-    return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
-  }
-
-  function copyScale(scal) {
-    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
-  }
-
-  // The following function returns something which looks like this:
-  // [
-  //   {type: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
-  //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
-  //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
-  // ]
-  var makeDataObjectForKeyFanciness = function (bin) {
-    var resultArray = new Array();
-
-    if (whichLinesToRender.indexOf('rawData') > -1){
-      resultArray.push({
-        type: 'rawData',
-        which: 0
-      });
-    }
-
-    var j = 0;
-    for (var keyValue in bin['keys']){ // for each of 'average', 'max', 'min'
-      var key = bin.keys[keyValue];
-
-      if (whichLinesToRender.indexOf(key) > -1){
-        for (j = 0; j < howManyBinLevels; j++) {
-          if (whichLevelToRender === j){
-            resultArray.push({
-              type: key,
-              which: j,
-              interpolate: interpolationMethod
-            });
-          }
-        }
-      }
-    }
-
-    return resultArray;
-  };
-
-  // See makeDataObjectForKeyFanciness for explanation of output
-  var makeQuartileObjectForKeyFanciness = function () {
-    var resultArray = new Array();
-    var key = 'quartiles';
-
-    var j = 0;
-    if (whichLinesToRender.indexOf('quartiles') > -1)
-    {
-      for (j = 0; j < howManyBinLevels; j++) {
-        if (whichLevelToRender === j){
-          resultArray.push({
-            type: key,
-            which: j,
-            interpolate: interpolationMethod
-          });
-        }
-      }
-    }
-    return resultArray;
-  }
-
-  var isWithinRange = function (r1, r2) {
-    // see if r1 is within r2
-    return r1[0] >= r2[0] && r1[1] <= r2[1];
-  };
-
-  var getTwoLargest = function (array) {
-    var arr = array.slice();
-    first = d3.max(arr);
-    arr.splice(arr.indexOf(first),1);
-    second = d3.max(arr);
-    return [first, second];
-  };
-
-  var average = function (array) {
-    return d3.sum(array)/array.length;
-  };
-
-  var getTwoSmallest = function (array) {
-    var arr = array.slice();
-    first = d3.min(arr);
-    arr.splice(arr.indexOf(first),1);
-    second = d3.min(arr);
-    return [first, second];
-  };
-
-  // Bin the data into abstracted bins
-  var binTheDataWithFunction = function (bin, curLevel, key, func) {
-    var bDat = new Array();
-    var i = 0;
-    for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
-      if (bin[key].levels[curLevel][i+1]){
-        var newdate = new Date();
-        newdate.setTime(bin['q1'].levels[curLevel][i/*+1*/].date.getTime());
-
-        if (key === 'q1' || key === 'q3') {
-          //console.log( bin['q1'].levels[curLevel][i+1].date.getTime() );
-
-          bDat.push({ val:  func(
-                bin['q1'].levels[curLevel][i].val,
-                bin['q1'].levels[curLevel][i+1].val,
-                bin['q3'].levels[curLevel][i].val,
-                bin['q3'].levels[curLevel][i+1].val)
-              , date: newdate }); // This is messy and depends on a lot of things
-        }else{
-          bDat.push( { val: func(
-                bin[key].levels[curLevel][i].val,
-                bin[key].levels[curLevel][i+1].val)
-              , date: newdate });
-        }
-      }else{
-        var newdate = new Date();
-        newdate.setTime(bin[key].levels[curLevel][i].date);
-        bDat.push( { val: bin[key].levels[curLevel][i].val // TODO: FIX
-                   , date: newdate } );
-      }
-    }
-    return bDat;
-  };
-
   // HELPER FUNCTIONS }}}
 
   //{{{ POPULATE THE BINNED DATAS (binData)
@@ -661,12 +673,12 @@ var binnedLineChart = function (data, dataRequester) {
     binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate}; });
     var j = 0;
     //console.log(_.map(data, function (num) { return {val: num};}));
-    for (j = 1; j < howManyBinLevels; j++){ // add a new object for each bin level
+    for (j = 1; j < maxNumberOfBinLevels; j++){ // add a new object for each bin level
       binData[binData.keys[keyValue]].levels[j] = [];
     }
   }
 
-  for (j = 1; j < howManyBinLevels; j++){ // for each bin level
+  for (j = 1; j < maxNumberOfBinLevels; j++){ // for each bin level
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
       binData[key].levels[0] = _.map(data, function (num, py) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate }; });
@@ -862,7 +874,7 @@ var binnedLineChart = function (data, dataRequester) {
         .attr("class", "paths")
         .attr("height", height);
 
-      var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData);
+      var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
 
       // CONTAINER AND CLIPPING }}}
 
@@ -874,19 +886,39 @@ var binnedLineChart = function (data, dataRequester) {
       drawElements(currentSelection,
                    function (d) { return "rgba(0,0,0,0)"; },
                    function (d) { return binData[d.type].color; },
-                   xScale);
+                   xScale,
+                   transitionNextTime,
+                   previousXScale,
+                   easingMethod,
+                   transitionDuration,
+                   renderedD0s,
+                   binData,
+                   margin,
+                   oldxS,
+                   previousXsOld,
+                   strokeWidth);
 
       // LINES }}}
 
       //{{{ AREAS
       //make and render the area
       currentSelection = paths.selectAll(".posArea")
-        .data(makeQuartileObjectForKeyFanciness(), function (d) {return d.type + d.which + d.interpolate; });
+        .data(makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod), function (d) {return d.type + d.which + d.interpolate; });
 
       drawElements(currentSelection,
                    function (d) { return binData[d.type].color; },
                    function (d) { return "rgba(0,0,0,0)"; },
-                   xScale);
+                   xScale,
+                   transitionNextTime,
+                   previousXScale,
+                   easingMethod,
+                   transitionDuration,
+                   renderedD0s,
+                   binData,
+                   margin,
+                   oldxS,
+                   previousXsOld,
+                   strokeWidth);
 
       // AREAS }}}
 
@@ -895,7 +927,7 @@ var binnedLineChart = function (data, dataRequester) {
       xAxis = d3.svg.axis()
         //.tickSize(6)
         .tickFormat(msToCenturyTickFormat)
-        .tickValues(msToCenturyTickValues(xScale))
+        .tickValues(msToCenturyTickValues(xScale, width))
         //.ticks(width / 100) // TODO: magic number. It looks good, though.
         .scale(xScale).orient("bottom");
 
@@ -951,13 +983,6 @@ var binnedLineChart = function (data, dataRequester) {
     if (!arguments.length) return margin.top;
     if (margin.top !== value) my.reRenderTheNextTime(true);
     margin.top = value;
-    return my;
-  };
-
-  my.howManyBinLevels = function (value) {
-    if (!arguments.length) return howManyBinLevels ;
-    if (howManyBinLevels !== value) my.reRenderTheNextTime(true);
-    howManyBinLevels = value;
     return my;
   };
 
