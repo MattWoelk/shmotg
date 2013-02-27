@@ -4,7 +4,6 @@
 //      - See "new section" for the beginnings of a fix for this.
 // TODO: }}}
 
-
   // {{{ CONSTANTS
   var minDistanceBetweenXAxisLabels = 75;
   var maxNumberOfBinLevels = 10; // TODO: phase this out (preferable) OR set it as a really high number
@@ -261,7 +260,7 @@
   // selection are the objects,
   // fill and stroke are functions,
   // scal is the scale
-  function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, oldxS, prevxSOld, strokeW) {
+  function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, oldxScale, strokeW) {
     //update
     var sels = toTransition ?
       sel.transition().duration(dur).ease(ease) :
@@ -270,7 +269,7 @@
     sels
       .attr("d", function (d, i) { return d0s[d.type][d.which]; })
       .attr("opacity", function (d) { return bin[d.type].opacity; })
-      .attr("transform", transformScale(scal, oldxS, mar));
+      .attr("transform", transformScale(scal, getScaleValue(oldxScale), mar));
 
 
     //enter
@@ -282,13 +281,13 @@
       .style("stroke", stroke);
 
     if (toTransition) {
-      sels.attr("transform", transformScale(scalOld, oldxS, mar))
+      sels.attr("transform", transformScale(scalOld, getScaleValue(oldxScale), mar))
         .attr("opacity", 0)
         .transition().ease(ease).duration(dur)
-          .attr("transform", transformScale(scal, oldxS, mar))
+          .attr("transform", transformScale(scal, getScaleValue(oldxScale), mar))
           .attr("opacity", function (d) { return bin[d.type].opacity; });
     } else {
-      sels.attr("transform", transformScale(scal, oldxS, mar))
+      sels.attr("transform", transformScale(scal, getScaleValue(oldxScale), mar))
         .attr("opacity", function (d) { return bin[d.type].opacity; });
     }
 
@@ -299,7 +298,7 @@
       sel.exit();
 
     sels
-      .attr("transform", transformScale(scal, getScaleValue(prevxSOld), mar))
+      .attr("transform", transformScale(scal, getScaleValue(scalOld), mar))
       .attr("opacity", 0)
       .remove();
   }
@@ -483,6 +482,10 @@ var binnedLineChart = function (data, dataRequester) {
 
   //{{{ VARIABLES
 
+  // TODO: put most (all?) of these in a big object
+  // which can be passed around to helper functions
+  // easily
+
   var datReq = dataRequester;
   var strokeWidth = 1;
 
@@ -636,32 +639,19 @@ var binnedLineChart = function (data, dataRequester) {
   var renderFunction = function (d) {
     // See transformScale for the inverse.
 
-    // TODO: could replace oldxS with a properly rounded scale value for the current level.
-    oldxS = getScaleValue(xScale);
-    previousXsOld = copyScale(previousXScale);
     oldxScale = copyScale(xScale);
-    oldLevel = goToLevel(xScale);
+    var oldxS = getScaleValue(oldxScale);
 
     return d.date.getTime() * oldxS;
   };
 
-  // TODO: figure out what all these are actually
-  //       for and simplify everything.
-  //       - This includes previousXScale.
-  //       - Also, get rid of the weirdness in renderFunction
-  //         while making it a function instead of a method
-  var oldxS = 1;
+  // This stores the scale at which the d0s were
+  // originally rendered. It's our base-point for
+  // the transitions which scrolling does.
+  // TODO: make this what the scale SHOULD be
+  //       for the specific level and maxBinRenderSize
+  //       then we won't need to store state like this
   var oldxScale;
-  var previousXsOld;
-  var oldLevel = 1;
-
-//  function mB () {
-//    return maxBinRenderSize();
-//  }
-//
-//  function lmBl (lvl, scalVal) {
-//    return Math.pow(2, lvl) * scalVal;
-//  }
 
   // HELPER FUNCTIONS }}}
 
@@ -894,8 +884,7 @@ var binnedLineChart = function (data, dataRequester) {
                    renderedD0s,
                    binData,
                    margin,
-                   oldxS,
-                   previousXsOld,
+                   oldxScale,
                    strokeWidth);
 
       // LINES }}}
@@ -916,8 +905,7 @@ var binnedLineChart = function (data, dataRequester) {
                    renderedD0s,
                    binData,
                    margin,
-                   oldxS,
-                   previousXsOld,
+                   oldxScale,
                    strokeWidth);
 
       // AREAS }}}
@@ -1027,7 +1015,6 @@ var binnedLineChart = function (data, dataRequester) {
       previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
       previousXScale = copyScale(xScale);
-      previousXsOld = copyScale(oldxScale);
       previousLevelToRender = whichLevelToRender;
     } // else, don't change previousXScale
 
