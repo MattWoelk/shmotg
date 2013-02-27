@@ -655,6 +655,8 @@ var binnedLineChart = function (data, dataRequester) {
 
   // HELPER FUNCTIONS }}}
 
+  //// INITIALIZATION //// (runs once)
+
   //{{{ POPULATE THE BINNED DATAS (binData)
 
   binData.rawData.levels[0] = _.map(data, function (num) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate }; });
@@ -678,7 +680,7 @@ var binnedLineChart = function (data, dataRequester) {
 
   // POPULATE THE BINNED DATAS (binData) }}}
 
-  //// MY ////
+  //// MY //// (runs whenever something changes)
 
   var my = function (selection) {
 
