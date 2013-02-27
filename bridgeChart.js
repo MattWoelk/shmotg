@@ -50,13 +50,11 @@
     var pixelsPerSample = getScaleValue(scal);
     var xS = getScaleValue(scal);
 
-    // TODO: fix the scrolling offset here (likely somewhere else, actually)
     var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]);
     var ty = mar.top; // translate y value
-    //var ty = (mar.top + yScale.domain()[0]); // translate y value (this is here if we ever want to dynamically change the y scale)
 
-    // See renderFunction for the inverse.
 
+    // See renderFunction for the inverse:
     var sx = xS / oldScal;
     var sy = 1; // scale y value
 
@@ -469,7 +467,7 @@
       }else{
         var newdate = new Date();
         newdate.setTime(bin[key].levels[curLevel][i].date);
-        bDat.push( { val: bin[key].levels[curLevel][i].val // TODO: FIX
+        bDat.push( { val: bin[key].levels[curLevel][i].val
                    , date: newdate } );
       }
     }
@@ -481,10 +479,6 @@
 var binnedLineChart = function (data, dataRequester) {
 
   //{{{ VARIABLES
-
-  // TODO: put most (all?) of these in a big object
-  // which can be passed around to helper functions
-  // easily
 
   var datReq = dataRequester;
   var strokeWidth = 1;
@@ -918,7 +912,6 @@ var binnedLineChart = function (data, dataRequester) {
         //.tickSize(6)
         .tickFormat(msToCenturyTickFormat)
         .tickValues(msToCenturyTickValues(xScale, width))
-        //.ticks(width / 100) // TODO: magic number. It looks good, though.
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
