@@ -5,8 +5,8 @@
 // TODO: }}}
 
   // {{{ CONSTANTS
-  var minDistanceBetweenXAxisLabels = 75;
-  var maxNumberOfBinLevels = 10; // TODO: phase this out (preferable) OR set it as a really high number
+  var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
+  var MAX_NUMBER_OF_BIN_LEVELS = 10; // TODO: phase this out (preferable) OR set it as a really high number
   // CONSTANTS }}}
 
   // {{{ HELPER FUNCTIONS
@@ -252,7 +252,7 @@
       return d3.range( baseFunc.floor( dt(start) ).getTime(),
                        baseFunc.ceil(  dt( end ) ).getTime(),
                        roundUpToNearestTime(
-                         smallInc*minDistanceBetweenXAxisLabels/wid,
+                         smallInc*MIN_DISTANCE_BETWEEN_X_AXIS_LABELS/wid,
                          smallInc));
     }
   }
@@ -309,7 +309,7 @@
     var i = 0;
     for (i = 0; i < rounding_scales.length; i++) {
       var ro = rounding_scales[i];
-      var compr = onScreenSizeOfLabels(ro[0]*ro[1], wid, minDistanceBetweenXAxisLabels);
+      var compr = onScreenSizeOfLabels(ro[0]*ro[1], wid, MIN_DISTANCE_BETWEEN_X_AXIS_LABELS);
 
       if (dom[1] - dom[0] <= compr ) {
         var result = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1], wid);
@@ -359,7 +359,7 @@
       var key = bin.keys[keyValue];
 
       if (whichLines.indexOf(key) > -1){
-        for (j = 0; j < maxNumberOfBinLevels; j++) {
+        for (j = 0; j < MAX_NUMBER_OF_BIN_LEVELS; j++) {
           if (whichLevel === j){
             resultArray.push({
               type: key,
@@ -382,7 +382,7 @@
     var j = 0;
     if (whichLines.indexOf('quartiles') > -1)
     {
-      for (j = 0; j < maxNumberOfBinLevels; j++) {
+      for (j = 0; j < MAX_NUMBER_OF_BIN_LEVELS; j++) {
         if (whichLevel === j){
           resultArray.push({
             type: key,
@@ -412,7 +412,7 @@
     var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
     var toLevel = Math.floor(toLevel);
     var toLevel = d3.max([0, toLevel]);
-    var toLevel = d3.min([maxNumberOfBinLevels - 1, toLevel]);
+    var toLevel = d3.min([MAX_NUMBER_OF_BIN_LEVELS - 1, toLevel]);
 
     return toLevel;
   }
@@ -663,12 +663,12 @@ var binnedLineChart = function (data, dataRequester) {
     binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate}; });
     var j = 0;
     //console.log(_.map(data, function (num) { return {val: num};}));
-    for (j = 1; j < maxNumberOfBinLevels; j++){ // add a new object for each bin level
+    for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // add a new object for each bin level
       binData[binData.keys[keyValue]].levels[j] = [];
     }
   }
 
-  for (j = 1; j < maxNumberOfBinLevels; j++){ // for each bin level
+  for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
       binData[key].levels[0] = _.map(data, function (num, py) { var newdate = new Date(); newdate.setTime(num.SampleIndex); return {val: num.ESGgirder18, date: newdate }; });
