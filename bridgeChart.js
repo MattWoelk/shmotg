@@ -491,7 +491,7 @@ var binnedLineChart = function (data, dataRequester) {
   var width = containerWidth - margin.left - margin.right;
 
   var whichLevelToRender = 0;
-  var whichLinesToRender = ['average', 'rawData', 'average', 'maxes', 'mins'];
+  var whichLinesToRender = ['average', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
 
   var transitionDuration = 500;
@@ -732,8 +732,8 @@ var binnedLineChart = function (data, dataRequester) {
       }
     }
 
-    for (var keyValue in whichLinesToRender) {
-      var key = whichLinesToRender[keyValue];
+    for (var keyValue in renderThis) {
+      var key = renderThis[keyValue];
 
       if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender]) && !reRenderTheNextTime) {
           // necessary range is already rendered for this key
@@ -860,14 +860,14 @@ var binnedLineChart = function (data, dataRequester) {
         .attr("class", "paths")
         .attr("height", height);
 
-      var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
-
       // CONTAINER AND CLIPPING }}}
 
       //{{{ LINES
+
       //Make and render the Positive lines.
+      var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
       var currentSelection = paths.selectAll(".posPath")
-        .data(dataObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
+        .data(dataObjectForKeyFanciness, function (d) { return d.type + d.which + d.interpolate; });
 
       drawElements(currentSelection,
                    function (d) { return "rgba(0,0,0,0)"; },
@@ -978,8 +978,11 @@ var binnedLineChart = function (data, dataRequester) {
 
   my.whichLinesToRender  = function (value) {
     if (!arguments.length) return whichLinesToRender;
-    whichLinesToRender   = value;
-    //my.reRenderTheNextTime(true);
+    if (  _.difference(value, whichLinesToRender).length !== 0
+       || _.difference(whichLinesToRender, value).length !== 0 ) { // contain the different things
+      my.reRenderTheNextTime(true);
+    }
+    whichLinesToRender = value;
     return my;
   };
 
@@ -1034,9 +1037,10 @@ var binnedLineChart = function (data, dataRequester) {
     }
   };
 
+  // TODO: make this independent of the actual HTML. Do it through bridgecharts.js instead
   my.setSelectedLines = function () {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
-    whichLinesToRender = a;
+    my.whichLinesToRender(a);
 
     //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
     //whichLevelToRender = b[0];
