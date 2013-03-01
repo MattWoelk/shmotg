@@ -849,7 +849,7 @@ var binnedLineChart = function (data, dataRequester) {
         //.transition().duration(transitionDuration)
         .attr("width", width)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .attr("height", document.getElementById("chartContainer").offsetHeight); // this is a hack:
+        .attr("height", document.getElementById("chartContainer").offsetHeight); // TODO: this is a hack:
           // it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
           // should be .attr("height", height);
 
