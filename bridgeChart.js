@@ -651,7 +651,7 @@ var binnedLineChart = function (data, dataRequester) {
   //{{{ POPULATE THE BINNED DATAS (binData)
 
   // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
-  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: num.SampleIndex }; });
+  binData.rawData.levels[0] = _.map(data, function (num) { console.log(num.SampleIndex); return {val: num.ESGgirder18, date: num.SampleIndex }; });
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
     // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch

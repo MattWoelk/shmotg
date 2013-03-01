@@ -46,8 +46,11 @@ var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
 
 // these are the overall scales which are modified by zooming
+var off = 101100300;
 // they should be set as the default for new plots
+var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
+var xScale = d3.scale.linear().domain([0 + off, 1000 + off]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
 var frequency = 200; //Hz
@@ -233,77 +236,121 @@ function scrollright() {
 }
 
 // HELPER FUNCTIONS }}}
-
-//{{{ SERVER COMMUNICATIONS
-
-var socket = io.connect('130.179.231.28:8080/');
-var firstTime = true;
-
-//socket.on('connect_failed', function () {
-//  console.log("connect_failed :(");
+//
+////{{{ SERVER COMMUNICATIONS
+//
+//var socket = io.connect('130.179.231.28:8080/');
+//var firstTime = true;
+//
+////socket.on('connect_failed', function () {
+////  console.log("connect_failed :(");
+////});
+////
+////socket.on('connecting', function () {
+////  console.log("connecting :!");
+////});
+////
+////socket.on('connect', function () {
+////  console.log("connected !!");
+////});
+////
+////socket.on('disconnect', function () {
+////  console.log("disconnected !!");
+////});
+//
+//
+//socket.on('news', function (data) {
+//  // only do this once, so that plots don't get overlapped whenever the server restarts.
+//  if (!firstTime) {
+//    return;
+//  }
+//  // TODO: extract data about which "level" the data is for.
+//  // SPB is 200Hz
+//
+//  firstTime = false;
+//
+//  // deleting all example plots -->
+//  _.times(plots.length, function (i) {
+//    delete plots[i];
+//  });
+//  svg = document.getElementById("charts");
+//  while (svg.lastChild) {
+//    svg.removeChild(svg.lastChild);
+//  }
+//  plots = []; // delete the previous plots
+//  // <-- done deleting all example plots
+//
+//  var json = JSON.parse(data);
+//  socket.emit('ack', "Message received!");
+//
+//  //initPlot(json);
+//  initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
+//  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
 //});
 //
-//socket.on('connecting', function () {
-//  console.log("connecting :!");
-//});
+//// SERVER COMMUNICATIONS }}}
 //
-//socket.on('connect', function () {
-//  console.log("connected !!");
-//});
-//
-//socket.on('disconnect', function () {
-//  console.log("disconnected !!");
-//});
-
-
-socket.on('news', function (data) {
-  // only do this once, so that plots don't get overlapped whenever the server restarts.
-  if (!firstTime) {
-    return;
-  }
-  // TODO: extract data about which "level" the data is for.
-  // SPB is 200Hz
-
-  firstTime = false;
-
-  // deleting all example plots -->
-  _.times(plots.length, function (i) {
-    delete plots[i];
-  });
-  svg = document.getElementById("charts");
-  while (svg.lastChild) {
-    svg.removeChild(svg.lastChild);
-  }
-  plots = []; // delete the previous plots
-  // <-- done deleting all example plots
-
-  var json = JSON.parse(data);
-  socket.emit('ack', "Message received!");
-
-  //initPlot(json);
-  initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
-  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
-});
-
-// SERVER COMMUNICATIONS }}}
-
 //{{{ OFFLINE DEMO
 
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 1500);
+//setTimeout(rundemo, 1500);
+rundemo();
+
+// TODO: put this function in a library for both the server and client to access
+function dateStringToMilliseconds (dateStr) {
+  return d3.time.format("%a %b %d %Y %H:%M:%S")
+    .parse(dateStr.substring(0, 24))
+    .getTime();
+}
+
+// TODO: put this function in a library for both the server and client to access
+function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
+  return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
+}
+
+function samplesToMilliseconds (sampleIndex) {
+  var samplesPerSecond = 200;
+  var msPerSample = 1000/samplesPerSecond;
+  var mils = sampleIndex * msPerSample;
+  return mils;
+}
 
 function rundemo() {
-  d3.json("Server/esg_sample_index.js", function (error, data) {
+  d3.json("Server/esg_time.js", function (error, data) {
     if (error || plots.length > 0) {
       return;
     }
 
     var json = data;
 
+    //var testTime = "Mon Jan 02 2012 23:12:33 GMT-0600 (CST)";
+    //console.log(dateStringToMilliseconds(testTime));
+    //console.log(dateAndSampleIndexStringToMilliseconds(testTime, 1));
+    // TODO: This ^^ combining should be done on the server as well
+    // good idea: pass around date.getTime()'s
+
+    console.log(dateAndSampleIndexStringToMilliseconds(
+                 json[0].Time,
+                 json[0].SampleIndex));
+    console.log(new Date(dateAndSampleIndexStringToMilliseconds(
+                 json[0].Time,
+                 json[0].SampleIndex)));
+
     //initPlot(json);
-    initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
+    initPlot(_.map(json, function (d) {
+      console.log ({ ESGgirder18: d.ESGgirder18 ,
+               SampleIndex: dateAndSampleIndexStringToMilliseconds(
+                 d.Time,
+                 d.SampleIndex)
+             }.SampleIndex);
+      return { ESGgirder18: d.ESGgirder18 ,
+               SampleIndex: dateAndSampleIndexStringToMilliseconds(
+                 d.Time,
+                 d.SampleIndex) - 1325567551000 + off
+             };
+    }));
   });
 }
 
