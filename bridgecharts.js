@@ -291,6 +291,7 @@ socket.on('news', function (data) {
 
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
+// TODO: make this based on the server communication, instead of a time to wait.
 setTimeout(rundemo, 1500);
 
 function rundemo() {
