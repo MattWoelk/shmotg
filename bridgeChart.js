@@ -1,4 +1,5 @@
 //{{{ TODO AND NOTES:
+//  Translate for the object is HUGE. That means that some other translate must also be big, for them to cancel out and be near zero on-screen.
 //  CURRENT TASK:
 //      Only render what is on-screen.
 //      - See "new section" for the beginnings of a fix for this.
@@ -50,8 +51,11 @@
     var pixelsPerSample = getScaleValue(scal);
     var xS = getScaleValue(scal);
 
-    var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]);
+    var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]) - ( off*xS ); // translate x value
     var ty = mar.top; // translate y value
+
+    console.log(tx.toExponential() + " = " + getScaleValue(scal) + " * " + scal.domain()[0]);
+    //console.log(Math.log(tx) + ", " + ( Math.log(tx) / Math.log(2) ));
 
 
     // See renderFunction for the inverse:
@@ -632,6 +636,7 @@ var binnedLineChart = function (data, dataRequester) {
 
     oldxScale = copyScale(xScale);
     var oldxS = getScaleValue(oldxScale);
+    //console.log("renderFunction, " + d.date + ", " + oldxS);
 
     return d.date * oldxS;
   };
@@ -651,7 +656,7 @@ var binnedLineChart = function (data, dataRequester) {
   //{{{ POPULATE THE BINNED DATAS (binData)
 
   // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
-  binData.rawData.levels[0] = _.map(data, function (num) { console.log(num.SampleIndex); return {val: num.ESGgirder18, date: num.SampleIndex }; });
+  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: num.SampleIndex }; });
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
     // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch

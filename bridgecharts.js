@@ -46,11 +46,11 @@ var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
 
 // these are the overall scales which are modified by zooming
-var off = 101100300;
+var off = 100;//101100300;
 // they should be set as the default for new plots
 var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
-var xScale = d3.scale.linear().domain([0 + off, 1000 + off]).range([0, document.getElementById("chartContainer").offsetWidth]);
+var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
 var frequency = 200; //Hz
@@ -331,20 +331,20 @@ function rundemo() {
     // TODO: This ^^ combining should be done on the server as well
     // good idea: pass around date.getTime()'s
 
-    console.log(dateAndSampleIndexStringToMilliseconds(
-                 json[0].Time,
-                 json[0].SampleIndex));
-    console.log(new Date(dateAndSampleIndexStringToMilliseconds(
-                 json[0].Time,
-                 json[0].SampleIndex)));
+    //console.log(dateAndSampleIndexStringToMilliseconds(
+    //             json[0].Time,
+    //             json[0].SampleIndex));
+    //console.log(new Date(dateAndSampleIndexStringToMilliseconds(
+    //             json[0].Time,
+    //             json[0].SampleIndex)));
 
     //initPlot(json);
     initPlot(_.map(json, function (d) {
-      console.log ({ ESGgirder18: d.ESGgirder18 ,
-               SampleIndex: dateAndSampleIndexStringToMilliseconds(
-                 d.Time,
-                 d.SampleIndex)
-             }.SampleIndex);
+      //console.log ({ ESGgirder18: d.ESGgirder18 ,
+      //         SampleIndex: dateAndSampleIndexStringToMilliseconds(
+      //           d.Time,
+      //           d.SampleIndex)
+      //       }.SampleIndex);
       return { ESGgirder18: d.ESGgirder18 ,
                SampleIndex: dateAndSampleIndexStringToMilliseconds(
                  d.Time,
