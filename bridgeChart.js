@@ -498,7 +498,7 @@ var binTheDataWithFunction = function (bin, curLevel, key, func) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester) {
+var binnedLineChart = function (data, dataRequester, uniqueID) {
 
   //{{{ VARIABLES
 
@@ -851,7 +851,7 @@ var binnedLineChart = function (data, dataRequester) {
 
 
       //Make the clipPath (for cropping the paths)
-      if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip").append("rect"); }
+      if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + uniqueID).append("rect"); }
       defclip
         //.transition().duration(transitionDuration)
         .attr("width", width)
@@ -863,7 +863,7 @@ var binnedLineChart = function (data, dataRequester) {
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
       paths
-        .attr("clip-path", "url(#clip)") // Firefox issue: We're using the same "clip" id more than once; once for each bridgeChart that exists. :S
+        .attr("clip-path", "url(#clip" + uniqueID + ")") // Firefox issue: We're using the same "clip" id more than once; once for each bridgeChart that exists. :S
         .attr("class", "paths")
         .attr("height", height);
 

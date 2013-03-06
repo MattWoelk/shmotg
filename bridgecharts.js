@@ -92,8 +92,11 @@ function transitionAllNextTime() {
   });
 }
 
+var uniqueID = 0;
+
 function initPlot(data) {
-  var plot = binnedLineChart(data);
+  var plot = binnedLineChart(data, "TODO-SERVER", uniqueID);
+  uniqueID = uniqueID + 1;
   plot.xScale(copyScale(xScale));
 
   var pl = d3.select("#charts").append("g").call(plot);
