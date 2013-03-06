@@ -42,8 +42,22 @@
     return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
   }
 
+function divid (one, two) {
+  if (one && two) {
+    return one.toPrecision(1) / two.toPrecision(1);
+  } else {
+    return NaN;
+  }
+}
+
+  function getScaleValueTimesDomainZero (scal) {
+    return (scal.range()[1] - scal.range()[0]) /
+           ((scal.domain()[1] / scal.domain()[0]) - 1);
+  }
+
   function copyScale(scal) {
-    return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+    return scal.copy();
+    //return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
   }
 
   // This is the transform which is done on the data after it has been rendered.
@@ -52,10 +66,9 @@
     var xS = getScaleValue(scal);
 
     var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]) - ( off*xS ); // translate x value
+    var tx = mar.left - getScaleValueTimesDomainZero(scal) - ( off*xS ); // translate x value
     var ty = mar.top; // translate y value
 
-    console.log(tx.toExponential() + " = " + getScaleValue(scal) + " * " + scal.domain()[0]);
-    //console.log(Math.log(tx) + ", " + ( Math.log(tx) / Math.log(2) ));
 
 
     // See renderFunction for the inverse:

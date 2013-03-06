@@ -46,7 +46,7 @@ var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
 
 // these are the overall scales which are modified by zooming
-var off = 100;//101100300;
+var off = 101100300;
 // they should be set as the default for new plots
 var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
@@ -135,7 +135,8 @@ var updateZoom = function () { return 0; };
 
 
 function copyScale(scal) {
-  return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
+  return scal.copy();
+  //return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
 }
 
 function zoomAll() {
