@@ -11,11 +11,9 @@
   // CONSTANTS }}}
 
   // {{{ HELPER FUNCTIONS
-  var tmpp = 0;
 
   var filterDateToRange = function (input, range) {
     return _.filter(input, function (d, i) {
-      tmpp = tmpp + 1;
       return d.date <= range[1] && d.date >= range[0];
     });
   }
