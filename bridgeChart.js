@@ -768,8 +768,15 @@ var binnedLineChart = function (data, dataRequester) {
       //                    xScale.domain()[1] - di],           // THIS LINE IS FOR TESTING ONLY
       //                    renderedD0s[key + "Ranges"][whichLevelToRender]) || reRenderTheNextTime) { // THIS LINE IS FOR TESTING ONLY
 
+      // These two variables are here to remove the slight amount
+      // of un-rendered space which shows up on the sides just
+      // before the new data is generated. It provides a buffer zone.
+      var tenDiff = (renderedD0s[key + "Ranges"][whichLevelToRender][1] -
+                     renderedD0s[key + "Ranges"][whichLevelToRender][0]) * 0.1;
+      var ninetyPercentRange = [ renderedD0s[key + "Ranges"][whichLevelToRender][0] + tenDiff ,
+                                 renderedD0s[key + "Ranges"][whichLevelToRender][1] - tenDiff ];
       //if we are not within the range OR reRenderTheNextTime
-      if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender]) || reRenderTheNextTime) {
+      if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
         //render the new stuff
 
         // figure out how much to render:
