@@ -12,6 +12,8 @@
 
   // {{{ HELPER FUNCTIONS
 
+  // filter an array so that we don't render much more
+  // than the required amount of line and area
   var filterDateToRange = function (input, range) {
     return _.filter(input, function (d, i) {
       return d.date <= range[1] && d.date >= range[0];
@@ -770,26 +772,29 @@ var binnedLineChart = function (data, dataRequester) {
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender]) || reRenderTheNextTime) {
         //render the new stuff
 
+        // figure out how much to render:
+        var xdiff = xScale.domain()[1] - xScale.domain()[0];
+        var newRange = [0, 0];
+        newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
+        newRange[1] = xScale.domain()[1] + (xdiff / 2);
+
         if (key === 'quartiles') {
           // render AREA d0s
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
+          var q1filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], newRange );
+          var q3filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], newRange );
+
           renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
             .x(renderFunction)
-            .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
-            .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
-            .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
+            .y0(function (d, i) { return yScale( q1filter[i].val ); }) //.val
+            .y1(function (d, i) { return yScale( q3filter[i].val ); }) //.val
+            .interpolate( interpolationMethod )(q1filter);
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
         } else {
           // render LINES d0s
-
-          // figure out how much to render:
-          var xdiff = xScale.domain()[1] - xScale.domain()[0];
-          var newRange = [0, 0];
-          newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
-          newRange[1] = xScale.domain()[1] + (xdiff / 2);
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
 
