@@ -11,6 +11,14 @@
   // CONSTANTS }}}
 
   // {{{ HELPER FUNCTIONS
+  var tmpp = 0;
+
+  var filterDateToRange = function (input, range) {
+    return _.filter(input, function (d, i) {
+      tmpp = tmpp + 1;
+      return d.date <= range[1] && d.date >= range[0];
+    });
+  }
 
   var isWithinRange = function (r1, r2) {
     // see if r1 is within r2
@@ -65,8 +73,7 @@ function divid (one, two) {
     var pixelsPerSample = getScaleValue(scal);
     var xS = getScaleValue(scal);
 
-    var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]) - ( off*xS ); // translate x value
-    var tx = mar.left - getScaleValueTimesDomainZero(scal) - ( off*xS ); // translate x value
+    var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]); // translate x value
     var ty = mar.top; // translate y value
 
 
@@ -750,15 +757,21 @@ var binnedLineChart = function (data, dataRequester) {
       }
     }
 
+    // for each key
     for (var keyValue in renderThis) {
       var key = renderThis[keyValue];
 
-      if (isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender]) && !reRenderTheNextTime) {
-          // necessary range is already rendered for this key
-          // render nothing new; just use what is already there
-      } else if (reRenderTheNextTime){
+      // Useful for testing to see that only what is needed is being rendered:
+      // replace the following if statement with this code:
+      //var di = ( xScale.domain()[1] - xScale.domain()[0] ) / 2; // THIS LINE IS FOR TESTING ONLY
+      //if (!isWithinRange([xScale.domain()[0] + di,             // THIS LINE IS FOR TESTING ONLY
+      //                    xScale.domain()[1] - di],           // THIS LINE IS FOR TESTING ONLY
+      //                    renderedD0s[key + "Ranges"][whichLevelToRender]) || reRenderTheNextTime) { // THIS LINE IS FOR TESTING ONLY
 
-        // console.log(getScaleValue(xScale));
+      //if we are not within the range OR reRenderTheNextTime
+      if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], renderedD0s[key + "Ranges"][whichLevelToRender]) || reRenderTheNextTime) {
+        //render the new stuff
+
         if (key === 'quartiles') {
           // render AREA d0s
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
@@ -769,6 +782,8 @@ var binnedLineChart = function (data, dataRequester) {
             .y0(function (d, i) { return yScale(binData["q1"].levels[whichLevelToRender][i].val); }) //.val
             .y1(function (d, i) { return yScale(binData["q3"].levels[whichLevelToRender][i].val); }) //.val
             .interpolate( interpolationMethod )(binData["q1"].levels[whichLevelToRender]);
+
+          renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
         } else {
           // render LINES d0s
 
@@ -787,57 +802,21 @@ var binnedLineChart = function (data, dataRequester) {
 
           renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
             .x(renderFunction)
-            .y(function (d, i) { return yScale(binData.rawData.levels[0][i].val); })
-            .interpolate(interpolationMethod)(binData.rawData.levels[0]);
+            .y(function (d, i) { return yScale(d.val); })
+            .interpolate(interpolationMethod)(filterDateToRange(binData.rawData.levels[0] , newRange));
 
           renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
 
           renderedD0s[key][whichLevelToRender] = d3.svg.line()
             .x(renderFunction)
-            .y(function (d, i) { return yScale(binData[key].levels[whichLevelToRender][i].val); })
-            .interpolate( interpolationMethod )(binData[key].levels[whichLevelToRender]);
-        } // if quartiles
-      } // if don't need to render
+            .y(function (d, i) { return yScale(d.val); })
+            .interpolate( interpolationMethod )(filterDateToRange(binData[key].levels[whichLevelToRender] , newRange));
+        } // if quartiles else lines
+      } // if we should render anything
     } // for
 
     reRenderTheNextTime = false;
 
-
-
-
-
-
-///////////// vvv START NEW SECTION vvv /////////////
-//    // TODO: This takes binData and trims it so that we are only rendering things which are on the screen.
-//    var generateRenderData = function (bin, render) {
-//      newobject = {};
-//      newobject.keys = bin.keys.slice(0); // using slice(0) to make a copy
-//      newobject.properties = bin.properties; // direct reference; sharing a pointer
-//
-//      newobject.levels = [];
-//      // use _.filter to keep only the data which we want to render
-//      // this will be much easier once we have timestamps on our data ...
-//      _.times(bin.levels.length, function (i) {
-//        //console.log(i); // 0, 1, 2, 3, 4, 5, 6
-//        newobject.levels.push({});
-//        _.forEach(bin.levels[i], function (d, levelName) {
-//          //console.log(levelName); //rawData, rawDatad0, average, etc.
-//          newobject.levels[i][levelName] = _.filter(bin.levels[i][levelName], function (dat, iter) {
-//            // TODO: filter out what is off-screen.
-//            // this will be much easier once we have timestamps on our data ...
-//            // TODO: start using newobject instead of binData in my();
-//          });
-//        });
-//      });
-//      var i = 0;
-//      //for (i = 0; i < )
-//      //newobject.levels
-//
-//      return newobject;
-//    };
-//
-//    //var renderData = generateRenderData(binData, renderData);
-///////////// ^^^ END NEW SECTION ^^^ /////////////
     // GENERATE ALL d0s. (generate the lines paths) }}}
 
     //// SELECTION.EACH ////
