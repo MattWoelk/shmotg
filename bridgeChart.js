@@ -63,11 +63,6 @@ function getScaleValueTimesDomainZero (scal) {
          ((scal.domain()[1] / scal.domain()[0]) - 1);
 }
 
-function copyScale(scal) {
-  return scal.copy();
-  //return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
-}
-
 // This is the transform which is done on the data after it has been rendered.
 function transformScale(scal, oldScal, mar) {
   var pixelsPerSample = getScaleValue(scal);
@@ -652,7 +647,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var renderFunction = function (d) {
     // See transformScale for the inverse.
 
-    oldxScale = copyScale(xScale);
+    oldxScale = xScale.copy();
     var oldxS = getScaleValue(oldxScale);
     //console.log("renderFunction, " + d.date + ", " + oldxS);
 
@@ -1017,7 +1012,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       previousXScale = d3.scale.linear(); // now it's initialized.
       previousLevelToRender = whichLevelToRender;
     }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
-      previousXScale = copyScale(xScale);
+      previousXScale = xScale.copy();
       previousLevelToRender = whichLevelToRender;
     } // else, don't change previousXScale
 
