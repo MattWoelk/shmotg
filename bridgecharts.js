@@ -271,6 +271,7 @@ socket.on('news', function (data) {
   // <-- done deleting all example plots
 
   var json = JSON.parse(data);
+  console.log(json);
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
@@ -298,7 +299,7 @@ socket.on('news', function (data) {
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 1500);
+//setTimeout(rundemo, 1500);
 //rundemo();
 
 // TODO: put this function in a library for both the server and client to access
@@ -320,24 +321,24 @@ function samplesToMilliseconds (sampleIndex) {
   return mils;
 }
 
-function rundemo() {
-  d3.json("Server/esg_time.js", function (error, data) {
-    if (error || plots.length > 0) {
-      return;
-    }
-
-    var json = data;
-
-    //initPlot(json);
-    initPlot(_.map(json, function (d) {
-      return { ESGgirder18: d.ESGgirder18 ,
-               SampleIndex: dateAndSampleIndexStringToMilliseconds(
-                 d.Time,
-                 d.SampleIndex)
-             };
-    }));
-  });
-}
+//function rundemo() {
+//  d3.json("Server/esg_time.js", function (error, data) {
+//    if (error || plots.length > 0) {
+//      return;
+//    }
+//
+//    var json = data;
+//
+//    //initPlot(json);
+//    initPlot(_.map(json, function (d) {
+//      return { ESGgirder18: d.ESGgirder18 ,
+//               SampleIndex: dateAndSampleIndexStringToMilliseconds(
+//                 d.Time,
+//                 d.SampleIndex)
+//             };
+//    }));
+//  });
+//}
 
 // OFFLINE DEMO }}}
 
