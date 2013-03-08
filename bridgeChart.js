@@ -73,13 +73,11 @@ function transformScale(scal, oldScal, mar) {
   var pixelsPerSample = getScaleValue(scal);
   var xS = getScaleValue(scal);
 
-  var tx = mar.left - (getScaleValue(scal) * scal.domain()[0]); // translate x value
+  var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
   var ty = mar.top; // translate y value
 
-
-
   // See renderFunction for the inverse:
-  var sx = xS / oldScal;
+  var sx = xS / getScaleValue(oldScal);
   var sy = 1; // scale y value
 
   return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
@@ -291,7 +289,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
   sels
     .attr("d", function (d, i) { return d0s[d.type][d.which]; })
     .attr("opacity", function (d) { return bin[d.type].opacity; })
-    .attr("transform", transformScale(scal, getScaleValue(oldxScale), mar));
+    .attr("transform", transformScale(scal, oldxScale, mar));
 
 
   //enter
@@ -303,13 +301,13 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     .style("stroke", stroke);
 
   if (toTransition) {
-    sels.attr("transform", transformScale(scalOld, getScaleValue(oldxScale), mar))
+    sels.attr("transform", transformScale(scalOld, oldxScale, mar))
       .attr("opacity", 0)
       .transition().ease(ease).duration(dur)
-        .attr("transform", transformScale(scal, getScaleValue(oldxScale), mar))
+        .attr("transform", transformScale(scal, oldxScale, mar))
         .attr("opacity", function (d) { return bin[d.type].opacity; });
   } else {
-    sels.attr("transform", transformScale(scal, getScaleValue(oldxScale), mar))
+    sels.attr("transform", transformScale(scal, oldxScale, mar))
       .attr("opacity", function (d) { return bin[d.type].opacity; });
   }
 
@@ -320,7 +318,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     sel.exit();
 
   sels
-    .attr("transform", transformScale(scal, getScaleValue(scalOld), mar))
+    .attr("transform", transformScale(scal, scalOld, mar))
     .attr("opacity", 0)
     .remove();
 }
@@ -658,7 +656,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     var oldxS = getScaleValue(oldxScale);
     //console.log("renderFunction, " + d.date + ", " + oldxS);
 
-    return d.date * oldxS;
+    return (d.date - oldxScale.domain()[0]) * oldxS;
   };
 
   // This stores the scale at which the d0s were
