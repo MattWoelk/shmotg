@@ -661,6 +661,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   //       for the specific level and maxBinRenderSize
   //       then we won't need to store state like this
   var oldxScale;
+  //var oldxScale = d3.scale.linear();
 
   // HELPER FUNCTIONS }}}
 
