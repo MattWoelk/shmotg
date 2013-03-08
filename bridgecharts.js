@@ -90,7 +90,7 @@ var uniqueID = 0;
 function initPlot(data) {
   var plot = binnedLineChart(data, "TODO-SERVER", uniqueID);
   uniqueID = uniqueID + 1;
-  plot.xScale(copyScale(xScale));
+  plot.xScale(xScale.copy());
 
   var pl = d3.select("#charts").append("g").call(plot);
 
@@ -128,15 +128,9 @@ function initPlot(data) {
 // for now it's just a dummy
 var updateZoom = function () { return 0; };
 
-
-function copyScale(scal) {
-  return scal.copy();
-  //return d3.scale.linear().domain([scal.domain()[0], scal.domain()[1]]).range([scal.range()[0], scal.range()[1]]);
-}
-
 function zoomAll() {
   plots.forEach(function (plt) {
-    plt.xScale(copyScale(xScale)).update();
+    plt.xScale(xScale.copy()).update();
   });
 }
 
