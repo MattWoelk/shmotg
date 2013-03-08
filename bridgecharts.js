@@ -328,19 +328,6 @@ function rundemo() {
 
     var json = data;
 
-    //var testTime = "Mon Jan 02 2012 23:12:33 GMT-0600 (CST)";
-    //console.log(dateStringToMilliseconds(testTime));
-    //console.log(dateAndSampleIndexStringToMilliseconds(testTime, 1));
-    // TODO: This ^^ combining should be done on the server as well
-    // good idea: pass around date.getTime()'s
-
-    //console.log(dateAndSampleIndexStringToMilliseconds(
-    //             json[0].Time,
-    //             json[0].SampleIndex));
-    //console.log(new Date(dateAndSampleIndexStringToMilliseconds(
-    //             json[0].Time,
-    //             json[0].SampleIndex)));
-
     //initPlot(json);
     initPlot(_.map(json, function (d) {
       return { ESGgirder18: d.ESGgirder18 ,
