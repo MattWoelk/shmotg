@@ -45,14 +45,10 @@ var margin = {top: 10, right: 10, bottom: 25, left: 40};
 var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
 
-var off = 1000000000;
-
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
-//var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
-//var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
-//var xScale = d3.scale.linear().domain([0, 1000]).range([0, document.getElementById("chartContainer").offsetWidth]);
-var xScale = d3.scale.linear().domain([0 + off, 3000 + off]).range([0, document.getElementById("chartContainer").offsetWidth]);
+// and should show the offline demo data.
+var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
 var frequency = 200; //Hz
@@ -354,7 +350,7 @@ function rundemo() {
       return { ESGgirder18: d.ESGgirder18 ,
                SampleIndex: dateAndSampleIndexStringToMilliseconds(
                  d.Time,
-                 d.SampleIndex) - 1325567551000 + off
+                 d.SampleIndex)
              };
     }));
   });
