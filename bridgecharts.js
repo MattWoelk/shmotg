@@ -64,16 +64,10 @@ function setExtents() {
 }
 
 var redraw = function () {
-  // reset the zoom extents
-  //var oldE = zoomExtents[0];
-  //zoomExtents = setExtents();
-  //var ratio = zoomExtents[0] / oldE;
-  //zoomExtentsForScale[0]*= ratio;
-  //zoomExtentsForScale[1]*= ratio;
-
   plots.forEach(function (plt) {
     plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
   });
+
   d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
   zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
           .attr("height", document.getElementById("chartContainer").offsetHeight);
@@ -238,67 +232,80 @@ function scrollright() {
 }
 
 // HELPER FUNCTIONS }}}
-//
-////{{{ SERVER COMMUNICATIONS
-//
-//var socket = io.connect('130.179.231.28:8080/');
-//var firstTime = true;
-//
-////socket.on('connect_failed', function () {
-////  console.log("connect_failed :(");
-////});
-////
-////socket.on('connecting', function () {
-////  console.log("connecting :!");
-////});
-////
-////socket.on('connect', function () {
-////  console.log("connected !!");
-////});
-////
-////socket.on('disconnect', function () {
-////  console.log("disconnected !!");
-////});
-//
-//
-//socket.on('news', function (data) {
-//  // only do this once, so that plots don't get overlapped whenever the server restarts.
-//  if (!firstTime) {
-//    return;
-//  }
-//  // TODO: extract data about which "level" the data is for.
-//  // SPB is 200Hz
-//
-//  firstTime = false;
-//
-//  // deleting all example plots -->
-//  _.times(plots.length, function (i) {
-//    delete plots[i];
-//  });
-//  svg = document.getElementById("charts");
-//  while (svg.lastChild) {
-//    svg.removeChild(svg.lastChild);
-//  }
-//  plots = []; // delete the previous plots
-//  // <-- done deleting all example plots
-//
-//  var json = JSON.parse(data);
-//  socket.emit('ack', "Message received!");
-//
-//  //initPlot(json);
-//  initPlot(_.map(json, function (d) { return { ESGgirder18: d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
-//  initPlot(_.map(json, function (d) { return { ESGgirder18: Math.random() * 5 + d.ESGgirder18, SampleIndex: d.SampleIndex*(1000/frequency)}; }));
+
+//{{{ SERVER COMMUNICATIONS
+
+var socket = io.connect('130.179.231.28:8080/');
+var firstTime = true;
+
+//socket.on('connect_failed', function () {
+//  console.log("connect_failed :(");
 //});
 //
-//// SERVER COMMUNICATIONS }}}
+//socket.on('connecting', function () {
+//  console.log("connecting :!");
+//});
 //
+//socket.on('connect', function () {
+//  console.log("connected !!");
+//});
+//
+//socket.on('disconnect', function () {
+//  console.log("disconnected !!");
+//});
+
+
+socket.on('news', function (data) {
+  // only do this once, so that plots don't get overlapped whenever the server restarts.
+  if (!firstTime) {
+    return;
+  }
+  // TODO: extract data about which "level" the data is for.
+  // SPB is 200Hz
+
+  firstTime = false;
+
+  // deleting all example plots -->
+  _.times(plots.length, function (i) {
+    delete plots[i];
+  });
+  svg = document.getElementById("charts");
+  while (svg.lastChild) {
+    svg.removeChild(svg.lastChild);
+  }
+  plots = []; // delete the previous plots
+  // <-- done deleting all example plots
+
+  var json = JSON.parse(data);
+  socket.emit('ack', "Message received!");
+
+  //initPlot(json);
+    //initPlot(json);
+    initPlot(_.map(json, function (d) {
+      return { ESGgirder18: d.ESGgirder18 ,
+               SampleIndex: dateAndSampleIndexStringToMilliseconds(
+                 d.Time,
+                 d.SampleIndex)
+             };
+    }));
+    initPlot(_.map(json, function (d) {
+      return { ESGgirder18: Math.random() * 5 + d.ESGgirder18,
+               SampleIndex: dateAndSampleIndexStringToMilliseconds(
+                 d.Time,
+                 d.SampleIndex)
+             };
+    }));
+});
+
+// SERVER COMMUNICATIONS }}}
+
 //{{{ OFFLINE DEMO
 
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: make this based on the server communication, instead of a time to wait.
-//setTimeout(rundemo, 1500);
-rundemo();
+setTimeout(rundemo, 1500);
+//rundemo();
 
 // TODO: put this function in a library for both the server and client to access
 function dateStringToMilliseconds (dateStr) {
@@ -342,11 +349,6 @@ function rundemo() {
 
     //initPlot(json);
     initPlot(_.map(json, function (d) {
-      //console.log ({ ESGgirder18: d.ESGgirder18 ,
-      //         SampleIndex: dateAndSampleIndexStringToMilliseconds(
-      //           d.Time,
-      //           d.SampleIndex)
-      //       }.SampleIndex);
       return { ESGgirder18: d.ESGgirder18 ,
                SampleIndex: dateAndSampleIndexStringToMilliseconds(
                  d.Time,
