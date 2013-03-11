@@ -7,7 +7,10 @@
 
 // {{{ CONSTANTS
 var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
-var MAX_NUMBER_OF_BIN_LEVELS = 10; // TODO: phase this out (preferable) OR set it as a really high number
+var MAX_NUMBER_OF_BIN_LEVELS = 10;
+  // TODO: phase this out (preferable) OR set it as a really high number
+var TIME_CONTEXT_VERTICAL_EACH = 20;
+  // vertical size of each section of the user time context system
 // CONSTANTS }}}
 
 // {{{ HELPER FUNCTIONS
@@ -489,6 +492,14 @@ var binTheDataWithFunction = function (bin, curLevel, key, func) {
   return bDat;
 };
 
+// return an array of labels to be put in the user time context box
+var getTimeContextLabels = function () {
+  var result = [];
+  result = ["one", "two"];
+  // TODO:
+  return result;
+}
+
 // HELPER FUNCTIONS }}}
 
 var binnedLineChart = function (data, dataRequester, uniqueID) {
@@ -511,6 +522,9 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var whichLinesToRender = ['average', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
 
+  var showTimeContext = true;
+  var timeContextVerticalSpace = 0;
+
   var transitionDuration = 500;
   var easingMethod = 'cubic-in-out';
 
@@ -524,6 +538,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var yScale;
   var previousXScale; // used for rendering transitions
   var previousLevelToRender; // used for rendering transitions;
+  var timeContextContainer;
 
   var chart; // the svg element (?)
   var paths;
@@ -834,10 +849,16 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       selection
         .attr("width", width);
 
+      //Render the vertical requirements for time context system.
+      if (showTimeContext) {
+        var timeContextLabels = getTimeContextLabels();
+        timeContextVerticalSpace = timeContextLabels.length * TIME_CONTEXT_VERTICAL_EACH;
+      }
+
       //Set the chart's dimensions
       chart
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
+        .attr("height", height + margin.top + margin.bottom + timeContextVerticalSpace);
 
       //Allow dragging and zooming.
       //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
@@ -849,14 +870,12 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         //.transition().duration(transitionDuration)
         .attr("width", width)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .attr("height", document.getElementById("chartContainer").offsetHeight); // TODO: this is a hack:
-          // it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
-          // should be .attr("height", height);
+        .attr("height", height);
 
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
       paths
-        .attr("clip-path", "url(#clip" + uniqueID + ")") // Firefox issue: We're using the same "clip" id more than once; once for each bridgeChart that exists. :S
+        .attr("clip-path", "url(#clip" + uniqueID + ")")
         .attr("class", "paths")
         .attr("height", height);
 
@@ -943,6 +962,53 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       }
       // AXES }}}
 
+      //{{{ TIME CONTEXT
+      if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
+      if (showTimeContext) {
+        // Draw Time Context
+        var timeContextSelection = timeContextContainer.selectAll("text")
+          .data(timeContextLabels);
+        timeContextSelection.enter().append("text")
+          .text(function (d) { console.log(d); return d; })
+          .attr("x", margin.left)
+          .attr("y", function (d, i) { return (i+1) * TIME_CONTEXT_VERTICAL_EACH; });
+
+        xAxis = d3.svg.axis()
+          //.tickSize(6)
+          .tickFormat(msToCenturyTickFormat)
+          .tickValues(msToCenturyTickValues(xScale, width))
+          .scale(xScale).orient("bottom");
+
+        if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
+        xAxisContainer.attr("class", "x axis")
+          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+          //.attr("transform", "translate(" + margin.left + "," + height + ")");
+        if (transitionNextTime) {
+          xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+        } else {
+          xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
+        }
+
+        yAxis = d3.svg.axis()
+          .scale(yScale)
+          .ticks(3)
+          .tickSubdivide(true)
+          .tickSize(width, 0, 0) // major, minor, end
+          .orient("left");
+
+        if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
+        yAxisContainer.attr("class", "y axis")
+          .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
+          //.attr("transform", "translate(" + margin.left + "," + height + ")");
+        yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
+
+        if (transitionNextTime) {
+          // So that this only happens once per button click
+          transitionNextTime = false;
+        }
+      }
+      // TIME CONTEXT }}}
+
     });
   };
 
@@ -956,7 +1022,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   };
 
   my.height = function (value) {
-    if (!arguments.length) return height;
+    if (!arguments.length) return (height + timeContextVerticalSpace);
     if (height !== value) my.reRenderTheNextTime(true);
     height = value;
     return my;
@@ -1029,12 +1095,13 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   }
 
   my.update = function (reRender) {
-    if (!arguments.length) {
-      my(slctn);
-    } else {
-      //my.reRenderTheNextTime(reRender);
-      my(slctn);
-    }
+    my(slctn);
+  };
+
+  my.showTimeContext = function (show) {
+    if (!arguments.length) return showTimeContext;
+    showTimeContext = show;
+    return my;
   };
 
   // TODO: make this independent of the actual HTML. Do it through bridgecharts.js instead
