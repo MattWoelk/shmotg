@@ -40,7 +40,7 @@ d3.select("#scrollright").on("click", scrollright);
 var plots = []; //an array of all plots
 
 // TODO: sync this with the one in bridgeChart.js
-var margin = {top: 10, right: 10, bottom: 25, left: 40};
+var margin = {top: 20, right: 10, bottom: 25, left: 40};
 
 var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
@@ -72,7 +72,6 @@ var getTotalChartHeight = function () {
 }
 
 var redraw = function () {
-  console.log("total height: " + getTotalChartHeight());
   plots.forEach(function (plt) {
     plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
   });
@@ -96,14 +95,18 @@ function transitionAllNextTime() {
 
 var uniqueID = 0;
 
-function initPlot(data) {
+function initPlot(data, first) {
   var plot = binnedLineChart(data, "TODO-SERVER", uniqueID);
   uniqueID = uniqueID + 1;
   plot.xScale(xScale.copy());
 
-  var pl = d3.select("#charts").append("g").call(plot);
+  var pl = d3.select("#charts").append("svg").call(plot);
 
-  plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).marginTop(120*plots.length + 10).update();
+  if (first) {
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(true).update();
+  } else {
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(false).update();
+  }
 
   plots.push(plot);
 
@@ -291,7 +294,7 @@ socket.on('news', function (data) {
                  d.Time,
                  d.SampleIndex)
              };
-    }));
+    }), true);
     initPlot(_.map(json, function (d) {
       return { ESGgirder18: Math.random() * 5 + d.ESGgirder18,
                SampleIndex: dateAndSampleIndexStringToMilliseconds(
@@ -345,7 +348,7 @@ function rundemo() {
                  d.Time,
                  d.SampleIndex)
              };
-    }));
+    }), true);
   });
 }
 

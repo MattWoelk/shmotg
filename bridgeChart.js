@@ -9,7 +9,7 @@
 var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
 var MAX_NUMBER_OF_BIN_LEVELS = 10;
   // TODO: phase this out (preferable) OR set it as a really high number
-var TIME_CONTEXT_VERTICAL_EACH = 20;
+var TIME_CONTEXT_VERTICAL_EACH = 25;
   // vertical size of each section of the user time context system
 // CONSTANTS }}}
 
@@ -451,8 +451,8 @@ function msToCenturyTickFormat(ti) {
      [ d3.time.format("%Y")    , function() { return true; }                 ],
      [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
      [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
-     [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
-     [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }      ],
+     [ d3.time.format("%H %p") , function(d) { return d.getHours(); }        ],
+     [ d3.time.format("%H:%M") , function(d) { return d.getMinutes(); }      ],
      [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }      ],
      [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
     ]);
@@ -492,12 +492,38 @@ var binTheDataWithFunction = function (bin, curLevel, key, func) {
   return bDat;
 };
 
-// return an array of labels to be put in the user time context box
-var getTimeContextLabels = function () {
-  var result = [];
-  result = ["one", "two"];
-  // TODO:
-  return result;
+// return a string label to be put in the user time context area
+var getTimeContextString = function (scal, show) {
+  if (!show) return [];
+
+  var result = "";
+
+  var timeContextFormatSpecifier = [
+    { fun: function (a,b) { return (b - a) < 2 * times.y;  }, formIf: "%Y",  formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.mo; }, formIf: " %b", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.d;  }, formIf: " %d", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.h;  }, formIf: " %H", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.m;  }, formIf: ":%M", formIfNot: "h"},
+    { fun: function (a,b) { return (b - a) < 2 * times.s;  }, formIf: ":%Ss", formIfNot: ""},
+    // milliseconds would be unnecessary for our purposes
+  ];
+
+  var d0 = scal.domain()[0];
+  var d1 = scal.domain()[1];
+  var doneNow = false;
+
+  parseDate = d3.time.format(_.reduce(timeContextFormatSpecifier, function (str, dat) {
+    if ( doneNow ) return str;
+    if (dat.fun(d0, d1)) {
+      return str + dat.formIf;
+    } else {
+      doneNow = true;
+      return str + dat.formIfNot;
+    }
+  }, ""));
+
+  result = parseDate(dt(d0));
+  return [ result ];
 }
 
 // HELPER FUNCTIONS }}}
@@ -512,6 +538,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   // TODO: sync this with the one in bridgecharts.js
   var margin = {top: 10, right: 27, bottom: 25, left: 40};
 
+  // the height of the chart by itself (not including axes or time context)
   var height = 150 - margin.top - margin.bottom;
 
   // the width of the chart, including margins
@@ -523,7 +550,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var interpolationMethod = ['linear'];
 
   var showTimeContext = true;
-  var timeContextVerticalSpace = 0;
 
   var transitionDuration = 500;
   var easingMethod = 'cubic-in-out';
@@ -620,7 +646,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var testTime = testTime.substring(0,24);
   var testScale = d3.time.scale()
     .range([0, width]);
-  var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
+  //var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
   //console.log(parseDate(testTime));
   var samplesPerSecond = 200;
   var samplesPerMillisecond = 1000/samplesPerSecond;
@@ -849,16 +875,10 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       selection
         .attr("width", width);
 
-      //Render the vertical requirements for time context system.
-      if (showTimeContext) {
-        var timeContextLabels = getTimeContextLabels();
-        timeContextVerticalSpace = timeContextLabels.length * TIME_CONTEXT_VERTICAL_EACH;
-      }
-
       //Set the chart's dimensions
       chart
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom + timeContextVerticalSpace);
+        .attr("height", height + margin.top + margin.bottom);
 
       //Allow dragging and zooming.
       //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
@@ -964,49 +984,58 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
       //{{{ TIME CONTEXT
       if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
-      if (showTimeContext) {
-        // Draw Time Context
-        var timeContextSelection = timeContextContainer.selectAll("text")
-          .data(timeContextLabels);
-        timeContextSelection.enter().append("text")
-          .text(function (d) { console.log(d); return d; })
-          .attr("x", margin.left)
-          .attr("y", function (d, i) { return (i+1) * TIME_CONTEXT_VERTICAL_EACH; });
 
-        xAxis = d3.svg.axis()
-          //.tickSize(6)
-          .tickFormat(msToCenturyTickFormat)
-          .tickValues(msToCenturyTickValues(xScale, width))
-          .scale(xScale).orient("bottom");
+      // Draw Time Context
+      var timeContextSelection = timeContextContainer.selectAll("text")
+        .data(getTimeContextString(xScale, showTimeContext));
 
-        if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
-        xAxisContainer.attr("class", "x axis")
-          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-          //.attr("transform", "translate(" + margin.left + "," + height + ")");
-        if (transitionNextTime) {
-          xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-        } else {
-          xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
-        }
+      // enter
+      timeContextSelection.enter().append("text");
 
-        yAxis = d3.svg.axis()
-          .scale(yScale)
-          .ticks(3)
-          .tickSubdivide(true)
-          .tickSize(width, 0, 0) // major, minor, end
-          .orient("left");
+      // update
+      timeContextSelection
+        .text(function (d) { return d; })
+        .attr("x", margin.left)
+        .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
 
-        if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
-        yAxisContainer.attr("class", "y axis")
-          .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
-          //.attr("transform", "translate(" + margin.left + "," + height + ")");
-        yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
+      // exit
+      timeContextSelection.exit()
+        .remove();
 
-        if (transitionNextTime) {
-          // So that this only happens once per button click
-          transitionNextTime = false;
-        }
+      xAxis = d3.svg.axis()
+        //.tickSize(6)
+        .tickFormat(msToCenturyTickFormat)
+        .tickValues(msToCenturyTickValues(xScale, width))
+        .scale(xScale).orient("bottom");
+
+      if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
+      xAxisContainer.attr("class", "x axis")
+        .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+        //.attr("transform", "translate(" + margin.left + "," + height + ")");
+      if (transitionNextTime) {
+        xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+      } else {
+        xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
       }
+
+      yAxis = d3.svg.axis()
+        .scale(yScale)
+        .ticks(3)
+        .tickSubdivide(true)
+        .tickSize(width, 0, 0) // major, minor, end
+        .orient("left");
+
+      if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
+      yAxisContainer.attr("class", "y axis")
+        .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
+        //.attr("transform", "translate(" + margin.left + "," + height + ")");
+      yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
+
+      if (transitionNextTime) {
+        // So that this only happens once per button click
+        transitionNextTime = false;
+      }
+
       // TIME CONTEXT }}}
 
     });
@@ -1021,17 +1050,12 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     return my;
   };
 
+  // set the size of the chart
+  // or return the size that the chart + everything with it takes up
   my.height = function (value) {
-    if (!arguments.length) return (height + timeContextVerticalSpace);
+    if (!arguments.length) return (height + margin.bottom + margin.top);
     if (height !== value) my.reRenderTheNextTime(true);
     height = value;
-    return my;
-  };
-
-  my.marginTop = function (value) {
-    if (!arguments.length) return margin.top;
-    if (margin.top !== value) my.reRenderTheNextTime(true);
-    margin.top = value;
     return my;
   };
 
@@ -1100,7 +1124,10 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
   my.showTimeContext = function (show) {
     if (!arguments.length) return showTimeContext;
+
     showTimeContext = show;
+    margin.top = margin.top + (showTimeContext ? TIME_CONTEXT_VERTICAL_EACH : 0);
+
     return my;
   };
 
