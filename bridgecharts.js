@@ -63,16 +63,25 @@ function setExtents() {
   return [Math.pow(2, -30), Math.pow(2,4)];
 }
 
+var getTotalChartHeight = function () {
+  var total = 0;
+  _.each(plots, function (d, i) {
+    total = total + d.height();
+  });
+  return total;
+}
+
 var redraw = function () {
+  console.log("total height: " + getTotalChartHeight());
   plots.forEach(function (plt) {
     plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
   });
 
   d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
   zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-          .attr("height", document.getElementById("chartContainer").offsetHeight);
+          .attr("height", getTotalChartHeight());
   zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-           .attr("height", document.getElementById("chartContainer").offsetHeight)
+           .attr("height", getTotalChartHeight())
            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   //update the zoom for the new plot size
@@ -100,14 +109,15 @@ function initPlot(data) {
 
   redraw();
 
-  d3.select("#charts").attr("height", 120*plots.length).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
+  //d3.select("#charts").attr("height", 120*plots.length).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
+  d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
 
   zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-         .attr("height", document.getElementById("chartContainer").offsetHeight)
+         .attr("height", getTotalChartHeight())
          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-          .attr("height", document.getElementById("chartContainer").offsetHeight - margin.top)
+          .attr("height", getTotalChartHeight() - margin.top)
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
   zoomRect.attr("fill", "rgba(0,0,0,0)")
