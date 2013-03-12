@@ -326,6 +326,11 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
         sel.attr("transform", transformScale(scal, renderScale, mar, false))
           //.attr("opacity", function (d) { return bin[d.type].opacity; });
       }
+    } else {
+      sel
+        .attr("opacity", function (d) { return bin[d.type].opacity; })
+        .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
+        .attr("transform", transformScale(scal, renderScale, mar, false));
     }
     //sel
     //  .attr("opacity", function (d) { return bin[d.type].opacity; })
