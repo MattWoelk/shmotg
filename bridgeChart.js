@@ -308,31 +308,29 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
       console.log("REMOVING");
       //sel.remove();
       //enter (forced)
+      // TODO: figure out why this is working ..........
       sel
-        .attr("class", "posPath")
-        .attr("fill", fill)
-        .style("stroke-width", strokeW)
+        //.attr("class", "posPath")
+        //.attr("fill", fill)
+        //.style("stroke-width", strokeW)
         .attr("d", function (d, i) { return d0s[d.type][d.which]; })
-        .style("stroke", stroke);
+        //.style("stroke", stroke);
 
       if (toTransition) {
         sel.attr("transform", transformScale(scalOld, renderScale, mar, false))
-          .attr("opacity", 0)
+          //.attr("opacity", 0)
           .transition().ease(ease).duration(dur)
           .attr("transform", transformScale(scal, renderScale, mar, false))
-          .attr("opacity", function (d) { return bin[d.type].opacity; });
+          //.attr("opacity", function (d) { return bin[d.type].opacity; });
       } else {
         sel.attr("transform", transformScale(scal, renderScale, mar, false))
-          .attr("opacity", function (d) { return bin[d.type].opacity; });
+          //.attr("opacity", function (d) { return bin[d.type].opacity; });
       }
     }
     //sel
     //  .attr("opacity", function (d) { return bin[d.type].opacity; })
     //  .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
     //  .attr("transform", transformScale(scal, renderScale, mar, false));
-    if (toTransition) {
-      sel.attr("opacity", 0.5);
-    }
 //  }
 
 
