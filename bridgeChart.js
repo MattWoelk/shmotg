@@ -958,6 +958,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       if (transitionNextTime) {
+        console.log("TRANS");
         xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
       } else {
         xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
@@ -975,11 +976,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
-
-      if (transitionNextTime) {
-        // So that this only happens once per button click
-        transitionNextTime = false;
-      }
       // AXES }}}
 
       //{{{ TIME CONTEXT
@@ -1002,41 +998,14 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       timeContextSelection.exit()
         .remove();
 
-      xAxis = d3.svg.axis()
-        //.tickSize(6)
-        .tickFormat(msToCenturyTickFormat)
-        .tickValues(msToCenturyTickValues(xScale, width))
-        .scale(xScale).orient("bottom");
+      // TIME CONTEXT }}}
 
-      if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
-      xAxisContainer.attr("class", "x axis")
-        .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-        //.attr("transform", "translate(" + margin.left + "," + height + ")");
-      if (transitionNextTime) {
-        xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-      } else {
-        xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
-      }
-
-      yAxis = d3.svg.axis()
-        .scale(yScale)
-        .ticks(3)
-        .tickSubdivide(true)
-        .tickSize(width, 0, 0) // major, minor, end
-        .orient("left");
-
-      if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
-      yAxisContainer.attr("class", "y axis")
-        .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
-        //.attr("transform", "translate(" + margin.left + "," + height + ")");
-      yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
-
+      //{{{ TRANSITION NEXT TIME
       if (transitionNextTime) {
         // So that this only happens once per button click
         transitionNextTime = false;
       }
-
-      // TIME CONTEXT }}}
+      // TRANSITION NEXT TIME }}}
 
     });
   };
