@@ -67,11 +67,16 @@ function getScaleValueTimesDomainZero (scal) {
 }
 
 // This is the transform which is done on the data after it has been rendered.
-function transformScale(scal, oldScal, mar) {
+function transformScale(scal, oldScal, mar, inverse) {
   var pixelsPerSample = getScaleValue(scal);
   var xS = getScaleValue(scal);
 
-  var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
+  if (inverse) {
+    var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
+    console.log(Math.round(tx), oldScal.domain()[0] - scal.domain()[0], oldScal.domain()[0] % 10000, scal.domain()[0] % 10000);
+  } else {
+    var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
+  }
   var ty = mar.top; // translate y value
 
   // See renderFunction for the inverse:
@@ -278,16 +283,57 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, oldxScale, strokeW) {
+function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renderScale, strokeW) {
   //update
-  var sels = toTransition ?
-    sel.transition().duration(dur).ease(ease) :
-    sel;
+  // TODO: look at quartileobject and the other one to see how keys are being made
+  //       - perhaps they should have different keys, so that this isn't a transition at all ???
+//  if (toTransition) {
+//    sel//.transition().duration(dur).ease(ease)
+       // scal, scal               --> moves wrong way -->
+       // scal, scalOld            --> doesn't move    -->
+       // scal, renderScale        --> moves wrong way -->
+       // scalOld, scal            --> moves wrong way -->
+       // scalOld, scalOld         --> moves wrong way -->
+       // scalOld, renderScale     --> moves wrong way -->
+       // renderScale, scal        --> moves wrong way -->
+       // renderScale, scalOld     --> doesn't move    --> -1, +2
+       // renderScale, renderScale --> moves wrong way -->
+//       .transition().duration(0)
+//       .attr("d", function (d, i) { return d0s[d.type][d.which]; })
+//       .attr("transform", transformScale(renderScale, scal, mar, false))
+//       .transition().duration(dur).delay(dur)
+//       .attr("transform", transformScale(scal, renderScale, mar, false));
+//  } else {
+    if (toTransition) {
+      console.log("REMOVING");
+      //sel.remove();
+      //enter (forced)
+      sel
+        .attr("class", "posPath")
+        .attr("fill", fill)
+        .style("stroke-width", strokeW)
+        .attr("d", function (d, i) { return d0s[d.type][d.which]; })
+        .style("stroke", stroke);
 
-  sels
-    .attr("d", function (d, i) { return d0s[d.type][d.which]; })
-    .attr("opacity", function (d) { return bin[d.type].opacity; })
-    .attr("transform", transformScale(scal, oldxScale, mar));
+      if (toTransition) {
+        sel.attr("transform", transformScale(scalOld, renderScale, mar, false))
+          .attr("opacity", 0)
+          .transition().ease(ease).duration(dur)
+          .attr("transform", transformScale(scal, renderScale, mar, false))
+          .attr("opacity", function (d) { return bin[d.type].opacity; });
+      } else {
+        sel.attr("transform", transformScale(scal, renderScale, mar, false))
+          .attr("opacity", function (d) { return bin[d.type].opacity; });
+      }
+    }
+    //sel
+    //  .attr("opacity", function (d) { return bin[d.type].opacity; })
+    //  .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
+    //  .attr("transform", transformScale(scal, renderScale, mar, false));
+    if (toTransition) {
+      sel.attr("opacity", 0.5);
+    }
+//  }
 
 
   //enter
@@ -299,13 +345,13 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     .style("stroke", stroke);
 
   if (toTransition) {
-    sels.attr("transform", transformScale(scalOld, oldxScale, mar))
+    sels.attr("transform", transformScale(scalOld, renderScale, mar, false))
       .attr("opacity", 0)
       .transition().ease(ease).duration(dur)
-        .attr("transform", transformScale(scal, oldxScale, mar))
+        .attr("transform", transformScale(scal, renderScale, mar, false))
         .attr("opacity", function (d) { return bin[d.type].opacity; });
   } else {
-    sels.attr("transform", transformScale(scal, oldxScale, mar))
+    sels.attr("transform", transformScale(scal, renderScale, mar, false))
       .attr("opacity", function (d) { return bin[d.type].opacity; });
   }
 
@@ -316,7 +362,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     sel.exit();
 
   sels
-    .attr("transform", transformScale(scal, scalOld, mar))
+    .attr("transform", transformScale(scal, scalOld, mar, false))
     .attr("opacity", 0)
     .remove();
 }
@@ -688,11 +734,10 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var renderFunction = function (d) {
     // See transformScale for the inverse.
 
-    oldxScale = xScale.copy();
-    var oldxS = getScaleValue(oldxScale);
-    //console.log("renderFunction, " + d.date + ", " + oldxS);
+    // Store this for later use.
+    renderScale = xScale.copy();
 
-    return (d.date - oldxScale.domain()[0]) * oldxS;
+    return (d.date - renderScale.domain()[0]) * getScaleValue(renderScale);
   };
 
   // This stores the scale at which the d0s were
@@ -701,7 +746,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   // TODO: make this what the scale SHOULD be
   //       for the specific level and maxBinRenderSize
   //       then we won't need to store state like this
-  var oldxScale;
+  var renderScale;
 
   // HELPER FUNCTIONS }}}
 
@@ -905,6 +950,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
       //Make and render the Positive lines.
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
+      //console.log(dataObjectForKeyFanciness);
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) { return d.type + d.which + d.interpolate; });
 
@@ -919,15 +965,17 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
                    renderedD0s,
                    binData,
                    margin,
-                   oldxScale,
+                   renderScale,
                    strokeWidth);
 
       // LINES }}}
 
       //{{{ AREAS
       //make and render the area
+      var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
+      //console.log(quartileObjectForKeyFanciness);
       currentSelection = paths.selectAll(".posArea")
-        .data(makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod), function (d) {return d.type + d.which + d.interpolate; });
+        .data(quartileObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
 
       drawElements(currentSelection,
                    function (d) { return binData[d.type].color; },
@@ -940,7 +988,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
                    renderedD0s,
                    binData,
                    margin,
-                   oldxScale,
+                   renderScale,
                    strokeWidth);
 
       // AREAS }}}
@@ -958,7 +1006,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       if (transitionNextTime) {
-        console.log("TRANS");
         xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
       } else {
         xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
