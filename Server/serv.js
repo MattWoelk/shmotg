@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
+var d3 = require("d3");
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
@@ -31,6 +32,9 @@ var handler = function (req, res) {
 // because JSON.stringify() uses it to change
 // the format of our dates when they're converted
 // back to strings
+// NOTE: this is not actually required anymore
+// because we're sending milliseconds instead of
+// date strings, but it's nice to have around. :)
 Date.prototype.toJSON = function (key) {
   console.log("key: ");
   console.log(key, this);
@@ -65,7 +69,7 @@ var girder = 1;
 //query = 'SELECT NumStartTime_DD, NumEndTime_DD, NumStartTime_CC, NumStartTime_CC, ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 15';
 //query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
 //query = 'SELECT * FROM SPBRTData_0A LIMIT 10'; // grab 10 entries (LIMIT 10)
-query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 10';
+query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
 
 //-- TODO: new data section --//
 //var dat = Date.parse("Thu, 01 Jan 1970 00:00:00 GMT-0400");
@@ -76,11 +80,39 @@ query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LI
 //console.log(dates);
 //----------------------------//
 
+function dateStringToMilliseconds (dateStr) {
+  return d3.time.format("%a %b %d %Y %H:%M:%S")
+    .parse(dateStr.substring(0, 24))
+    .getTime();
+}
+
+function samplesToMilliseconds (sampleIndex) {
+  var samplesPerSecond = 200;
+  var msPerSample = 1000/samplesPerSecond;
+  var mils = sampleIndex * msPerSample;
+  return mils;
+}
+
+function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
+  return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
+}
+
 mysqlconnection.query(query, function (err, rows, fields) {
   if (err) throw err;
   console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
-  var send_to_user = JSON.stringify(rows);
-  console.log(send_to_user);
+
+  var send_object = rows.map(function (d) {
+    return { val: d.ESGgirder18 ,
+             ms: dateAndSampleIndexStringToMilliseconds(
+               d.Time + "",
+               d.SampleIndex)
+           };
+  });
+
+  var send_to_user = JSON.stringify(send_object);
+
+  //console.log(send_to_user); // to print out test file
+
   io.sockets.on('connection', function (socket) {
     socket.emit('news', send_to_user);
     socket.on('ack', function (data) {

@@ -670,11 +670,11 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   //{{{ POPULATE THE BINNED DATAS (binData)
 
   // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
-  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: num.SampleIndex }; });
+  binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms }; });
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
     // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
-    binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.ESGgirder18, date: num.SampleIndex}; });
+    binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms}; });
     var j = 0;
     //console.log(_.map(data, function (num) { return {val: num};}));
     for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // add a new object for each bin level
@@ -686,7 +686,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
       // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
-      binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.ESGgirder18, date: num.SampleIndex }; });
+      binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.val, date: num.ms }; });
       binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key]['func']);
     }
   }
