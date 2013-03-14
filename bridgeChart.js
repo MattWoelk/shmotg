@@ -315,7 +315,6 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
       .attr("opacity", function (d) { return bin[d.type].opacity; });
   }
 
-
   //exit
   var sels = toTransition ?
     sel.exit().transition().ease(ease).duration(dur) :
