@@ -7,7 +7,10 @@
 
 // {{{ CONSTANTS
 var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
-var MAX_NUMBER_OF_BIN_LEVELS = 10; // TODO: phase this out (preferable) OR set it as a really high number
+var MAX_NUMBER_OF_BIN_LEVELS = 10;
+  // TODO: phase this out (preferable) OR set it as a really high number
+var TIME_CONTEXT_VERTICAL_EACH = 25;
+  // vertical size of each section of the user time context system
 // CONSTANTS }}}
 
 // {{{ HELPER FUNCTIONS
@@ -64,11 +67,16 @@ function getScaleValueTimesDomainZero (scal) {
 }
 
 // This is the transform which is done on the data after it has been rendered.
-function transformScale(scal, oldScal, mar) {
+function transformScale(scal, oldScal, mar, inverse) {
   var pixelsPerSample = getScaleValue(scal);
   var xS = getScaleValue(scal);
 
-  var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
+  if (inverse) {
+    var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
+    console.log(Math.round(tx), oldScal.domain()[0] - scal.domain()[0], oldScal.domain()[0] % 10000, scal.domain()[0] % 10000);
+  } else {
+    var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
+  }
   var ty = mar.top; // translate y value
 
   // See renderFunction for the inverse:
@@ -275,17 +283,18 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, oldxScale, strokeW) {
+function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renderScale, strokeW) {
   //update
-  var sels = toTransition ?
-    sel.transition().duration(dur).ease(ease) :
-    sel;
-
-  sels
-    .attr("d", function (d, i) { return d0s[d.type][d.which]; })
-    .attr("opacity", function (d) { return bin[d.type].opacity; })
-    .attr("transform", transformScale(scal, oldxScale, mar));
-
+  if (toTransition) {
+    sel.attr("transform", transformScale(scalOld, renderScale, mar, false))
+       .attr("d", function (d, i) { return d0s[d.type][d.which]; })
+       .transition().ease(ease).duration(dur)
+       .attr("transform", transformScale(scal, renderScale, mar, false));
+  } else {
+    sel.attr("opacity", function (d) { return bin[d.type].opacity; })
+       .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
+       .attr("transform", transformScale(scal, renderScale, mar, false));
+  }
 
   //enter
   var sels = sel.enter().append("path")
@@ -296,13 +305,13 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     .style("stroke", stroke);
 
   if (toTransition) {
-    sels.attr("transform", transformScale(scalOld, oldxScale, mar))
+    sels.attr("transform", transformScale(scalOld, renderScale, mar, false))
       .attr("opacity", 0)
       .transition().ease(ease).duration(dur)
-        .attr("transform", transformScale(scal, oldxScale, mar))
+        .attr("transform", transformScale(scal, renderScale, mar, false))
         .attr("opacity", function (d) { return bin[d.type].opacity; });
   } else {
-    sels.attr("transform", transformScale(scal, oldxScale, mar))
+    sels.attr("transform", transformScale(scal, renderScale, mar, false))
       .attr("opacity", function (d) { return bin[d.type].opacity; });
   }
 
@@ -313,7 +322,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     sel.exit();
 
   sels
-    .attr("transform", transformScale(scal, scalOld, mar))
+    .attr("transform", transformScale(scal, scalOld, mar, false))
     .attr("opacity", 0)
     .remove();
 }
@@ -448,8 +457,8 @@ function msToCenturyTickFormat(ti) {
      [ d3.time.format("%Y")    , function() { return true; }                 ],
      [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
      [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
-     [ d3.time.format("%I %p") , function(d) { return d.getHours(); }        ],
-     [ d3.time.format("%I:%M") , function(d) { return d.getMinutes(); }      ],
+     [ d3.time.format("%H %p") , function(d) { return d.getHours(); }        ],
+     [ d3.time.format("%H:%M") , function(d) { return d.getMinutes(); }      ],
      [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }      ],
      [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
     ]);
@@ -489,6 +498,40 @@ var binTheDataWithFunction = function (bin, curLevel, key, func) {
   return bDat;
 };
 
+// return a string label to be put in the user time context area
+var getTimeContextString = function (scal, show) {
+  if (!show) return [];
+
+  var result = "";
+
+  var timeContextFormatSpecifier = [
+    { fun: function (a,b) { return (b - a) < 2 * times.y;  }, formIf: "%Y",  formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.mo; }, formIf: " %b", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.d;  }, formIf: " %d", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.h;  }, formIf: " %H", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.m;  }, formIf: ":%M", formIfNot: "h"},
+    { fun: function (a,b) { return (b - a) < 2 * times.s;  }, formIf: ":%Ss", formIfNot: ""},
+    // milliseconds would be unnecessary for our purposes
+  ];
+
+  var d0 = scal.domain()[0];
+  var d1 = scal.domain()[1];
+  var doneNow = false;
+
+  parseDate = d3.time.format(_.reduce(timeContextFormatSpecifier, function (str, dat) {
+    if ( doneNow ) return str;
+    if (dat.fun(d0, d1)) {
+      return str + dat.formIf;
+    } else {
+      doneNow = true;
+      return str + dat.formIfNot;
+    }
+  }, ""));
+
+  result = parseDate(dt(d0));
+  return [ result ];
+}
+
 // HELPER FUNCTIONS }}}
 
 var binnedLineChart = function (data, dataRequester, uniqueID) {
@@ -501,6 +544,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   // TODO: sync this with the one in bridgecharts.js
   var margin = {top: 10, right: 27, bottom: 25, left: 40};
 
+  // the height of the chart by itself (not including axes or time context)
   var height = 150 - margin.top - margin.bottom;
 
   // the width of the chart, including margins
@@ -510,6 +554,8 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var whichLevelToRender = 0;
   var whichLinesToRender = ['average', 'average', 'maxes', 'mins'];
   var interpolationMethod = ['linear'];
+
+  var showTimeContext = true;
 
   var transitionDuration = 500;
   var easingMethod = 'cubic-in-out';
@@ -524,6 +570,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var yScale;
   var previousXScale; // used for rendering transitions
   var previousLevelToRender; // used for rendering transitions;
+  var timeContextContainer;
 
   var chart; // the svg element (?)
   var paths;
@@ -605,7 +652,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var testTime = testTime.substring(0,24);
   var testScale = d3.time.scale()
     .range([0, width]);
-  var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
+  //var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
   //console.log(parseDate(testTime));
   var samplesPerSecond = 200;
   var samplesPerMillisecond = 1000/samplesPerSecond;
@@ -647,11 +694,10 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var renderFunction = function (d) {
     // See transformScale for the inverse.
 
-    oldxScale = xScale.copy();
-    var oldxS = getScaleValue(oldxScale);
-    //console.log("renderFunction, " + d.date + ", " + oldxS);
+    // Store this for later use.
+    renderScale = xScale.copy();
 
-    return (d.date - oldxScale.domain()[0]) * oldxS;
+    return (d.date - renderScale.domain()[0]) * getScaleValue(renderScale);
   };
 
   // This stores the scale at which the d0s were
@@ -660,8 +706,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   // TODO: make this what the scale SHOULD be
   //       for the specific level and maxBinRenderSize
   //       then we won't need to store state like this
-  var oldxScale;
-  //var oldxScale = d3.scale.linear();
+  var renderScale;
 
   // HELPER FUNCTIONS }}}
 
@@ -850,14 +895,12 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         //.transition().duration(transitionDuration)
         .attr("width", width)
         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-        .attr("height", document.getElementById("chartContainer").offsetHeight); // TODO: this is a hack:
-          // it makes every clip path as tall as the container, so that firefox can always choose the first one and it'll work.
-          // should be .attr("height", height);
+        .attr("height", height);
 
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
       paths
-        .attr("clip-path", "url(#clip" + uniqueID + ")") // Firefox issue: We're using the same "clip" id more than once; once for each bridgeChart that exists. :S
+        .attr("clip-path", "url(#clip" + uniqueID + ")")
         .attr("class", "paths")
         .attr("height", height);
 
@@ -867,6 +910,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
       //Make and render the Positive lines.
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
+      //console.log(dataObjectForKeyFanciness);
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) { return d.type + d.which + d.interpolate; });
 
@@ -881,15 +925,17 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
                    renderedD0s,
                    binData,
                    margin,
-                   oldxScale,
+                   renderScale,
                    strokeWidth);
 
       // LINES }}}
 
       //{{{ AREAS
       //make and render the area
+      var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
+      //console.log(quartileObjectForKeyFanciness);
       currentSelection = paths.selectAll(".posArea")
-        .data(makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod), function (d) {return d.type + d.which + d.interpolate; });
+        .data(quartileObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
 
       drawElements(currentSelection,
                    function (d) { return binData[d.type].color; },
@@ -902,7 +948,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
                    renderedD0s,
                    binData,
                    margin,
-                   oldxScale,
+                   renderScale,
                    strokeWidth);
 
       // AREAS }}}
@@ -937,12 +983,36 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
+      // AXES }}}
 
+      //{{{ TIME CONTEXT
+      if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
+
+      // Draw Time Context
+      var timeContextSelection = timeContextContainer.selectAll("text")
+        .data(getTimeContextString(xScale, showTimeContext));
+
+      // enter
+      timeContextSelection.enter().append("text");
+
+      // update
+      timeContextSelection
+        .text(function (d) { return d; })
+        .attr("x", margin.left)
+        .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+
+      // exit
+      timeContextSelection.exit()
+        .remove();
+
+      // TIME CONTEXT }}}
+
+      //{{{ TRANSITION NEXT TIME
       if (transitionNextTime) {
         // So that this only happens once per button click
         transitionNextTime = false;
       }
-      // AXES }}}
+      // TRANSITION NEXT TIME }}}
 
     });
   };
@@ -956,17 +1026,12 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     return my;
   };
 
+  // set the size of the chart
+  // or return the size that the chart + everything with it takes up
   my.height = function (value) {
-    if (!arguments.length) return height;
+    if (!arguments.length) return (height + margin.bottom + margin.top);
     if (height !== value) my.reRenderTheNextTime(true);
     height = value;
-    return my;
-  };
-
-  my.marginTop = function (value) {
-    if (!arguments.length) return margin.top;
-    if (margin.top !== value) my.reRenderTheNextTime(true);
-    margin.top = value;
     return my;
   };
 
@@ -1030,12 +1095,16 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   }
 
   my.update = function (reRender) {
-    if (!arguments.length) {
-      my(slctn);
-    } else {
-      //my.reRenderTheNextTime(reRender);
-      my(slctn);
-    }
+    my(slctn);
+  };
+
+  my.showTimeContext = function (show) {
+    if (!arguments.length) return showTimeContext;
+
+    showTimeContext = show;
+    margin.top = margin.top + (showTimeContext ? TIME_CONTEXT_VERTICAL_EACH : 0);
+
+    return my;
   };
 
   // TODO: make this independent of the actual HTML. Do it through bridgecharts.js instead

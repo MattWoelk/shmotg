@@ -15,6 +15,20 @@
   </head>
   <body>
 
+    <!-- Loading Animation {{{-->
+    <!-- From http://cssload.net/ -->
+    <div id="circularG">
+      <div id="circularG_1" class="circularG"> </div>
+      <div id="circularG_2" class="circularG"> </div>
+      <div id="circularG_3" class="circularG"> </div>
+      <div id="circularG_4" class="circularG"> </div>
+      <div id="circularG_5" class="circularG"> </div>
+      <div id="circularG_6" class="circularG"> </div>
+      <div id="circularG_7" class="circularG"> </div>
+      <div id="circularG_8" class="circularG"> </div>
+    </div>
+    <!--}}}-->
+
     <script type="text/javascript">
       if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
         document.write("<button id='back' onclick='history.go(-1);return true;'>back</button>");
@@ -22,7 +36,7 @@
     </script>
 
     <div id="chartContainer" style="overflow:none; width:70%; overflow:none; float:left;">
-      <svg id="charts"></svg>
+      <div id="charts"></div>
       <svg id="zoomSVG"><rect id="zoomRect" /></svg>
     </div>
     <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
@@ -89,3 +103,4 @@
   <script src="html5slider.js"></script>
 </html>
 
+<!-- vim: set foldmethod=marker: -->
