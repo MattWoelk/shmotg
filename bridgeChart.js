@@ -285,59 +285,16 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
 // scal is the scale
 function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renderScale, strokeW) {
   //update
-  // TODO: look at quartileobject and the other one to see how keys are being made
-  //       - perhaps they should have different keys, so that this isn't a transition at all ???
-//  if (toTransition) {
-//    sel//.transition().duration(dur).ease(ease)
-       // scal, scal               --> moves wrong way -->
-       // scal, scalOld            --> doesn't move    -->
-       // scal, renderScale        --> moves wrong way -->
-       // scalOld, scal            --> moves wrong way -->
-       // scalOld, scalOld         --> moves wrong way -->
-       // scalOld, renderScale     --> moves wrong way -->
-       // renderScale, scal        --> moves wrong way -->
-       // renderScale, scalOld     --> doesn't move    --> -1, +2
-       // renderScale, renderScale --> moves wrong way -->
-//       .transition().duration(0)
-//       .attr("d", function (d, i) { return d0s[d.type][d.which]; })
-//       .attr("transform", transformScale(renderScale, scal, mar, false))
-//       .transition().duration(dur).delay(dur)
-//       .attr("transform", transformScale(scal, renderScale, mar, false));
-//  } else {
-    if (toTransition) {
-      console.log("REMOVING");
-      //sel.remove();
-      //enter (forced)
-      // TODO: figure out why this is working ..........
-      sel
-        //.attr("class", "posPath")
-        //.attr("fill", fill)
-        //.style("stroke-width", strokeW)
-        .attr("d", function (d, i) { return d0s[d.type][d.which]; })
-        //.style("stroke", stroke);
-
-      if (toTransition) {
-        sel.attr("transform", transformScale(scalOld, renderScale, mar, false))
-          //.attr("opacity", 0)
-          .transition().ease(ease).duration(dur)
-          .attr("transform", transformScale(scal, renderScale, mar, false))
-          //.attr("opacity", function (d) { return bin[d.type].opacity; });
-      } else {
-        sel.attr("transform", transformScale(scal, renderScale, mar, false))
-          //.attr("opacity", function (d) { return bin[d.type].opacity; });
-      }
-    } else {
-      sel
-        .attr("opacity", function (d) { return bin[d.type].opacity; })
-        .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
-        .attr("transform", transformScale(scal, renderScale, mar, false));
-    }
-    //sel
-    //  .attr("opacity", function (d) { return bin[d.type].opacity; })
-    //  .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
-    //  .attr("transform", transformScale(scal, renderScale, mar, false));
-//  }
-
+  if (toTransition) {
+    sel.attr("transform", transformScale(scalOld, renderScale, mar, false))
+       .attr("d", function (d, i) { return d0s[d.type][d.which]; })
+       .transition().ease(ease).duration(dur)
+       .attr("transform", transformScale(scal, renderScale, mar, false));
+  } else {
+    sel.attr("opacity", function (d) { return bin[d.type].opacity; })
+       .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
+       .attr("transform", transformScale(scal, renderScale, mar, false));
+  }
 
   //enter
   var sels = sel.enter().append("path")
