@@ -284,7 +284,7 @@ socket.on('news', function (data) {
   // <-- done deleting all example plots
 
   var json = JSON.parse(data);
-  console.log(json);
+  //console.log(json);
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
