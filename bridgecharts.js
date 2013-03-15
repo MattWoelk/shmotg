@@ -284,24 +284,16 @@ socket.on('news', function (data) {
   // <-- done deleting all example plots
 
   var json = JSON.parse(data);
+  //console.log(json);
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
-    //initPlot(json);
-    initPlot(_.map(json, function (d) {
-      return { ESGgirder18: d.ESGgirder18 ,
-               SampleIndex: dateAndSampleIndexStringToMilliseconds(
-                 d.Time,
-                 d.SampleIndex)
-             };
-    }), true);
-    initPlot(_.map(json, function (d) {
-      return { ESGgirder18: Math.random() * 5 + d.ESGgirder18,
-               SampleIndex: dateAndSampleIndexStringToMilliseconds(
-                 d.Time,
-                 d.SampleIndex)
-             };
-    }));
+  initPlot(json);
+
+  initPlot(_.map(json, function (d) {
+    return { val: Math.random() * 5 + d.val,
+             ms: d.ms };
+  }));
 });
 
 // SERVER COMMUNICATIONS }}}
@@ -314,41 +306,16 @@ socket.on('news', function (data) {
 setTimeout(rundemo, 1500);
 //rundemo();
 
-// TODO: put this function in a library for both the server and client to access
-function dateStringToMilliseconds (dateStr) {
-  return d3.time.format("%a %b %d %Y %H:%M:%S")
-    .parse(dateStr.substring(0, 24))
-    .getTime();
-}
-
-// TODO: put this function in a library for both the server and client to access
-function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
-  return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
-}
-
-function samplesToMilliseconds (sampleIndex) {
-  var samplesPerSecond = 200;
-  var msPerSample = 1000/samplesPerSecond;
-  var mils = sampleIndex * msPerSample;
-  return mils;
-}
-
 function rundemo() {
   d3.json("Server/esg_time.js", function (error, data) {
     if (error || plots.length > 0) {
       return;
     }
+    var json = data.map(function (d) {
+      return {val: d.ESGgirder18, ms: d.ms};
+    });
 
-    var json = data;
-
-    //initPlot(json);
-    initPlot(_.map(json, function (d) {
-      return { ESGgirder18: d.ESGgirder18 ,
-               SampleIndex: dateAndSampleIndexStringToMilliseconds(
-                 d.Time,
-                 d.SampleIndex)
-             };
-    }), true);
+    initPlot(json);
   });
 }
 
