@@ -8,6 +8,13 @@
 //   see customTimeFormat            //
 // - Depends on underscore.js, d3.js //
 ///////////////////////////////////////
+// USAGE
+// ----------------
+// xAxis = d3.svg.axis()
+//   .tickFormat(msToCenturyTickFormat)
+//   .tickValues(msToCenturyTickValues(xScale, width))
+//   .scale(xScale).orient("bottom");
+///////////////////////////////////////
 
 var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
 
