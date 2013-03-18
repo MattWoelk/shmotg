@@ -66,16 +66,11 @@ function getScaleValueTimesDomainZero (scal) {
 }
 
 // This is the transform which is done on the data after it has been rendered.
-function transformScale(scal, oldScal, mar, inverse) {
+function transformScale(scal, oldScal, mar) {
   var pixelsPerSample = getScaleValue(scal);
   var xS = getScaleValue(scal);
 
-  if (inverse) {
-    var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
-    console.log(Math.round(tx), oldScal.domain()[0] - scal.domain()[0], oldScal.domain()[0] % 10000, scal.domain()[0] % 10000);
-  } else {
-    var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
-  }
+  var tx = mar.left + (xS * (oldScal.domain()[0] - scal.domain()[0])); // translate x value
   var ty = mar.top; // translate y value
 
   // See renderFunction for the inverse:
@@ -95,17 +90,17 @@ function dt (num) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renderScale, strokeW) {
+function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW) {
   //update
   if (toTransition) {
-    sel.attr("transform", transformScale(scalOld, renderScale, mar, false))
+    sel.attr("transform", transformScale(scalOld, renScale, mar))
        .attr("d", function (d, i) { return d0s[d.type][d.which]; })
        .transition().ease(ease).duration(dur)
-       .attr("transform", transformScale(scal, renderScale, mar, false));
+       .attr("transform", transformScale(scal, renScale, mar));
   } else {
     sel.attr("opacity", function (d) { return bin[d.type].opacity; })
        .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
-       .attr("transform", transformScale(scal, renderScale, mar, false));
+       .attr("transform", transformScale(scal, renScale, mar));
   }
 
   //enter
@@ -117,13 +112,13 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     .style("stroke", stroke);
 
   if (toTransition) {
-    sels.attr("transform", transformScale(scalOld, renderScale, mar, false))
+    sels.attr("transform", transformScale(scalOld, renScale, mar))
       .attr("opacity", 0)
       .transition().ease(ease).duration(dur)
-        .attr("transform", transformScale(scal, renderScale, mar, false))
+        .attr("transform", transformScale(scal, renScale, mar))
         .attr("opacity", function (d) { return bin[d.type].opacity; });
   } else {
-    sels.attr("transform", transformScale(scal, renderScale, mar, false))
+    sels.attr("transform", transformScale(scal, renScale, mar))
       .attr("opacity", function (d) { return bin[d.type].opacity; });
   }
 
@@ -133,7 +128,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     sel.exit();
 
   sels
-    .attr("transform", transformScale(scal, scalOld, mar, false))
+    .attr("transform", transformScale(scal, scalOld, mar))
     .attr("opacity", 0)
     .remove();
 }
@@ -328,7 +323,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var yAxis;
   var xScale;
   var yScale;
-  var previousXScale; // used for rendering transitions
+  var previousXScale = d3.scale.linear(); // used for rendering transitions
   var previousLevelToRender; // used for rendering transitions;
   var timeContextContainer;
 
@@ -455,7 +450,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     // See transformScale for the inverse.
 
     // Store this for later use.
-    renderScale = xScale.copy();
+    renderScale = d3.scale.linear();
 
     return (d.date - renderScale.domain()[0]) * getScaleValue(renderScale);
   };
@@ -466,7 +461,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   // TODO: make this what the scale SHOULD be
   //       for the specific level and maxBinRenderSize
   //       then we won't need to store state like this
-  var renderScale;
+  var renderScale = d3.scale.linear();
 
   // HELPER FUNCTIONS }}}
 
@@ -481,7 +476,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
     binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms}; });
     var j = 0;
-    //console.log(_.map(data, function (num) { return {val: num};}));
     for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // add a new object for each bin level
       binData[binData.keys[keyValue]].levels[j] = [];
     }
@@ -551,7 +545,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       var key = renderThis[keyValue];
 
       if (!renderedD0s[key + "Ranges"][whichLevelToRender]) {
-        //console.log("FIRST TIME FOR THIS LEVEL/KEY, " + key);
+        // first time for this level/key
         renderedD0s[key + "Ranges"][whichLevelToRender] = [0, 0];
       }
     }
@@ -670,7 +664,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
       //Make and render the Positive lines.
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
-      //console.log(dataObjectForKeyFanciness);
       var currentSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) { return d.type + d.which + d.interpolate; });
 
@@ -693,7 +686,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       //{{{ AREAS
       //make and render the area
       var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
-      //console.log(quartileObjectForKeyFanciness);
       currentSelection = paths.selectAll(".posArea")
         .data(quartileObjectForKeyFanciness, function (d) {return d.type + d.which + d.interpolate; });
 
