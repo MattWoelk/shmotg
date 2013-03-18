@@ -51,8 +51,6 @@ var zoomRect = d3.select("#zoomRect");
 var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
-var frequency = 200; //Hz
-
 // VARIABLES }}}
 
 //{{{ HELPER FUNCTIONS
