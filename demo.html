@@ -1,0 +1,211 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+<style>
+body {
+  background-color : #FFF;
+  font-family      : sans-serif;
+  color            : #000;
+  font-size        : 20px;
+}
+
+#chart {
+  font: 10px sans-serif;
+  overflow: none;
+}
+
+path, line {
+  /*shape-rendering: crispEdges;*/
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis path {
+  /* Don't show the axis lines. */
+  display: none;
+}
+
+.y.axis line {
+  stroke: #999;
+  stroke-dasharray: 3, 3;
+}
+
+#chart_container {
+  position: relative;
+  overflow: none;
+}
+
+#chartContainer {
+  overflow : none;
+  width    : 100%;
+  overflow : none;
+  float    : left;
+}
+
+#zoomSVG {
+  position : absolute;
+  top      : 0;
+  left     : 0;
+}
+
+#zoomRect {
+  border-style : solid;
+  border-width : 1px;
+  cursor       : col-resize;
+}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="underscore.js"></script> <!-- TODO TODO TODO find on a server-->
+<script src="binnedChart.js"></script> <!-- TODO TODO TODO put on a server-->
+<script src="msToCentury.js"></script> <!-- TODO TODO TODO put on a server-->
+
+<div id="chartContainer">
+  <svg id="zoomSVG"><rect id="zoomRect" /></svg>
+</div>
+
+<div id="controls">
+  <form>
+    <ul id="render-lines">
+      Which functions<br />to render:
+      <li><label><input type="checkbox" checked value="average"/>Averages</label></li>
+      <li><label><input type="checkbox" checked value="maxes"/>Maximums</label></li>
+      <li><label><input type="checkbox" checked value="mins"/>Minimums</label></li>
+      <li><label><input type="checkbox"         value="q1"/>1st Quartile</label></li>
+      <li><label><input type="checkbox"         value="q3"/>3st Quartile</label></li>
+      <li><label><input type="checkbox" checked value="quartiles"/>Quartile Area</label></li>
+    </ul>
+
+    <ul id="render-depth">
+      Maximum Bin<br />Render Size:
+      <br />
+      <label><input type="range" min="1" max="200" id="renderdepth" value="40" style="width:200px"/>
+    </ul>
+
+    <ul id="render-method">
+      Interpolation<br />Method:
+      <li><label><input type="radio"         name="render-method" value="linear"/>Linear</li>
+      <li><label><input type="radio" checked name="render-method" value="step-after"/>Step-After</li>
+      <li><label><input type="radio"         name="render-method" value="monotone"/>Monotone</li>
+    </ul>
+  </form>
+</div>
+
+<script>
+  function initPlot(data, uniqueID){
+    var plot = binnedLineChart(data, "TODO-SERVER", uniqueID);
+    uniqueID = uniqueID + 1;
+    plot.xScale(xScale.copy());
+
+    var pl = d3.select("#chartContainer").append("svg").call(plot);
+
+    if (first) {
+      plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(true).update();
+    } else {
+      plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(false).update();
+    }
+
+    plots.push(plot);
+
+    redraw();
+
+    d3.select("#chartContainer").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
+
+    zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
+           .attr("height", getTotalChartHeight())
+           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+    zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
+            .attr("height", getTotalChartHeight() - margin.top)
+            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+    zoomRect.attr("fill", "rgba(0,0,0,0)")
+            .call(zoom);
+
+    // Redefine this function now that we have data for it to work from
+    updateZoom = function () {
+      xScale = plot.xScale();
+      yScale = plot.yScale();
+      zoom.x(xScale);
+      zoom.y(yScale);
+    };
+
+    updateZoom(); // TODO: get rid of this
+  }
+  var plots = [];
+var updateZoom = function () { return 0; };
+var zoomSVG = d3.select("#zoomSVG");
+var zoomRect = d3.select("#zoomRect");
+var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
+var yScale = d3.scale.linear();
+
+
+function changeLines () {
+plots.forEach(function (plt) {
+  plt.setSelectedLines().update();
+});
+}
+document.getElementById("render-lines").addEventListener("change", changeLines, false);
+document.getElementById("render-depth").addEventListener("change", changeLines, false);
+//  an alternative so that it waits for you to lift up your mouse/finger:
+//document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
+//document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
+document.getElementById("render-method").addEventListener("change", changeLines, false);
+
+function zoomAll() {
+plots.forEach(function (plt) {
+  plt.xScale(xScale.copy()).update();
+});
+}
+
+function setExtents() {
+//var wid = document.getElementById("chartContainer").offsetWidth; // TODO: use this in the following equation.
+// [ how far zoomed-out , how far zoomed-in ]
+return [Math.pow(2, -30), Math.pow(2,4)];
+}
+var zoomExtents = setExtents();
+var zoomExtentsForScale = [zoomExtents[0], zoomExtents[1]];
+var zoom = d3.behavior.zoom()
+.scaleExtent(zoomExtentsForScale)
+.on("zoom", zoomAll);
+
+var redraw = function () {
+plots.forEach(function (plt) {
+  plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
+});
+
+d3.select("#chartContainer").attr("width", document.getElementById("chartContainer").offsetWidth);
+zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
+        .attr("height", getTotalChartHeight());
+zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
+         .attr("height", getTotalChartHeight())
+         .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+//update the zoom for the new plot size
+updateZoom();
+}
+
+var margin = {top: 20, right: 10, bottom: 25, left: 40};
+var getTotalChartHeight = function () {
+var total = 0;
+_.each(plots, function (d, i) {
+  total = total + d.height();
+});
+return total;
+}
+
+d3.json("Server/esg_time.js", function (error, data) { // TODO: put on server, too.
+  if (error || plots.length > 0) {
+    return;
+  }
+  var json = data.map(function (d) {
+    return {val: d.ESGgirder18, ms: d.ms};
+  });
+
+  initPlot(json, "one");
+});
+</script>
