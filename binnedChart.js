@@ -450,7 +450,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     // See transformScale for the inverse.
 
     // Store this for later use.
-    renderScale = d3.scale.linear();
+    renderScale = xScale.copy();
 
     return (d.date - renderScale.domain()[0]) * getScaleValue(renderScale);
   };
