@@ -21,7 +21,6 @@ document.getElementById("render-depth").addEventListener("change", changeLines, 
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
 // The zoom limits for the plot
-// TODO: magic: make this relative to width
 var zoomExtents = setExtents();
 
 // The changing zoom extents from the perspective
@@ -38,6 +37,7 @@ d3.select("#scrollright").on("click", scrollright);
 //{{{ VARIABLES
 
 var plots = []; //an array of all plots
+var msPS = 5; // frequency of data samples
 
 // TODO: sync this with the one in bridgeChart.js
 var margin = {top: 20, right: 10, bottom: 25, left: 40};
@@ -56,6 +56,7 @@ var yScale = d3.scale.linear();
 //{{{ HELPER FUNCTIONS
 
 function setExtents() {
+  // TODO: magic: make this relative to width
   //var wid = document.getElementById("chartContainer").offsetWidth; // TODO: use this in the following equation.
   // [ how far zoomed-out , how far zoomed-in ]
   return [Math.pow(2, -30), Math.pow(2,4)];
@@ -101,9 +102,9 @@ function initPlot(data, first) {
   var pl = d3.select("#charts").append("svg").call(plot);
 
   if (first) {
-    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(true).update();
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(true).milliSecondsPerSample(msPS).update();
   } else {
-    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(false).update();
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(false).milliSecondsPerSample(msPS).update();
   }
 
   plots.push(plot);

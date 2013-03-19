@@ -101,7 +101,9 @@ d3.csv("readme-flights.csv", function (error, data) {
 
   pl = d3.select("#chartContainer").insert("svg").call(thePlot);
 
-  thePlot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(height).showTimeContext(true).update();
+  var sps = 864e5; // 864e5 is the number of milliseconds in a day
+
+  thePlot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(height).showTimeContext(true).milliSecondsPerSample(sps).update();
 
   d3.select("#chartContainer").attr("height", plotHeight).attr("width", document.getElementById("chartContainer").offsetWidth);
 

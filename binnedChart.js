@@ -134,11 +134,9 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
 }
 
 // TODO: Phase 2 - make this external, as in, set from outside this chart object.
+//       - could pass in a function or a static value.
 function maxBinRenderSize () {
-  return document.getElementById("renderdepth").value / 4;
-  // TODO: magic:
-  // the 4 is to balance something which is due to the
-  // sampling rate being 200Hz
+  return document.getElementById("renderdepth").value;
 }
 
 // The following function returns something which looks like this:
@@ -198,13 +196,13 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
   return resultArray;
 }
 
-function goToLevel(scal) {
-  //Want: samples/bin --> level
-  //Have: pixels/bin, pixels/sample
+function goToLevel(scal, msPS) {
+  // msPS is milliSecondsPerSample
 
   // pixels/bin:
   var pixelsPerBin = maxBinRenderSize();
-  var pixelsPerSample = getScaleValue(scal);
+  var pixelsPerMilliSecond = getScaleValue(scal);
+  var pixelsPerSample = pixelsPerMilliSecond * msPS;
 
   // sam   pix   sam
   // --- = --- * ---
@@ -295,6 +293,9 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
   var datReq = dataRequester;
   var strokeWidth = 1;
+
+  // the frequency of the data samples
+  var milliSecondsPerSample = 1;
 
   // TODO: sync this with the one in bridgecharts.js
   var margin = {top: 10, right: 27, bottom: 25, left: 40};
@@ -403,23 +404,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     quartilesRanges : new Array(),
   };
 
-  var testTime = "Mon Jan 02 2012 23:12:33 GMT-0600 (CST)";
-  var testTime = testTime.substring(0,24);
-  var testScale = d3.time.scale()
-    .range([0, width]);
-  //var parseDate = d3.time.format("%a %b %d %Y %H:%M:%S").parse;
-  //console.log(parseDate(testTime));
-  var samplesPerSecond = 200;
-  var samplesPerMillisecond = 1000/samplesPerSecond;
-  var mils = 196*samplesPerMillisecond;
-  var testTimeMilliseconds = testTime + "." + mils;
-  // TODO: This ^^ combining should be done on the server
-  // good idea: pass around date.getTime()'s
-
-  var parseDateMilliseconds = d3.time.format("%a %b %d %Y %H:%M:%S.%L").parse;
-  //console.log(testTimeMilliseconds);
-  //console.log(parseDateMilliseconds(testTimeMilliseconds));
-
   // VARIABLES }}}
 
   //{{{ HELPER METHODS
@@ -432,17 +416,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     // send a request to bridgecharts.js for specific data
     // request: [Date, Date]
     // receive: not in this function. TODO: make a new function which updates binData.
-  }
-
-  // TODO: use this for two things:
-  // - draw a line under the charts to show the size of day/minute/second/etc.
-  // - display the currently-viewed year&day&hour&minutes&etc.
-  //   - See Issue #11 (https://github.com/MattWoelk/www/issues/11)
-  //   - display whichever ones are larger than the current domain
-  //   - and by 'domain' I mean getTicks(scal)[-1] - getTicks(scal)[0]
-  // - thought: could the second of these fullfill the purpose of the 1st?
-  function getTicks(scal) {
-    //console.log(scal.ticks(width / 100));
   }
 
   // This is the function used to render the data at a specific size.
@@ -498,7 +471,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
     //{{{ SELECTION AND SCALES
 
-    my.setSelectedLines();
     slctn = selection; // Saving the selection so that my.update() works.
 
     width = containerWidth - margin.left - margin.right;
@@ -771,6 +743,12 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
   //{{{ Getters and Setters
 
+  my.milliSecondsPerSample = function (value) {
+    if (!arguments.length) return milliSecondsPerSample;
+    milliSecondsPerSample = value;
+    return my;
+  }
+
   my.containerWidth = function (value) {
     if (!arguments.length) return containerWidth;
     if (containerWidth !== value) my.reRenderTheNextTime(true);
@@ -847,6 +825,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   }
 
   my.update = function (reRender) {
+    my.setSelectedLines();
     my(slctn);
   };
 
@@ -864,10 +843,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
     my.whichLinesToRender(a);
 
-    //var b = [Number(document.querySelector("li input:checked[name='render-depth']").value)];
-    //whichLevelToRender = b[0];
-
-    my.whichLevelToRender(goToLevel(xScale));
+    my.whichLevelToRender(goToLevel(xScale, milliSecondsPerSample));
 
     var b = document.querySelector("#render-method input:checked").value;
     if (b !== interpolationMethod) {
