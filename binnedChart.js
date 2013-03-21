@@ -676,6 +676,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         //.tickSize(6)
         .tickFormat(msToCenturyTickFormat)
         .tickValues(msToCenturyTickValues(xScale, width))
+        .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
         .scale(xScale).orient("bottom");
 
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }

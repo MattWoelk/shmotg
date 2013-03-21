@@ -101,10 +101,7 @@ function onScreenSizeOfLabels(millisecondsPerLabel, screenWidth, distanceBtwnLab
   return millisecondsPerLabel * screenWidth / distanceBtwnLabels;
 }
 
-function msToCenturyTickValues(scal, wid) {
-  var dom = scal.domain();
-
-  var i = 0;
+function findLevel(dom, wid) {
   for (i = 0; i < rounding_scales.length; i++) {
     var ro = rounding_scales[i];
     var compr = onScreenSizeOfLabels(ro[0]*ro[1], wid, MIN_DISTANCE_BETWEEN_X_AXIS_LABELS);
@@ -117,12 +114,43 @@ function msToCenturyTickValues(scal, wid) {
         return num < dom[1] && num > dom[0];
       });
 
-      return result;
+      return i;
     }
   }
+  return -1;
+}
 
-  // This should never occur
-  return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+function msToCenturyTickValues(scal, wid) {
+  var dom = scal.domain();
+
+  var lvl = findLevel(dom, wid);
+
+  // This should never occur if the zoom limits are correct
+  if (lvl === -1) {
+    return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+  }
+
+  var ro = rounding_scales[lvl];
+  var rng = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1], wid);
+
+  // filter this for only what is actually on-screen.
+  var result = _.filter(rng, function (num) {
+    return num < dom[1] && num > dom[0];
+  });
+
+  return result;
+}
+
+function msToCenturyTickSubDivide(scal, wid) {
+  var dom = scal.domain();
+
+  var lvl = findLevel(dom, wid);
+  if (lvl === -1) { return 0; }
+
+  var baseSize = rounding_scales[lvl][1];
+  var tickSpace = rounding_ticks[baseSize];
+
+  return ((baseSize / tickSpace) - 1);
 }
 
 function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, wid) {
@@ -203,6 +231,28 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
                        smallInc*MIN_DISTANCE_BETWEEN_X_AXIS_LABELS/wid,
                        smallInc));
   }
+}
+
+// for major ticks every 'a' units,
+// have a minor tick every 'b' units
+// [a, b]
+// b should always be a factor of a
+var rounding_ticks = {
+   1   : 0.5, // when we are showing 1 of something, display a tick every 0.5
+   2   : 1  ,
+   3   : 1  ,
+   5   : 1  ,
+   6   : 3  , // when we are showing 6 of something, display a tick every 3
+   10  : 5  ,
+   12  : 3  ,
+   15  : 5  ,
+   20  : 5  ,
+   25  : 5  ,
+   30  : 10 ,
+   50  : 10 ,
+   100 : 50 ,
+   200 : 50 ,
+   500 : 100,
 }
 
 // Data object to help make custom axis' tick values
