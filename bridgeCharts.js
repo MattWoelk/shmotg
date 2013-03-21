@@ -287,12 +287,12 @@ socket.on('news', function (data) {
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
-  initPlot(json);
+  initPlot(json, true);
 
   initPlot(_.map(json, function (d) {
     return { val: Math.random() * 5 + d.val,
              ms: d.ms };
-  }));
+  }), false);
 });
 
 // SERVER COMMUNICATIONS }}}
