@@ -498,8 +498,10 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     //  var min = _.min(arr, function (d) { return d.date; /* TODO: define structure */ }).date; /* TODO: define structure */
     //  return [min, max];
     //};
+    console.log("Before");
 
     // Choose which d0s need to be generated
+    // based on which keys are active.
     var renderThis = [];
     renderThis = renderThis.concat(whichLinesToRender);
     if (whichLinesToRender.indexOf("quartiles") !== -1) {
@@ -523,15 +525,9 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     }
 
     // for each key
+    // 1. find out whether we should render things
     for (var keyValue in renderThis) {
       var key = renderThis[keyValue];
-
-      // Useful for testing to see that only what is needed is being rendered:
-      // replace the following if statement with this code:
-      //var di = ( xScale.domain()[1] - xScale.domain()[0] ) / 2; // THIS LINE IS FOR TESTING ONLY
-      //if (!isWithinRange([xScale.domain()[0] + di,             // THIS LINE IS FOR TESTING ONLY
-      //                    xScale.domain()[1] - di],           // THIS LINE IS FOR TESTING ONLY
-      //                    renderedD0s[key + "Ranges"][whichLevelToRender]) || reRenderTheNextTime) { // THIS LINE IS FOR TESTING ONLY
 
       // These two variables are here to remove the slight amount
       // of un-rendered space which shows up on the sides just
@@ -540,9 +536,11 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
                      renderedD0s[key + "Ranges"][whichLevelToRender][0]) * 0.1;
       var ninetyPercentRange = [ renderedD0s[key + "Ranges"][whichLevelToRender][0] + tenDiff ,
                                  renderedD0s[key + "Ranges"][whichLevelToRender][1] - tenDiff ];
+
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
         //render the new stuff
+        console.log("--render");
 
         // figure out how much to render:
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
@@ -552,6 +550,8 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
         if (key === 'quartiles') {
           // render AREA d0s
+          console.log("----quarts");
+          // TODO: quarts is way faster than lines right now
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
@@ -567,6 +567,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
         } else {
           // render LINES d0s
+          console.log("----lines");
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
 
@@ -574,11 +575,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
           //     - we will ask binData (through a function) if it has the data
           //     - if that binData doesn't have it, we'll request information
           //       from the server througoh bridgecharts.js somehow.
-
-          renderedD0s['rawData'][0] = d3.svg.line() // TODO: learn to do without this line
-            .x(renderFunction)
-            .y(function (d, i) { return yScale(d.val); })
-            .interpolate(interpolationMethod)(filterDateToRange(binData.rawData.levels[0] , newRange));
 
           renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
 
@@ -591,6 +587,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     } // for
 
     reRenderTheNextTime = false;
+    console.log("AFTER");
 
     // GENERATE ALL d0s. (generate the lines paths) }}}
 
