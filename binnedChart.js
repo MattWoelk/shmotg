@@ -498,7 +498,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     //  var min = _.min(arr, function (d) { return d.date; /* TODO: define structure */ }).date; /* TODO: define structure */
     //  return [min, max];
     //};
-    console.log("Before");
 
     // Choose which d0s need to be generated
     // based on which keys are active.
@@ -540,7 +539,6 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
         //render the new stuff
-        console.log("--render");
 
         // figure out how much to render:
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
@@ -550,24 +548,21 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
         if (key === 'quartiles') {
           // render AREA d0s
-          console.log("----quarts");
-          // TODO: quarts is way faster than lines right now
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
-          var q1filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], newRange );
+          var q1Filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], newRange );
           var q3filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], newRange );
 
           renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
             .x(renderFunction)
-            .y0(function (d, i) { return yScale( q1filter[i].val ); }) //.val
+            .y0(function (d, i) { return yScale( q1Filter[i].val ); }) //.val
             .y1(function (d, i) { return yScale( q3filter[i].val ); }) //.val
-            .interpolate( interpolationMethod )(q1filter);
+            .interpolate( interpolationMethod )(q1Filter);
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
         } else {
           // render LINES d0s
-          console.log("----lines");
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
 
@@ -578,16 +573,17 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
           renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
 
+          var lineFilter = filterDateToRange(binData[key].levels[whichLevelToRender], newRange);
+
           renderedD0s[key][whichLevelToRender] = d3.svg.line()
             .x(renderFunction)
             .y(function (d, i) { return yScale(d.val); })
-            .interpolate( interpolationMethod )(filterDateToRange(binData[key].levels[whichLevelToRender] , newRange));
+            .interpolate( interpolationMethod )(lineFilter);
         } // if quartiles else lines
       } // if we should render anything
     } // for
 
     reRenderTheNextTime = false;
-    console.log("AFTER");
 
     // GENERATE ALL d0s. (generate the lines paths) }}}
 
