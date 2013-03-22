@@ -673,7 +673,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       //{{{ AXES
       // Draw Axes using msToCentury.js format and values
       xAxis = d3.svg.axis()
-        //.tickSize(6)
+        .tickSize(6, 3, 3) //major, minor, end
         .tickFormat(msToCenturyTickFormat)
         .tickValues(msToCenturyTickValues(xScale, width))
         .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
