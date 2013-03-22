@@ -591,21 +591,22 @@ var binnedLineChart = function (data, dataRequester, girder) {
     if (didWeRenderAnything) {
       // TODO: see if we need more data
       //     - we will ask binData (through a function) if it has the data
+      // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
       var newRange = [0, 0];
       newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
       newRange[1] = xScale.domain()[1] + (xdiff / 2);
 
       var key = binData.keys[0]; // any will do; pick the first one.
-      var tmp = _.filter(binData[key].levels[whichLevelToRender], function (d, i) { // TODO: rename tmp
+      var filteredRangeData = _.filter(binData[key].levels[whichLevelToRender], function (d, i) {
         return d.date <= newRange[1] && d.date >= newRange[0];
       });
-      // Note: tmp's dates are in order highest --> lowest
+      // Note: filteredRangeData's dates are in order highest --> lowest
 
-      var distBtwnSamples = tmp[0].date - tmp[1].date;
+      var distBtwnSamples = filteredRangeData[0].date - filteredRangeData[1].date;
 
       // This relies on the samples being equally spaced
       // if the data doesn't go all the way to the end of what has been rendered:
-      if (newRange[1] - tmp[0].date > distBtwnSamples) {
+      if (newRange[1] - filteredRangeData[0].date > distBtwnSamples) {
         // we need data at the upper end
         sendARequest = true;
         var msRange = [0, 0];
@@ -613,14 +614,15 @@ var binnedLineChart = function (data, dataRequester, girder) {
         // build and send the request
         var req = {
           sensor: whichGirder,
-          ms_start: tmp[0].date, // exact point
+          ms_start: filteredRangeData[0].date, // exact point
           ms_end: newRange[1],   // could round either way on the server and be fine
           level: whichLevelToRender,
         };
 
         dataReq(req);
       }
-      if (tmp[tmp.length - 1].date - newRange[0] > distBtwnSamples) {
+
+      if (filteredRangeData[filteredRangeData.length - 1].date - newRange[0] > distBtwnSamples) {
         // we need data at the lower end
         sendARequest = true;
         var msRange = [0, 0];
@@ -629,7 +631,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
         var req = {
           sensor: whichGirder,
           ms_start: newRange[0], // could round either way on the server and be fine
-          ms_end: tmp[tmp.length - 1].date, // exact point
+          ms_end: filteredRangeData[filteredRangeData.length - 1].date, // exact point
           level: whichLevelToRender,
         };
 
