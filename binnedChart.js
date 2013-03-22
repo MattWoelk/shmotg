@@ -542,6 +542,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
+        // TODO: this is happening roughly every 4th of the screen moving instead of every half screen
+        //       evidence: look at the server output
         //render the new stuff
         didWeRenderAnything = true;
 
@@ -594,7 +596,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
       newRange[1] = xScale.domain()[1] + (xdiff / 2);
 
       var key = binData.keys[0]; // any will do; pick the first one.
-      var tmp = _.filter(binData[key].levels[whichLevelToRender], function (d, i) {
+      var tmp = _.filter(binData[key].levels[whichLevelToRender], function (d, i) { // TODO: rename tmp
         return d.date <= newRange[1] && d.date >= newRange[0];
       });
       // Note: tmp's dates are in order highest --> lowest

@@ -96,14 +96,6 @@ function setLoadingIcon(on) {
   d3.select("#circularG").style("display", on ? "block" : "none");
 }
 
-function sendRequestToServer(req) {
-  // turn on loading icon
-  setLoadingIcon(true);
-
-  // TODO: send the request
-  console.log("Sending Request To Server ");
-}
-
 var uniqueID = 0;
 function initPlot(data, first) {
   if (first) {
@@ -298,7 +290,6 @@ socket.on('news', function (data) {
   // <-- done deleting all example plots
 
   var json = JSON.parse(data);
-  //console.log(json);
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
@@ -308,6 +299,54 @@ socket.on('news', function (data) {
     return { val: Math.random() * 5 + d.val,
              ms: d.ms };
   }), false);
+});
+
+sizeOfQueue = function() {
+  var size = 0, key;
+  for (key in serverQueue) {
+    if (serverQueue.hasOwnProperty(key)) size++;
+  }
+  return size;
+};
+
+removeFromQueue = function (key) {
+  delete serverQueue[key];
+}
+
+// things which we are waiting for the server to send to us
+var serverQueue = {};
+
+function addToServerQueue(ob) {
+  serverQueue[ob.id] = ob.req;
+};
+
+var uniqueRequestID = 0;
+function sendRequestToServer(req) {
+  // turn on loading icon
+  setLoadingIcon(true);
+
+  // wrap the req with a unique id
+  var sendReq = {
+    id: uniqueRequestID,
+    req: req };
+  uniqueRequestID = uniqueRequestID + 1;
+
+  // add the request to the queue
+  addToServerQueue(sendReq);
+
+  socket.emit('req', JSON.stringify(sendReq));
+}
+
+socket.on('req_data', function (data) {
+  var received = JSON.parse(data);
+  // remove request from server queue
+  removeFromQueue(received.id);
+  var receivedData = received.req;
+
+  // deactivate loading icon
+  if (sizeOfQueue() === 0) {
+    setLoadingIcon(false);
+  }
 });
 
 // SERVER COMMUNICATIONS }}}

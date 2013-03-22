@@ -115,8 +115,22 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
   io.sockets.on('connection', function (socket) {
     socket.emit('news', send_to_user);
+
     socket.on('ack', function (data) {
       console.log("client: " + data); //ack
+    });
+
+    socket.on('req', function (sendReq) {
+      var received = JSON.parse(sendReq);
+      var req = received.req;
+      var id = received.id;
+      console.log("client req: " + JSON.stringify(received));
+
+      // TODO: actually bin and send more data
+      var toBeSent = {
+        id: id,
+        req: {"test": "test"} };
+      socket.emit('req_data', JSON.stringify(toBeSent));
     });
   });
 });
