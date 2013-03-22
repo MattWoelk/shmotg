@@ -287,17 +287,20 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, uniqueID) {
+var binnedLineChart = function (data, dataRequester, girder) {
 
   //{{{ VARIABLES
 
-  var datReq = dataRequester;
+  var dataReq = dataRequester;
   var strokeWidth = 1;
+  var whichGirder = girder;
 
   // the frequency of the data samples
   var milliSecondsPerSample = 1;
 
   // TODO: sync this with the one in bridgecharts.js
+  //       - can't do, because we're changing top depending
+  //         on if we're showing time context
   var margin = {top: 10, right: 27, bottom: 25, left: 40};
 
   // the height of the chart by itself (not including axes or time context)
@@ -316,8 +319,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
   var transitionDuration = 500;
   var easingMethod = 'cubic-in-out';
 
-  var defclip; // the clipping region TODO: stop using ids, or have a unique id per chart. This will help the firefox problem. Id should be based on the type of data which is being stored by the chart (AA, CC, DD, etc.) ?
-              //  - could have this clip path set by bridgecharts.js instead
+  var defclip;
   var xAxisContainer;
   var xAxis;
   var yAxisContainer;
@@ -523,6 +525,8 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       }
     }
 
+    var didWeRenderAnything = false;
+
     // for each key
     // 1. find out whether we should render things
     for (var keyValue in renderThis) {
@@ -539,6 +543,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
         //render the new stuff
+        didWeRenderAnything = true;
 
         // figure out how much to render:
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
@@ -561,16 +566,9 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
             .interpolate( interpolationMethod )(q1Filter);
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
+          // TODO: Is this ^^^ even being used anymore for anything ???
         } else {
           // render LINES d0s
-
-          renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
-
-          // TODO: when to poll server for more data ???
-          //     - we will ask binData (through a function) if it has the data
-          //     - if that binData doesn't have it, we'll request information
-          //       from the server througoh bridgecharts.js somehow.
-
           renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
 
           var lineFilter = filterDateToRange(binData[key].levels[whichLevelToRender], newRange);
@@ -579,9 +577,68 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
             .x(renderFunction)
             .y(function (d, i) { return yScale(d.val); })
             .interpolate( interpolationMethod )(lineFilter);
+
+          renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
+          // TODO: Is this ^^^ even being used anymore for anything ???
         } // if quartiles else lines
       } // if we should render anything
     } // for
+
+    // If we rendered anything, see if we need more data from the server
+    // AKA see if we didn't have enough data to render the entire domain.
+    if (didWeRenderAnything) {
+      // TODO: see if we need more data
+      //     - we will ask binData (through a function) if it has the data
+      var newRange = [0, 0];
+      newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
+      newRange[1] = xScale.domain()[1] + (xdiff / 2);
+
+      var key = binData.keys[0]; // any will do; pick the first one.
+      var tmp = _.filter(binData[key].levels[whichLevelToRender], function (d, i) {
+        return d.date <= newRange[1] && d.date >= newRange[0];
+      });
+      // Note: tmp's dates are in order highest --> lowest
+
+      var distBtwnSamples = tmp[0].date - tmp[1].date;
+
+      // This relies on the samples being equally spaced
+      // if the data doesn't go all the way to the end of what has been rendered:
+      if (newRange[1] - tmp[0].date > distBtwnSamples) {
+        // we need data at the upper end
+        sendARequest = true;
+        var msRange = [0, 0];
+
+        // build and send the request
+        var req = {
+          sensor: whichGirder,
+          ms_start: tmp[0].date, // exact point
+          ms_end: newRange[1],   // could round either way on the server and be fine
+          level: whichLevelToRender,
+        };
+
+        dataReq(req);
+      }
+      if (tmp[tmp.length - 1].date - newRange[0] > distBtwnSamples) {
+        // we need data at the lower end
+        sendARequest = true;
+        var msRange = [0, 0];
+
+        // build and send the request
+        var req = {
+          sensor: whichGirder,
+          ms_start: newRange[0], // could round either way on the server and be fine
+          ms_end: tmp[tmp.length - 1].date, // exact point
+          level: whichLevelToRender,
+        };
+
+        dataReq(req);
+      }
+
+
+      // TODO: is this happening twice as often as necessary?
+      //       - console.log(distBtwnSamples) for evidence.
+      //console.log(distBtwnSamples);
+    }
 
     reRenderTheNextTime = false;
 
@@ -609,7 +666,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
 
 
       //Make the clipPath (for cropping the paths)
-      if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + uniqueID).append("rect"); }
+      if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + whichGirder).append("rect"); }
       defclip
         //.transition().duration(transitionDuration)
         .attr("width", width)
@@ -619,7 +676,7 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
       //Apply the clipPath
       paths = !paths ? chart.append("g") : paths;
       paths
-        .attr("clip-path", "url(#clip" + uniqueID + ")")
+        .attr("clip-path", "url(#clip" + whichGirder + ")")
         .attr("class", "paths")
         .attr("height", height);
 
@@ -846,6 +903,15 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
     interpolationMethod = b;
     return my;
   };
+
+  my.addDataToBinData = function () {
+    // TODO: add data to binData
+
+    // TODO: re-bin the new data
+
+    // re-render the lines and areas
+    my.reRenderTheNextTime(true);
+  }
 
   // Getters and Setters }}}
 

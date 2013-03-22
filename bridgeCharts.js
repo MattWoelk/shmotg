@@ -92,10 +92,25 @@ function transitionAllNextTime() {
   });
 }
 
-var uniqueID = 0;
+function setLoadingIcon(on) {
+  d3.select("#circularG").style("display", on ? "block" : "none");
+}
 
+function sendRequestToServer(req) {
+  // turn on loading icon
+  setLoadingIcon(true);
+
+  // TODO: send the request
+  console.log("Sending Request To Server ");
+}
+
+var uniqueID = 0;
 function initPlot(data, first) {
-  var plot = binnedLineChart(data, "TODO-SERVER", uniqueID);
+  if (first) {
+    var plot = binnedLineChart(data, sendRequestToServer, "ESGgirder18");
+  } else {
+    var plot = binnedLineChart(data, function () {}, uniqueID);
+  }
   uniqueID = uniqueID + 1;
   plot.xScale(xScale.copy());
 
