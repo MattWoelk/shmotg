@@ -36,8 +36,8 @@ var handler = function (req, res) {
 // because we're sending milliseconds instead of
 // date strings, but it's nice to have around. :)
 Date.prototype.toJSON = function (key) {
-  console.log("key: ");
-  console.log(key, this);
+  //console.log("key: ");
+  //console.log(key, this);
   return this + "";
 };
 
@@ -70,6 +70,9 @@ var girder = 1;
 //query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
 //query = 'SELECT * FROM SPBRTData_0A LIMIT 10'; // grab 10 entries (LIMIT 10)
 query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
+
+// TODO: make a query which selects a time range (more difficult than it should be)
+//query = "SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A WHERE Time between 'Mon Jan 02 2010 23:12:29 GMT-0600 (CST)' AND 'Mon Jan 02 2010 23:12:30 GMT-0600 (CST)' LIMIT 10";
 
 //-- TODO: new data section --//
 //var dat = Date.parse("Thu, 01 Jan 1970 00:00:00 GMT-0400");
@@ -127,9 +130,49 @@ mysqlconnection.query(query, function (err, rows, fields) {
       console.log("client req: " + JSON.stringify(received));
 
       // TODO: actually bin and send more data
+
+      // TODO: send randomly generated data (temporary)
+      var randomPoint = function () {
+        return Math.random() * 6 + 92; // between 92 and 98
+      };
+
+      var howManyPointsToGenerate = (parseInt(req.ms_end) - parseInt(req.ms_start)) / 5; // 5 because sampling rate is 200Hz
+      console.log(req.sensor);
+
+      var send_req = [];
+
+      if (req.bin_level === 0) {
+        // make raw data
+        for(i=0;i<howManyPointsToGenerate;i++) {
+          send_req.push({
+            sensor: req.sensor,
+            ms: (req.ms_start % 5) + (i * 5),
+            val: randomPoint(),
+          })
+        }
+      } else {
+        // make binned data
+        for(i=0;i<howManyPointsToGenerate;i++) {
+          var val = randomPoint();
+          send_req.push({
+            sensor: req.sensor,
+            ms: (req.ms_start % 5) + (i * 5),
+            bin_level: req.bin_level,
+            max_val: val + (Math.random() * 2),
+            min_val: val - (Math.random() * 2),
+            avg_val: val,
+            q1_val: val - (Math.random() * 1),
+            q3_val: val + (Math.random() * 1),
+          })
+        }
+      }
+
+
+      // TODO: send requested data to client
       var toBeSent = {
         id: id,
-        req: {"test": "test"} };
+        req: send_req };
+
       socket.emit('req_data', JSON.stringify(toBeSent));
     });
   });

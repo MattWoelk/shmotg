@@ -341,7 +341,15 @@ socket.on('req_data', function (data) {
   var received = JSON.parse(data);
   // remove request from server queue
   removeFromQueue(received.id);
-  var receivedData = received.req;
+  var req = received.req;
+
+  // TODO: give the data to the corresponding chart
+  //console.log(req);
+  for (i=0;i<plots.length;i++) {
+    if (plots[i].uniqueID() === req[0].sensor) {
+      plots[i].addDataToBinData(req);
+    }
+  }
 
   // deactivate loading icon
   if (sizeOfQueue() === 0) {

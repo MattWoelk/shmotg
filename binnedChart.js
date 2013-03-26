@@ -444,11 +444,12 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
   //{{{ POPULATE THE BINNED DATAS (binData)
 
-  // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
+  // TODO TODO TODO:
+  // - change this so that even if we don't have data at the first level, we'll bin higher levels
+  // - make this a function instead of being only in the initialization routine
   binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms }; });
 
   for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
-    // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
     binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms}; });
     var j = 0;
     for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // add a new object for each bin level
@@ -459,7 +460,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
   for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
     for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
-      // TODO: change this from sampleindex to something which actually represents the time, in ms since epoch
       binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.val, date: num.ms }; });
       binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key]['func']);
     }
@@ -559,12 +559,12 @@ var binnedLineChart = function (data, dataRequester, girder) {
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
           var q1Filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], newRange );
-          var q3filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], newRange );
+          var q3Filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], newRange );
 
           renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
             .x(renderFunction)
             .y0(function (d, i) { return yScale( q1Filter[i].val ); }) //.val
-            .y1(function (d, i) { return yScale( q3filter[i].val ); }) //.val
+            .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
             .interpolate( interpolationMethod )(q1Filter);
 
           renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
@@ -602,6 +602,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
       });
       // Note: filteredRangeData's dates are in order highest --> lowest
 
+      // TODO: make work for special case where filteredRangeData has 0 length
       var distBtwnSamples = filteredRangeData[0].date - filteredRangeData[1].date;
 
       // This relies on the samples being equally spaced
@@ -616,7 +617,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
           sensor: whichGirder,
           ms_start: filteredRangeData[0].date, // exact point
           ms_end: newRange[1],   // could round either way on the server and be fine
-          level: whichLevelToRender,
+          bin_level: whichLevelToRender,
         };
 
         dataReq(req);
@@ -908,8 +909,63 @@ var binnedLineChart = function (data, dataRequester, girder) {
     return my;
   };
 
-  my.addDataToBinData = function () {
-    // TODO: add data to binData
+  my.uniqueID = function (value) {
+    if (!arguments.length) return whichGirder;
+    whichGirder = value;
+    return my;
+  }
+
+  my.addDataToBinData = function (datas) {
+    // TODO: add data to binData IN THE CORRECT ORDER
+
+    // translate from:
+    // datas = [{ sensor: x,
+    //            ms: y,
+    //            val: z },
+    //          { etc... },
+    //          ...
+    //          }]
+    // or:
+    // datas = [{ sensor: x,
+    //            ms: y,
+    //            bin_level: b,
+    //            max_val: d_1,
+    //            min_val: d_2,
+    //            avg_val: d_3,
+    //            q1_val: d_4,
+    //            q3_val: d_5 },
+    //          { etc... },
+    //          ...
+    //          }]
+    // to: how binData is
+
+    var trns = {
+      'max_val': 'maxes',
+      'min_val': 'mins',
+      'avg_val': 'average',
+      'q1_val' : 'q1',
+      'q3_val' : 'q3',
+      'val'    : 'rawData',
+    }
+
+    // TODO: make special case for raw data (right now it would be ... umm... it might be working ?? )
+
+    for (var key in trns) {
+      datas.forEach (function (dat, i) {
+        if (trns.hasOwnProperty(key)) {
+          //console.log(dat);
+          //console.log(key);
+          // TODO: push new data to the end of the array
+          if (dat.hasOwnProperty(key)) {
+            //console.log("PUSHING: " + dat);
+            binData[trns[key]].levels[dat.bin_level].push({date: dat.ms, val: dat[key]});
+          }
+        }
+      }
+
+      // sort the array again ASSUMPTION: all data is at the same bin level
+      //binData[trns[key]].levels[datas[0].bin_level].sort(function (d) { return d.date; });
+    )};
 
     // TODO: re-bin the new data
 
