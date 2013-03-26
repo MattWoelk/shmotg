@@ -679,6 +679,9 @@ var binnedLineChart = function (data, dataRequester, uniqueID) {
         .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
         .scale(xScale).orient("bottom");
 
+      //d3.selectAll(".tick text").attr("opacity", function (d, i) { console.log(d); return i % 4 * 0.25; });
+      // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
+
       if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
       xAxisContainer.attr("class", "x axis")
         .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
