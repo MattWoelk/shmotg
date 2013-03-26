@@ -136,17 +136,20 @@ mysqlconnection.query(query, function (err, rows, fields) {
         return Math.random() * 6 + 92; // between 92 and 98
       };
 
-      var howManyPointsToGenerate = (parseInt(req.ms_end) - parseInt(req.ms_start)) / 5; // 5 because sampling rate is 200Hz
-      console.log(req.sensor);
+      var msPerSample = 1000 / 200; // 5
+      var msPerBin = Math.pow(2, req.bin_level) * msPerSample;
+      var howManyPointsToGenerate = (parseInt(req.ms_end) - parseInt(req.ms_start)) / msPerBin;
 
       var send_req = [];
 
       if (req.bin_level === 0) {
         // make raw data
+        var dat = req.ms_start - (req.ms_start % msPerBin);
+                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
         for(i=0;i<howManyPointsToGenerate;i++) {
           send_req.push({
             sensor: req.sensor,
-            ms: (req.ms_start % 5) + (i * 5),
+            ms: dat + (i * msPerBin),
             val: randomPoint(),
           })
         }
@@ -154,9 +157,10 @@ mysqlconnection.query(query, function (err, rows, fields) {
         // make binned data
         for(i=0;i<howManyPointsToGenerate;i++) {
           var val = randomPoint();
+          var dat = req.ms_start - (req.ms_start % msPerBin);
           send_req.push({
             sensor: req.sensor,
-            ms: (req.ms_start % 5) + (i * 5),
+            ms: dat + (i * msPerBin),
             bin_level: req.bin_level,
             max_val: val + (Math.random() * 2),
             min_val: val - (Math.random() * 2),

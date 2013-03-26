@@ -592,6 +592,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
       // TODO: see if we need more data
       //     - we will ask binData (through a function) if it has the data
       // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
+      //       ALSO: TODO: only request data once per region. Right now it's requesting as many as it can while you scroll around.
       var newRange = [0, 0];
       newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
       newRange[1] = xScale.domain()[1] + (xdiff / 2);
@@ -605,10 +606,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
       // TODO: make work for special case where filteredRangeData has 0 length
       var distBtwnSamples = filteredRangeData[0].date - filteredRangeData[1].date;
 
-      // This relies on the samples being equally spaced
+      // ASSUMPTION: This relies on the samples being equally spaced
       // if the data doesn't go all the way to the end of what has been rendered:
+      // If we need data at the upper end
       if (newRange[1] - filteredRangeData[0].date > distBtwnSamples) {
-        // we need data at the upper end
         sendARequest = true;
         var msRange = [0, 0];
 
@@ -623,6 +624,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
         dataReq(req);
       }
 
+      // If we need data at the lower end
       if (filteredRangeData[filteredRangeData.length - 1].date - newRange[0] > distBtwnSamples) {
         // we need data at the lower end
         sendARequest = true;
@@ -957,20 +959,31 @@ var binnedLineChart = function (data, dataRequester, girder) {
           //console.log(key);
           // TODO: push new data to the end of the array
           if (dat.hasOwnProperty(key)) {
-            //console.log("PUSHING: " + dat);
-            binData[trns[key]].levels[dat.bin_level].push({date: dat.ms, val: dat[key]});
+
+            // See if there is not already an object with that date.
+            if (_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date === dat.ms; })) {
+              //console.log(!_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date; }));
+            } else {
+              console.log("PUSHING: {date: " + dat.ms + ", val: " + dat[key] + "}");
+              // Add a new object to the binData array
+              binData[trns[key]].levels[dat.bin_level].push({date: dat.ms, val: dat[key]});
+            }
           }
         }
-      }
+      })
 
-      // sort the array again ASSUMPTION: all data is at the same bin level
-      //binData[trns[key]].levels[datas[0].bin_level].sort(function (d) { return d.date; });
-    )};
+      // sort the array again ASSUMPTION: everything in datas is at the same bin level
+      binData[trns[key]].levels[datas[0].bin_level].sort(function (a, b) { return a.date - b.date; });
+    };
 
     // TODO: re-bin the new data
 
     // re-render the lines and areas
     my.reRenderTheNextTime(true);
+  }
+
+  my.bd = function () {
+    return binData;
   }
 
   // Getters and Setters }}}

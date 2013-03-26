@@ -343,17 +343,20 @@ socket.on('req_data', function (data) {
   removeFromQueue(received.id);
   var req = received.req;
 
-  // TODO: give the data to the corresponding chart
-  //console.log(req);
+  // deactivate loading icon
+  if (sizeOfQueue() === 0) {
+    setLoadingIcon(false);
+  }
+
+  if (req.length === 0) {
+    console.log("Server returned empty data.");
+    return;
+  }
+
   for (i=0;i<plots.length;i++) {
     if (plots[i].uniqueID() === req[0].sensor) {
       plots[i].addDataToBinData(req);
     }
-  }
-
-  // deactivate loading icon
-  if (sizeOfQueue() === 0) {
-    setLoadingIcon(false);
   }
 });
 
