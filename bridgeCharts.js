@@ -349,9 +349,9 @@ socket.on('req_data', function (data) {
   }
 
   if (req.length === 0) {
-    console.log("Server returned empty data.");
+    //console.log("Server returned empty data.");
     return;
-  }
+  } else { /*console.log("Server returned DATA")*/; }
 
   if (!req[0].bin_level) {
     console.log("RAW DATA RECEIVED");
@@ -359,7 +359,7 @@ socket.on('req_data', function (data) {
 
   for (i=0;i<plots.length;i++) {
     if (plots[i].uniqueID() === req[0].sensor) {
-      plots[i].addDataToBinData(req);
+      plots[i].addDataToBinData(req).reRenderTheNextTime(true).update();
     }
   }
 });

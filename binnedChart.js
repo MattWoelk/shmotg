@@ -338,6 +338,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
   // whether we used the buttons to zoom
   var transitionNextTime = false;
   var reRenderTheNextTime = true;
+  var waitingForServer = false;
+  var freshArrivalFromServer = false;
 
   // Where all data is stored, but NOT rendered d0's
   var binData = {
@@ -539,6 +541,11 @@ var binnedLineChart = function (data, dataRequester, girder) {
                      renderedD0s[key + "Ranges"][whichLevelToRender][0]) * 0.1;
       var ninetyPercentRange = [ renderedD0s[key + "Ranges"][whichLevelToRender][0] + tenDiff ,
                                  renderedD0s[key + "Ranges"][whichLevelToRender][1] - tenDiff ];
+      var xdiff = xScale.domain()[1] - xScale.domain()[0];
+
+      // figure out how much to render:
+      var renderRange = [ xScale.domain()[0] - xdiff,   // render thrice what is necessary.
+                          xScale.domain()[1] + xdiff ]; // (xdiff / 2) for twice
 
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
@@ -547,19 +554,13 @@ var binnedLineChart = function (data, dataRequester, girder) {
         //render the new stuff
         didWeRenderAnything = true;
 
-        // figure out how much to render:
-        var xdiff = xScale.domain()[1] - xScale.domain()[0];
-        var newRange = [0, 0];
-        newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
-        newRange[1] = xScale.domain()[1] + (xdiff / 2);
-
         if (key === 'quartiles') {
           // render AREA d0s
           renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
           renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
 
-          var q1Filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], newRange );
-          var q3Filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], newRange );
+          var q1Filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], renderRange );
+          var q3Filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], renderRange );
 
           renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
             .x(renderFunction)
@@ -567,77 +568,73 @@ var binnedLineChart = function (data, dataRequester, girder) {
             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
             .interpolate( interpolationMethod )(q1Filter);
 
-          renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
-          // TODO: Is this ^^^ even being used anymore for anything ???
         } else {
           // render LINES d0s
           renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
 
-          var lineFilter = filterDateToRange(binData[key].levels[whichLevelToRender], newRange);
+          var lineFilter = filterDateToRange(binData[key].levels[whichLevelToRender], renderRange);
 
           renderedD0s[key][whichLevelToRender] = d3.svg.line()
             .x(renderFunction)
             .y(function (d, i) { return yScale(d.val); })
             .interpolate( interpolationMethod )(lineFilter);
 
-          renderedD0s[key + "Ranges"][whichLevelToRender] = [newRange[0], newRange[1]];
-          // TODO: Is this ^^^ even being used anymore for anything ???
         } // if quartiles else lines
+
+        // update the Ranges of rendered data
+        renderedD0s[key + "Ranges"][whichLevelToRender] = [renderRange[0], renderRange[1]];
       } // if we should render anything
     } // for
 
     // If we rendered anything, see if we need more data from the server
     // AKA see if we didn't have enough data to render the entire domain.
-    if (didWeRenderAnything) {
+    if (didWeRenderAnything && !waitingForServer && !freshArrivalFromServer) {
       // TODO: see if we need more data
       //     - we will ask binData (through a function) if it has the data
       // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
       //       ALSO: TODO: only request data once per region. Right now it's requesting as many as it can while you scroll around.
-      var newRange = [0, 0];
-      newRange[0] = xScale.domain()[0] - (xdiff / 2); // render twice what is necessary.
-      newRange[1] = xScale.domain()[1] + (xdiff / 2);
 
       var key = binData.keys[0]; // any will do; pick the first one.
       var filteredRangeData = _.filter(binData[key].levels[whichLevelToRender], function (d, i) {
-        return d.date <= newRange[1] && d.date >= newRange[0];
+        return d.date <= renderRange[1] && d.date >= renderRange[0];
       });
-      // Note: filteredRangeData's dates are in order highest --> lowest
+      filteredRangeData = filteredRangeData.sort(function (a, b) { return a.date - b.date; });
+      // Note: filteredRangeData's dates are in order lowest --> highest
 
       // TODO: make work for special case where filteredRangeData has 0 length
-      var distBtwnSamples = filteredRangeData[0].date - filteredRangeData[1].date;
+      var distBtwnSamples = filteredRangeData[1].date - filteredRangeData[0].date;
 
       // ASSUMPTION: This relies on the samples being equally spaced
       // if the data doesn't go all the way to the end of what has been rendered:
       // If we need data at the upper end
-      if (newRange[1] - filteredRangeData[0].date > distBtwnSamples) {
-        sendARequest = true;
-        var msRange = [0, 0];
-
+      if ( renderRange[1] - filteredRangeData[filteredRangeData.length - 1].date > distBtwnSamples) {
         // build and send the request
         var req = {
           sensor: whichGirder,
-          ms_start: filteredRangeData[0].date, // exact point
-          ms_end: newRange[1],   // could round either way on the server and be fine
+          ms_start: filteredRangeData[filteredRangeData.length - 1].date, // exact point
+          ms_end: renderRange[1], // could round either way on the server and be fine
           bin_level: whichLevelToRender,
         };
 
+        //console.log("range requested - upper end: " + new Date(filteredRangeData[filteredRangeData.length - 1].date) + ", " + new Date(renderRange[1]));
+
+        waitingForServer = true;
         dataReq(req);
       }
 
       // If we need data at the lower end
-      if (filteredRangeData[filteredRangeData.length - 1].date - newRange[0] > distBtwnSamples) {
-        // we need data at the lower end
-        sendARequest = true;
-        var msRange = [0, 0];
-
+      if (filteredRangeData[0].date - renderRange[0] > distBtwnSamples) {
         // build and send the request
         var req = {
           sensor: whichGirder,
-          ms_start: newRange[0], // could round either way on the server and be fine
-          ms_end: filteredRangeData[filteredRangeData.length - 1].date, // exact point
+          ms_start: renderRange[0],   // could round either way on the server and be fine
+          ms_end: filteredRangeData[0].date, // exact point
           level: whichLevelToRender,
         };
 
+        //console.log("range requested - lower end: " + new Date(renderRange[0]) + ", " + new Date(filteredRangeData[0].date));
+
+        waitingForServer = true;
         dataReq(req);
       }
 
@@ -648,6 +645,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     }
 
     reRenderTheNextTime = false;
+    freshArrivalFromServer = false;
 
     // GENERATE ALL d0s. (generate the lines paths) }}}
 
@@ -918,28 +916,12 @@ var binnedLineChart = function (data, dataRequester, girder) {
   }
 
   my.addDataToBinData = function (datas) {
-    // TODO: add data to binData IN THE CORRECT ORDER
+    // add data to binData IN THE CORRECT ORDER
 
-    // translate from:
-    // datas = [{ sensor: x,
-    //            ms: y,
-    //            val: z },
-    //          { etc... },
-    //          ...
-    //          }]
-    // or:
-    // datas = [{ sensor: x,
-    //            ms: y,
-    //            bin_level: b,
-    //            max_val: d_1,
-    //            min_val: d_2,
-    //            avg_val: d_3,
-    //            q1_val: d_4,
-    //            q3_val: d_5 },
-    //          { etc... },
-    //          ...
-    //          }]
-    // to: how binData is
+    if (datas.length === 0) {
+      console.log("NO DATA");
+      return my;
+    }
 
     var trns = {
       'max_val': 'maxes',
@@ -950,36 +932,38 @@ var binnedLineChart = function (data, dataRequester, girder) {
       'val'    : 'rawData',
     }
 
-    // TODO: make special case for raw data (right now it would be ... umm... it might be working ?? )
-
-    for (var key in trns) {
-      datas.forEach (function (dat, i) {
+    for (var key in trns) { // for each of max_val, min_val, etc.
+      datas.forEach (function (dat, i) { // for each piece of data we received
         if (trns.hasOwnProperty(key)) {
-          //console.log(dat);
-          //console.log(key);
           // TODO: push new data to the end of the array
           if (dat.hasOwnProperty(key)) {
 
             // See if there is not already an object with that date.
             if (_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date === dat.ms; })) {
-              //console.log(!_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date; }));
+              // We already have that data point
             } else {
-              console.log("PUSHING: {date: " + dat.ms + ", val: " + dat[key] + "}");
               // Add a new object to the binData array
               binData[trns[key]].levels[dat.bin_level].push({date: dat.ms, val: dat[key]});
+              //renderedD0s[trns[key] + "Ranges"][datas[0].bin_level] = [renderRange[0], renderRange[1]]; // update the rendered range
             }
+
           }
         }
-      })
+      }) // for each received data point
 
       // sort the array again ASSUMPTION: everything in datas is at the same bin level
-      binData[trns[key]].levels[datas[0].bin_level].sort(function (a, b) { return a.date - b.date; });
-    };
+      if (!!binData[trns[key]].levels[datas[0].bin_level]) { // if we have data at this level (this case is for rawData)
+        binData[trns[key]].levels[datas[0].bin_level].sort(function (a, b) { return a.date - b.date; });
+      }
+    }; // for each of max_val, min_val, etc.
 
     // TODO: re-bin the new data
 
     // re-render the lines and areas
-    my.reRenderTheNextTime(true);
+    //my.reRenderTheNextTime(true);
+    waitingForServer = false;
+    freshArrivalFromServer = true;
+    return my;
   }
 
   my.bd = function () {
