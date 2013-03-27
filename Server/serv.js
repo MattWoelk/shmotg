@@ -130,10 +130,11 @@ mysqlconnection.query(query, function (err, rows, fields) {
       console.log("client req: " + JSON.stringify(received));
 
       // TODO: actually bin and send more data
+      // TODO: to start, bin randomly-generated data
 
       // TODO: send randomly generated data (temporary)
       var randomPoint = function () {
-        return Math.random() * 6 + 92; // between 92 and 98
+        return Math.random() * 2 + 94; // between 94 and 96
       };
 
       var msPerSample = 1000 / 200; // 5
@@ -157,16 +158,20 @@ mysqlconnection.query(query, function (err, rows, fields) {
         // make binned data
         for(i=0;i<howManyPointsToGenerate;i++) {
           var val = randomPoint();
-          var dat = req.ms_start - (req.ms_start % msPerBin);
+          var val_q1 = val - (Math.random() * 1.2);
+          var val_q3 = val + (Math.random() * 1.2);
+          var val_min = val_q1 - (Math.random() * 2);
+          var val_max = val_q3 + (Math.random() * 2);
+          var dat = req.ms_start - (req.ms_start % msPerBin) - 5; // TODO: magic hack
           send_req.push({
             sensor: req.sensor,
             ms: dat + (i * msPerBin),
             bin_level: req.bin_level,
-            max_val: val + (Math.random() * 2),
-            min_val: val - (Math.random() * 2),
+            max_val: val + (Math.random() * 2) + 2,
+            min_val: val - (Math.random() * 2) - 2,
             avg_val: val,
-            q1_val: val - (Math.random() * 1),
-            q3_val: val + (Math.random() * 1),
+            q1_val: val - (Math.random() * 2),
+            q3_val: val + (Math.random() * 2),
           })
         }
       }

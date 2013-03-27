@@ -353,6 +353,10 @@ socket.on('req_data', function (data) {
     return;
   }
 
+  if (!req[0].bin_level) {
+    console.log("RAW DATA RECEIVED");
+  }
+
   for (i=0;i<plots.length;i++) {
     if (plots[i].uniqueID() === req[0].sensor) {
       plots[i].addDataToBinData(req);
