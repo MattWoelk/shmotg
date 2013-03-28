@@ -6,7 +6,7 @@
 // TODO: }}}
 
 // {{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 10;
+var MAX_NUMBER_OF_BIN_LEVELS = 34;
   // TODO: phase this out (preferable) OR set it as a really high number
 var TIME_CONTEXT_VERTICAL_EACH = 25;
   // vertical size of each section of the user time context system
@@ -601,47 +601,52 @@ var binnedLineChart = function (data, dataRequester, girder) {
       filteredRangeData = filteredRangeData.sort(function (a, b) { return a.date - b.date; });
       // Note: filteredRangeData's dates are in order lowest --> highest
 
-      // TODO: make work for special case where filteredRangeData has 0 length
-      var distBtwnSamples = filteredRangeData[1].date - filteredRangeData[0].date;
-
-      // ASSUMPTION: This relies on the samples being equally spaced
-      // if the data doesn't go all the way to the end of what has been rendered:
-      // If we need data at the upper end
-      if ( renderRange[1] - filteredRangeData[filteredRangeData.length - 1].date > distBtwnSamples) {
+      if (filteredRangeData.length === 0 || filteredRangeData.length === 1) { // we have no data; fill the entire range
+        // We need data in the whole section (we're zoomed out or in to a place where we have no data yet)
         // build and send the request
         var req = {
           sensor: whichGirder,
-          ms_start: filteredRangeData[filteredRangeData.length - 1].date, // exact point
-          ms_end: renderRange[1], // could round either way on the server and be fine
+          ms_start: renderRange[0],
+          ms_end: renderRange[1],
           bin_level: whichLevelToRender,
         };
 
-        //console.log("range requested - upper end: " + new Date(filteredRangeData[filteredRangeData.length - 1].date) + ", " + new Date(renderRange[1]));
-
         waitingForServer = true;
         dataReq(req);
+      } else { // we have data already, and need more on one or both sides of it
+        var distBtwnSamples = filteredRangeData[1].date - filteredRangeData[0].date;
+        // ASSUMPTION: This relies on the samples being equally spaced
+        // if the data doesn't go all the way to the end of what has been rendered:
+        if ( renderRange[1] - filteredRangeData[filteredRangeData.length - 1].date > distBtwnSamples) {
+          // If we need data at the upper end
+
+          // build and send the request
+          var req = {
+            sensor: whichGirder,
+            ms_start: filteredRangeData[filteredRangeData.length - 1].date, // exact point
+            ms_end: renderRange[1], // could round either way on the server and be fine
+            bin_level: whichLevelToRender,
+          };
+
+          waitingForServer = true;
+          dataReq(req);
+        }
+
+        if (filteredRangeData[0].date - renderRange[0] > distBtwnSamples) {
+          // If we need data at the lower end
+
+          // build and send the request
+          var req = {
+            sensor: whichGirder,
+            ms_start: renderRange[0],   // could round either way on the server and be fine
+            ms_end: filteredRangeData[0].date, // exact point
+            bin_level: whichLevelToRender,
+          };
+
+          waitingForServer = true;
+          dataReq(req);
+        }
       }
-
-      // If we need data at the lower end
-      if (filteredRangeData[0].date - renderRange[0] > distBtwnSamples) {
-        // build and send the request
-        var req = {
-          sensor: whichGirder,
-          ms_start: renderRange[0],   // could round either way on the server and be fine
-          ms_end: filteredRangeData[0].date, // exact point
-          bin_level: whichLevelToRender,
-        };
-
-        //console.log("range requested - lower end: " + new Date(renderRange[0]) + ", " + new Date(filteredRangeData[0].date));
-
-        waitingForServer = true;
-        dataReq(req);
-      }
-
-
-      // TODO: is this happening twice as often as necessary?
-      //       - console.log(distBtwnSamples) for evidence.
-      //console.log(distBtwnSamples);
     }
 
     reRenderTheNextTime = false;
