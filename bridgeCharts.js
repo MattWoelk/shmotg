@@ -349,7 +349,7 @@ socket.on('req_data', function (data) {
   }
 
   if (req.length === 0) {
-    //console.log("Server returned empty data.");
+    console.log("Server returned empty data.");
     return;
   } else { /*console.log("Server returned DATA")*/; }
 

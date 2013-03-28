@@ -629,7 +629,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
           sensor: whichGirder,
           ms_start: renderRange[0],   // could round either way on the server and be fine
           ms_end: filteredRangeData[0].date, // exact point
-          level: whichLevelToRender,
+          bin_level: whichLevelToRender,
         };
 
         //console.log("range requested - lower end: " + new Date(renderRange[0]) + ", " + new Date(filteredRangeData[0].date));
