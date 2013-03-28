@@ -36,8 +36,8 @@ var handler = function (req, res) {
 // because we're sending milliseconds instead of
 // date strings, but it's nice to have around. :)
 Date.prototype.toJSON = function (key) {
-  console.log("key: ");
-  console.log(key, this);
+  //console.log("key: ");
+  //console.log(key, this);
   return this + "";
 };
 
@@ -70,6 +70,9 @@ var girder = 1;
 //query = 'SELECT ESGgirder' + girder + ' FROM SPBRTData_Truck LIMIT 10'; // grab 10 entries (LIMIT 10)
 //query = 'SELECT * FROM SPBRTData_0A LIMIT 10'; // grab 10 entries (LIMIT 10)
 query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
+
+// TODO: make a query which selects a time range (more difficult than it should be)
+//query = "SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A WHERE Time between 'Mon Jan 02 2010 23:12:29 GMT-0600 (CST)' AND 'Mon Jan 02 2010 23:12:30 GMT-0600 (CST)' LIMIT 10";
 
 //-- TODO: new data section --//
 //var dat = Date.parse("Thu, 01 Jan 1970 00:00:00 GMT-0400");
@@ -115,8 +118,71 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
   io.sockets.on('connection', function (socket) {
     socket.emit('news', send_to_user);
+
     socket.on('ack', function (data) {
       console.log("client: " + data); //ack
+    });
+
+    socket.on('req', function (sendReq) {
+      var received = JSON.parse(sendReq);
+      var req = received.req;
+      var id = received.id;
+      console.log("client req: " + JSON.stringify(received));
+
+      // TODO: actually bin and send more data
+      // TODO: to start, bin randomly-generated data
+
+      // TODO: send randomly generated data (temporary)
+      var randomPoint = function () {
+        return Math.random() * 2 + 94; // between 94 and 96
+      };
+
+      var msPerSample = 1000 / 200; // 5
+      var msPerBin = Math.pow(2, req.bin_level) * msPerSample;
+      var howManyPointsToGenerate = (parseInt(req.ms_end) - parseInt(req.ms_start)) / msPerBin;
+
+      var send_req = [];
+
+      if (req.bin_level === 0) {
+        // make raw data
+        var dat = req.ms_start - (req.ms_start % msPerBin);
+                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
+        for(i=0;i<howManyPointsToGenerate;i++) {
+          send_req.push({
+            sensor: req.sensor,
+            ms: dat + (i * msPerBin),
+            val: randomPoint(),
+          })
+        }
+      } else {
+        // make binned data
+        for(i=0;i<howManyPointsToGenerate;i++) {
+          var val = randomPoint();
+          var val_q1 = val - (Math.random() * 1.2);
+          var val_q3 = val + (Math.random() * 1.2);
+          var val_min = val_q1 - (Math.random() * 2);
+          var val_max = val_q3 + (Math.random() * 2);
+          var dat = req.ms_start - (req.ms_start % msPerBin) - 5; // TODO: magic hack
+          send_req.push({
+            sensor: req.sensor,
+            ms: dat + (i * msPerBin),
+            bin_level: req.bin_level,
+            max_val: val + (Math.random() * 2) + 2,
+            min_val: val - (Math.random() * 2) - 2,
+            avg_val: val,
+            q1_val: val - (Math.random() * 2),
+            q3_val: val + (Math.random() * 2),
+          })
+        }
+      }
+
+
+      // TODO: send requested data to client
+      var toBeSent = {
+        id: id,
+        req: send_req };
+
+      socket.emit('req_data', JSON.stringify(toBeSent));
     });
   });
 });
