@@ -1,10 +1,3 @@
-//{{{ TODO AND NOTES:
-//  Translate for the object is HUGE. That means that some other translate must also be big, for them to cancel out and be near zero on-screen.
-//  CURRENT TASK:
-//      Only render what is on-screen.
-//      - See "new section" for the beginnings of a fix for this.
-// TODO: }}}
-
 // {{{ CONSTANTS
 var MAX_NUMBER_OF_BIN_LEVELS = 34;
   // TODO: phase this out (preferable) OR set it as a really high number
@@ -923,6 +916,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
     return my;
   }
 
+  my.binData = function () { // TODO: just for testing
+    return binData;
+  }
+
   my.addDataToBinData = function (datas) {
     // add data to binData IN THE CORRECT ORDER
 
@@ -945,13 +942,14 @@ var binnedLineChart = function (data, dataRequester, girder) {
         if (trns.hasOwnProperty(key)) {
           // TODO: push new data to the end of the array
           if (dat.hasOwnProperty(key)) {
-
+            console.log(trns[key]);
             // See if there is not already an object with that date.
             if (_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date === dat.ms; })) {
               // We already have that data point
             } else {
               // Add a new object to the binData array
-              binData[trns[key]].levels[dat.bin_level].push({date: dat.ms, val: dat[key]});
+              var bl = dat.bin_level ? dat.bin_level : 0;
+              binData[trns[key]].levels[bl].push({date: dat.ms, val: dat[key]});
               //renderedD0s[trns[key] + "Ranges"][datas[0].bin_level] = [renderRange[0], renderRange[1]]; // update the rendered range
             }
 
@@ -960,7 +958,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
       }) // for each received data point
 
       // sort the array again ASSUMPTION: everything in datas is at the same bin level
-      if (!!binData[trns[key]].levels[datas[0].bin_level]) { // if we have data at this level (this case is for rawData)
+      if (!!binData[trns[key]].levels[datas[0].bin_level]) {
+        // if we have data at this level
+        // (this case is for rawData and for levels which haven't yet been taken from the server)
+        console.log("RAW DATUH");
         binData[trns[key]].levels[datas[0].bin_level].sort(function (a, b) { return a.date - b.date; });
       }
     }; // for each of max_val, min_val, etc.
