@@ -149,7 +149,7 @@ var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, inter
   }
 
   var j = 0;
-  for (var keyValue in bin['keys']){ // for each of 'average', 'max', 'min'
+  for (var keyValue in bin.keys){ // for each of 'average', 'max', 'min'
     var key = bin.keys[keyValue];
 
     if (whichLines.indexOf(key) > -1){
@@ -217,16 +217,16 @@ var binTheDataWithFunction = function (bin, curLevel, key, func) {
   var i = 0;
   for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
     if (bin[key].levels[curLevel][i+1]){
-      var newdate = bin['q1'].levels[curLevel][i/*+1*/].date;
+      var newdate = bin.q1.levels[curLevel][i/*+1*/].date;
 
       if (key === 'q1' || key === 'q3') {
-        //console.log( bin['q1'].levels[curLevel][i+1].date );
+        //console.log( bin.q1.levels[curLevel][i+1].date );
 
         bDat.push({ val:  func(
-              bin['q1'].levels[curLevel][i].val,
-              bin['q1'].levels[curLevel][i+1].val,
-              bin['q3'].levels[curLevel][i].val,
-              bin['q3'].levels[curLevel][i+1].val)
+              bin.q1.levels[curLevel][i].val,
+              bin.q1.levels[curLevel][i+1].val,
+              bin.q3.levels[curLevel][i].val,
+              bin.q3.levels[curLevel][i+1].val)
             , date: newdate }); // This is messy and depends on a lot of things
       }else{
         bDat.push( { val: func(
@@ -444,7 +444,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
   // - make this a function instead of being only in the initialization routine
   binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms }; });
 
-  for (var keyValue in binData['keys']){ // set level 0 data for each of 'average', 'max', 'min', etc.
+  for (var keyValue in binData.keys){ // set level 0 data for each of 'average', 'max', 'min', etc.
     binData[binData.keys[keyValue]].levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms}; });
     var j = 0;
     for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // add a new object for each bin level
@@ -453,10 +453,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
   }
 
   for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-    for (var keyValue in binData['keys']){ // for each of 'average', 'max', 'min', etc.
+    for (var keyValue in binData.keys){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
       binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.val, date: num.ms }; });
-      binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key]['func']);
+      binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key].func);
     }
   }
 
@@ -549,13 +549,13 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
         if (key === 'quartiles') {
           // render AREA d0s
-          renderedD0s["q1"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
-          renderedD0s["q3"][0] = renderedD0s["rawData"][0]; // TODO: learn to do without this line
+          //renderedD0s.q1[0] = renderedD0s.rawData[0]; // TODO: learn to do without this line
+          //renderedD0s.q3[0] = renderedD0s.rawData[0]; // TODO: learn to do without this line
 
-          var q1Filter = filterDateToRange( binData["q1"].levels[whichLevelToRender], renderRange );
-          var q3Filter = filterDateToRange( binData["q3"].levels[whichLevelToRender], renderRange );
+          var q1Filter = filterDateToRange( binData.q1.levels[whichLevelToRender], renderRange );
+          var q3Filter = filterDateToRange( binData.q3.levels[whichLevelToRender], renderRange );
 
-          renderedD0s["quartiles"][whichLevelToRender] = d3.svg.area()
+          renderedD0s.quartiles[whichLevelToRender] = d3.svg.area()
             .x(renderFunction)
             .y0(function (d, i) { return yScale( q1Filter[i].val ); }) //.val
             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
@@ -563,10 +563,14 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
         } else {
           // render LINES d0s
-          renderedD0s[key][0] = renderedD0s['rawData'][0]; // TODO: learn to do without this line
+          renderedD0s[key][0] = renderedD0s.rawData[0]; // TODO: learn to do without this line
+          // TODO TODO TODO: renderedD0s.rawData doesn't get updated when we get new binData
 
           var lineFilter = filterDateToRange(binData[key].levels[whichLevelToRender], renderRange);
 
+          if (whichLevelToRender === 0){
+            console.log("DOING FOR RAW DATA " + key + ", " + lineFilter.length);
+          }
           renderedD0s[key][whichLevelToRender] = d3.svg.line()
             .x(renderFunction)
             .y(function (d, i) { return yScale(d.val); })
@@ -949,6 +953,9 @@ var binnedLineChart = function (data, dataRequester, girder) {
             } else {
               // Add a new object to the binData array
               var bl = dat.bin_level ? dat.bin_level : 0;
+              if (bl === 0) {
+                console.log(dat.ms + ", " + dat[key]);
+              }
               binData[trns[key]].levels[bl].push({date: dat.ms, val: dat[key]});
               //renderedD0s[trns[key] + "Ranges"][datas[0].bin_level] = [renderRange[0], renderRange[1]]; // update the rendered range
             }
@@ -961,7 +968,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
       if (!!binData[trns[key]].levels[datas[0].bin_level]) {
         // if we have data at this level
         // (this case is for rawData and for levels which haven't yet been taken from the server)
-        console.log("RAW DATUH");
+        console.log("nothing is at this bin level, yet");
         binData[trns[key]].levels[datas[0].bin_level].sort(function (a, b) { return a.date - b.date; });
       }
     }; // for each of max_val, min_val, etc.
