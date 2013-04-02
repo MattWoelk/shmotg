@@ -439,9 +439,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
   //{{{ POPULATE THE BINNED DATAS (binData)
 
-  // TODO TODO TODO:
-  // - change this so that even if we don't have data at the first level, we'll bin higher levels
-  // - make this a function instead of being only in the initialization routine
   binData.rawData.levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms }; });
 
   for (var keyValue in binData.keys){ // set level 0 data for each of 'average', 'max', 'min', etc.
@@ -452,6 +449,9 @@ var binnedLineChart = function (data, dataRequester, girder) {
     }
   }
 
+  // TODO TODO TODO:
+  // - change this so that even if we don't have data at the first level, we'll bin higher levels
+  // - make this a function instead of being only in the initialization routine
   for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
     for (var keyValue in binData.keys){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
