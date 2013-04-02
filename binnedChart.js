@@ -455,7 +455,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
   for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
     for (var keyValue in binData.keys){ // for each of 'average', 'max', 'min', etc.
       var key = binData.keys[keyValue];
-      binData[key].levels[0] = _.map(data, function (num, py) { return {val: num.val, date: num.ms }; });
+      binData[key].levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms }; });
       binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key].func);
     }
   }
