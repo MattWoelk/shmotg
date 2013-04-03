@@ -211,7 +211,43 @@ function goToLevel(scal, msPS) {
   return toLevel;
 }
 
-// Bin the data into abstracted bins
+// Bin 'bin' into abstracted bins
+function binAll (bin, raw) {
+  if (raw) { // if we are replacing the raw data with new data
+    for (var keyValue in bin.keys) {
+      var key = bin.keys[keyValue];
+      bin[key].levels[0] = _.map(raw, function (num) { return {val: num.val, date: num.ms }; });
+      // ^ necessary due to do this first, because of
+      //   the dependencies between q1 and q3
+    }
+  }
+
+  // for each level other than raw data level, for each key, bin the data from the lower level
+  for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
+    for (var keyValue in bin.keys) { // for each of 'average', 'max', 'min', etc.
+      var key = bin.keys[keyValue];
+
+      // store new data
+      var newData = binTheDataWithFunction(bin, j-1, key, bin[key].func);
+
+      // get range of new data
+      var range = [_.min(newData, function (d) { return d.date; }).date,
+                   _.max(newData, function (d) { return d.date; }).date];
+
+      // filter for old data which is outside the range of the new data
+      // (newly binned data gets preference over previously binned data)
+      var oldFiltered = _.filter(bin[key].levels[j], function (d) { return d.date < range[0] || d.date > range[1]; });
+
+      // combine and sort old and new
+      var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.date - b.date; });
+
+      // store combination
+      bin[key].levels[j] = combo;
+    }
+  }
+}
+
+// Bin the data in a level into abstracted bins
 var binTheDataWithFunction = function (bin, curLevel, key, func) {
   var bDat = new Array();
   var i = 0;
@@ -449,16 +485,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     }
   }
 
-  // TODO TODO TODO:
-  // - change this so that even if we don't have data at the first level, we'll bin higher levels
-  // - make this a function instead of being only in the initialization routine
-  for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-    for (var keyValue in binData.keys){ // for each of 'average', 'max', 'min', etc.
-      var key = binData.keys[keyValue];
-      binData[key].levels[0] = _.map(data, function (num) { return {val: num.val, date: num.ms }; });
-      binData[key].levels[j] = binTheDataWithFunction(binData, j-1, key, binData[key].func);
-    }
-  }
+  binAll(binData, data);
 
   // POPULATE THE BINNED DATAS (binData) }}}
 
@@ -974,6 +1001,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     }; // for each of max_val, min_val, etc.
 
     // TODO: re-bin the new data
+    binAll(binData, false);
 
     // re-render the lines and areas
     //my.reRenderTheNextTime(true);
