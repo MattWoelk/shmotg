@@ -92,7 +92,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
        .attr("transform", transformScale(scal, renScale, mar));
   } else {
     sel.attr("opacity", function (d) { return bin[d.type].opacity; })
-       .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this
+       .attr("d", function (d, i) { return d0s[d.type][d.which]; }) // TODO: remove this ??
        .attr("transform", transformScale(scal, renScale, mar));
   }
 
@@ -213,12 +213,15 @@ function goToLevel(scal, msPS) {
 
 // Bin 'bin' into abstracted bins
 function binAll (bin, raw) {
-  if (raw) { // if we are replacing the raw data with new data
-    for (var keyValue in bin.keys) {
-      var key = bin.keys[keyValue];
+  for (var keyValue in bin.keys) {
+    var key = bin.keys[keyValue];
+      if (raw) { // if we are replacing the raw data with new data
       bin[key].levels[0] = _.map(raw, function (num) { return {val: num.val, date: num.ms }; });
       // ^ necessary due to do this first, because of
       //   the dependencies between q1 and q3
+    } else {
+      // if we don't have alternative raw data, update from what's already there.
+      bin[key].levels[0] = bin.rawData.levels[0];
     }
   }
 
@@ -330,6 +333,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
   // TODO: sync this with the one in bridgecharts.js
   //       - can't do, because we're changing top depending
   //         on if we're showing time context
+  //       - unless we make it a new offset variable instead of reusing margin
   var margin = {top: 10, right: 27, bottom: 25, left: 40};
 
   // the height of the chart by itself (not including axes or time context)
@@ -441,16 +445,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
   //{{{ HELPER METHODS
 
-  //TODO:
-  //    - need a function here which requests specific data from bridgecharts.js
-  //    - need a function in bridgecharts.js which requests that data from the server
-  //    - each bridgeChart.js will be asking for different data (from different girders) so there won't be redundancy :)
-  function requestForData(dat) {
-    // send a request to bridgecharts.js for specific data
-    // request: [Date, Date]
-    // receive: not in this function. TODO: make a new function which updates binData.
-  }
-
   // This is the function used to render the data at a specific size.
   var renderFunction = function (d) {
     // See transformScale for the inverse.
@@ -516,13 +510,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
     // Currently, we are abandoning non-contiguous values as if they don't exist. This may be just fine. :)
     // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
 
-    //var findTimeRange = function (arr) {
-    //TODO: use getTime instead
-    //  var max = _.max(arr, function (d) { return d.date; /* TODO: define structure */ }).date; /* TODO: define structure */
-    //  var min = _.min(arr, function (d) { return d.date; /* TODO: define structure */ }).date; /* TODO: define structure */
-    //  return [min, max];
-    //};
-
     // Choose which d0s need to be generated
     // based on which keys are active.
     var renderThis = [];
@@ -569,15 +556,11 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
-        // TODO: this is happening roughly every 4th of the screen moving instead of every half screen
-        //       evidence: look at the server output
         //render the new stuff
         didWeRenderAnything = true;
 
         if (key === 'quartiles') {
           // render AREA d0s
-          //renderedD0s.q1[0] = renderedD0s.rawData[0]; // TODO: learn to do without this line
-          //renderedD0s.q3[0] = renderedD0s.rawData[0]; // TODO: learn to do without this line
 
           var q1Filter = filterDateToRange( binData.q1.levels[whichLevelToRender], renderRange );
           var q3Filter = filterDateToRange( binData.q3.levels[whichLevelToRender], renderRange );
@@ -590,14 +573,9 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
         } else {
           // render LINES d0s
-          renderedD0s[key][0] = renderedD0s.rawData[0]; // TODO: learn to do without this line
-          // TODO TODO TODO: renderedD0s.rawData doesn't get updated when we get new binData
 
           var lineFilter = filterDateToRange(binData[key].levels[whichLevelToRender], renderRange);
 
-          if (whichLevelToRender === 0){
-            console.log("DOING FOR RAW DATA " + key + ", " + lineFilter.length);
-          }
           renderedD0s[key][whichLevelToRender] = d3.svg.line()
             .x(renderFunction)
             .y(function (d, i) { return yScale(d.val); })
@@ -613,10 +591,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     // If we rendered anything, see if we need more data from the server
     // AKA see if we didn't have enough data to render the entire domain.
     if (didWeRenderAnything && !waitingForServer && !freshArrivalFromServer) {
-      // TODO: see if we need more data
-      //     - we will ask binData (through a function) if it has the data
       // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
-      //       ALSO: TODO: only request data once per region. Right now it's requesting as many as it can while you scroll around.
 
       var key = binData.keys[0]; // any will do; pick the first one.
       var filteredRangeData = _.filter(binData[key].levels[whichLevelToRender], function (d, i) {
@@ -971,36 +946,30 @@ var binnedLineChart = function (data, dataRequester, girder) {
     for (var key in trns) { // for each of max_val, min_val, etc.
       datas.forEach (function (dat, i) { // for each piece of data we received
         if (trns.hasOwnProperty(key)) {
-          // TODO: push new data to the end of the array
+          // push new data to the end of the array
           if (dat.hasOwnProperty(key)) {
-            console.log(trns[key]);
             // See if there is not already an object with that date.
             if (_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date === dat.ms; })) {
               // We already have that data point
             } else {
-              // Add a new object to the binData array
               var bl = dat.bin_level ? dat.bin_level : 0;
-              if (bl === 0) {
-                console.log(dat.ms + ", " + dat[key]);
-              }
+              // Add a new object to the binData array
               binData[trns[key]].levels[bl].push({date: dat.ms, val: dat[key]});
-              //renderedD0s[trns[key] + "Ranges"][datas[0].bin_level] = [renderRange[0], renderRange[1]]; // update the rendered range
             }
-
           }
         }
       }) // for each received data point
 
       // sort the array again ASSUMPTION: everything in datas is at the same bin level
-      if (!!binData[trns[key]].levels[datas[0].bin_level]) {
+      var bl = datas[0].bin_level ? datas[0].bin_level : 0;
+      if (!!binData[trns[key]].levels[bl]) {
         // if we have data at this level
         // (this case is for rawData and for levels which haven't yet been taken from the server)
-        console.log("nothing is at this bin level, yet");
-        binData[trns[key]].levels[datas[0].bin_level].sort(function (a, b) { return a.date - b.date; });
+        binData[trns[key]].levels[bl].sort(function (a, b) { return a.date - b.date; });
       }
     }; // for each of max_val, min_val, etc.
 
-    // TODO: re-bin the new data
+    // re-bin the new data
     binAll(binData, false);
 
     // re-render the lines and areas

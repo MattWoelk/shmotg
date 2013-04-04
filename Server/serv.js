@@ -136,6 +136,9 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var randomPoint = function () {
         return Math.random() * 2 + 94; // between 94 and 96
       };
+      var randomPointRaw = function () {
+        return Math.random() * 8 + 91; // between 91 and 99
+      };
 
       var msPerSample = 1000 / 200; // 5
       var msPerBin = Math.pow(2, req.bin_level) * msPerSample;
@@ -151,7 +154,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
           send_req.push({
             sensor: req.sensor,
             ms: dat + (i * msPerBin),
-            val: randomPoint(),
+            val: randomPointRaw(),
           })
         }
       } else {

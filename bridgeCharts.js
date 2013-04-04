@@ -118,7 +118,6 @@ function initPlot(data, first) {
 
   redraw();
 
-  //d3.select("#charts").attr("height", 120*plots.length).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
   d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
 
   zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
@@ -273,7 +272,6 @@ socket.on('news', function (data) {
   if (!firstTime) {
     return;
   }
-  // TODO: extract data about which "level" the data is for.
   // SPB is 200Hz
 
   firstTime = false;
@@ -351,11 +349,7 @@ socket.on('req_data', function (data) {
   if (req.length === 0) {
     console.log("Server returned empty data.");
     return;
-  } else { /*console.log("Server returned DATA")*/; }
-
-  if (!req[0].bin_level) {
-    console.log("RAW DATA RECEIVED");
-  }
+  }// else { console.log("Server returned DATA"); }
 
   for (i=0;i<plots.length;i++) {
     if (plots[i].uniqueID() === req[0].sensor) {
