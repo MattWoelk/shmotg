@@ -1,5 +1,5 @@
 // {{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 34;
+var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with Server/serv.js
   // TODO: phase this out (preferable) OR set it as a really high number
 var TIME_CONTEXT_VERTICAL_EACH = 25;
   // vertical size of each section of the user time context system
@@ -212,17 +212,10 @@ function goToLevel(scal, msPS) {
 }
 
 // Bin 'bin' into abstracted bins
-function binAll (bin, raw) {
+function binAll (bin) {
   for (var keyValue in bin.keys) {
     var key = bin.keys[keyValue];
-      if (raw) { // if we are replacing the raw data with new data
-      bin[key].levels[0] = _.map(raw, function (num) { return {val: num.val, date: num.ms }; });
-      // ^ necessary due to do this first, because of
-      //   the dependencies between q1 and q3
-    } else {
-      // if we don't have alternative raw data, update from what's already there.
-      bin[key].levels[0] = bin.rawData.levels[0];
-    }
+    bin[key].levels[0] = bin.rawData.levels[0]; // update raw data from the source
   }
 
   // for each level other than raw data level, for each key, bin the data from the lower level
@@ -479,7 +472,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     }
   }
 
-  binAll(binData, data);
+  binAll(binData);
 
   // POPULATE THE BINNED DATAS (binData) }}}
 
@@ -970,7 +963,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     }; // for each of max_val, min_val, etc.
 
     // re-bin the new data
-    binAll(binData, false);
+    binAll(binData);
 
     // re-render the lines and areas
     //my.reRenderTheNextTime(true);

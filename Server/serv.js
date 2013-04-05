@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
 var d3 = require("d3");
+var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
@@ -13,6 +14,43 @@ var jsonData = [ { "ESGgirder1" : -47.8500 }, { "ESGgirder1" : -39.3800 }, { "ES
 
 var jsonData = fs.readFileSync(__dirname + '/esg_time.js').toString(); // block while getting the girder contents.
 
+var sensorBins = []; // an array of binData in the following form:
+                     // sensorBins = [ { sensor: 'ESGgirder18', binData: [just like in binnedChart.js] },
+                     //                { sensor: 'another', binData: [etc.]},
+                     //                { etc ... }]
+
+
+// Bin 'bin' into abstracted bins
+function binAll (bin) {
+  for (var keyValue in bin.keys) {
+    var key = bin.keys[keyValue];
+    bin[key].levels[0] = bin.rawData.levels[0]; // update raw data from the source
+  }
+
+  // for each level other than raw data level, for each key, bin the data from the lower level
+  for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
+    for (var keyValue in bin.keys) { // for each of 'average', 'max', 'min', etc.
+      var key = bin.keys[keyValue];
+
+      // store new data
+      var newData = binTheDataWithFunction(bin, j-1, key, bin[key].func);
+
+      // get range of new data
+      var range = [_.min(newData, function (d) { return d.date; }).date,
+                   _.max(newData, function (d) { return d.date; }).date];
+
+      // filter for old data which is outside the range of the new data
+      // (newly binned data gets preference over previously binned data)
+      var oldFiltered = _.filter(bin[key].levels[j], function (d) { return d.date < range[0] || d.date > range[1]; });
+
+      // combine and sort old and new
+      var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.date - b.date; });
+
+      // store combination
+      bin[key].levels[j] = combo;
+    }
+  }
+}
 
 var handler = function (req, res) {
   // for html:
@@ -129,10 +167,27 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var id = received.id;
       console.log("client req: " + JSON.stringify(received));
 
-      // TODO: actually bin and send more data
-      // TODO: to start, bin randomly-generated data
+      // TODO: see if we have the requested data at the requested bin level
+      //       AND make sure it's gapless.
+      //       - Make it its own function, because binnedChart.js will need it, too.
 
-      // TODO: send randomly generated data (temporary)
+      // TODO: if we don't have what we need, calculate what raw data we need from the server
+
+      // TODO: request raw data where needed from database
+      // TODO: - (temporary) generate random data where needed
+
+      // TODO: add the data to out raw data
+
+      // Bin the data
+
+      // if we don't have a binData for this sensor yet, make one
+      if (!sensorBins[req.sensor]) {
+        sensorBins[req.sensor] = {};
+      }
+
+      binAll(sensorBins[req.sensor]);
+
+      // Send randomly generated data (temporary)
       var randomPoint = function () {
         return Math.random() * 2 + 94; // between 94 and 96
       };
@@ -179,8 +234,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
         }
       }
 
-
-      // TODO: send requested data to client
+      // Send requested data to client
       var toBeSent = {
         id: id,
         req: send_req };
