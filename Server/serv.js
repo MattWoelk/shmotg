@@ -3,6 +3,9 @@ var fs = require('fs');
 var mysql = require('mysql');
 var _ = require('underscore');
 var d3 = require("d3");
+require("../binnedData.js");
+
+// CONSTANTS TODO: get rid of these once they're no longer required
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
@@ -195,6 +198,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
   var send_to_user = JSON.stringify(send_object);
 
   //console.log(send_to_user); // to print out test file
+
+  // TODO: binnedData is included: console.log(binnedData());
 
   io.sockets.on('connection', function (socket) {
     socket.emit('news', send_to_user);
