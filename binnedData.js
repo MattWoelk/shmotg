@@ -52,6 +52,37 @@ binnedData = function () {
   // VARIABLES }}}
 
   //{{{ HELPER METHODS
+
+  rebin = function () {
+    for (var keyValue in bd.keys) {
+      var key = bd.keys[keyValue];
+      bd[key].levels[0] = bd.rawData.levels[0]; // update raw data from the source
+    }
+
+    // for each level other than raw data level, for each key, bin the data from the lower level
+    for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
+      for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
+        var key = bd.keys[keyValue];
+
+        // store new data
+        var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
+
+        // get range of new data
+        var range = [_.min(newData, function (d) { return d.date; }).date,
+                     _.max(newData, function (d) { return d.date; }).date];
+
+        // filter for old data which is outside the range of the new data
+        // (newly binned data gets preference over previously binned data)
+        var oldFiltered = _.filter(bd[key].levels[j], function (d) { return d.date < range[0] || d.date > range[1]; });
+
+        // combine and sort old and new
+        var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.date - b.date; });
+
+        // store combination
+        bd[key].levels[j] = combo;
+      } // for each key
+    } // for each bin level
+  }
   // HELPER METHODS }}}
 
   //{{{ INITIALIZATION (runs once)
@@ -64,11 +95,51 @@ binnedData = function () {
 
   //{{{ METHODS
 
-  my.addRawData = function (data) {
+  my.addRawData = function (rData) {
+    // data must be in the following form: (example)
+    // [ {val: value_point, date: ms_since_epoch},
+    //   {val: value_point, date: ms_since_epoch},
+    //   {etc...},
+    // ],
+
+    // TODO: fix
+
+    bd.rawData.levels[0] = rData;
+
+    console.log(bd);
+
+    rebin();
     return my;
   }
 
-  my.addBinnedData = function (data) {
+  my.addBinnedData = function (bData) {
+    // data must be in the following form: (example)
+    // { average: {
+    //     levels: [
+    //       [{val: value_point, date: ms_since_epoch},
+    //        {val: value_point, date: ms_since_epoch},
+    //        {etc...}],
+    //       [{val: value_point, date: ms_since_epoch},
+    //        {val: value_point, date: ms_since_epoch},
+    //        {etc...}],
+    //     ],
+    //   },
+    //   q1: {
+    //     levels: [
+    //       [{val: value_point, date: ms_since_epoch},
+    //        {val: value_point, date: ms_since_epoch},
+    //        {etc...}],
+    //       [{val: value_point, date: ms_since_epoch},
+    //        {val: value_point, date: ms_since_epoch},
+    //        {etc...}],
+    //     ],
+    //   },
+    //   etc: {},
+    // }
+
+    // TODO: fix
+
+    rebin();
     return my;
   }
 
