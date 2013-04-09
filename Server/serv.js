@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
+var _ = require('underscore');
 var d3 = require("d3");
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
 
@@ -14,10 +15,19 @@ var jsonData = [ { "ESGgirder1" : -47.8500 }, { "ESGgirder1" : -39.3800 }, { "ES
 
 var jsonData = fs.readFileSync(__dirname + '/esg_time.js').toString(); // block while getting the girder contents.
 
+var listOfGirders = ['ESGgirder18'];
 var sensorBins = []; // an array of binData in the following form:
                      // sensorBins = [ { sensor: 'ESGgirder18', binData: [just like in binnedChart.js] },
                      //                { sensor: 'another', binData: [etc.]},
                      //                { etc ... }]
+
+// initialize sensorBins
+var i = 0;
+for (var li in listOfGirders) {
+  var l = listOfGirders[li];
+  sensorBins[l] = { keys : ['average', 'maxes', 'mins', 'q1', 'q3'] };
+  i = i + 1;
+}
 
 
 // Bin 'bin' into abstracted bins
@@ -51,6 +61,38 @@ function binAll (bin) {
     }
   }
 }
+
+// Bin the data in a level into abstracted bins
+var binTheDataWithFunction = function (bin, curLevel, key, func) {
+  var bDat = new Array();
+  var i = 0;
+  for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+    if (bin[key].levels[curLevel][i+1]){
+      var newdate = bin.q1.levels[curLevel][i/*+1*/].date;
+
+      if (key === 'q1' || key === 'q3') {
+        //console.log( bin.q1.levels[curLevel][i+1].date );
+
+        bDat.push({ val:  func(
+              bin.q1.levels[curLevel][i].val,
+              bin.q1.levels[curLevel][i+1].val,
+              bin.q3.levels[curLevel][i].val,
+              bin.q3.levels[curLevel][i+1].val)
+            , date: newdate }); // This is messy and depends on a lot of things
+      }else{
+        bDat.push( { val: func(
+              bin[key].levels[curLevel][i].val,
+              bin[key].levels[curLevel][i+1].val)
+            , date: newdate });
+      }
+    }else{
+      var newdate = bin[key].levels[curLevel][i].date;
+      bDat.push( { val: bin[key].levels[curLevel][i].val
+                 , date: newdate } );
+    }
+  }
+  return bDat;
+};
 
 var handler = function (req, res) {
   // for html:
@@ -167,31 +209,89 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var id = received.id;
       console.log("client req: " + JSON.stringify(received));
 
-      // TODO: see if we have the requested data at the requested bin level
-      //       AND make sure it's gapless.
-      //       - Make it its own function, because binnedChart.js will need it, too.
+      // See if we have the requested data at the requested bin level
+      var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
+
+      // if it doesn't yet exist at this level, initialize it.
+      // TODO: get rid of this ??
+//      if (!sensorBins[req.sensor].average.levels[req.bin_level]) {
+//        sensorBins[req.sensor].average.levels[req.bin_level] = [];
+//        sensorBins[req.sensor].q1.levels[req.bin_level] = [];
+//        sensorBins[req.sensor].q3.levels[req.bin_level] = [];
+//        sensorBins[req.sensor].mins.levels[req.bin_level] = [];
+//        sensorBins[req.sensor].maxes.levels[req.bin_level] = [];
+//      }
+          // if we don't have a binData for this sensor yet, make one
+          if (!sensorBins[req.sensor].rawData ||
+              !sensorBins[req.sensor].rawData.levels[0]) {
+            sensorBins[req.sensor] = {rawData: { levels: [[]] },
+                                      average: { levels: [[]] },
+                                      mins: { levels:    [[]] },
+                                      maxes: { levels:   [[]] },
+                                      q1: { levels:      [[]] },
+                                      q3: { levels:      [[]] }, };
+          }
+
+      var filtered_range = _.filter(sensorBins[req.sensor].rawData.levels[req.bin_level], function (d) {
+        return d.date >= range[0] && d.date <= range[1];
+      });
+
+      var quantityInRange = filtered_range.length;
+      console.log("num: " + quantityInRange);
+
+      var enoughValuesInRange = function (rng, num, lvl) {
+        // returns true if we have enough values, or false if we don't
+        var msPerSample = 1000 / 200; // 5
+        var totalSamplesForRange = (rng[1] / rng[0]) / msPerSample;
+        var requiredNumberOfValues = totalSamplesForRange / Math.pow(2, lvl);
+        return num >= requiredNumberOfValues;
+      };
 
       // TODO: if we don't have what we need, calculate what raw data we need from the server
+      if (!enoughValuesInRange(range, quantityInRange, req.bin_level)) {
+        console.log("NEED MORE");
+        // TODO: request raw data where needed from database
+        // TODO: - (temporary) generate random data where needed
+        var msPerSample = 1000 / 200; // 5
+        var totalSamplesForRange = (range[1] - range[0]) / msPerSample;
+        var rndmdata = [];
+        var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
+                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
+        for(i=0;i<totalSamplesForRange;i++) {
+          rndmdata.push({
+            sensor: req.sensor,
+            ms: dat + (i * msPerBin),
+            val: randomPointRaw(),
+          })
+        }
 
-      // TODO: request raw data where needed from database
-      // TODO: - (temporary) generate random data where needed
+        // TODO: add the data to our raw data
+        rndmdata.forEach(function (dat, i) { // for each piece of data we received
 
-      // TODO: add the data to out raw data
+          // See if there is not already an object with that date.
+          if (_.find(sensorBins[req.sensor].rawData.levels[0], function (d) { return d.date === dat.ms; })) {
+            // We already have that data point
+          } else {
+            // Add a new object to the binData array
+            sensorBins[req.sensor].rawData.levels[0].push({date: dat.ms, val: dat.val});
+          }
+        }); // for each received data point
 
-      // Bin the data
+        // sort the array again ASSUMPTION: everything in datas is at the same bin level
+        sensorBins[req.sensor].rawData.levels[0].sort(function (a, b) { return a.date - b.date; });
 
-      // if we don't have a binData for this sensor yet, make one
-      if (!sensorBins[req.sensor]) {
-        sensorBins[req.sensor] = {};
+        console.log("sensor bin raw 0 length: " + sensorBins[req.sensor].rawData.levels[0].length);
+
+        // Bin the data
+        //binAll(sensorBins[req.sensor]);
       }
 
-      binAll(sensorBins[req.sensor]);
-
       // Send randomly generated data (temporary)
+      // TODO: remove
       var randomPoint = function () {
         return Math.random() * 2 + 94; // between 94 and 96
       };
-      var randomPointRaw = function () {
+      function randomPointRaw () {
         return Math.random() * 8 + 91; // between 91 and 99
       };
 
@@ -203,7 +303,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
       if (req.bin_level === 0) {
         // make raw data
-        var dat = req.ms_start - (req.ms_start % msPerBin);
+        var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
                 //ms: (req.ms_start % msPerBin) + (i * msPerBin),
         for(i=0;i<howManyPointsToGenerate;i++) {
           send_req.push({
@@ -220,7 +320,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
           var val_q3 = val + (Math.random() * 1.2);
           var val_min = val_q1 - (Math.random() * 2);
           var val_max = val_q3 + (Math.random() * 2);
-          var dat = req.ms_start - (req.ms_start % msPerBin) - 5; // TODO: magic hack
+          var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin) - 5; // TODO: magic hack
           send_req.push({
             sensor: req.sensor,
             ms: dat + (i * msPerBin),
