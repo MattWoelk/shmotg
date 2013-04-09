@@ -53,7 +53,7 @@ binnedData = function () {
 
   //{{{ HELPER METHODS
 
-  rebin = function () {
+  function rebin () {
     for (var keyValue in bd.keys) {
       var key = bd.keys[keyValue];
       bd[key].levels[0] = bd.rawData.levels[0]; // update raw data from the source
@@ -83,6 +83,77 @@ binnedData = function () {
       } // for each key
     } // for each bin level
   }
+
+  // Bin the data in a level into abstracted bins
+  function binTheDataWithFunction (bin, curLevel, key, func) {
+    var bDat = new Array();
+    var i = 0;
+    for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+      if (bin[key].levels[curLevel][i+1]){
+        var newdate = bin.q1.levels[curLevel][i/*+1*/].date;
+
+        if (key === 'q1' || key === 'q3') {
+          //console.log( bin.q1.levels[curLevel][i+1].date );
+
+          bDat.push({ val:  func(
+                bin.q1.levels[curLevel][i].val,
+                bin.q1.levels[curLevel][i+1].val,
+                bin.q3.levels[curLevel][i].val,
+                bin.q3.levels[curLevel][i+1].val)
+              , date: newdate }); // This is messy and depends on a lot of things
+        }else{
+          bDat.push( { val: func(
+                bin[key].levels[curLevel][i].val,
+                bin[key].levels[curLevel][i+1].val)
+              , date: newdate });
+        }
+      }else{
+        var newdate = bin[key].levels[curLevel][i].date;
+        bDat.push( { val: bin[key].levels[curLevel][i].val
+                   , date: newdate } );
+      }
+    }
+    return bDat;
+  };
+
+  function getTwoLargest (array) {
+    var arr = array.slice();
+    first = d3.max(arr);
+    arr.splice(arr.indexOf(first),1);
+    second = d3.max(arr);
+    return [first, second];
+  };
+
+  function average (array) {
+    return d3.sum(array)/array.length;
+  };
+
+  function getTwoSmallest (array) {
+    var arr = array.slice();
+    first = d3.min(arr);
+    arr.splice(arr.indexOf(first),1);
+    second = d3.min(arr);
+    return [first, second];
+  };
+
+  function addToIfUniqueDate (arr1, arr2) {
+    // Add the objects from arr2 (array) to arr1 (array)
+    //   if the object from arr2 has a date value which no
+    //   object in arr1 has.
+    for (var key in arr2) {
+      console.log("  FOR EACH KEY IN arr2");
+      console.log("  - " + arr2[key].date);
+      //if (!_.some(arr1, function(d) { return d.date === arr2[key].date; })) {
+      //  arr1.push({date: arr2[key].date, val: arr2[key].val});
+      //}
+      arr1.concat(_.filter(arr2, function(d) {
+        return !_.some(arr2, function(g) {
+          console.log("  -  - " + d.date + " " + g.date);
+          return d.date === g.date; });
+      }));
+    }
+  }
+
   // HELPER METHODS }}}
 
   //{{{ INITIALIZATION (runs once)
@@ -93,7 +164,7 @@ binnedData = function () {
   var my = function () {
   }
 
-  //{{{ METHODS
+  //{{{ PUBLIC METHODS
 
   my.addRawData = function (rData) {
     // data must be in the following form: (example)
@@ -102,11 +173,19 @@ binnedData = function () {
     //   {etc...},
     // ],
 
-    // TODO: fix
+    if (!bd.rawData.levels[0]) {
+      bd.rawData.levels[0] = [];
+    }
 
-    bd.rawData.levels[0] = rData;
-
-    console.log(bd);
+    for (var i in rData) {
+      var dat = rData[i];
+      if (_.find(bd.rawData.levels[0], function (d) { return d.date === dat.date; })) {
+        // We already have that data point
+      } else {
+        // Add a new object to the bd level
+        bd.rawData.levels[0].push({date: dat.date, val: dat.val});
+      }
+    }
 
     rebin();
     return my;
@@ -139,11 +218,49 @@ binnedData = function () {
 
     // TODO: fix
 
+    for (var key in bData) { // for each of max_val, min_val, etc.
+      for (var lvl in bData[key].levels) { // for each level
+        console.log("FOR EACH LEVEL");
+
+        //if we don't have a level for this already, initialize one
+        if (!bd[key].levels[lvl]) {
+          bd[key].levels[lvl] = [];
+        }
+
+        addToIfUniqueDate(bd[key].levels[lvl], bData[key].levels[lvl]);
+        //if (trns.hasOwnProperty(key)) {
+        //  // push new data to the end of the array
+        //  if (dat.hasOwnProperty(key)) {
+        //    // See if there is not already an object with that date.
+        //    if (_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date === dat.ms; })) {
+        //      // We already have that data point
+        //    } else {
+        //      var bl = dat.bin_level ? dat.bin_level : 0;
+        //      // Add a new object to the binData array
+        //      binData[trns[key]].levels[bl].push({date: dat.ms, val: dat[key]});
+        //    }
+        //  }
+        //}
+        //
+        //TODO: sort the level
+      } // for each received data point
+
+      console.log(bd);
+
+      // sort the array again ASSUMPTION: everything in datas is at the same bin level
+      //var bl = datas[0].bin_level ? datas[0].bin_level : 0;
+      //if (!!binData[trns[key]].levels[bl]) {
+      //  // if we have data at this level
+      //  // (this case is for rawData and for levels which haven't yet been taken from the server)
+      //  binData[trns[key]].levels[bl].sort(function (a, b) { return a.date - b.date; });
+      //}
+    }; // for each of max_val, min_val, etc.
+
     rebin();
     return my;
   }
 
-  // METHODS }}}
+  // PUBLIC METHODS }}}
 
   return my;
 }

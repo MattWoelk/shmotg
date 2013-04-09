@@ -7,19 +7,33 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 ////{{{ TEST SECTION FOR binnedData.js
 
+console.log(_.union([{v:1}, {v:2}], [{v:3}, {v:1}]));
+
 bd = binnedData();
 
-dat = [ {val: 0, date: 0},
+dat = [ {val: 4, date: 0},
         {val: 1, date: 1},
         {val: 3, date: 2},
         {val: 2, date: 3},
         {val: 1, date: 4},
         {val: 5, date: 5},
-        {val: 4, date: 6},
+        {val: 0, date: 6},
         {val: 2, date: 7},
         {val: 3, date: 8}];
-// TODO TODO TODO bd.addRawData(dat);
-console.log(bd);
+bd.addRawData(dat);
+bd.addRawData(dat);
+
+datbin = { average: {
+             levels: [
+               [],
+               [],
+               [],
+               [],
+               [{val: 3, date: 0},
+                {val: 2.34, date: 16},
+                {val: 1.5, date: 32}]
+             ], } };
+bd.addBinnedData(datbin);
 
 
 //// TEST SECTION FOR binnedData.js }}}
@@ -991,6 +1005,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     return my;
   }
 
+  // TODO: this is just for testing
   my.bd = function () {
     return binData;
   }
