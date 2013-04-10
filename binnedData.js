@@ -209,8 +209,6 @@ binnedData = function () {
 
     for (var key in bData) { // for each of max_val, min_val, etc.
       for (var lvl in bData[key].levels) { // for each level
-        console.log("FOR EACH LEVEL");
-
         //if we don't have a level for this already, initialize one
         if (!bd[key].levels[lvl]) {
           bd[key].levels[lvl] = [];
@@ -221,17 +219,23 @@ binnedData = function () {
     }; // for each of max_val, min_val, etc.
 
     rebin();
-    console.log(bd);
-
     return my;
   }
 
-  my.minRaw = function (sensor) {
-    d3.min(bd[sensor].rawData.levels[0], function(d) { return d.val; });
+  my.minRaw = function () {
+    d3.min(bd.rawData.levels[0], function(d) { return d.val; });
   }
 
-  my.maxRaw = function (sensor) {
-    d3.max(bd[sensor].rawData.levels[0], function(d) { return d.val; });
+  my.maxRaw = function () {
+    d3.max(bd.rawData.levels[0], function(d) { return d.val; });
+  }
+
+  my.getColor = function (type) {
+    return bd[type].color;
+  }
+
+  my.getOpacity = function (type) {
+    return bd[type].opacity;
   }
 
   // PUBLIC METHODS }}}

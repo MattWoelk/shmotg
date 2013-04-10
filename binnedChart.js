@@ -168,7 +168,7 @@ function maxBinRenderSize () {
 //   {type: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
 //   {type: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
 //   {type: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
-// ]
+// ] // TODO: put in binnedData.js
 var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, interp) {
   var resultArray = new Array();
 
@@ -199,7 +199,7 @@ var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, inter
   return resultArray;
 };
 
-// See makeDataObjectForKeyFanciness for explanation of output
+// See makeDataObjectForKeyFanciness for explanation of output // TODO: put in binnedData.js
 var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp) {
   var resultArray = new Array();
   var key = 'quartiles';
@@ -546,6 +546,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
       }
     }
 
+    // TODO TODO TODO SHOULD BE IN BINNEDDATA.JS --->
     // initialize the array if it's the first time for this level and key:
     for (var keyValue in renderThis) {
       var key = renderThis[keyValue];
@@ -584,6 +585,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
         if (key === 'quartiles') {
           // render AREA d0s
 
+          // TODO TODO TODO
           var q1Filter = filterDateToRange( binData.q1.levels[whichLevelToRender], renderRange );
           var q3Filter = filterDateToRange( binData.q3.levels[whichLevelToRender], renderRange );
 
@@ -609,6 +611,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
         renderedD0s[key + "Ranges"][whichLevelToRender] = [renderRange[0], renderRange[1]];
       } // if we should render anything
     } // for
+    // <--- TODO TODO TODO SHOULD BE IN BINNEDDATA.JS
 
     // If we rendered anything, see if we need more data from the server
     // AKA see if we didn't have enough data to render the entire domain.

@@ -227,69 +227,70 @@ mysqlconnection.query(query, function (err, rows, fields) {
 //        sensorBins[req.sensor].maxes.levels[req.bin_level] = [];
 //      }
           // if we don't have a binData for this sensor yet, make one
-          if (!sensorBins[req.sensor].rawData ||
-              !sensorBins[req.sensor].rawData.levels[0]) {
-            sensorBins[req.sensor] = {rawData: { levels: [[]] },
-                                      average: { levels: [[]] },
-                                      mins: { levels:    [[]] },
-                                      maxes: { levels:   [[]] },
-                                      q1: { levels:      [[]] },
-                                      q3: { levels:      [[]] }, };
-          }
-
-      var filtered_range = _.filter(sensorBins[req.sensor].rawData.levels[req.bin_level], function (d) {
-        return d.date >= range[0] && d.date <= range[1];
-      });
-
-      var quantityInRange = filtered_range.length;
-      console.log("num: " + quantityInRange);
-
-      var enoughValuesInRange = function (rng, num, lvl) {
-        // returns true if we have enough values, or false if we don't
-        var msPerSample = 1000 / 200; // 5
-        var totalSamplesForRange = (rng[1] / rng[0]) / msPerSample;
-        var requiredNumberOfValues = totalSamplesForRange / Math.pow(2, lvl);
-        return num >= requiredNumberOfValues;
-      };
-
-      // TODO: if we don't have what we need, calculate what raw data we need from the server
-      if (!enoughValuesInRange(range, quantityInRange, req.bin_level)) {
-        console.log("NEED MORE");
-        // TODO: request raw data where needed from database
-        // TODO: - (temporary) generate random data where needed
-        var msPerSample = 1000 / 200; // 5
-        var totalSamplesForRange = (range[1] - range[0]) / msPerSample;
-        var rndmdata = [];
-        var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
-                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
-        for(i=0;i<totalSamplesForRange;i++) {
-          rndmdata.push({
-            sensor: req.sensor,
-            ms: dat + (i * msPerBin),
-            val: randomPointRaw(),
-          })
-        }
-
-        // TODO: add the data to our raw data
-        rndmdata.forEach(function (dat, i) { // for each piece of data we received
-
-          // See if there is not already an object with that date.
-          if (_.find(sensorBins[req.sensor].rawData.levels[0], function (d) { return d.date === dat.ms; })) {
-            // We already have that data point
-          } else {
-            // Add a new object to the binData array
-            sensorBins[req.sensor].rawData.levels[0].push({date: dat.ms, val: dat.val});
-          }
-        }); // for each received data point
-
-        // sort the array again ASSUMPTION: everything in datas is at the same bin level
-        sensorBins[req.sensor].rawData.levels[0].sort(function (a, b) { return a.date - b.date; });
-
-        console.log("sensor bin raw 0 length: " + sensorBins[req.sensor].rawData.levels[0].length);
-
-        // Bin the data
-        //binAll(sensorBins[req.sensor]);
-      }
+//COMMENTED OUT THE NEW STUFF FOR NOW TODO: use the new stuff
+//          if (!sensorBins[req.sensor].rawData ||
+//              !sensorBins[req.sensor].rawData.levels[0]) {
+//            sensorBins[req.sensor] = {rawData: { levels: [[]] },
+//                                      average: { levels: [[]] },
+//                                      mins: { levels:    [[]] },
+//                                      maxes: { levels:   [[]] },
+//                                      q1: { levels:      [[]] },
+//                                      q3: { levels:      [[]] }, };
+//          }
+//
+//      var filtered_range = _.filter(sensorBins[req.sensor].rawData.levels[req.bin_level], function (d) {
+//        return d.date >= range[0] && d.date <= range[1];
+//      });
+//
+//      var quantityInRange = filtered_range.length;
+//      console.log("num: " + quantityInRange);
+//
+//      var enoughValuesInRange = function (rng, num, lvl) {
+//        // returns true if we have enough values, or false if we don't
+//        var msPerSample = 1000 / 200; // 5
+//        var totalSamplesForRange = (rng[1] / rng[0]) / msPerSample;
+//        var requiredNumberOfValues = totalSamplesForRange / Math.pow(2, lvl);
+//        return num >= requiredNumberOfValues;
+//      };
+//
+//      // TODO: if we don't have what we need, calculate what raw data we need from the server
+//      if (!enoughValuesInRange(range, quantityInRange, req.bin_level)) {
+//        console.log("NEED MORE");
+//        // TODO: request raw data where needed from database
+//        // TODO: - (temporary) generate random data where needed
+//        var msPerSample = 1000 / 200; // 5
+//        var totalSamplesForRange = (range[1] - range[0]) / msPerSample;
+//        var rndmdata = [];
+//        var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
+//                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
+//        for(i=0;i<totalSamplesForRange;i++) {
+//          rndmdata.push({
+//            sensor: req.sensor,
+//            ms: dat + (i * msPerBin),
+//            val: randomPointRaw(),
+//          })
+//        }
+//
+//        // TODO: add the data to our raw data
+//        rndmdata.forEach(function (dat, i) { // for each piece of data we received
+//
+//          // See if there is not already an object with that date.
+//          if (_.find(sensorBins[req.sensor].rawData.levels[0], function (d) { return d.date === dat.ms; })) {
+//            // We already have that data point
+//          } else {
+//            // Add a new object to the binData array
+//            sensorBins[req.sensor].rawData.levels[0].push({date: dat.ms, val: dat.val});
+//          }
+//        }); // for each received data point
+//
+//        // sort the array again ASSUMPTION: everything in datas is at the same bin level
+//        sensorBins[req.sensor].rawData.levels[0].sort(function (a, b) { return a.date - b.date; });
+//
+//        console.log("sensor bin raw 0 length: " + sensorBins[req.sensor].rawData.levels[0].length);
+//
+//        // Bin the data
+//        //binAll(sensorBins[req.sensor]);
+//      }
 
       // Send randomly generated data (temporary)
       // TODO: remove
