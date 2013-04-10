@@ -190,25 +190,18 @@ binnedData = function () {
   }
 
   my.addBinnedData = function (bData) {
-    // data must be in the following form: (example)
+    // data must be in the form of the following example:
     // { average: {
     //     levels: [
     //       [{val: value_point, date: ms_since_epoch},
     //        {val: value_point, date: ms_since_epoch},
     //        {etc...}],
-    //       [{val: value_point, date: ms_since_epoch},
-    //        {val: value_point, date: ms_since_epoch},
-    //        {etc...}],
+    //       [etc.]
     //     ],
     //   },
     //   q1: {
     //     levels: [
-    //       [{val: value_point, date: ms_since_epoch},
-    //        {val: value_point, date: ms_since_epoch},
-    //        {etc...}],
-    //       [{val: value_point, date: ms_since_epoch},
-    //        {val: value_point, date: ms_since_epoch},
-    //        {etc...}],
+    //       [etc.]
     //     ],
     //   },
     //   etc: {},
@@ -231,6 +224,14 @@ binnedData = function () {
     console.log(bd);
 
     return my;
+  }
+
+  my.minRaw = function (sensor) {
+    d3.min(bd[sensor].rawData.levels[0], function(d) { return d.val; });
+  }
+
+  my.maxRaw = function (sensor) {
+    d3.max(bd[sensor].rawData.levels[0], function(d) { return d.val; });
   }
 
   // PUBLIC METHODS }}}

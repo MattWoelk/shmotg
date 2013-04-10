@@ -517,9 +517,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
     width = containerWidth - margin.left - margin.right;
 
-    if (!xScale) {
-      xScale = d3.scale.linear().domain([0, binData.levels[0].rawData.length - 1]);
-    }
+    if (!xScale) { xScale = d3.scale.linear().domain([0, 100]); }
     xScale.range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
     if (!yScale){ yScale = d3.scale.linear(); }
