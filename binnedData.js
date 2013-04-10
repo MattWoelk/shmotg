@@ -136,22 +136,20 @@ binnedData = function () {
     return [first, second];
   };
 
-  function addToIfUniqueDate (arr1, arr2) {
+  function combineAndSortArraysOfDateValObjects (arr1, arr2) {
     // Add the objects from arr2 (array) to arr1 (array)
     //   if the object from arr2 has a date value which no
     //   object in arr1 has.
-    for (var key in arr2) {
-      console.log("  FOR EACH KEY IN arr2");
-      console.log("  - " + arr2[key].date);
-      //if (!_.some(arr1, function(d) { return d.date === arr2[key].date; })) {
-      //  arr1.push({date: arr2[key].date, val: arr2[key].val});
-      //}
-      arr1.concat(_.filter(arr2, function(d) {
-        return !_.some(arr2, function(g) {
-          console.log("  -  - " + d.date + " " + g.date);
-          return d.date === g.date; });
-      }));
-    }
+    var result = arr1.concat(_.filter(arr2, function(d) {
+      var b = !_.some(arr1, function(g) {
+        return d.date === g.date;
+      });
+      return b;
+    }));
+
+    // sort the result
+    result.sort(function (a, b) { return a.date - b.date; });
+    return result;
   }
 
   // HELPER METHODS }}}
@@ -216,8 +214,6 @@ binnedData = function () {
     //   etc: {},
     // }
 
-    // TODO: fix
-
     for (var key in bData) { // for each of max_val, min_val, etc.
       for (var lvl in bData[key].levels) { // for each level
         console.log("FOR EACH LEVEL");
@@ -227,36 +223,13 @@ binnedData = function () {
           bd[key].levels[lvl] = [];
         }
 
-        addToIfUniqueDate(bd[key].levels[lvl], bData[key].levels[lvl]);
-        //if (trns.hasOwnProperty(key)) {
-        //  // push new data to the end of the array
-        //  if (dat.hasOwnProperty(key)) {
-        //    // See if there is not already an object with that date.
-        //    if (_.find(binData[trns[key]].levels[dat.bin_level], function (d) { return d.date === dat.ms; })) {
-        //      // We already have that data point
-        //    } else {
-        //      var bl = dat.bin_level ? dat.bin_level : 0;
-        //      // Add a new object to the binData array
-        //      binData[trns[key]].levels[bl].push({date: dat.ms, val: dat[key]});
-        //    }
-        //  }
-        //}
-        //
-        //TODO: sort the level
+        bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
       } // for each received data point
-
-      console.log(bd);
-
-      // sort the array again ASSUMPTION: everything in datas is at the same bin level
-      //var bl = datas[0].bin_level ? datas[0].bin_level : 0;
-      //if (!!binData[trns[key]].levels[bl]) {
-      //  // if we have data at this level
-      //  // (this case is for rawData and for levels which haven't yet been taken from the server)
-      //  binData[trns[key]].levels[bl].sort(function (a, b) { return a.date - b.date; });
-      //}
     }; // for each of max_val, min_val, etc.
 
     rebin();
+    console.log(bd);
+
     return my;
   }
 

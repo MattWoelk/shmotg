@@ -7,8 +7,6 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 ////{{{ TEST SECTION FOR binnedData.js
 
-console.log(_.union([{v:1}, {v:2}], [{v:3}, {v:1}]));
-
 bd = binnedData();
 
 dat = [ {val: 4, date: 0},
