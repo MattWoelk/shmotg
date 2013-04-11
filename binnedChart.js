@@ -997,8 +997,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
 //
 //    // re-render the lines and areas
 //    //my.reRenderTheNextTime(true);
-//    waitingForServer = false;
-//    freshArrivalFromServer = true;
+    waitingForServer = false;
+    freshArrivalFromServer = true;
 
     return my;
   }
