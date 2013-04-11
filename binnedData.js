@@ -9,7 +9,7 @@ binnedData = function () {
       color: '#000',
       opacity: 0.5,
       levels: [], // stores all of the values for each level in an array.
-                  // example: [[{val: 1.7, date: ms_since_epoch}, {val: 2.3, date: ms_since_epoch}], [etc.]]
+                  // example: [[{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}], [etc.]]
     },
     average : {
       color : '#F00',
@@ -68,15 +68,15 @@ binnedData = function () {
         var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
 
         // get range of new data
-        var range = [_.min(newData, function (d) { return d.date; }).date,
-                     _.max(newData, function (d) { return d.date; }).date];
+        var range = [_.min(newData, function (d) { return d.ms; }).ms,
+                     _.max(newData, function (d) { return d.ms; }).ms];
 
         // filter for old data which is outside the range of the new data
         // (newly binned data gets preference over previously binned data)
-        var oldFiltered = _.filter(bd[key].levels[j], function (d) { return d.date < range[0] || d.date > range[1]; });
+        var oldFiltered = _.filter(bd[key].levels[j], function (d) { return d.ms < range[0] || d.ms > range[1]; });
 
         // combine and sort old and new
-        var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.date - b.date; });
+        var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.ms - b.ms; });
 
         // store combination
         bd[key].levels[j] = combo;
@@ -90,27 +90,27 @@ binnedData = function () {
     var i = 0;
     for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       if (bin[key].levels[curLevel][i+1]){
-        var newdate = bin.q1.levels[curLevel][i/*+1*/].date;
+        var newdate = bin.q1.levels[curLevel][i/*+1*/].ms;
 
         if (key === 'q1' || key === 'q3') {
-          //console.log( bin.q1.levels[curLevel][i+1].date );
+          //console.log( bin.q1.levels[curLevel][i+1].ms );
 
           bDat.push({ val:  func(
                 bin.q1.levels[curLevel][i].val,
                 bin.q1.levels[curLevel][i+1].val,
                 bin.q3.levels[curLevel][i].val,
                 bin.q3.levels[curLevel][i+1].val)
-              , date: newdate }); // This is messy and depends on a lot of things
+              , ms: newdate }); // This is messy and depends on a lot of things
         }else{
           bDat.push( { val: func(
                 bin[key].levels[curLevel][i].val,
                 bin[key].levels[curLevel][i+1].val)
-              , date: newdate });
+              , ms: newdate });
         }
       }else{
-        var newdate = bin[key].levels[curLevel][i].date;
+        var newdate = bin[key].levels[curLevel][i].ms;
         bDat.push( { val: bin[key].levels[curLevel][i].val
-                   , date: newdate } );
+                   , ms: newdate } );
       }
     }
     return bDat;
@@ -138,17 +138,17 @@ binnedData = function () {
 
   function combineAndSortArraysOfDateValObjects (arr1, arr2) {
     // Add the objects from arr2 (array) to arr1 (array)
-    //   if the object from arr2 has a date value which no
+    //   if the object from arr2 has a ms value which no
     //   object in arr1 has.
     var result = arr1.concat(_.filter(arr2, function(d) {
       var b = !_.some(arr1, function(g) {
-        return d.date === g.date;
+        return d.ms === g.ms;
       });
       return b;
     }));
 
     // sort the result
-    result.sort(function (a, b) { return a.date - b.date; });
+    result.sort(function (a, b) { return a.ms - b.ms; });
     return result;
   }
 
@@ -158,16 +158,18 @@ binnedData = function () {
   // INITIALIZATION }}}
 
   //{{{ MY (runs whenever something changes)
-  // MY }}}
+
   var my = function () {
   }
+
+  // MY }}}
 
   //{{{ PUBLIC METHODS
 
   my.addRawData = function (rData) {
     // data must be in the following form: (example)
-    // [ {val: value_point, date: ms_since_epoch},
-    //   {val: value_point, date: ms_since_epoch},
+    // [ {val: value_point, ms: ms_since_epoch},
+    //   {val: value_point, ms: ms_since_epoch},
     //   {etc...},
     // ],
 
@@ -177,11 +179,11 @@ binnedData = function () {
 
     for (var i in rData) {
       var dat = rData[i];
-      if (_.find(bd.rawData.levels[0], function (d) { return d.date === dat.date; })) {
+      if (_.find(bd.rawData.levels[0], function (d) { return d.ms === dat.ms; })) {
         // We already have that data point
       } else {
         // Add a new object to the bd level
-        bd.rawData.levels[0].push({date: dat.date, val: dat.val});
+        bd.rawData.levels[0].push({ms: dat.ms, val: dat.val});
       }
     }
 
@@ -193,8 +195,8 @@ binnedData = function () {
     // data must be in the form of the following example:
     // { average: {
     //     levels: [
-    //       [{val: value_point, date: ms_since_epoch},
-    //        {val: value_point, date: ms_since_epoch},
+    //       [{val: value_point, ms: ms_since_epoch},
+    //        {val: value_point, ms: ms_since_epoch},
     //        {etc...}],
     //       [etc.]
     //     ],
@@ -242,7 +244,7 @@ binnedData = function () {
     // filter an array so that we don't render much more
     // than the required amount of line and area
     return _.filter(bd[key].levels[lvl], function (d, i) {
-      return d.date <= range[1] && d.date >= range[0];
+      return d.ms <= range[1] && d.ms >= range[0];
     });
   }
 
