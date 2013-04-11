@@ -224,20 +224,20 @@ binnedData = function () {
     return my;
   }
 
-  my.minRaw = function () {
-    d3.min(bd.rawData.levels[0], function(d) { return d.val; });
+  my.getMinRaw = function () {
+    return d3.min(bd.rawData.levels[0], function(d) { return d.val; });
   }
 
-  my.maxRaw = function () {
-    d3.max(bd.rawData.levels[0], function(d) { return d.val; });
+  my.getMaxRaw = function () {
+    return d3.max(bd.rawData.levels[0], function(d) { return d.val; });
   }
 
-  my.getColor = function (type) {
-    return bd[type].color;
+  my.getColor = function (key) {
+    return bd[key].color;
   }
 
-  my.getOpacity = function (type) {
-    return bd[type].opacity;
+  my.getOpacity = function (key) {
+    return bd[key].opacity;
   }
 
   my.getDateRange = function (key, lvl, range) {
