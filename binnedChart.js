@@ -546,7 +546,13 @@ var binnedLineChart = function (data, dataRequester, girder) {
       }
     }
 
-    // TODO TODO TODO SHOULD BE IN BINNEDDATA.JS --->
+    var xdiff = xScale.domain()[1] - xScale.domain()[0];
+
+    // figure out how much to render:
+    var renderRange = [ xScale.domain()[0] - xdiff,   // render thrice what is necessary.
+                        xScale.domain()[1] + xdiff ]; // (xdiff / 2) for twice
+
+    // TODO TODO TODO binData SHOULD BE IN BINNEDDATA.JS --->
     // initialize the array if it's the first time for this level and key:
     for (var keyValue in renderThis) {
       var key = renderThis[keyValue];
@@ -571,11 +577,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
                      renderedD0s[key + "Ranges"][whichLevelToRender][0]) * 0.1;
       var ninetyPercentRange = [ renderedD0s[key + "Ranges"][whichLevelToRender][0] + tenDiff ,
                                  renderedD0s[key + "Ranges"][whichLevelToRender][1] - tenDiff ];
-      var xdiff = xScale.domain()[1] - xScale.domain()[0];
-
-      // figure out how much to render:
-      var renderRange = [ xScale.domain()[0] - xdiff,   // render thrice what is necessary.
-                          xScale.domain()[1] + xdiff ]; // (xdiff / 2) for twice
 
       //if we are not within the range OR reRenderTheNextTime
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
@@ -585,7 +586,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
         if (key === 'quartiles') {
           // render AREA d0s
 
-          // TODO TODO TODO
           var q1Filter = filterDateToRange( binData.q1.levels[whichLevelToRender], renderRange );
           var q3Filter = filterDateToRange( binData.q3.levels[whichLevelToRender], renderRange );
 
@@ -618,6 +618,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     if (didWeRenderAnything && !waitingForServer && !freshArrivalFromServer) {
       // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
 
+      // TODO TODO TODO SHOULD BE IN BINNEDDATA.JS --->
       var key = binData.keys[0]; // any will do; pick the first one.
       var filteredRangeData = _.filter(binData[key].levels[whichLevelToRender], function (d, i) {
         return d.date <= renderRange[1] && d.date >= renderRange[0];
@@ -671,6 +672,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
           dataReq(req);
         }
       }
+      // <--- TODO TODO TODO SHOULD BE IN BINNEDDATA.JS
     }
 
     reRenderTheNextTime = false;

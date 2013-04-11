@@ -238,6 +238,18 @@ binnedData = function () {
     return bd[type].opacity;
   }
 
+  my.getDateRange = function (key, lvl, range) {
+    // filter an array so that we don't render much more
+    // than the required amount of line and area
+    return _.filter(bd[key].levels[lvl], function (d, i) {
+      return d.date <= range[1] && d.date >= range[0];
+    });
+  }
+
+  my.getKeys = function () {
+    return bd.keys.slice(0); // give a copy of the array
+  }
+
   // PUBLIC METHODS }}}
 
   return my;
