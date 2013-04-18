@@ -5,37 +5,6 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
   // vertical size of each section of the user time context system
 // CONSTANTS }}}
 
-////{{{ TEST SECTION FOR binnedData.js
-
-bd = binnedData();
-
-dat = [ {val: 4, ms: 0},
-        {val: 1, ms: 1},
-        {val: 3, ms: 2},
-        {val: 2, ms: 3},
-        {val: 1, ms: 4},
-        {val: 5, ms: 5},
-        {val: 0, ms: 6},
-        {val: 2, ms: 7},
-        {val: 3, ms: 8}];
-bd.addRawData(dat);
-bd.addRawData(dat);
-
-datbin = { average: {
-             levels: [
-               [],
-               [],
-               [],
-               [],
-               [{val: 3, ms: 0},
-                {val: 2.34, ms: 16},
-                {val: 1.5, ms: 32}]
-             ], } };
-bd.addBinnedData(datbin);
-
-
-//// TEST SECTION FOR binnedData.js }}}
-
 // {{{ HELPER FUNCTIONS
 
 // filter an array so that we don't render much more
