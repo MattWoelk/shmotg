@@ -915,7 +915,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     return binData;
   }
 
-  my.addDataToBinData = function (datas) {
+  my.addDataToBinData = function (datas, level) {
     // add data to binData IN THE CORRECT ORDER
 
     // TODO: binDark.addBinnedData(datas);
@@ -933,6 +933,9 @@ var binnedLineChart = function (data, dataRequester, girder) {
       'q3_val' : 'q3',
       'val'    : 'rawData',
     }
+
+    if (datas)
+    binDark.addBinnedData()
 
 //
 //    for (var key in trns) { // for each of max_val, min_val, etc.

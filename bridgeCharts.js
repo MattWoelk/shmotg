@@ -353,7 +353,7 @@ socket.on('req_data', function (data) {
 
   for (i=0;i<plots.length;i++) {
     if (plots[i].uniqueID() === req[0].sensor) {
-      plots[i].addDataToBinData(req).reRenderTheNextTime(true).update();
+      plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
     }
   }
 });
