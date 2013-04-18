@@ -305,6 +305,23 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var msPerBin = Math.pow(2, req.bin_level) * msPerSample;
       var howManyPointsToGenerate = (parseInt(req.ms_end) - parseInt(req.ms_start)) / msPerBin;
 
+      // data must be in the form of the following example:
+      // { average: {
+      //     levels: [
+      //       [{val: value_point, ms: ms_since_epoch},
+      //        {val: value_point, ms: ms_since_epoch},
+      //        {etc...}],
+      //       [etc.]
+      //     ],
+      //   },
+      //   q1: {
+      //     levels: [
+      //       [etc.]
+      //     ],
+      //   },
+      //   etc: {},
+      // }
+
       var send_req = [];
 
       if (req.bin_level === 0) {
@@ -343,6 +360,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
       // Send requested data to client
       var toBeSent = {
         id: id,
+        sensor: req.sensor,
+        bin_level: req.bin_level,
         req: send_req };
 
       socket.emit('req_data', JSON.stringify(toBeSent));
