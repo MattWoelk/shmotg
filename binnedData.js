@@ -236,16 +236,14 @@ binnedData = function () {
     var dateRange = my.getDateRange(key, level, ms_range);
 
     if (dateRange.length === 0) {
-      console.log("we had none");
       return false;
     }
 
-    var firstSample = dateRange[0];
+    var firstSample = dateRange[0].ms;
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, level) * oneSample;
 
     if (firstSample > ms_range[0] + sampleSize) {
-      console.log("first sample was too late");
       return false;
     }
 
@@ -254,7 +252,6 @@ binnedData = function () {
 
     var numberWeHave = dateRange.length;
 
-    console.log(numberWeHave >= numberWeShouldHave);
     return numberWeHave >= numberWeShouldHave;
   }
 
