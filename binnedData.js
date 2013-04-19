@@ -224,6 +224,37 @@ binnedData = function () {
     return my;
   }
 
+  my.haveDataInRange = function(ms_range, level) {
+    // Determine the number of samples which we should have in the given range.
+
+    if (level === 0) {
+      key = "rawData";
+    } else {
+      key = "average";
+    }
+
+    var dateRange = my.getDateRange(key, level, ms_range);
+
+    if (dateRange.length === 0) {
+      return false;
+    }
+
+    var firstSample = dateRange[0];
+    var oneSample = 1000 / 200; // milliseconds per sample
+    var sampleSize = Math.pow(2, level) * oneSample;
+
+    if (firstSample > ms_range[0] + sampleSize) {
+      return false;
+    }
+
+    var actualRange = ms_range[1] - firstSample;
+    var numberWeShouldHave = Math.floor(actualRange / sampleSize);
+
+    var numberWeHave = dateRange.length;
+
+    return numberWeHave >= numberWeShouldHave;
+  }
+
   my.getMinRaw = function () {
     return d3.min(bd.rawData.levels[0], function(d) { return d.val; });
   }
