@@ -322,21 +322,30 @@ mysqlconnection.query(query, function (err, rows, fields) {
       //   etc: {},
       // }
 
-      var send_req = [];
+      var send_req = {};
 
       if (req.bin_level === 0) {
         // make raw data
+
         var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
                 //ms: (req.ms_start % msPerBin) + (i * msPerBin),
+        send_req = [];
         for(i=0;i<howManyPointsToGenerate;i++) {
           send_req.push({
-            sensor: req.sensor,
-            ms: dat + (i * msPerBin),
             val: randomPointRaw(),
+            ms: dat + (i * msPerBin),
           })
         }
       } else {
         // make binned data
+
+        // initialize the data structure to be sent
+        var theKeys = ["average", "q1", "q3", "mins", "maxes"];
+        for (var i = 0; i < theKeys.length; i++) {
+          send_req[theKeys[i]] = {};
+          send_req[theKeys[i]].levels = [];
+          send_req[theKeys[i]].levels[req.bin_level] = [];
+        }
         for(i=0;i<howManyPointsToGenerate;i++) {
           var val = randomPoint();
           var val_q1 = val - (Math.random() * 1.2);
@@ -344,16 +353,12 @@ mysqlconnection.query(query, function (err, rows, fields) {
           var val_min = val_q1 - (Math.random() * 2);
           var val_max = val_q3 + (Math.random() * 2);
           var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin) - 5; // TODO: magic hack
-          send_req.push({
-            sensor: req.sensor,
-            ms: dat + (i * msPerBin),
-            bin_level: req.bin_level,
-            max_val: val + (Math.random() * 2) + 2,
-            min_val: val - (Math.random() * 2) - 2,
-            avg_val: val,
-            q1_val: val - (Math.random() * 2),
-            q3_val: val + (Math.random() * 2),
-          })
+
+          send_req.average.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val});
+          send_req.q1.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q1});
+          send_req.q3.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q3});
+          send_req.mins.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_min});
+          send_req.maxes.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_max});
         }
       }
 
