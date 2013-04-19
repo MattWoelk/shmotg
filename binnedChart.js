@@ -437,62 +437,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
         waitingForServer = true;
         dataReq(req);
       }
-
-      //// TODO TODO TODO SHOULD BE IN BINNEDDATA.JS --->
-      //var keys = binData.getKeys();
-      //var key = keys[0]; // any will do; pick the first one.
-      //var filteredRangeData = binData.getDateRange(key, whichLevelToRender, renderRange);
-
-      //filteredRangeData = filteredRangeData.sort(function (a, b) { return a.ms - b.ms; });
-      //// Note: filteredRangeData's dates are in order lowest --> highest
-
-      //if (filteredRangeData.length === 0 || filteredRangeData.length === 1) { // we have no data; fill the entire range
-      //  // We need data in the whole section (we're zoomed out or in to a place where we have no data yet)
-      //  // build and send the request
-      //  var req = {
-      //    sensor: whichGirder,
-      //    ms_start: renderRange[0],
-      //    ms_end: renderRange[1],
-      //    bin_level: whichLevelToRender,
-      //  };
-
-      //  waitingForServer = true;
-      //  dataReq(req);
-      //} else { // we have data already, and need more on one or both sides of it
-      //  var distBtwnSamples = filteredRangeData[1].ms - filteredRangeData[0].ms;
-      //  // ASSUMPTION: This relies on the samples being equally spaced
-      //  // if the data doesn't go all the way to the end of what has been rendered:
-      //  if ( renderRange[1] - filteredRangeData[filteredRangeData.length - 1].ms > distBtwnSamples) {
-      //    // If we need data at the upper end
-
-      //    // build and send the request
-      //    var req = {
-      //      sensor: whichGirder,
-      //      ms_start: filteredRangeData[filteredRangeData.length - 1].ms, // exact point
-      //      ms_end: renderRange[1], // could round either way on the server and be fine
-      //      bin_level: whichLevelToRender,
-      //    };
-
-      //    waitingForServer = true;
-      //    dataReq(req);
-      //  }
-
-      //  if (filteredRangeData[0].ms - renderRange[0] > distBtwnSamples) {
-      //    // If we need data at the lower end
-
-      //    // build and send the request
-      //    var req = {
-      //      sensor: whichGirder,
-      //      ms_start: renderRange[0],   // could round either way on the server and be fine
-      //      ms_end: filteredRangeData[0].ms, // exact point
-      //      bin_level: whichLevelToRender,
-      //    };
-
-      //    waitingForServer = true;
-      //    dataReq(req);
-      //  }
-      //}
-      //// <--- TODO TODO TODO SHOULD BE IN BINNEDDATA.JS
     }
 
     reRenderTheNextTime = false;
