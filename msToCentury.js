@@ -18,6 +18,12 @@
 
 var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
 
+function dt (num) {
+  var newdate = new Date();
+  newdate.setTime(num);
+  return newdate;
+}
+
 function millisecond(val) {
   var newdate = new Date();
   newdate.setTime(roundDownToNearestTime(val, times.ms));
