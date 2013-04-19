@@ -934,8 +934,11 @@ var binnedLineChart = function (data, dataRequester, girder) {
       'val'    : 'rawData',
     }
 
-    if (datas)
-    binDark.addBinnedData()
+    if (level === 0) {
+      binDark.addRawData(datas);
+    } else {
+      binDark.addBinnedData(datas);
+    }
 
 //
 //    for (var key in trns) { // for each of max_val, min_val, etc.

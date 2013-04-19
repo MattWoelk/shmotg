@@ -93,8 +93,6 @@ binnedData = function () {
         var newdate = bin.q1.levels[curLevel][i/*+1*/].ms;
 
         if (key === 'q1' || key === 'q3') {
-          //console.log( bin.q1.levels[curLevel][i+1].ms );
-
           bDat.push({ val:  func(
                 bin.q1.levels[curLevel][i].val,
                 bin.q1.levels[curLevel][i+1].val,
@@ -186,6 +184,8 @@ binnedData = function () {
         bd.rawData.levels[0].push({ms: dat.ms, val: dat.val});
       }
     }
+
+    bd.rawData.levels[0].sort(function (a, b) { return a.ms - b.ms; });
 
     rebin();
     return my;

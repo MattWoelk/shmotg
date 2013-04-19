@@ -352,7 +352,7 @@ socket.on('req_data', function (data) {
   }// else { console.log("Server returned DATA"); }
 
   for (i=0;i<plots.length;i++) {
-    if (plots[i].uniqueID() === req[0].sensor) {
+    if (plots[i].uniqueID() === received.sensor) {
       plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
     }
   }
