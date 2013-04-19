@@ -8,7 +8,7 @@ query = 'SELECT Time FROM SPBRTData_0A LIMIT 10';
 //query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN NOW() AND (NOW() - INTERVAL 5 YEAR) LIMIT 10';
 //query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "Sun Jan 01 2012 00:57:34 GMT-0600 (CST)" AND "Sun Jan 01 2012 00:57:35 GMT-0600 (CST)" LIMIT 201';
 query =
-'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2010-02-27 14:00" AND "2012-02-28 10:00" LIMIT 10';
+'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
 
 var mysqlconnection = mysql.createConnection({
   host     : 'shm1.ee.umanitoba.ca',
