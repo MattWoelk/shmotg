@@ -89,7 +89,7 @@ function maxBinRenderSize () {
 //   {key: 'rawData',  which: 0, interpolate: blabla}, <-- this one is for the raw data
 //   {key: 'average', which: 2, interpolate: blabla}, <-- the current level is 'which'
 //   {key: 'maxes',    which: 2, interpolate: blabla}, <-- etc.
-// ] // TODO: put in binnedData.js
+// ]
 var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, interp) {
   var resultArray = new Array();
 
@@ -121,7 +121,7 @@ var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, inter
   return resultArray;
 };
 
-// See makeDataObjectForKeyFanciness for explanation of output // TODO: put in binnedData.js
+// See makeDataObjectForKeyFanciness for explanation of output
 var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp) {
   var resultArray = new Array();
   var key = 'quartiles';
@@ -143,7 +143,9 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
 }
 
 function goToLevel(scal, msPS) {
-  // msPS is milliSecondsPerSample
+  // Return which level should be displayed based on
+  // the current scale, and the sample rate
+  // - msPS is milliSecondsPerSample
 
   // pixels/bin:
   var pixelsPerBin = maxBinRenderSize();
