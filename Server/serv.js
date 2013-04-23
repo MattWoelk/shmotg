@@ -217,6 +217,13 @@ mysqlconnection.query(query, function (err, rows, fields) {
       // See if we have the requested data at the requested bin level
       var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
 
+      // TODO: see if our binned data has the requested range
+      // TODO: if it does not, make a list of missing bins
+        // TODO: request the raw data which would fill those bins from database
+        // TODO: receive, bin, and store the data from the database
+      // TODO: send the requested data to the client
+      // TODO: MAYBE: remove lowest few levels to save space
+
       // if it doesn't yet exist at this level, initialize it.
       // TODO: get rid of this ??
 //      if (!sensorBins[req.sensor].average.levels[req.bin_level]) {
