@@ -64,19 +64,27 @@ binnedData = function () {
       for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
         var key = bd.keys[keyValue];
 
-        // store new data
+        // store newly calculated data from lower level
         var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
+
+        // TODO: filter away duplicates of newData (ms which are already in the old data)
 
         // get range of new data
         var range = [_.min(newData, function (d) { return d.ms; }).ms,
                      _.max(newData, function (d) { return d.ms; }).ms];
 
+        // TODO TODO TODO: probably where the gap-filling problem is:
         // filter for old data which is outside the range of the new data
         // (newly binned data gets preference over previously binned data)
         var oldFiltered = _.filter(bd[key].levels[j], function (d) { return d.ms < range[0] || d.ms > range[1]; });
+        // TODO TODO TODO: instead, remove new data which are duplicates of old data
+
+        var oldUnfiltered = _.filter(bd[key].levels[j], function (d) { return true; });
 
         // combine and sort old and new
-        var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.ms - b.ms; });
+        //var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.ms - b.ms; });
+        //var combo = oldUnfiltered.concat(newData).sort(function (a, b) { return a.ms - b.ms; });
+        var combo = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
 
         // store combination
         bd[key].levels[j] = combo;
@@ -209,14 +217,21 @@ binnedData = function () {
     //   etc: {},
     // }
 
+    console.log("adding binned data");
+
     for (var key in bData) { // for each of max_val, min_val, etc.
       for (var lvl in bData[key].levels) { // for each level
         //if we don't have a level for this already, initialize one
         if (!bd[key].levels[lvl]) {
           bd[key].levels[lvl] = [];
         }
+        if (bData[key].levels[lvl]) {
+          console.log("level: " + lvl + ", length: " +  bData[key].levels[lvl].length);
+        }
+        console.log("before: " + bd[key].levels[lvl].length);
 
         bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
+        console.log("after : " + bd[key].levels[lvl].length);
       } // for each received data point
     }; // for each of max_val, min_val, etc.
 
@@ -282,6 +297,11 @@ binnedData = function () {
   my.getKeys = function () {
     return bd.keys.slice(0); // give a copy of the array
   }
+
+  my.bd = function () { // TODO: JUST FOR TESTING
+    return bd;
+  }
+
 
   // PUBLIC METHODS }}}
 
