@@ -5,6 +5,12 @@ var _ = require('underscore');
 var d3 = require("d3");
 require("../binnedData.js");
 
+function dt (num) {
+  var newdate = new Date();
+  newdate.setTime(num);
+  return newdate;
+}
+
 // CONSTANTS TODO: get rid of these once they're no longer required
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
 
@@ -222,6 +228,35 @@ mysqlconnection.query(query, function (err, rows, fields) {
       //       - it returns ranges. Request each range from the server.
       // TODO: if it does not, make a list of missing bins
         // TODO: request the raw data which would fill those bins from database
+         //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
+         var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
+         var msToRequest = 0;
+         var dtr = dt(msToRequest); // date to request
+         var msToRequest2 = 0;
+         var dtr2 = dt(msToRequest); // date to request
+
+         var mon1 = "" + dtr.getMonth();
+         if ((mon1 + "").length === 1) { mon1 = "0" + mon1; } // pad with a zero if necessary
+         var mon2 = "" + dtr2.getMonth();
+         if ((mon2 + "").length === 1) { mon2 = "0" + mon2; } // pad with a zero if necessary
+
+         var queryHead = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN';
+         var query1 = ' "' + dtr.getFullYear() +
+                      '-' + mon1 +
+                      '-' + dtr.getDate() +
+                      ' ' + dtr.getHours() +
+                      ':' + dtr.getMinutes() +
+                      ':' + dtr.getSeconds() + '"';
+         var queryMid = ' AND ';
+         var query2 = ' "' + dtr.getFullYear() +
+                      '-' + mon2 +
+                      '-' + dtr.getDate() +
+                      ' ' + dtr.getHours() +
+                      ':' + dtr.getMinutes() +
+                      ':' + dtr.getSeconds() + '"';
+         var queryTail = '"';
+
+         var query = queryHead + query1 + queryMid + query2 + queryTail;
         // TODO: receive, bin, and store the data from the database
       // TODO: send the requested data to the client
       // TODO: MAYBE: remove lowest few levels to save space
