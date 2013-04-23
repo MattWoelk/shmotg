@@ -217,21 +217,14 @@ binnedData = function () {
     //   etc: {},
     // }
 
-    console.log("adding binned data");
-
     for (var key in bData) { // for each of max_val, min_val, etc.
       for (var lvl in bData[key].levels) { // for each level
         //if we don't have a level for this already, initialize one
         if (!bd[key].levels[lvl]) {
           bd[key].levels[lvl] = [];
         }
-        if (bData[key].levels[lvl]) {
-          console.log("level: " + lvl + ", length: " +  bData[key].levels[lvl].length);
-        }
-        console.log("before: " + bd[key].levels[lvl].length);
 
         bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
-        console.log("after : " + bd[key].levels[lvl].length);
       } // for each received data point
     }; // for each of max_val, min_val, etc.
 
@@ -266,6 +259,41 @@ binnedData = function () {
     var numberWeShouldHave = Math.floor(actualRange / sampleSize);
 
     var numberWeHave = dateRange.length;
+
+    return numberWeHave >= numberWeShouldHave;
+  }
+
+  my.missingBins = function(ms_range, level) {
+    // Return which bins which we are missing in the given range and level.
+
+    if (level === 0) {
+      key = "rawData";
+    } else {
+      key = "average";
+    }
+
+    var dateRange = my.getDateRange(key, level, ms_range);
+
+    if (dateRange.length === 0) {
+      return false;
+    }
+
+    var firstSample = dateRange[0].ms;
+    var oneSample = 1000 / 200; // milliseconds per sample
+    var sampleSize = Math.pow(2, level) * oneSample;
+
+    if (firstSample > ms_range[0] + sampleSize) {
+      return false;
+    }
+
+    var actualRange = ms_range[1] - firstSample;
+    var numberWeShouldHave = Math.floor(actualRange / sampleSize);
+
+    var numberWeHave = dateRange.length;
+
+    var whichSamplesWeShouldHaveForThisRange = [];
+    // TODO: if we have a sample in this range, extrapolate from it where the others should be
+    // TODO: if not, we indicate that we are missing the entire range
 
     return numberWeHave >= numberWeShouldHave;
   }
