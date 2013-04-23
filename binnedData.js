@@ -241,13 +241,13 @@ binnedData = function () {
       key = "average";
     }
 
-    var dateRange = my.getDateRange(key, level, ms_range);
+    var datedRange = my.getDateRange(key, level, ms_range);
 
-    if (dateRange.length === 0) {
+    if (datedRange.length === 0) {
       return false;
     }
 
-    var firstSample = dateRange[0].ms;
+    var firstSample = datedRange[0].ms;
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, level) * oneSample;
 
@@ -258,13 +258,14 @@ binnedData = function () {
     var actualRange = ms_range[1] - firstSample;
     var numberWeShouldHave = Math.floor(actualRange / sampleSize);
 
-    var numberWeHave = dateRange.length;
+    var numberWeHave = datedRange.length;
 
     return numberWeHave >= numberWeShouldHave;
   }
 
   my.missingBins = function(ms_range, level) {
-    // Return which bins which we are missing in the given range and level.
+    // TODO: Return which bins which we are missing in the given range and level.
+    // TODO: returns [[start, end],[start,end],...] ranges of required data
 
     if (level === 0) {
       key = "rawData";
@@ -272,30 +273,42 @@ binnedData = function () {
       key = "average";
     }
 
-    var dateRange = my.getDateRange(key, level, ms_range);
+    var datedRange = my.getDateRange(key, level, ms_range);
 
-    if (dateRange.length === 0) {
-      return false;
+    if (datedRange.length === 0) {
+      return ms_range;
     }
 
-    var firstSample = dateRange[0].ms;
+    var firstSample = datedRange[0].ms;
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, level) * oneSample;
 
-    if (firstSample > ms_range[0] + sampleSize) {
-      return false;
-    }
-
-    var actualRange = ms_range[1] - firstSample;
-    var numberWeShouldHave = Math.floor(actualRange / sampleSize);
-
-    var numberWeHave = dateRange.length;
+    var howManyFitAbove = Math.floor((ms_range[1] - firstSample) / sampleSize);
+    var howManyFitBelow = Math.floor((firstSample - ms_range[0]) / sampleSize);
 
     var whichSamplesWeShouldHaveForThisRange = [];
-    // TODO: if we have a sample in this range, extrapolate from it where the others should be
-    // TODO: if not, we indicate that we are missing the entire range
 
-    return numberWeHave >= numberWeShouldHave;
+    // add first sample
+    whichSamplesWeShouldHaveForThisRange.push(firstSample);
+
+    // add above samples
+    _.times(howManyFitAbove, function (i) {
+      whichSamplesWeShouldHaveForThisRange.push(firstSample + ((i+1) * sampleSize));
+    });
+
+    // add below samples
+    _.times(howManyFitBelow, function (i) {
+      whichSamplesWeShouldHaveForThisRange.push(firstSample - ((i+1) * sampleSize));
+    });
+
+    var missingRanges = []; // form: [[0,1],[4,8],[10,45]]
+
+    _.each(whichSamplesWeShouldHaveForThisRange, function (d,i) {
+      missingRanges.push([d, d + sampleSize]);
+      // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+    });
+
+    return missingRanges;
   }
 
   my.getMinRaw = function () {

@@ -218,6 +218,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
 
       // TODO: see if our binned data has the requested range
+      //       Use missingBins to do so
+      //       - it returns ranges. Request each range from the server.
       // TODO: if it does not, make a list of missing bins
         // TODO: request the raw data which would fill those bins from database
         // TODO: receive, bin, and store the data from the database
