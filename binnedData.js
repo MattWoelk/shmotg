@@ -1,5 +1,11 @@
 // This is binnedData. A convenient way of storing binned data
 
+//{{{ CONSTANTS
+var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
+  // TODO: phase this out (preferable) OR set it as a really high number
+
+/// CONSTANTS }}}
+
 binnedData = function () {
 
   //{{{ VARIABLES
@@ -333,6 +339,12 @@ binnedData = function () {
 
   my.getOpacity = function (key) {
     return bd[key].opacity;
+  }
+
+  my.getAllInRange = function(lvl, range) {
+    // return bd with the same structure, but only
+    // with data in the following range and level
+    // from any key
   }
 
   my.getDateRange = function (key, lvl, range) {

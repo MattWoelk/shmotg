@@ -279,7 +279,9 @@ mysqlconnection.query(query, function (err, rows, fields) {
           var query = queryHead + query1 + queryMid + query2 + queryTail;
 
           var queryResult = sendQuery(query);
-          // TODO: Bin the new data
+
+          // Bin the new data
+          binData.addRawData(queryResult);
         }
       }
       // TODO: send the requested data to the client
