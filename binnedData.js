@@ -98,6 +98,14 @@ binnedData = function () {
   }
 
   // Bin the data in a level into abstracted bins
+  // TODO: This is where the problem is
+  //       The bins must all have 0ms as a point-of-reference
+  //       so that they don't get rendered differently on the
+  //       server and the client.
+  //       To fix this, choose whether or not to skip certain
+  //       values which are being binned.
+  //       If they are being skipped, the next one will be the
+  //       first of the two samples to be binned.
   function binTheDataWithFunction (bin, curLevel, key, func) {
     var bDat = new Array();
     var i = 0;
