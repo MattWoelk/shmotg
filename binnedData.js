@@ -158,6 +158,12 @@ binnedData = function () {
     return result;
   }
 
+  function inAButNotInB(arr1, arr2) {
+    return _.filter(arr1, function (d) {
+      return !_.contains(arr2, d);
+    });
+  }
+
   // HELPER METHODS }}}
 
   //{{{ INITIALIZATION (runs once)
@@ -301,9 +307,11 @@ binnedData = function () {
       whichSamplesWeShouldHaveForThisRange.push(firstSample - ((i+1) * sampleSize));
     });
 
-    var missingRanges = []; // form: [[0,1],[4,8],[10,45]]
+    var missingSamples = inAButNotInB(whichSamplesWeShouldHaveForThisRange, _.pluck(datedRange, 'ms'));
 
-    _.each(whichSamplesWeShouldHaveForThisRange, function (d,i) {
+    var missingRanges = []; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+
+    _.each(missingSamples, function (d,i) {
       missingRanges.push([d, d + sampleSize]);
       // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
     });
