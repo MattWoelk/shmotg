@@ -2,7 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
 _ = require('underscore');
-var d3 = require("d3");
+d3 = require("d3");
 require("../binnedData.js");
 
 function dt (num) {
@@ -192,10 +192,11 @@ function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
-function sendQuery(query) {
+function sendDatabaseQuery(query, doWithResult) {
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) {console.log("err: ", err); return err;}
     console.log(query, rows.length);
+    //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
       return { val: d.ESGgirder18 ,
                ms: dateAndSampleIndexStringToMilliseconds(
@@ -203,9 +204,11 @@ function sendQuery(query) {
                  d.SampleIndex)
              };
     });
-    return send_object; // this is always raw data
+
+    // TODO TODO TODO: send_object is currently a bunch of NaN and undefined's
+
+    doWithResult(send_object); // send_object is always raw data
   });
-  return -1; // shouldn't happen
 }
 
 function pad(integ) {
@@ -217,7 +220,7 @@ function pad(integ) {
 mysqlconnection.query(query, function (err, rows, fields) {
   if (err) return err;
   //console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
-  console.log(query, rows.length);
+  //console.log(query, rows.length);
 
   var send_object = rows.map(function (d) {
     return { val: d.ESGgirder18 ,
@@ -245,10 +248,38 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var req = received.req;
       var id = received.id;
       console.log("client req: " + JSON.stringify(received));
-      //sendQuery('SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10');
+      //sendDatabaseQuery('SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10');
 
       // See if we have the requested data at the requested bin level
       var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
+
+      var sendToClient = function () {
+        // get result ready to send
+        var send_req = {};
+
+        if (req.bin_level === 0) {
+          // send raw data
+          send_req = binData.getDateRange("rawData", req.bin_level, range);
+          console.log("RAW");
+          console.log(range);
+          console.log(send_req);
+        } else {
+          // send binned data
+          send_req = binData.getAllInRange(req.bin_level, range);
+          console.log("BINNED");
+          console.log(range);
+          console.log(send_req);
+        }
+
+        // Send requested data to client
+        var toBeSent = {
+          id: id,
+          sensor: req.sensor,
+          bin_level: req.bin_level,
+          req: send_req };
+
+        socket.emit('req_data', JSON.stringify(toBeSent));
+      };
 
       // See if our binned data has the requested range
       var missingRanges = binData.missingBins(range, received.bin_level);
@@ -256,11 +287,18 @@ mysqlconnection.query(query, function (err, rows, fields) {
       //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
       if (missingRanges.length !== 0) {
         for (var i = 0; i < missingRanges.length; i++) {
-          // TODO: Request more data from the server
+          // Request more data from the server
           var dtr = dt(parseInt(missingRanges[i][0])); // date to request
           var dtr2 = dt(parseInt(missingRanges[i][1])); // second date to request
 
-          var queryHead = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN';
+          // TODO: need more than just Time
+          // return { val: d.ESGgirder18 ,
+          //    ms: dateAndSampleIndexStringToMilliseconds(
+          //      d.Time + "",
+          //      d.SampleIndex)
+          //  };
+          // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
+          var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
           var query1 = ' "' + dtr.getFullYear() +
                        '-' + pad(dtr.getMonth() + 1) +
                        '-' + pad(dtr.getDate()) +
@@ -278,168 +316,21 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
           var query = queryHead + query1 + queryMid + query2 + queryTail;
 
-          var queryResult = sendQuery(query);
+          sendDatabaseQuery(query, function (queryResult) {
+            // Bin the new data
+            // TODO CURRENT console.log("query Result: ", queryResult);
+            binData.addRawData(queryResult);
 
-          // Bin the new data
-          binData.addRawData(queryResult);
-        }
-      }
-      // TODO: send the requested data to the client
-      // TODO MAYBE: remove lower bins to save space.
+            sendToClient();
 
-      // if it doesn't yet exist at this level, initialize it.
-      // TODO: get rid of this ??
-//      if (!sensorBins[req.sensor].average.levels[req.bin_level]) {
-//        sensorBins[req.sensor].average.levels[req.bin_level] = [];
-//        sensorBins[req.sensor].q1.levels[req.bin_level] = [];
-//        sensorBins[req.sensor].q3.levels[req.bin_level] = [];
-//        sensorBins[req.sensor].mins.levels[req.bin_level] = [];
-//        sensorBins[req.sensor].maxes.levels[req.bin_level] = [];
-//      }
-          // if we don't have a binData for this sensor yet, make one
-//COMMENTED OUT THE NEW STUFF FOR NOW TODO: use the new stuff
-//          if (!sensorBins[req.sensor].rawData ||
-//              !sensorBins[req.sensor].rawData.levels[0]) {
-//            sensorBins[req.sensor] = {rawData: { levels: [[]] },
-//                                      average: { levels: [[]] },
-//                                      mins: { levels:    [[]] },
-//                                      maxes: { levels:   [[]] },
-//                                      q1: { levels:      [[]] },
-//                                      q3: { levels:      [[]] }, };
-//          }
-//
-//      var filtered_range = _.filter(sensorBins[req.sensor].rawData.levels[req.bin_level], function (d) {
-//        return d.date >= range[0] && d.date <= range[1];
-//      });
-//
-//      var quantityInRange = filtered_range.length;
-//      console.log("num: " + quantityInRange);
-//
-//      var enoughValuesInRange = function (rng, num, lvl) {
-//        // returns true if we have enough values, or false if we don't
-//        var msPerSample = 1000 / 200; // 5
-//        var totalSamplesForRange = (rng[1] / rng[0]) / msPerSample;
-//        var requiredNumberOfValues = totalSamplesForRange / Math.pow(2, lvl);
-//        return num >= requiredNumberOfValues;
-//      };
-//
-//      // TODO: if we don't have what we need, calculate what raw data we need from the server
-//      if (!enoughValuesInRange(range, quantityInRange, req.bin_level)) {
-//        console.log("NEED MORE");
-//        // TODO: request raw data where needed from database
-//        // TODO: - (temporary) generate random data where needed
-//        var msPerSample = 1000 / 200; // 5
-//        var totalSamplesForRange = (range[1] - range[0]) / msPerSample;
-//        var rndmdata = [];
-//        var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
-//                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
-//        for(i=0;i<totalSamplesForRange;i++) {
-//          rndmdata.push({
-//            sensor: req.sensor,
-//            ms: dat + (i * msPerBin),
-//            val: randomPointRaw(),
-//          })
-//        }
-//
-//        // TODO: add the data to our raw data
-//        rndmdata.forEach(function (dat, i) { // for each piece of data we received
-//
-//          // See if there is not already an object with that date.
-//          if (_.find(sensorBins[req.sensor].rawData.levels[0], function (d) { return d.date === dat.ms; })) {
-//            // We already have that data point
-//          } else {
-//            // Add a new object to the binData array
-//            sensorBins[req.sensor].rawData.levels[0].push({date: dat.ms, val: dat.val});
-//          }
-//        }); // for each received data point
-//
-//        // sort the array again ASSUMPTION: everything in datas is at the same bin level
-//        sensorBins[req.sensor].rawData.levels[0].sort(function (a, b) { return a.date - b.date; });
-//
-//        console.log("sensor bin raw 0 length: " + sensorBins[req.sensor].rawData.levels[0].length);
-//
-//        // Bin the data
-//        //binAll(sensorBins[req.sensor]);
-//      }
-
-      // Send randomly generated data (temporary)
-      // TODO: remove
-      var randomPoint = function () {
-        return Math.random() * 2 + 94; // between 94 and 96
-      };
-      function randomPointRaw () {
-        return Math.random() * 8 + 91; // between 91 and 99
-      };
-
-      var msPerSample = 1000 / 200; // 5
-      var msPerBin = Math.pow(2, req.bin_level) * msPerSample;
-      var howManyPointsToGenerate = (parseInt(req.ms_end) - parseInt(req.ms_start)) / msPerBin;
-
-      // data must be in the form of the following example:
-      // { average: {
-      //     levels: [
-      //       [{val: value_point, ms: ms_since_epoch},
-      //        {val: value_point, ms: ms_since_epoch},
-      //        {etc...}],
-      //       [etc.]
-      //     ],
-      //   },
-      //   q1: {
-      //     levels: [
-      //       [etc.]
-      //     ],
-      //   },
-      //   etc: {},
-      // }
-
-      var send_req = {};
-
-      if (req.bin_level === 0) {
-        // make raw data
-
-        var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin);
-                //ms: (req.ms_start % msPerBin) + (i * msPerBin),
-        send_req = [];
-        for(i=0;i<howManyPointsToGenerate;i++) {
-          send_req.push({
-            val: randomPointRaw(),
-            ms: dat + (i * msPerBin),
-          })
-        }
+            // TODO MAYBE: remove lower bins to save space.
+          });
+        } // for each missing range
       } else {
-        // make binned data
+        // we do not need to retrieve data from the database
+        sendToClient();
+      } // if we need data from the database
 
-        // initialize the data structure to be sent
-        var theKeys = ["average", "q1", "q3", "mins", "maxes"];
-        for (var i = 0; i < theKeys.length; i++) {
-          send_req[theKeys[i]] = {};
-          send_req[theKeys[i]].levels = [];
-          send_req[theKeys[i]].levels[req.bin_level] = [];
-        }
-        for(i=0;i<howManyPointsToGenerate;i++) {
-          var val = randomPoint();
-          var val_q1 = val - (Math.random() * 1.2);
-          var val_q3 = val + (Math.random() * 1.2);
-          var val_min = val_q1 - (Math.random() * 2);
-          var val_max = val_q3 + (Math.random() * 2);
-          var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin) - 5; // TODO: magic hack
-
-          send_req.average.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val});
-          send_req.q1.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q1});
-          send_req.q3.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q3});
-          send_req.mins.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_min});
-          send_req.maxes.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_max});
-        }
-      }
-
-      // Send requested data to client
-      var toBeSent = {
-        id: id,
-        sensor: req.sensor,
-        bin_level: req.bin_level,
-        req: send_req };
-
-      socket.emit('req_data', JSON.stringify(toBeSent));
     });
   });
 });

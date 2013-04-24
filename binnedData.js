@@ -79,11 +79,10 @@ binnedData = function () {
         var range = [_.min(newData, function (d) { return d.ms; }).ms,
                      _.max(newData, function (d) { return d.ms; }).ms];
 
-        // TODO TODO TODO: probably where the gap-filling problem is:
+        // TODO remove unused:
         // filter for old data which is outside the range of the new data
         // (newly binned data gets preference over previously binned data)
         var oldFiltered = _.filter(bd[key].levels[j], function (d) { return d.ms < range[0] || d.ms > range[1]; });
-        // TODO TODO TODO: instead, remove new data which are duplicates of old data
 
         var oldUnfiltered = _.filter(bd[key].levels[j], function (d) { return true; });
 
@@ -342,9 +341,34 @@ binnedData = function () {
   }
 
   my.getAllInRange = function(lvl, range) {
-    // return bd with the same structure, but only
+    // TODO TODO TODO
+    // return a bd-like data structure but only
     // with data in the following range and level
-    // from any key
+    // from all keys
+
+    // initialize the data structure to be sent
+    var theKeys = ["average", "q1", "q3", "mins", "maxes"];
+    var send_req = {};
+    for (var i = 0; i < theKeys.length; i++) {
+      send_req[theKeys[i]] = {};
+      send_req[theKeys[i]].levels = [];
+      send_req[theKeys[i]].levels[lvl] = my.getDateRange(theKeys[i], lvl, range);
+    }
+    //for(i=0;i<howManyPointsToGenerate;i++) {
+    //  var val = randomPoint();
+    //  var val_q1 = val - (Math.random() * 1.2);
+    //  var val_q3 = val + (Math.random() * 1.2);
+    //  var val_min = val_q1 - (Math.random() * 2);
+    //  var val_max = val_q3 + (Math.random() * 2);
+    //  var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin) - 5; // TODO: magic hack
+
+    //  send_req.average.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val});
+    //  send_req.q1.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q1});
+    //  send_req.q3.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q3});
+    //  send_req.mins.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_min});
+    //  send_req.maxes.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_max});
+    //}
+    return send_req;
   }
 
   my.getDateRange = function (key, lvl, range) {
