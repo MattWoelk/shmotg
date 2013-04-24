@@ -282,7 +282,7 @@ binnedData = function () {
     var datedRange = my.getDateRange(key, level, ms_range);
 
     if (datedRange.length === 0) {
-      return ms_range;
+      return [ms_range];
     }
 
     var firstSample = datedRange[0].ms;

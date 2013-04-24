@@ -1,7 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
-var _ = require('underscore');
+_ = require('underscore');
 var d3 = require("d3");
 require("../binnedData.js");
 
@@ -13,6 +13,9 @@ function dt (num) {
 
 // CONSTANTS TODO: get rid of these once they're no longer required
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
+
+// GLOBAL VARIABLES
+var binData = binnedData();
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
@@ -189,9 +192,32 @@ function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
+function sendQuery(query) {
+  mysqlconnection.query(query, function (err, rows, fields) {
+    if (err) {console.log("err: ", err); return err;}
+    console.log(query, rows.length);
+    var send_object = rows.map(function (d) {
+      return { val: d.ESGgirder18 ,
+               ms: dateAndSampleIndexStringToMilliseconds(
+                 d.Time + "",
+                 d.SampleIndex)
+             };
+    });
+    return send_object; // this is always raw data
+  });
+  return -1; // shouldn't happen
+}
+
+function pad(integ) {
+  var i = "" + integ;
+  if (i.length === 1) { i = "0" + i; } // pad with a zero if necessary
+  return i;
+}
+
 mysqlconnection.query(query, function (err, rows, fields) {
-  if (err) throw err;
-  console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
+  if (err) return err;
+  //console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
+  console.log(query, rows.length);
 
   var send_object = rows.map(function (d) {
     return { val: d.ESGgirder18 ,
@@ -219,47 +245,45 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var req = received.req;
       var id = received.id;
       console.log("client req: " + JSON.stringify(received));
+      //sendQuery('SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10');
 
       // See if we have the requested data at the requested bin level
       var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
 
-      // TODO: see if our binned data has the requested range
-      //       Use missingBins to do so
-      //       - it returns ranges. Request each range from the server.
-      // TODO: if it does not, make a list of missing bins
-        // TODO: request the raw data which would fill those bins from database
-         //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
-         var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
-         var msToRequest = 0;
-         var dtr = dt(msToRequest); // date to request
-         var msToRequest2 = 0;
-         var dtr2 = dt(msToRequest); // date to request
+      // See if our binned data has the requested range
+      var missingRanges = binData.missingBins(range, received.bin_level);
 
-         var mon1 = "" + dtr.getMonth();
-         if ((mon1 + "").length === 1) { mon1 = "0" + mon1; } // pad with a zero if necessary
-         var mon2 = "" + dtr2.getMonth();
-         if ((mon2 + "").length === 1) { mon2 = "0" + mon2; } // pad with a zero if necessary
+      //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
+      if (missingRanges.length !== 0) {
+        for (var i = 0; i < missingRanges.length; i++) {
+          // TODO: Request more data from the server
+          var dtr = dt(parseInt(missingRanges[i][0])); // date to request
+          var dtr2 = dt(parseInt(missingRanges[i][1])); // second date to request
 
-         var queryHead = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN';
-         var query1 = ' "' + dtr.getFullYear() +
-                      '-' + mon1 +
-                      '-' + dtr.getDate() +
-                      ' ' + dtr.getHours() +
-                      ':' + dtr.getMinutes() +
-                      ':' + dtr.getSeconds() + '"';
-         var queryMid = ' AND ';
-         var query2 = ' "' + dtr.getFullYear() +
-                      '-' + mon2 +
-                      '-' + dtr.getDate() +
-                      ' ' + dtr.getHours() +
-                      ':' + dtr.getMinutes() +
-                      ':' + dtr.getSeconds() + '"';
-         var queryTail = '"';
+          var queryHead = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN';
+          var query1 = ' "' + dtr.getFullYear() +
+                       '-' + pad(dtr.getMonth() + 1) +
+                       '-' + pad(dtr.getDate()) +
+                       ' ' + pad(dtr.getHours()) +
+                       ':' + pad(dtr.getMinutes()) +
+                       ':' + pad(dtr.getSeconds()) + '"';
+          var queryMid = ' AND ';
+          var query2 = '"' + dtr.getFullYear() +
+                       '-' + pad(dtr2.getMonth() + 1) +
+                       '-' + pad(dtr.getDate()) +
+                       ' ' + pad(dtr.getHours()) +
+                       ':' + pad(dtr.getMinutes()) +
+                       ':' + pad(dtr.getSeconds() + 1) + '"';
+          var queryTail = '';
 
-         var query = queryHead + query1 + queryMid + query2 + queryTail;
-        // TODO: receive, bin, and store the data from the database
+          var query = queryHead + query1 + queryMid + query2 + queryTail;
+
+          var queryResult = sendQuery(query);
+          // TODO: Bin the new data
+        }
+      }
       // TODO: send the requested data to the client
-      // TODO: MAYBE: remove lowest few levels to save space
+      // TODO MAYBE: remove lower bins to save space.
 
       // if it doesn't yet exist at this level, initialize it.
       // TODO: get rid of this ??
@@ -419,7 +443,6 @@ mysqlconnection.query(query, function (err, rows, fields) {
 });
 
 
-mysqlconnection.end();
 
 /*
 http.createServer(function(req, res) {
