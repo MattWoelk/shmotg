@@ -110,6 +110,7 @@ binnedData = function () {
     var bDat = new Array();
     var i = 0;
     for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+      // TODO: if we are at a bad spot to begin a bin, decrement i by 1 and continue;
       if (bin[key].levels[curLevel][i+1]){
         var newdate = bin.q1.levels[curLevel][i/*+1*/].ms;
 
