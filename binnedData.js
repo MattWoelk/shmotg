@@ -116,7 +116,8 @@ binnedData = function () {
     }
     for(var i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
-      if (bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel) * 5) !== 0) {
+      if (bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel) * 5) !== 0 //||
+          /* TODO: if the samples aren't the right distance apart*/) {
         // TODO: Magic: 5 is the number of ms per sample
         // This is here so that both the server and client's bins start and end at the same place
         // no matter what range of data they have to work with.
