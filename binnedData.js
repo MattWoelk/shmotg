@@ -72,6 +72,9 @@ binnedData = function () {
 
         // store newly calculated data from lower level
         var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
+        if (newData.length === 0) {
+          continue;
+        }
 
         // TODO: filter away duplicates of newData (ms which are already in the old data)
 
@@ -108,9 +111,19 @@ binnedData = function () {
   //       first of the two samples to be binned.
   function binTheDataWithFunction (bin, curLevel, key, func) {
     var bDat = new Array();
-    var i = 0;
-    for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
-      // TODO: if we are at a bad spot to begin a bin, decrement i by 1 and continue;
+    if (!bin[key].levels[curLevel]) {
+      return bDat;
+    }
+    for(var i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+      // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
+      if (bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel) * 5) !== 0) {
+        // TODO: Magic: 5 is the number of ms per sample
+        // This is here so that both the server and client's bins start and end at the same place
+        // no matter what range of data they have to work with.
+        i = i - 1;
+        continue;
+      }
+
       if (bin[key].levels[curLevel][i+1]){
         var newdate = bin.q1.levels[curLevel][i/*+1*/].ms;
 
