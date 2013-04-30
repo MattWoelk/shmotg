@@ -70,32 +70,23 @@ binnedData = function () {
       for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
         var key = bd.keys[keyValue];
 
-        // store newly calculated data from lower level
+        // bin and store data from lower bin
         var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
         if (newData.length === 0) {
           continue;
         }
 
-        // TODO: filter away duplicates of newData (ms which are already in the old data)
-
-        // get range of new data
+        // get range of newly binned data
         var range = [_.min(newData, function (d) { return d.ms; }).ms,
                      _.max(newData, function (d) { return d.ms; }).ms];
 
-        // TODO remove unused:
-        // filter for old data which is outside the range of the new data
-        // (newly binned data gets preference over previously binned data)
-        var oldFiltered = _.filter(bd[key].levels[j], function (d) { return d.ms < range[0] || d.ms > range[1]; });
-
+        // What was already in this bin level
         var oldUnfiltered = _.filter(bd[key].levels[j], function (d) { return true; });
 
-        // combine and sort old and new
-        //var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.ms - b.ms; });
-        //var combo = oldUnfiltered.concat(newData).sort(function (a, b) { return a.ms - b.ms; });
-        var combo = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
-
-        // store combination
-        bd[key].levels[j] = combo;
+        // Combine what was already there and what was just calculated
+        // - What was already in this bin level gets precedence
+        //   over what is being binned from the lower level
+        bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
       } // for each key
     } // for each bin level
   }
@@ -116,7 +107,7 @@ binnedData = function () {
     }
     for(var i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
-      if (bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel) * 5) !== 0 //||
+      if (bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel+1) * 5) !== 0 //||
           /* TODO: if the samples aren't the right distance apart*/) {
         // TODO: Magic: 5 is the number of ms per sample
         // This is here so that both the server and client's bins start and end at the same place
@@ -142,9 +133,9 @@ binnedData = function () {
               , ms: newdate });
         }
       }else{
-        var newdate = bin[key].levels[curLevel][i].ms;
-        bDat.push( { val: bin[key].levels[curLevel][i].val
-                   , ms: newdate } );
+        //var newdate = bin[key].levels[curLevel][i].ms;
+        //bDat.push( { val: bin[key].levels[curLevel][i].val
+        //           , ms: newdate } );
       }
     }
     return bDat;
@@ -172,8 +163,9 @@ binnedData = function () {
 
   function combineAndSortArraysOfDateValObjects (arr1, arr2) {
     // Add the objects from arr2 (array) to arr1 (array)
-    //   if the object from arr2 has a ms value which no
-    //   object in arr1 has.
+    //   only if the object from arr2 has a ms value
+    //   which no object in arr1 has.
+    // AKA: arr1 gets precedence
     var result = arr1.concat(_.filter(arr2, function(d) {
       var b = !_.some(arr1, function(g) {
         return d.ms === g.ms;
