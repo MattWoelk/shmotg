@@ -105,10 +105,26 @@ binnedData = function () {
     if (!bin[key].levels[curLevel]) {
       return bDat;
     }
+
+    var oneSample = 1000 / 200; // milliseconds per sample
+    var sampleSize = Math.pow(2, curLevel) * oneSample;
+
     for(var i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
-      if (bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel+1) * 5) !== 0 //||
-          /* TODO: if the samples aren't the right distance apart*/) {
+      var sampleIsAtModularLocation = bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel+1) * 5) === 0;
+      var nextSampleExists = bin.q1.levels[curLevel].length > i + 1;
+      //console.log("nextSampleExists", nextSampleExists, bin.q1.levels[curLevel].length, i + 1);
+      var nextSampleIsRightDistanceAway = nextSampleExists ?
+            bin.q1.levels[curLevel][i+1].ms - bin.q1.levels[curLevel][i].ms === sampleSize :
+            true;
+
+      //if (nextSampleExists) {
+      //  console.log(bin.q1.levels[curLevel][i+1].ms - bin.q1.levels[curLevel][i].ms);
+      //}
+
+      //console.log(i, sampleIsAtModularLocation, nextSampleExists, nextSampleIsRightDistanceAway);
+
+      if (!sampleIsAtModularLocation || !nextSampleExists || !nextSampleIsRightDistanceAway) {
         // TODO: Magic: 5 is the number of ms per sample
         // This is here so that both the server and client's bins start and end at the same place
         // no matter what range of data they have to work with.

@@ -87,7 +87,8 @@ var burd = binnedData().addRawData([
 
 assert(_.pluck(burd.bd().average.levels[1], 'ms'), [1010, 1020, 1030, 1040, 1050], 'average bin locations; beginning starts at non modular location');
 
-assert(_.flatten(bord.missingBins([1000, 1050], 0)), [1000, 1005, 1025, 1030, 1030, 1035, 1035, 1040], 'missing beginning and middle');
+assert(_.flatten(bord.missingBins([1000, 1050], 0)), [1000, 1005, 1025, 1030, 1030, 1035, 1035, 1040], 'raw  : missing beginning');
+assert(_.flatten(bord.missingBins([1000, 1050], 1)), [1000, 1010], 'lvl 1: missing beginning');
 
 var bard = binnedData().addRawData([
   {ms: 1005, val: 10},
@@ -100,7 +101,7 @@ var bard = binnedData().addRawData([
   {ms: 1055, val: 20},
 ]);
 
-assert(_.pluck(bard.bd().average.levels[1], 'ms'), [1010, 1040, 1050], 'average bin locations');
+assert(_.pluck(bard.bd().average.levels[1], 'ms'), [1010, 1040, 1050], 'average bin locations; missing at beginning and middle');
 
-assert(_.flatten(bard.missingBins([1000, 1050], 1)), [1000, 1005, 1025, 1030, 1030, 1035, 1035, 1040], 'level 1 missing bins');
+assert(_.flatten(bard.missingBins([1000, 1050], 1)), [1000, 1005, 1025, 1030, 1030, 1035, 1035, 1040], 'level 1 missing bins; missing at beginning and middle');
 
