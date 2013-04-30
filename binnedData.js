@@ -313,38 +313,26 @@ binnedData = function () {
       return [ms_range];
     }
 
-    var firstSample = datedRange[0].ms;
-    var oneSample = 1000 / 200; // milliseconds per sample
+    var oneSample = 1000 / 200; // milliseconds per sample TODO: magic ?
+    var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
+    var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
+
     var sampleSize = Math.pow(2, level) * oneSample;
 
-    var howManyFitAbove = Math.floor((ms_range[1] - firstSample) / sampleSize);
-    var howManyFitBelow = Math.floor((firstSample - ms_range[0]) / sampleSize);
-
-    var whichSamplesWeShouldHaveForThisRange = [];
-
-    // add first sample
-    whichSamplesWeShouldHaveForThisRange.push(firstSample);
-
-    // add above samples
-    _.times(howManyFitAbove, function (i) {
-      whichSamplesWeShouldHaveForThisRange.push(firstSample + ((i+1) * sampleSize));
+    var neededBins = _.range(fir * Math.pow(2, level) * oneSample, (las + 1) * Math.pow(2, level) * oneSample, sampleSize);
+    neededBins.forEach(function (d) {
+      d = d * Math.pow(2, level) * oneSample;
     });
 
-    // add below samples
-    _.times(howManyFitBelow, function (i) {
-      whichSamplesWeShouldHaveForThisRange.push(firstSample - ((i+1) * sampleSize));
-    });
-
-    var missingSamples = inAButNotInB(whichSamplesWeShouldHaveForThisRange, _.pluck(datedRange, 'ms'));
-
-    var missingRanges = []; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+    var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
+    var missingRanges = [];
 
     _.each(missingSamples, function (d,i) {
       missingRanges.push([d, d + sampleSize]);
       // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
     });
 
-    return missingRanges;
+    return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
   }
 
   my.getMinRaw = function () {
