@@ -332,6 +332,9 @@ binnedData = function () {
       d = d * Math.pow(2, level) * oneSample;
     });
 
+    //console.log("    neededBins:", neededBins);
+    //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
+
     var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
     var missingRanges = [];
 
