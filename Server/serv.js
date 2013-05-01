@@ -11,8 +11,6 @@ function dt (num) {
   return newdate;
 }
 
-// CONSTANTS TODO: get rid of these once they're no longer required
-var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
 
 // GLOBAL VARIABLES
 var binData = binnedData();
@@ -41,70 +39,6 @@ for (var li in listOfGirders) {
   i = i + 1;
 }
 
-
-// Bin 'bin' into abstracted bins
-function binAll (bin) {
-  for (var keyValue in bin.keys) {
-    var key = bin.keys[keyValue];
-    bin[key].levels[0] = bin.rawData.levels[0]; // update raw data from the source
-  }
-
-  // for each level other than raw data level, for each key, bin the data from the lower level
-  for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-    for (var keyValue in bin.keys) { // for each of 'average', 'max', 'min', etc.
-      var key = bin.keys[keyValue];
-
-      // store new data
-      var newData = binTheDataWithFunction(bin, j-1, key, bin[key].func);
-
-      // get range of new data
-      var range = [_.min(newData, function (d) { return d.date; }).date,
-                   _.max(newData, function (d) { return d.date; }).date];
-
-      // filter for old data which is outside the range of the new data
-      // (newly binned data gets preference over previously binned data)
-      var oldFiltered = _.filter(bin[key].levels[j], function (d) { return d.date < range[0] || d.date > range[1]; });
-
-      // combine and sort old and new
-      var combo = oldFiltered.concat(newData).sort(function (a, b) { return a.date - b.date; });
-
-      // store combination
-      bin[key].levels[j] = combo;
-    }
-  }
-}
-
-// Bin the data in a level into abstracted bins
-var binTheDataWithFunction = function (bin, curLevel, key, func) {
-  var bDat = new Array();
-  var i = 0;
-  for(i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
-    if (bin[key].levels[curLevel][i+1]){
-      var newdate = bin.q1.levels[curLevel][i/*+1*/].date;
-
-      if (key === 'q1' || key === 'q3') {
-        //console.log( bin.q1.levels[curLevel][i+1].date );
-
-        bDat.push({ val:  func(
-              bin.q1.levels[curLevel][i].val,
-              bin.q1.levels[curLevel][i+1].val,
-              bin.q3.levels[curLevel][i].val,
-              bin.q3.levels[curLevel][i+1].val)
-            , date: newdate }); // This is messy and depends on a lot of things
-      }else{
-        bDat.push( { val: func(
-              bin[key].levels[curLevel][i].val,
-              bin[key].levels[curLevel][i+1].val)
-            , date: newdate });
-      }
-    }else{
-      var newdate = bin[key].levels[curLevel][i].date;
-      bDat.push( { val: bin[key].levels[curLevel][i].val
-                 , date: newdate } );
-    }
-  }
-  return bDat;
-};
 
 var handler = function (req, res) {
   // for html:
@@ -291,12 +225,6 @@ mysqlconnection.query(query, function (err, rows, fields) {
           var dtr = dt(parseInt(missingRanges[i][0])); // date to request
           var dtr2 = dt(parseInt(missingRanges[i][1])); // second date to request
 
-          // TODO: need more than just Time
-          // return { val: d.ESGgirder18 ,
-          //    ms: dateAndSampleIndexStringToMilliseconds(
-          //      d.Time + "",
-          //      d.SampleIndex)
-          //  };
           // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
           var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
           var query1 = ' "' + dtr.getFullYear() +
@@ -306,19 +234,18 @@ mysqlconnection.query(query, function (err, rows, fields) {
                        ':' + pad(dtr.getMinutes()) +
                        ':' + pad(dtr.getSeconds()) + '"';
           var queryMid = ' AND ';
-          var query2 = '"' + dtr.getFullYear() +
+          var query2 = '"' + dtr2.getFullYear() +
                        '-' + pad(dtr2.getMonth() + 1) +
-                       '-' + pad(dtr.getDate()) +
-                       ' ' + pad(dtr.getHours()) +
-                       ':' + pad(dtr.getMinutes()) +
-                       ':' + pad(dtr.getSeconds() + 1) + '"';
+                       '-' + pad(dtr2.getDate()) +
+                       ' ' + pad(dtr2.getHours()) +
+                       ':' + pad(dtr2.getMinutes()) +
+                       ':' + pad(dtr2.getSeconds() + 1) + '"';
           var queryTail = '';
 
           var query = queryHead + query1 + queryMid + query2 + queryTail;
 
           sendDatabaseQuery(query, function (queryResult) {
             // Bin the new data
-            // TODO CURRENT console.log("query Result: ", queryResult);
             binData.addRawData(queryResult);
 
             sendToClient();
