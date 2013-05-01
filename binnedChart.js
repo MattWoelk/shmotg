@@ -424,7 +424,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
     // If we rendered anything, see if we need more data from the server
     // AKA see if we didn't have enough data to render the entire domain.
-    if (didWeRenderAnything && !waitingForServer && !freshArrivalFromServer) {
+    if (didWeRenderAnything && !waitingForServer) {
       // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
 
       // If we don't have every piece of data in this range, ask for it all.
