@@ -60,6 +60,7 @@ binnedData = function () {
   //{{{ HELPER METHODS
 
   function rebin () {
+    console.log("rebin");
     for (var keyValue in bd.keys) {
       var key = bd.keys[keyValue];
       bd[key].levels[0] = bd.rawData.levels[0]; // update raw data from the source
@@ -108,6 +109,12 @@ binnedData = function () {
 
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, curLevel) * oneSample;
+
+    // TODO TODO TODO: for efficiency, do this in reverse:
+    // ??? see which bins need to be created
+    // (perhaps store which these are when data is being added)
+    // then only calculate the new bins.
+    // this will save MUCH time
 
     for(var i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
       // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
