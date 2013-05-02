@@ -199,9 +199,12 @@ mysqlconnection.query(query, function (err, rows, fields) {
           console.log(send_req);
         } else {
           // send binned data
+          console.log("== getting all in range");
+          console.log("== ...");
           send_req = binData.getAllInRange(req.bin_level, range);
-          console.log("BINNED");
-          console.log(range);
+          console.log("== got all in range");
+          console.log("== BINNED. sending now");
+          console.log(dt(range[0]), '-->', dt(range[1]));
           console.log(send_req);
         }
 
@@ -217,6 +220,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
       // See if our binned data has the requested range
       var missingRanges = binData.missingBins(range, received.bin_level);
+      console.log('missing ranges', missingRanges);
 
       //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
       if (missingRanges.length !== 0) {
@@ -246,7 +250,9 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
           sendDatabaseQuery(query, function (queryResult) {
             // Bin the new data
+            console.log("- binning data");
             binData.addRawData(queryResult);
+            console.log("- done binning data");
 
             sendToClient();
 
@@ -255,6 +261,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
         } // for each missing range
       } else {
         // we do not need to retrieve data from the database
+        console.log("** ALREADY HAD THAT DATA **");
+        // TODO TODO TODO this never happens. :/
         sendToClient();
       } // if we need data from the database
 
