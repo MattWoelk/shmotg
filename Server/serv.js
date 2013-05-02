@@ -220,6 +220,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
 
       // See if our binned data has the requested range
       var missingRanges = binData.missingBins(range, received.bin_level);
+      // TODO TODO TODO CURRENT TASK: get this working.
       console.log('missing ranges', missingRanges);
 
       //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
