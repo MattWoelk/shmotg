@@ -59,27 +59,27 @@ binnedData = function () {
 
   //{{{ HELPER METHODS
 
-  function rebin () {
-    console.log("rebin");
+  function rebin (range_to_rebin, level_to_rebin) {
+    var tic = new Date();
     for (var keyValue in bd.keys) {
       var key = bd.keys[keyValue];
       bd[key].levels[0] = bd.rawData.levels[0]; // update raw data from the source
     }
 
+
     // for each level other than raw data level, for each key, bin the data from the lower level
-    for (j = 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
+    for (j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
       for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
         var key = bd.keys[keyValue];
 
         // bin and store data from lower bin
-        var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
+        var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func, range_to_rebin);
         if (newData.length === 0) {
           continue;
         }
 
         // get range of newly binned data
-        var range = [_.min(newData, function (d) { return d.ms; }).ms,
-                     _.max(newData, function (d) { return d.ms; }).ms];
+        var range = d3.extent(newData, function (d) { return d.ms; });
 
         // What was already in this bin level
         var oldUnfiltered = _.filter(bd[key].levels[j], function (d) { return true; });
@@ -90,7 +90,9 @@ binnedData = function () {
         bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
       } // for each key
     } // for each bin level
+    console.log("rebin time:", new Date() - tic);
   }
+
 
   // Bin the data in a level into abstracted bins
   // TODO: This is where the problem is
@@ -101,7 +103,7 @@ binnedData = function () {
   //       values which are being binned.
   //       If they are being skipped, the next one will be the
   //       first of the two samples to be binned.
-  function binTheDataWithFunction (bin, curLevel, key, func) {
+  function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) {
     var bDat = new Array();
     if (!bin[key].levels[curLevel]) {
       return bDat;
@@ -155,10 +157,6 @@ binnedData = function () {
                 bin[key].levels[curLevel][i+1].val)
               , ms: newdate });
         }
-      }else{
-        //var newdate = bin[key].levels[curLevel][i].ms;
-        //bDat.push( { val: bin[key].levels[curLevel][i].val
-        //           , ms: newdate } );
       }
     }
     return bDat;
@@ -189,12 +187,20 @@ binnedData = function () {
     //   only if the object from arr2 has a ms value
     //   which no object in arr1 has.
     // AKA: arr1 gets precedence
-    var result = arr1.concat(_.filter(arr2, function(d) {
-      var b = !_.some(arr1, function(g) {
-        return d.ms === g.ms;
-      });
-      return b;
-    }));
+    //var result = arr1.concat(_.filter(arr2, function(d) {
+    //  var b = !_.some(arr1, function(g) {
+    //    return d.ms === g.ms;
+    //  });
+    //  return b;
+    //}));
+
+    var arr1_range = d3.extent(arr1, function (d) { return d.ms; });
+
+    if (!arr1_range[0]) { arr1_range = [999999999999999999, -99999999999999]; }
+    var filteredArr2Low = _.filter(arr2, function (d) { return d.ms < arr1_range[0]; });
+    var filteredArr2High = _.filter(arr2, function (d) { return d.ms > arr1_range[0]; })
+
+    var result = filteredArr2Low.concat(arr1,filteredArr2High);
 
     // sort the result
     result.sort(function (a, b) { return a.ms - b.ms; });
@@ -222,6 +228,7 @@ binnedData = function () {
   //{{{ PUBLIC METHODS
 
   my.addRawData = function (rData) {
+    var q = new Date();
     // data must be in the following form: (example)
     // [ {val: value_point, ms: ms_since_epoch},
     //   {val: value_point, ms: ms_since_epoch},
@@ -232,23 +239,40 @@ binnedData = function () {
       bd.rawData.levels[0] = [];
     }
 
-    for (var i in rData) {
-      var dat = rData[i];
-      if (_.find(bd.rawData.levels[0], function (d) { return d.ms === dat.ms; })) {
-        // We already have that data point
-      } else {
-        // Add a new object to the bd level
-        bd.rawData.levels[0].push({ms: dat.ms, val: dat.val});
-      }
-    }
+    var c = new Date();
+    bd.rawData.levels[0] = combineAndSortArraysOfDateValObjects(bd.rawData.levels[0], rData);
+    // CONCLUSION: combineAndSortArraysOfDateValObjects is a very slow function
+    //console.log("combotime:", new Date() - c);
 
-    bd.rawData.levels[0].sort(function (a, b) { return a.ms - b.ms; });
+    //var a = new Date();
+    //for (var i in rData) {
+    //  var dat = rData[i];
+    //  if (_.find(bd.rawData.levels[0], function (d) { return d.ms === dat.ms; })) {
+    //    // We already have that data point
+    //  } else {
+    //    // Add a new object to the bd level
+    //    bd.rawData.levels[0].push({ms: dat.ms, val: dat.val});
+    //  }
+    //}
+    //console.log("have or not time:", new Date () - a); // TODO TODO TODO this takes far too much time
 
-    rebin();
+    //var b = new Date();
+    //bd.rawData.levels[0].sort(function (a, b) { return a.ms - b.ms; });
+    //console.log("sort time", new Date () - b);
+
+    var a = new Date();
+    var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
+    //console.log("find extent:", new Date() - a);
+
+    var t = new Date();
+    rebin(range, 0);
+    //console.log("actual rebin time:", new Date() - t);
+    //console.log("actual total time:", new Date() - q);
     return my;
   }
 
-  my.addBinnedData = function (bData) {
+  my.addBinnedData = function (bData, lvl) {
+    // only the level lvl will be stored
     // data must be in the form of the following example:
     // { average: {
     //     levels: [
@@ -267,17 +291,20 @@ binnedData = function () {
     // }
 
     for (var key in bData) { // for each of max_val, min_val, etc.
-      for (var lvl in bData[key].levels) { // for each level
-        //if we don't have a level for this already, initialize one
-        if (!bd[key].levels[lvl]) {
-          bd[key].levels[lvl] = [];
-        }
+      //if we don't have a lvl for this already, initialize one
+      if (!bd[key].levels[lvl]) {
+        bd[key].levels[lvl] = [];
+      }
 
-        bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
-      } // for each received data point
+      bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
     }; // for each of max_val, min_val, etc.
 
-    rebin();
+    var range = [];
+    if ( bd.rawData.levels[lvl] ) {
+      range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
+    }
+
+    rebin(range, lvl);
     return my;
   }
 

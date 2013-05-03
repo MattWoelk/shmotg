@@ -730,7 +730,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     if (level === 0) {
       binData.addRawData(datas);
     } else {
-      binData.addBinnedData(datas);
+      binData.addBinnedData(datas, level);
     }
 
     waitingForServer = false;

@@ -20,6 +20,8 @@ function assert(a, b, test) {
 
 var tic = new Date();
 
+var t = new Date();
+
 // Missing in the middle.
 var bird = binnedData().addRawData([
   {ms: 1010001000, val: 10}, {ms: 1005, val: 10}, {ms: 1010, val: 20}, {ms: 1015, val: 20}, {ms: 1030, val: 30}, {ms: 1035, val: 30}, {ms: 1040, val: 10}, {ms: 1045, val: 10}, {ms: 1050, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20},
@@ -234,9 +236,12 @@ var bird = binnedData().addRawData([
   {ms: 1000, val: 10}, {ms: 1005, val: 10}, {ms: 1010, val: 20}, {ms: 1015, val: 20}, {ms: 1030, val: 30}, {ms: 1035, val: 30}, {ms: 1040, val: 10}, {ms: 1045, val: 10}, {ms: 1050, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20},
   {ms: 1000, val: 10}, {ms: 1005, val: 10}, {ms: 1010, val: 20}, {ms: 1015, val: 20}, {ms: 1030, val: 30}, {ms: 1035, val: 30}, {ms: 1040, val: 10}, {ms: 1045, val: 10}, {ms: 1050, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20},
 ]);
+console.log("time taken1 --------- :", new Date() - t);
 
 assert(_.flatten(bird.missingBins([1000, 1050], 0)), [1020, 1025, 1025, 1030], 'Missing Data In Middle: lvl 0 raw data');
 
+
+var t = new Date();
 // No missing data.
 bird.addRawData([
   {ms: 1000, val: 10},
@@ -261,7 +266,9 @@ assert(_.flatten(bird.missingBins([1000, 1065], 0)), [1060, 1065, 1065, 1070], '
 
 // Missing at start
 assert(_.flatten(bird.missingBins([990, 1055], 0)), [990, 995, 995, 1000], 'Missing Beginning: raw data');
+console.log("time taken2:", new Date() - t);
 
+var t = new Date();
 bird.addRawData([
   {ms: 1005, val: 10},
   {ms: 1010, val: 20},
@@ -272,7 +279,9 @@ bird.addRawData([
   {ms: 1050, val: 20},
   {ms: 1055, val: 20},
 ]);
+console.log("time taken3:", new Date() - t);
 
+var t = new Date();
 // No missing data.
 bird.addRawData([
   {ms: 1005, val: 10},
@@ -295,7 +304,9 @@ assert(_.flatten(bird.missingBins([1000, 1050], 1)), [1000, 1010], 'Missing Begi
 assert(_.flatten(bird.missingBins([1010, 1060], 0)), [1060, 1065], 'Missing End: lvl 0 raw data');
 assert(_.flatten(bird.missingBins([1010, 1060], 1)), [1060, 1070], 'Missing End: lvl 1 missing bins');
 
+console.log("time taken4:", new Date() - t);
 
+var t = new Date();
 bird.addRawData([
   {ms: 1005, val: 10},
   {ms: 1010, val: 20},
@@ -405,7 +416,9 @@ bird.addRawData([
 assert(_.pluck(bird.bd().average.levels[1], 'ms'), [1010, 1040, 1050], 'Missing At Beginning And Middle: lvl 1 bins');
 assert(_.flatten(bird.missingBins([1000, 1050], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Beginning And Middle: lvl 1 missing bins');
 
+console.log("time taken5:", new Date() - t);
 
+var t = new Date();
 bird.addRawData([
   {ms: 1005, val: 10},
   {ms: 19830, val: 10},
@@ -543,6 +556,8 @@ bird.addRawData([
   {ms: 1001001000, val: 10}, {ms: 10015, val: 10}, {ms: 1010, val: 20}, {ms: 1015, val: 20}, {ms: 1030, val: 30}, {ms: 1035, val: 30}, {ms: 1040, val: 10}, {ms: 1045, val: 10}, {ms: 1050, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20}, {ms: 1055, val: 20},
 ]);
 
+console.log("time taken6:", new Date() - t);
+var t = new Date();
 
 
 bird.addRawData([
@@ -1558,6 +1573,7 @@ bird.addRawData([
   {ms: 1010, val: 20},
   ]);
 
+console.log("time taken7:", new Date() - t);
 
 
 var toc = new Date();

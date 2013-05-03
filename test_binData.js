@@ -18,6 +18,13 @@ function assert(a, b, test) {
   }
 }
 
+var brd = binnedData().addRawData([
+  {ms: 1000, val: 10},
+  {ms: 1005, val: 10},
+]);
+
+assert(_.pluck(brd.bd().rawData.levels[0], 'ms'), [1000, 1005], 'adding raw and reading raw');
+
 // Missing in the middle.
 var bird = binnedData().addRawData([
   {ms: 1000, val: 10},
