@@ -85,6 +85,29 @@ var mysqlconnection = mysql.createConnection({
 
 mysqlconnection.connect(); // perhaps not necessary; seems to be working without it
 
+
+// DISCONNECTS FROM THE MYSQL DATABASE
+function handleDisconnect(connection) {
+  connection.on('error', function(err) {
+    if (!err.fatal) {
+      return;
+    }
+
+    if (err.code !== 'PROTOCOL_CONNECTION_LOST') {
+      throw err;
+    }
+
+    console.log('Re-connecting lost connection: ' + err.stack);
+
+    connection = mysql.createConnection(connection.config);
+    handleDisconnect(connection);
+    connection.connect();
+  });
+}
+
+handleDisconnect(mysqlconnection);
+
+
 //query = 'Show databases'; // did not use 'database' in mysqlconnection options
 //query = 'Show tables FROM SPB_SHM_2012MM01'; // did not use 'database' in mysqlconnection options
 //query = 'SELECT * FROM SPBRTData_Truck'; // this is a giant dump of data which takes forever to happen
@@ -138,8 +161,6 @@ function sendDatabaseQuery(query, doWithResult) {
                  d.SampleIndex)
              };
     });
-
-    // TODO TODO TODO: send_object is currently a bunch of NaN and undefined's
 
     doWithResult(send_object); // send_object is always raw data
   });
