@@ -103,7 +103,7 @@ binnedData = function () {
   //       values which are being binned.
   //       If they are being skipped, the next one will be the
   //       first of the two samples to be binned.
-  function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) {
+  function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) { // TODO: use range_to_rebin to speed up this function
     var bDat = new Array();
     if (!bin[key].levels[curLevel]) {
       return bDat;
@@ -235,39 +235,14 @@ binnedData = function () {
     //   {etc...},
     // ],
 
-    if (!bd.rawData.levels[0]) {
-      bd.rawData.levels[0] = [];
-    }
+    // make this level if it does not yet exist
+    if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = []; }
 
-    var c = new Date();
     bd.rawData.levels[0] = combineAndSortArraysOfDateValObjects(bd.rawData.levels[0], rData);
-    // CONCLUSION: combineAndSortArraysOfDateValObjects is a very slow function
-    //console.log("combotime:", new Date() - c);
 
-    //var a = new Date();
-    //for (var i in rData) {
-    //  var dat = rData[i];
-    //  if (_.find(bd.rawData.levels[0], function (d) { return d.ms === dat.ms; })) {
-    //    // We already have that data point
-    //  } else {
-    //    // Add a new object to the bd level
-    //    bd.rawData.levels[0].push({ms: dat.ms, val: dat.val});
-    //  }
-    //}
-    //console.log("have or not time:", new Date () - a); // TODO TODO TODO this takes far too much time
-
-    //var b = new Date();
-    //bd.rawData.levels[0].sort(function (a, b) { return a.ms - b.ms; });
-    //console.log("sort time", new Date () - b);
-
-    var a = new Date();
     var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
-    //console.log("find extent:", new Date() - a);
 
-    var t = new Date();
     rebin(range, 0);
-    //console.log("actual rebin time:", new Date() - t);
-    //console.log("actual total time:", new Date() - q);
     return my;
   }
 
