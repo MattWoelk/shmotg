@@ -385,7 +385,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
         binData.getDateRange('maxes', whichLevelToRender, renderRange),
         function(d) { return d.val; } );
 
-    yScale.domain([minFilter, maxFilter]);
+    yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
+                  , maxFilter ? maxFilter : yScale.domain()[1] ]);
 
     // for each key
     // 1. find out whether we should render things
