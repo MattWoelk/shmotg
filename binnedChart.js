@@ -376,7 +376,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
     var didWeRenderAnything = false;
 
     // calculate new y scale before we render any d0s
-    //var yRangeNew = [yScale.domain()[0], yScale.domain()[1]];
+    // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
+    // - this will give the option of all charts having the same y axis
     var minFilter = d3.min(
         binData.getDateRange('mins', whichLevelToRender, renderRange),
         function(d) { return d.val; } );
