@@ -273,7 +273,11 @@ mysqlconnection.query(query, function (err, rows, fields) {
           sendDatabaseQuery(query, function (queryResult) {
             // Bin the new data
             console.log("- binning data");
-            binData.addRawData(queryResult);
+            try {
+              binData.addRawData(queryResult);
+            } catch (e) {
+              console.log("=*= ERROR =*=", e.message);
+            }
             console.log("- done binning data");
 
             sendToClient();
