@@ -375,6 +375,17 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
     var didWeRenderAnything = false;
 
+    // calculate new y scale before we render any d0s
+    //var yRangeNew = [yScale.domain()[0], yScale.domain()[1]];
+    var minFilter = d3.min(
+        binData.getDateRange('mins', whichLevelToRender, renderRange),
+        function(d) { return d.val; } );
+    var maxFilter = d3.max(
+        binData.getDateRange('maxes', whichLevelToRender, renderRange),
+        function(d) { return d.val; } );
+
+    yScale.domain([minFilter, maxFilter]);
+
     // for each key
     // 1. find out whether we should render things
     for (var keyValue in renderThis) {
