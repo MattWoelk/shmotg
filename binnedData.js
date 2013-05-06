@@ -68,7 +68,7 @@ binnedData = function () {
 
 
     // for each level other than raw data level, for each key, bin the data from the lower level
-    for (j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
+    for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
       for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
         var key = bd.keys[keyValue];
 
@@ -90,7 +90,7 @@ binnedData = function () {
         bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
       } // for each key
     } // for each bin level
-    console.log("rebin time:", new Date() - tic);
+    //console.log("rebin time:", new Date() - tic);
   }
 
 
@@ -315,8 +315,8 @@ binnedData = function () {
   }
 
   my.missingBins = function(ms_range, level) {
-    // TODO: Return which bins which we are missing in the given range and level.
-    // TODO: returns [[start, end],[start,end],...] ranges of required data
+    // Return which bins which we are missing in the given range and level.
+    // returns [[start, end],[start,end],...] ranges of required data
 
     if (level === 0) {
       key = "rawData";
@@ -361,6 +361,18 @@ binnedData = function () {
 
   my.getMaxRaw = function () {
     return d3.max(bd.rawData.levels[0], function(d) { return d.val; });
+  }
+
+  my.getMinRawMS = function () {
+    if (!bd.rawData.levels[0])
+      return -1;
+    return d3.min(bd.rawData.levels[0], function(d) { return d.ms; });
+  }
+
+  my.getMaxRawMS = function () {
+    if (!bd.rawData.levels[0])
+      return -1;
+    return d3.max(bd.rawData.levels[0], function(d) { return d.ms; });
   }
 
   my.getColor = function (key) {

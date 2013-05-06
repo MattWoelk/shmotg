@@ -150,6 +150,7 @@ function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
 }
 
 function sendDatabaseQuery(query, doWithResult) {
+  console.log("- receiving data from server...");
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) {console.log("err: ", err); return err;}
     console.log(query, rows.length);
@@ -202,7 +203,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var received = JSON.parse(sendReq);
       var req = received.req;
       var id = received.id;
-      console.log("client req: " + JSON.stringify(received));
+      //console.log("client req: " + JSON.stringify(received));
       //sendDatabaseQuery('SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10');
 
       // See if we have the requested data at the requested bin level
@@ -211,22 +212,22 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var sendToClient = function () {
         // get result ready to send
         var send_req = {};
+        console.log("== BINNED. sending now");
 
         if (req.bin_level === 0) {
           // send raw data
           send_req = binData.getDateRange("rawData", req.bin_level, range);
-          console.log("RAW");
-          console.log(range);
-          console.log(send_req);
+          console.log("# range for client: #");
+          console.log(dt(range[0]));
+          console.log(dt(range[1]));
+          //console.log(send_req);
         } else {
           // send binned data
-          console.log("== getting all in range");
-          console.log("== ...");
           send_req = binData.getAllInRange(req.bin_level, range);
-          console.log("== got all in range");
-          console.log("== BINNED. sending now");
-          console.log(dt(range[0]), '-->', dt(range[1]));
-          console.log(send_req);
+          console.log("# range for client: #");
+          console.log(dt(range[0]));
+          console.log(dt(range[1]));
+          //console.log(send_req);
         }
 
         // Send requested data to client
@@ -237,6 +238,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
           req: send_req };
 
         socket.emit('req_data', JSON.stringify(toBeSent));
+        console.log("- sent to client");
       };
 
       // See if our binned data has the requested range
@@ -244,12 +246,41 @@ mysqlconnection.query(query, function (err, rows, fields) {
       // TODO TODO TODO CURRENT TASK: get this working.
       console.log('missing ranges', missingRanges);
 
+      // Filter the ranges for only those which we don't have raw data
+      // TODO: this is a temporary fix!
+      //       once missingRanges is working properly, we won't need this
+      var minval = binData.getMinRawMS();
+      var maxval = binData.getMaxRawMS();
+      var newMissingValues = [];
+      for (var i = 0; i < missingRanges.length; i++) {
+        // if the range is not within what we have, use it
+        var low;
+        var high;
+
+        low = Math.min(missingRanges[i][1]);
+        if (missingRanges[i][0] < minval) {
+          if (missingRanges[i][1] > minval) {
+            newMissingValues.push([missingRanges[i][0], minval]);
+          } else {
+            newMissingValues.push([missingRanges[i][0], missingRanges[i][1]]);
+          }
+        }
+
+        if (missingRanges[i][1] > maxval) {
+          if (missingRanges[i][0] > maxval) {
+            newMissingValues.push([missingRanges[i][0], missingRanges[i][1]]);
+          } else {
+            newMissingValues.push([maxval, missingRanges[i][1]]);
+          }
+        }
+      } // for each missing range
+
       //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
-      if (missingRanges.length !== 0) {
-        for (var i = 0; i < missingRanges.length; i++) {
+      if (newMissingValues.length !== 0) {
+        for (var i = 0; i < newMissingValues.length; i++) {
           // Request more data from the server
-          var dtr = dt(parseInt(missingRanges[i][0])); // date to request
-          var dtr2 = dt(parseInt(missingRanges[i][1])); // second date to request
+          var dtr = dt(parseInt(newMissingValues[i][0])); // date to request
+          var dtr2 = dt(parseInt(newMissingValues[i][1])); // second date to request
 
           // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
           var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
@@ -268,17 +299,24 @@ mysqlconnection.query(query, function (err, rows, fields) {
                        ':' + pad(dtr2.getSeconds() + 1) + '"';
           var queryTail = '';
 
+          console.log("querying for range:",
+              pad(dtr.getDate()),
+              pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
+          console.log("                  :",
+              pad(dtr2.getDate()),
+              pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
+
           var query = queryHead + query1 + queryMid + query2 + queryTail;
 
           sendDatabaseQuery(query, function (queryResult) {
             // Bin the new data
-            console.log("- binning data");
+            console.log("- data received. binning data...");
             try {
               binData.addRawData(queryResult);
             } catch (e) {
               console.log("=*= ERROR =*=", e.message);
             }
-            console.log("- done binning data");
+            console.log("- done binning data. sending to client.");
 
             sendToClient();
 
