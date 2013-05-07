@@ -21,14 +21,23 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 try {
-  var oldBinData = fs.readFileSync('/Users/woelk/test').toString(); // block while getting the girder contents.
+  var oldBinData = fs.readFileSync('/Users/woelk/test_backup').toString(); // block while getting the girder contents.
   console.log("reading");
   //binData.bd() = JSON.parse(oldBinData);
   //console.log(JSON.parse(oldBinData).rawData.levels[0]);
-  binData.addRawData(JSON.parse(oldBinData).rawData.levels[0]);
-  console.log("read");
+  var datDat = JSON.parse(oldBinData);
+
+  binData.replaceRawData(datDat.rawData.levels[0], true);
+
+  console.log("read1");
+  for (var i = 0; i < datDat.average.levels.length; i++) {
+    console.log("stuff");
+    binData.replaceBinnedData(datDat, i, true);
+  }
+  console.log("read2");
 } catch (err) {
   console.log(err);
+  throw err;
 }
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html

@@ -227,7 +227,7 @@ binnedData = function () {
 
   //{{{ PUBLIC METHODS
 
-  my.addRawData = function (rData) {
+  my.addRawData = function (rData, dontBin) {
     var q = new Date();
     // data must be in the following form: (example)
     // [ {val: value_point, ms: ms_since_epoch},
@@ -242,11 +242,36 @@ binnedData = function () {
 
     var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
 
-    rebin(range, 0);
+    if(!dontBin) {
+      rebin(range, 0);
+    }
+
     return my;
   }
 
-  my.addBinnedData = function (bData, lvl) {
+  my.replaceRawData = function (rData, dontBin) {
+    var q = new Date();
+    // data must be in the following form: (example)
+    // [ {val: value_point, ms: ms_since_epoch},
+    //   {val: value_point, ms: ms_since_epoch},
+    //   {etc...},
+    // ],
+
+    // make this level if it does not yet exist
+    if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = []; }
+
+    bd.rawData.levels[0] = rData;
+
+    var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
+
+    if(!dontBin) {
+      rebin(range, 0);
+    }
+
+    return my;
+  }
+
+  my.addBinnedData = function (bData, lvl, dontBin) {
     // only the level lvl will be stored
     // data must be in the form of the following example:
     // { average: {
@@ -267,11 +292,21 @@ binnedData = function () {
 
     for (var key in bData) { // for each of max_val, min_val, etc.
       //if we don't have a lvl for this already, initialize one
+      if (!bd[key]) {
+        bd[key] = {};
+      }
+
+      if (!bd[key].levels) {
+        bd[key].levels = [];
+      }
+
       if (!bd[key].levels[lvl]) {
         bd[key].levels[lvl] = [];
       }
 
-      bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
+      if(bData[key].levels) {
+        bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
+      }
     }; // for each of max_val, min_val, etc.
 
     var range = [];
@@ -279,9 +314,63 @@ binnedData = function () {
       range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
     }
 
-    rebin(range, lvl);
+    if(!dontBin) {
+      rebin(range, 0);
+    }
+
     return my;
   }
+
+  my.replaceBinnedData = function(bData, lvl, dontBin) {
+    // only the level lvl will be stored
+    // data must be in the form of the following example:
+    // { average: {
+    //     levels: [
+    //       [{val: value_point, ms: ms_since_epoch},
+    //        {val: value_point, ms: ms_since_epoch},
+    //        {etc...}],
+    //       [etc.]
+    //     ],
+    //   },
+    //   q1: {
+    //     levels: [
+    //       [etc.]
+    //     ],
+    //   },
+    //   etc: {},
+    // }
+
+    for (var key in bData) { // for each of max_val, min_val, etc.
+      //if we don't have a lvl for this already, initialize one
+      if (!bd[key]) {
+        bd[key] = {};
+      }
+
+      if (!bd[key].levels) {
+        bd[key].levels = [];
+      }
+
+      if (!bd[key].levels[lvl]) {
+        bd[key].levels[lvl] = [];
+      }
+
+      if(bData[key].levels) {
+        bd[key].levels[lvl] = bData[key].levels[lvl];
+      }
+    }; // for each of max_val, min_val, etc.
+
+    var range = [];
+    if ( bd.rawData.levels[lvl] ) {
+      range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
+    }
+
+    if(!dontBin) {
+      rebin(range, 0);
+    }
+
+    return my;
+  }
+
 
   my.haveDataInRange = function(ms_range, level) {
     // Determine the number of samples which we should have in the given range.
