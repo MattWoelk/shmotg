@@ -5,6 +5,12 @@ _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
 
+var red = '\033[31m';
+var yellow = '\033[33m';
+var magenta = '\033[35m';
+var blue = '\033[36m';
+var reset = '\033[0m';
+
 function dt (num) {
   var newdate = new Date();
   newdate.setTime(num);
@@ -14,6 +20,16 @@ function dt (num) {
 
 // GLOBAL VARIABLES
 var binData = binnedData();
+try {
+  var oldBinData = fs.readFileSync('/Users/woelk/test').toString(); // block while getting the girder contents.
+  console.log("reading");
+  //binData.bd() = JSON.parse(oldBinData);
+  //console.log(JSON.parse(oldBinData).rawData.levels[0]);
+  binData.addRawData(JSON.parse(oldBinData).rawData.levels[0]);
+  console.log("read");
+} catch (err) {
+  console.log(err);
+}
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
@@ -153,7 +169,7 @@ function sendDatabaseQuery(query, doWithResult) {
   console.log("- receiving data from server...");
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) {console.log("err: ", err); return err;}
-    console.log(query, rows.length);
+    console.log(red+query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
       return { val: d.ESGgirder18 ,
@@ -319,6 +335,16 @@ mysqlconnection.query(query, function (err, rows, fields) {
             console.log("- done binning data. sending to client.");
 
             sendToClient();
+
+            // Save binData to a file
+            var x = JSON.stringify(binData.bd());
+            fs.writeFile("/Users/woelk/test", x, function(err) {
+              if(err) {
+                console.log(err);
+              } else {
+                console.log("The file was saved to /Users/woelk/test");
+              }
+            });
 
             // TODO MAYBE: remove lower bins to save space.
           });
