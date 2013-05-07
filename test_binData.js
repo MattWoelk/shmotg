@@ -59,6 +59,9 @@ var burd = binnedData().addRawData([
 
 assert(_.flatten(burd.missingBins([1000, 1055], 0)), [], 'No Missing Data: lvl 0 raw data')
 assert(_.pluck(burd.bd().average.levels[1], 'ms'), [1000, 1010, 1020, 1030, 1040, 1050], 'No Missing Data: lvl 1 bins');
+assert([burd.bd().average.levels[0].length], [12], 'No Missing Data: lvl 0 length');
+assert([burd.bd().average.levels[1].length], [6], 'No Missing Data: lvl 1 length');
+assert([burd.bd().average.levels[2].length], [3], 'No Missing Data: lvl 2 length');
 
 // Missing at end
 assert(_.flatten(burd.missingBins([1000, 1065], 0)), [1060, 1065, 1065, 1070], 'missing at end');
