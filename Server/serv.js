@@ -40,18 +40,11 @@ try {
     binData.replaceBinnedData(datDat, i, true);
   }
   console.log("all has been read");
-  console.log("   ", binData.getMaxRawMS());
-  console.log("   ", binData.getMinRawMS());
-  console.log(binData.missingBins([1325567550000, 1325567564070], 0))
-  console.log(binData.missingBins([1325567540000, 1325567564070], 0))
-  console.log(binData.missingBins([1325567546365, 1325567564070], 0))
-  console.log(binData.missingBins([1325567564060, 1325567564080], 0))
-  console.log(binData.missingBins([1325567564064, 1325567564076], 0))
 } catch (err) {
   console.log(err);
   throw err;
 }
-/*
+
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
 io.configure(function () { io.set('log level', 2); });
