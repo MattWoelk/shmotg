@@ -26,15 +26,20 @@ try {
   //binData.bd() = JSON.parse(oldBinData);
   //console.log(JSON.parse(oldBinData).rawData.levels[0]);
   var datDat = JSON.parse(oldBinData);
+  console.log(datDat.rawData.levels[0].length);
+  console.log(datDat.average.levels[1].length);
+  console.log(datDat.q1.levels[1].length);
+  console.log(datDat.q3.levels[1].length);
+  console.log(datDat.mins.levels[1].length);
+  console.log(datDat.maxes.levels[1].length);
 
   binData.replaceRawData(datDat.rawData.levels[0], true);
 
-  console.log("read1");
   for (var i = 0; i < datDat.average.levels.length; i++) {
-    console.log("stuff");
+    console.log("reading in level", i);
     binData.replaceBinnedData(datDat, i, true);
   }
-  console.log("read2");
+  console.log("all has been read");
 } catch (err) {
   console.log(err);
   throw err;
@@ -339,7 +344,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
             try {
               binData.addRawData(queryResult);
             } catch (e) {
-              console.log("=*= ERROR =*=", e.message);
+              console.log(magenta+"=*= ERROR =*="+reset, e.message);
+              //throw e;
             }
             console.log("- done binning data. sending to client.");
 
