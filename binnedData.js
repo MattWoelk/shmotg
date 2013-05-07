@@ -424,6 +424,9 @@ binnedData = function () {
     var datedRange = my.getDateRange(key, level, normalizedRange);
 
     if (datedRange.length === 0) {
+      console.log(red+"jumping ship"+reset);
+      // TODO TODO TODO this should not be happening when
+      // we already have the data!
       return [ms_range];
     }
 
@@ -439,8 +442,8 @@ binnedData = function () {
     //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
 
     var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
-    //console.log("    missingSamples[0]:", missingSamples[0]);
-    //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
+    console.log("    missingSamples[0]:", missingSamples[0]);
+    console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
     var missingRanges = [];
 
     _.each(missingSamples, function (d,i) {

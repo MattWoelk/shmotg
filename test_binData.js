@@ -116,5 +116,5 @@ var bard = binnedData().addRawData([
 
 assert(_.pluck(bard.bd().average.levels[1], 'ms'), [1010, 1040, 1050], 'Missing At Beginning And Middle: lvl 1 bins');
 assert(_.flatten(bard.missingBins([1000, 1050], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Beginning And Middle: lvl 1 missing bins');
-assert(_.flatten(bard.missingBins([1001, 1046], 0)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Beginning And Middle: lvl 0 missing bins with a non5mod range');
+assert(_.flatten(bard.missingBins([1001, 1046], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Beginning And Middle: lvl 0 missing bins with a non5mod range');
 

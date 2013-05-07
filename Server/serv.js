@@ -5,11 +5,11 @@ _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
 
-var red = '\033[31m';
-var yellow = '\033[33m';
-var magenta = '\033[35m';
-var blue = '\033[36m';
-var reset = '\033[0m';
+red = '\033[31m';
+yellow = '\033[33m';
+magenta = '\033[35m';
+blue = '\033[36m';
+reset = '\033[0m';
 
 function dt (num) {
   var newdate = new Date();
@@ -345,7 +345,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
               binData.addRawData(queryResult);
             } catch (e) {
               console.log(magenta+"=*= ERROR =*="+reset, e.message);
-              //throw e;
+              throw e;
             }
             console.log("- done binning data. sending to client.");
 
