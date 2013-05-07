@@ -42,6 +42,7 @@ try {
   console.log("all has been read");
   console.log("   ", binData.getMaxRawMS());
   console.log("   ", binData.getMinRawMS());
+  console.log(binData.missingBins([1325567562000, 1325567564070], 0))
   console.log(binData.missingBins([1325567546364, 1325567564076], 0))
 } catch (err) {
   console.log(err);

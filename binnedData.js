@@ -375,6 +375,7 @@ binnedData = function () {
   my.haveDataInRange = function(ms_range, level) {
     // Determine the number of samples which we should have in the given range.
 
+    var key;
     if (level === 0) {
       key = "rawData";
     } else {
@@ -407,6 +408,7 @@ binnedData = function () {
     // Return which bins which we are missing in the given range and level.
     // returns [[start, end],[start,end],...] ranges of required data
 
+    var key;
     if (level === 0) {
       key = "rawData";
     } else {
