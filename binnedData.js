@@ -419,7 +419,7 @@ binnedData = function () {
     var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
     var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
 
-    normalizedRange = [ fir * Math.pow(2, level) * oneSample,
+    var normalizedRange = [ fir * Math.pow(2, level) * oneSample,
                         (las + 1) * Math.pow(2, level) * oneSample ];
     var datedRange = my.getDateRange(key, level, normalizedRange);
 
@@ -433,7 +433,7 @@ binnedData = function () {
 
     var sampleSize = Math.pow(2, level) * oneSample;
 
-    var neededBins = _.range(fir * Math.pow(2, level) * oneSample, (las + 1) * Math.pow(2, level) * oneSample, sampleSize);
+    var neededBins = _.range(normalizedRange[0], normalizedRange[1], sampleSize);
     neededBins.forEach(function (d) {
       d = d * Math.pow(2, level) * oneSample;
     });
