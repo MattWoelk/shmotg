@@ -415,15 +415,18 @@ binnedData = function () {
       key = "average";
     }
 
-    var datedRange = my.getDateRange(key, level, ms_range);
+    var oneSample = 1000 / 200; // milliseconds per sample TODO: magic ?
+    var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
+    var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
+
+    normalizedRange = [ fir * Math.pow(2, level) * oneSample,
+                        (las + 1) * Math.pow(2, level) * oneSample ];
+    var datedRange = my.getDateRange(key, level, normalizedRange);
 
     if (datedRange.length === 0) {
       return [ms_range];
     }
 
-    var oneSample = 1000 / 200; // milliseconds per sample TODO: magic ?
-    var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
-    var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
 
     var sampleSize = Math.pow(2, level) * oneSample;
 
@@ -436,6 +439,8 @@ binnedData = function () {
     //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
 
     var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
+    //console.log("    missingSamples[0]:", missingSamples[0]);
+    //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
     var missingRanges = [];
 
     _.each(missingSamples, function (d,i) {

@@ -45,7 +45,8 @@ try {
   console.log(binData.missingBins([1325567550000, 1325567564070], 0))
   console.log(binData.missingBins([1325567540000, 1325567564070], 0))
   console.log(binData.missingBins([1325567546365, 1325567564070], 0))
-  console.log(binData.missingBins([1325567546364, 1325567564076], 0))
+  console.log(binData.missingBins([1325567564060, 1325567564080], 0))
+  console.log(binData.missingBins([1325567564064, 1325567564076], 0))
 } catch (err) {
   console.log(err);
   throw err;
