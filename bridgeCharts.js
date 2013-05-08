@@ -109,9 +109,9 @@ function initPlot(data, first) {
   var pl = d3.select("#charts").append("svg").call(plot);
 
   if (first) {
-    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(true).milliSecondsPerSample(msPS).update();
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(true).milliSecondsPerSample(msPS).update();
   } else {
-    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(75).showTimeContext(false).milliSecondsPerSample(msPS).update();
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(false).milliSecondsPerSample(msPS).update();
   }
 
   plots.push(plot);
@@ -293,10 +293,10 @@ socket.on('news', function (data) {
   //initPlot(json);
   initPlot(json, true);
 
-  initPlot(_.map(json, function (d) {
-    return { val: Math.random() * 5 + d.val,
-             ms: d.ms };
-  }), false);
+  //initPlot(_.map(json, function (d) {
+  //  return { val: Math.random() * 5 + d.val,
+  //           ms: d.ms };
+  //}), false);
 });
 
 sizeOfQueue = function() {
