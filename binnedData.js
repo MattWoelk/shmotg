@@ -290,7 +290,8 @@ binnedData = function () {
     //   etc: {},
     // }
 
-    for (var key in bData) { // for each of max_val, min_val, etc.
+    for (var k in bd.keys) { // for each of max_val, min_val, etc.
+      var key = bd.keys[k];
       //if we don't have a lvl for this already, initialize one
       if (!bd[key]) {
         bd[key] = {};
@@ -340,16 +341,9 @@ binnedData = function () {
     //   etc: {},
     // }
 
-    for (var key in bData) { // for each of max_val, min_val, etc.
+    for (var k in bd.keys) { // for each of max_val, min_val, etc.
+      var key = bd.keys[k];
       //if we don't have a lvl for this already, initialize one
-      if (!bd[key]) {
-        bd[key] = {};
-      }
-
-      if (!bd[key].levels) {
-        bd[key].levels = [];
-      }
-
       if (!bd[key].levels[lvl]) {
         bd[key].levels[lvl] = [];
       }
@@ -442,8 +436,8 @@ binnedData = function () {
     //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
 
     var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
-    console.log("    missingSamples[0]:", missingSamples[0]);
-    console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
+    //console.log("    missingSamples[0]:", missingSamples[0]);
+    //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
     var missingRanges = [];
 
     _.each(missingSamples, function (d,i) {
