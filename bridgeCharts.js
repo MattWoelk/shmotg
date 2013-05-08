@@ -389,6 +389,7 @@ function rundemo() {
     if (error || plots.length > 0) {
       return;
     }
+    setLoadingIcon(true); // loading icon indicates that we can't connect to the server
     var json = data.map(function (d) {
       return {val: d.ESGgirder18, ms: d.ms};
     });
