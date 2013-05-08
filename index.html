@@ -29,11 +29,6 @@
     </div>
     <!--}}}-->
 
-    <script type="text/javascript">
-      if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
-        document.write("<button id='reload' onclick='window.location.reload(false); return true;'>reload</button>");
-      }
-    </script>
 
     <div id="chartContainer" style="overflow:none; width:100%; overflow:none; float:left;">
       <div id="charts"></div>
@@ -46,6 +41,12 @@
       <button id='zoomin' title="zoom in">+</button>
       <button id='zoomout' title="zoom out">-</button>
       <button id='scrollright' title="scroll right">&gt;</button>
+
+      <script type="text/javascript">
+        //if((navigator.userAgent.match(/iPad/i)) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPhone/i)) {
+          document.write("<button id='reload' onclick='window.location.reload(false); return true;'>reload page</button>");
+        //}
+      </script>
 
       <input type="checkbox" checked id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
       <label for="isexpanded" id="expand-btn">Controls</label>
