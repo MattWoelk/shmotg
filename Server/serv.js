@@ -40,6 +40,7 @@ try {
     binData.replaceBinnedData(datDat, i, true);
   }
   console.log("all has been read");
+  binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
 } catch (err) {
   console.log(err);
   throw err;

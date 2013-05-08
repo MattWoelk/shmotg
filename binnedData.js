@@ -398,7 +398,7 @@ binnedData = function () {
     return numberWeHave >= numberWeShouldHave;
   }
 
-  my.missingBins = function(ms_range, level) {
+  my.missingBins = function(ms_range, level, samplesInsteadOfRanges) {
     // Return which bins which we are missing in the given range and level.
     // returns [[start, end],[start,end],...] ranges of required data
 
@@ -418,9 +418,10 @@ binnedData = function () {
     var datedRange = my.getDateRange(key, level, normalizedRange);
 
     if (datedRange.length === 0) {
-      console.log(red+"jumping ship"+reset);
+      console.log(",.-' jumping ship");
       // TODO TODO TODO this should not be happening when
       // we already have the data!
+      if (samplesInsteadOfRanges) { return ms_range[0]; }
       return [ms_range];
     }
 
@@ -436,6 +437,9 @@ binnedData = function () {
     //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
 
     var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
+
+    if(samplesInsteadOfRanges) { console.log("samples"); return missingSamples; }
+
     //console.log("    missingSamples[0]:", missingSamples[0]);
     //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
     var missingRanges = [];
@@ -446,6 +450,40 @@ binnedData = function () {
     });
 
     return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+  }
+
+  my.missingRawBinsUnderThisRangeAndLevel = function (ms_range, level) {
+    var currentMissingBinStarts = my.missingBins(ms_range, level);
+    var nextMissingBinStarts = [];
+
+    var oneSample = 1000 / 200; // milliseconds per sample
+    var sampleSize = Math.pow(2, level) * oneSample;
+
+    console.log("currentMissingBinStarts", currentMissingBinStarts);
+
+    // for each level, going DOWN to zero:
+    for(var lvl = level; lvl > 0; lvl--) {
+      sampleSize = Math.pow(2, lvl);
+
+      // for each range
+      // - find which bins are missing in the previous level's ranges
+      for(var rng = 0; rng < currentMissingBinStarts.length; rng++) {
+        // add the start of each missing range found within
+        // the above missing range
+        nextMissingBinStarts.push(my.missingBins(currentMissingBinStarts[rng], lvl, true));
+      }
+
+      // swap the variables
+      var flattened = _.uniq(_.flatten(nextMissingBinStarts).sort());
+
+      var missingRanges = [];
+      _.each(flattened, function (d,i) {
+        missingRanges.push([d, d + sampleSize]);
+        // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+      });
+      currentMissingBinStarts = missingRanges;
+      nextMissingBinStarts = [];
+    }
   }
 
   my.getMinRaw = function () {

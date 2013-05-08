@@ -67,7 +67,7 @@ assert([burd.bd().average.levels[2].length], [3], 'No Missing Data: lvl 2 length
 assert(_.flatten(burd.missingBins([1000, 1065], 0)), [1060, 1065, 1065, 1070], 'missing at end');
 
 // Missing at start
-assert(_.flatten(burd.missingBins([990, 1055], 0)), [990, 995, 995, 1000], 'Missing Beginning: raw data');
+assert(_.flatten(burd.missingBins([990, 1055], 0)), [990, 995, 995, 1000], 'Missing Start: raw data');
 
 var bord = binnedData().addRawData([
   {ms: 1005, val: 10},
@@ -95,9 +95,9 @@ var burd = binnedData().addRawData([
   {ms: 1055, val: 20},
 ]);
 
-assert(_.flatten(burd.missingBins([1000, 1050], 0)), [1000, 1005], 'Missing Beginning: lvl 0 raw data');
-assert(_.pluck(burd.bd().average.levels[1], 'ms'), [1010, 1020, 1030, 1040, 1050], 'Missing Beginning: lvl 1 bins');
-assert(_.flatten(burd.missingBins([1000, 1050], 1)), [1000, 1010], 'Missing Beginning: lvl 1 missing bins');
+assert(_.flatten(burd.missingBins([1000, 1050], 0)), [1000, 1005], 'Missing Start: lvl 0 raw data');
+assert(_.pluck(burd.bd().average.levels[1], 'ms'), [1010, 1020, 1030, 1040, 1050], 'Missing Start: lvl 1 bins');
+assert(_.flatten(burd.missingBins([1000, 1050], 1)), [1000, 1010], 'Missing Start: lvl 1 missing bins');
 
 assert(_.flatten(burd.missingBins([1010, 1060], 0)), [1060, 1065], 'Missing End: lvl 0 raw data');
 assert(_.flatten(burd.missingBins([1010, 1060], 1)), [1060, 1070], 'Missing End: lvl 1 missing bins');
@@ -114,7 +114,25 @@ var bard = binnedData().addRawData([
   {ms: 1055, val: 20},
 ]);
 
-assert(_.pluck(bard.bd().average.levels[1], 'ms'), [1010, 1040, 1050], 'Missing At Beginning And Middle: lvl 1 bins');
-assert(_.flatten(bard.missingBins([1000, 1050], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Beginning And Middle: lvl 1 missing bins');
-assert(_.flatten(bard.missingBins([1001, 1046], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Beginning And Middle: lvl 0 missing bins with a non5mod range');
+assert(_.pluck(bard.bd().average.levels[1], 'ms'), [1010, 1040, 1050], 'Missing At Start And Middle: lvl 1 bins');
+assert(_.flatten(bard.missingBins([1000, 1050], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Start And Middle: lvl 1 missing bins');
+assert(_.flatten(bard.missingBins([1001, 1046], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Start And Middle: lvl 1 missing bins with a non5mod range');
+
+
+var bard = binnedData().addRawData([
+  {ms: 5,  val: 1},
+  {ms: 10, val: 2},
+  {ms: 15, val: 2},
+  {ms: 20, val: 2},
+  {ms: 40, val: 1},
+  {ms: 45, val: 1},
+  {ms: 50, val: 2},
+  {ms: 55, val: 2},
+]);
+
+console.log(bard.bd().average.levels[2]);
+assert(_.flatten(bard.missingRawBinsUnderThisRangeAndLevel([50, 60], 2)), [0, 10, 20, 30, 30, 40], 'Missing At Start And Middle: lvl 1 missing bins with a non5mod range');
+
+
+
 
