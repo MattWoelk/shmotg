@@ -72,10 +72,12 @@ handleDisconnect(mysqlconnection);
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 
-var rangeToWalk = [1325567000000, 1325569000000];
-var stepSize = 10000; // 10000 turns out to be 2400 samples
+var rangeToWalk = [1325567000000, 1325573000000];
+var stepSize = 600000; // 10000 is 2400 samples each time
+                       // 100000 is 1:40 each time
+                       // 600000 is ten minutes each time
 
-var lowestLevelToKeep = 5;
+var lowestLevelToKeep = 7;
 
 // TODO: walk through each section of the database
 for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
