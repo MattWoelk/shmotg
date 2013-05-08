@@ -456,6 +456,9 @@ binnedData = function () {
     var currentMissingBinStarts = my.missingBins(ms_range, level);
     var nextMissingBinStarts = [];
 
+    console.log("levels:");
+    console.log(bd.average.levels);
+
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, level) * oneSample;
 
