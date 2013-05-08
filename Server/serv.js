@@ -272,7 +272,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
       };
 
       // See if our binned data has the requested range
-      var missingRanges = binData.missingBins(range, received.bin_level);
+      var missingRanges = binData.missingBins(range, req.bin_level);
       // TODO TODO TODO CURRENT TASK: get this working.
       console.log('missing ranges', missingRanges);
 
