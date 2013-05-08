@@ -130,8 +130,7 @@ var bard = binnedData().addRawData([
   {ms: 55, val: 2},
 ]);
 
-console.log(bard.bd().average.levels[2]);
-assert(_.flatten(bard.missingRawBinsUnderThisRangeAndLevel([50, 60], 2)), [0, 10, 20, 30, 30, 40], 'Missing At Start And Middle: lvl 1 missing bins with a non5mod range');
+assert(_.flatten(bard.missingRawBinsUnderThisRangeAndLevel([20, 40], 2)), [0, 10, 20, 30, 30, 40], 'raw bins required under level');
 
 
 
