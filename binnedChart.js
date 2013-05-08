@@ -569,7 +569,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
       yAxis = d3.svg.axis()
         .scale(yScale)
-        .ticks(3)
+        .ticks(6)
         .tickSubdivide(true)
         .tickSize(width, 0, 0) // major, minor, end
         .orient("left");
