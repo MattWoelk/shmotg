@@ -320,18 +320,22 @@ function addToServerQueue(ob) {
 
 var uniqueRequestID = 0;
 var timeOfLastRequest = 0;
+var listOfRequestsMade = [];
 function sendRequestToServer(req) {
   // turn on loading icon
   setLoadingIcon(true);
 
   var now = new Date();
-  if(now - timeOfLastRequest < 500) {
-    // only allowed two request per second
-    console.log("too soon");
+  if(_.findWhere(listOfRequestsMade, {ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
+    // never request the same thing twice
+    //console.log("already requested");
+    setLoadingIcon(false);
     return false;
   }
 
-  console.log("requesting");
+  listOfRequestsMade.push(req);
+
+  //console.log("requesting");
 
   // wrap the req with a unique id
   var sendReq = {

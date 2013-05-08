@@ -73,7 +73,7 @@ handleDisconnect(mysqlconnection);
 //////////////////////////////////////////////////
 
 var rangeToWalk = [1325567000000, 1325569000000];
-var stepSize = 10000;
+var stepSize = 10000; // 10000 turns out to be 2400 samples
 
 var lowestLevelToKeep = 5;
 
