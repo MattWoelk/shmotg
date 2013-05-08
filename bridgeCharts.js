@@ -319,9 +319,19 @@ function addToServerQueue(ob) {
 };
 
 var uniqueRequestID = 0;
+var timeOfLastRequest = 0;
 function sendRequestToServer(req) {
   // turn on loading icon
   setLoadingIcon(true);
+
+  var now = new Date();
+  if(now - timeOfLastRequest < 500) {
+    // only allowed two request per second
+    console.log("too soon");
+    return false;
+  }
+
+  console.log("requesting");
 
   // wrap the req with a unique id
   var sendReq = {
@@ -331,6 +341,8 @@ function sendRequestToServer(req) {
 
   // add the request to the queue
   addToServerQueue(sendReq);
+
+  timeOfLastRequest = now;
 
   socket.emit('req', JSON.stringify(sendReq));
 }

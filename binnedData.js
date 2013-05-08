@@ -457,22 +457,22 @@ binnedData = function () {
     var nextMissingBinStarts = [];
 
     console.log("levels:");
-    console.log(bd.average.levels);
+    //console.log(bd.average.levels);
 
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, level) * oneSample;
 
-    console.log("currentMissingBinStarts", currentMissingBinStarts);
+    //console.log("currentMissingBinStarts", currentMissingBinStarts);
 
     // for each level, going DOWN to zero:
     for(var lvl = level; lvl >= 0; lvl--) {
       sampleSize = Math.pow(2, lvl);
-      console.log("level", lvl);
+      //console.log("level", lvl);
 
       // for each range
       // - find which bins are missing in the previous level's ranges
       for(var rng = 0; rng < currentMissingBinStarts.length; rng++) {
-        console.log("  checking range", currentMissingBinStarts[rng]);
+        //console.log("  checking range", currentMissingBinStarts[rng]);
         // add the start of each missing range found within
         // the above missing range
         nextMissingBinStarts.push(my.missingBins(currentMissingBinStarts[rng], lvl, true));
@@ -487,7 +487,7 @@ binnedData = function () {
         missingRanges.push([d, d + sampleSize]);
         // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
       });
-      console.log("  level", lvl, "was missing", missingRanges);
+      //console.log("  level", lvl, "was missing", missingRanges);
       currentMissingBinStarts = missingRanges;
       nextMissingBinStarts = [];
     }
@@ -560,6 +560,25 @@ binnedData = function () {
     return _.filter(bd[key].levels[lvl], function (d, i) {
       return d.ms <= range[1] && d.ms >= range[0];
     });
+  }
+
+  my.removeAllLevelsBelow = function(LowestLevel) {
+    //TODO
+    for(var i = 0; i < LowestLevel; i++) {
+      for(k in bd.keys) {
+        var key = bd.keys[k];
+        //console.log("removing", key, i);
+        bd[key].levels[i] = [];
+      }
+    }
+
+    // remove rawData, too
+    if (LowestLevel > 0) {
+      //console.log("removing", "rawData", 0);
+      bd.rawData.levels[0] = [];
+    }
+
+    //console.log("removing ;]");
   }
 
   my.getKeys = function () {

@@ -450,7 +450,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
         }
 
         waitingForServer = true;
-        dataReq(req);
+        if (!dataReq(req)) {
+          // if it's too soon, or it failed
+          waitingForServer = false;
+        }
       }
     }
 

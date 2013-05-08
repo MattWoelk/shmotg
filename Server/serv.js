@@ -21,7 +21,7 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 try {
-  var oldBinData = fs.readFileSync('/Users/woelk/test_backup').toString(); // block while getting the girder contents.
+  var oldBinData = fs.readFileSync('/Users/woelk/scraped_5').toString(); // block while getting the girder contents.
   console.log("reading");
   //binData.bd() = JSON.parse(oldBinData);
   //console.log(JSON.parse(oldBinData).rawData.levels[0]);
@@ -182,20 +182,21 @@ function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
 
 function sendDatabaseQuery(query, doWithResult) {
   console.log("- receiving data from server...");
-  mysqlconnection.query(query, function (err, rows, fields) {
-    if (err) {console.log("err: ", err); return err;}
-    console.log(red+query, blue+rows.length+reset);
-    //console.log("ROWS: ", rows);
-    var send_object = rows.map(function (d) {
-      return { val: d.ESGgirder18 ,
-               ms: dateAndSampleIndexStringToMilliseconds(
-                 d.Time + "",
-                 d.SampleIndex)
-             };
-    });
+  //mysqlconnection.query(query, function (err, rows, fields) {
+  //  if (err) {console.log("err: ", err); return err;}
+  //  console.log(red+query, blue+rows.length+reset);
+  //  //console.log("ROWS: ", rows);
+  //  var send_object = rows.map(function (d) {
+  //    return { val: d.ESGgirder18 ,
+  //             ms: dateAndSampleIndexStringToMilliseconds(
+  //               d.Time + "",
+  //               d.SampleIndex)
+  //           };
+  //  });
 
-    doWithResult(send_object); // send_object is always raw data
-  });
+  //  doWithResult(send_object); // send_object is always raw data
+  //});
+  doWithResult({}); // send_object is always raw data
 }
 
 function pad(integ) {
@@ -275,7 +276,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
       // See if our binned data has the requested range
       var missingRanges = binData.missingBins(range, req.bin_level);
       // TODO TODO TODO CURRENT TASK: get this working.
-      console.log('missing ranges', missingRanges);
+      //console.log('missing ranges', missingRanges);
 
       // Filter the ranges for only those which we don't have raw data
       // TODO: this is a temporary fix!
