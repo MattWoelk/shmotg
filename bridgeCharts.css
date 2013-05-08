@@ -5,6 +5,10 @@ body {
   font-size: 20px;
 }
 
+a, input, button {
+  -ms-touch-action: none !important;
+}
+
 #chart {
   font: 10px sans-serif;
   overflow: none;

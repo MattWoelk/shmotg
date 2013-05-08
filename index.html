@@ -11,6 +11,13 @@
     <script src="html5shiv.js"></script>
     <![endif]-->
 
+    <script type='application/javascript' src='node_modules/fastclick/lib/fastclick.js'></script>
+    <script type='application/javascript'>
+      window.addEventListener('load', function() {
+        FastClick.attach(document.body);
+      }, false);
+    </script>
+
     <title>Bridge Data Analysis</title>
   </head>
   <body>
