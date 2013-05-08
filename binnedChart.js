@@ -375,6 +375,19 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
     var didWeRenderAnything = false;
 
+    // calculate new y scale before we render any d0s
+    // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
+    // - this will give the option of all charts having the same y axis
+    var minFilter = d3.min(
+        binData.getDateRange('mins', whichLevelToRender, renderRange),
+        function(d) { return d.val; } );
+    var maxFilter = d3.max(
+        binData.getDateRange('maxes', whichLevelToRender, renderRange),
+        function(d) { return d.val; } );
+
+    yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
+                  , maxFilter ? maxFilter : yScale.domain()[1] ]);
+
     // for each key
     // 1. find out whether we should render things
     for (var keyValue in renderThis) {
@@ -437,7 +450,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
         }
 
         waitingForServer = true;
-        dataReq(req);
+        if (!dataReq(req)) {
+          // if it's too soon, or it failed
+          waitingForServer = false;
+        }
       }
     }
 
@@ -730,7 +746,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     if (level === 0) {
       binData.addRawData(datas);
     } else {
-      binData.addBinnedData(datas);
+      binData.addBinnedData(datas, level);
     }
 
     waitingForServer = false;

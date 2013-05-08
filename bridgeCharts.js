@@ -319,9 +319,23 @@ function addToServerQueue(ob) {
 };
 
 var uniqueRequestID = 0;
+var timeOfLastRequest = 0;
+var listOfRequestsMade = [];
 function sendRequestToServer(req) {
   // turn on loading icon
   setLoadingIcon(true);
+
+  var now = new Date();
+  if(_.findWhere(listOfRequestsMade, {ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
+    // never request the same thing twice
+    //console.log("already requested");
+    setLoadingIcon(false);
+    return false;
+  }
+
+  listOfRequestsMade.push(req);
+
+  //console.log("requesting");
 
   // wrap the req with a unique id
   var sendReq = {
@@ -331,6 +345,8 @@ function sendRequestToServer(req) {
 
   // add the request to the queue
   addToServerQueue(sendReq);
+
+  timeOfLastRequest = now;
 
   socket.emit('req', JSON.stringify(sendReq));
 }
