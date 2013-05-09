@@ -21,7 +21,7 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 try {
-  var oldBinData = fs.readFileSync('/Users/woelk/scraped_7_3hours').toString(); // block while getting the girder contents.
+  var oldBinData = fs.readFileSync('/Users/woelk/scraped_7_90min').toString(); // block while getting the girder contents.
   console.log("reading");
   //binData.bd() = JSON.parse(oldBinData);
   //console.log(JSON.parse(oldBinData).rawData.levels[0]);
