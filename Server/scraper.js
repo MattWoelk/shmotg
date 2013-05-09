@@ -72,7 +72,7 @@ handleDisconnect(mysqlconnection);
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 
-var rangeToWalk = [1325567000000, 1325573000000];
+var rangeToWalk = [1325567000000, 1325579000000];
 var stepSize = 600000; // 10000 is 2400 samples each time
                        // 100000 is 1:40 each time
                        // 600000 is ten minutes each time
