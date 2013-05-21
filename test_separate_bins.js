@@ -1,4 +1,5 @@
 require("./binnedData.js");
+require("./binnedDatas.js");
 _ = require('underscore');
 d3 = require("d3");
 
@@ -30,9 +31,14 @@ function assert(a, b, test) {
   }
 }
 
-var brd = binnedData().addRawData([
+////////////////////////////////
+
+var brds = binnedDatas();
+assert(brds(), [], 'initialization');
+
+var brds = binnedDatas().addRawData([
   {ms: 1000, val: 10},
   {ms: 1005, val: 10},
 ]);
 
-assert(_.pluck(brd.bd().rawData.levels[0], 'ms'), [1000, 1005], 'adding raw and reading raw');
+assert(brds.bds() [1000, 1005], 'adding raw and reading raw');
