@@ -9,6 +9,7 @@ var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
 binnedData = function () {
 
   //{{{ VARIABLES
+
   var bd = { // where all of the data is stored
     keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
     rawData : {
