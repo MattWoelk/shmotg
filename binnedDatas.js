@@ -50,7 +50,9 @@ binnedDatas = function (maxbins) {
     //{{{ PUBLIC METHODS
 
     my.addRawData = function (rData, dontBin) {
-        // TODO
+        // TODO: see which bins we need to create
+        // TODO: create them if needed
+        // TODO: add corresponding data to bds' bins
         return my;
     }
 

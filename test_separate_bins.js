@@ -41,4 +41,4 @@ var brds = binnedDatas().addRawData([
   {ms: 1005, val: 10},
 ]);
 
-assert(brds.bds() [1000, 1005], 'adding raw and reading raw');
+assert(brds.bds(), [1000, 1005], 'adding raw and reading raw');
