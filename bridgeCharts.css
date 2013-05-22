@@ -1,8 +1,8 @@
 body {
-  background-color: #FFF;
-  font-family: sans-serif;
-  color: #000;
-  font-size: 20px;
+  background-color:  #FFF;
+  font-family:       sans-serif;
+  color:             #000;
+  font-size:         20px;
 }
 
 a, input, button {
@@ -10,8 +10,8 @@ a, input, button {
 }
 
 #chart {
-  font: 10px sans-serif;
-  overflow: none;
+  font:      10px sans-serif;
+  overflow:  none;
 }
 
 path, line {
@@ -19,9 +19,9 @@ path, line {
 }
 
 .axis path, .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+  fill:             none;
+  stroke:           #000;
+  shape-rendering:  crispEdges;
 }
 
 .axis path {
@@ -30,8 +30,8 @@ path, line {
 }
 
 .y.axis line {
-  stroke: #999;
-  stroke-dasharray: 3, 3;
+  stroke:            #999;
+  stroke-dasharray:  3, 3;
 }
 
 #chart_container {
@@ -44,22 +44,22 @@ path, line {
 }
 
 #zoomSVG {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position:  absolute;
+  top:       0;
+  left:      0;
 }
 
 #zoomRect {
-  border-style: solid;
-  border-width: 1px;
-  cursor: col-resize;
+  border-style:  solid;
+  border-width:  1px;
+  cursor:        col-resize;
 }
 
 #expand-btn {
-  display: inline-block;
-  /*padding: 0 0.25em 0 0.25em;*/
-  border-radius: 1em; /*16px;*/
-  /*box-shadow: 0px 0px 0.4em #000;*/
+  display:        inline-block;
+  /*padding:      0 0.25em 0 0.25em;*/
+  border-radius:  1em; /*16px;*/
+  /*box-shadow:   0px 0px 0.4em #000;*/
 }
 
 /*#isexpanded:checked ~ #expand-btn {
@@ -67,51 +67,51 @@ path, line {
 }*/
 
 #controls {
-  -moz-transition: max-height 0.5s ease-out;
-  -webkit-transition: max-height 0.5s ease-out;
-  transition: max-height 0.5s ease-out; /* this is a bit of a hack */
+  -moz-transition:     max-height 0.5s ease-out;
+  -webkit-transition:  max-height 0.5s ease-out;
+  transition:          max-height 0.5s ease-out; /* this is a bit of a hack */
 
-  overflow: hidden;
-  max-height: 0;
-  background-color: #eee;
-  border: solid;
-  border-width: 0px;
-  border-radius: 1em;
-  box-shadow: inset 0px 0px 0.4em #000;
+  overflow:          hidden;
+  max-height:        0;
+  background-color:  #eee;
+  border:            solid;
+  border-width:      0px;
+  border-radius:     1em;
+  box-shadow:        inset 0px 0px 0.4em #000;
 }
 
 #isexpanded:checked ~ #controls {
-  -moz-transition: max-height 0.5s ease-in;
-  -webkit-transition: max-height 0.5s ease-in;
-  transition: max-height 0.5s ease-in; /* this is a bit of a hack */
+  -moz-transition:     max-height 0.5s ease-in;
+  -webkit-transition:  max-height 0.5s ease-in;
+  transition:          max-height 0.5s ease-in; /* this is a bit of a hack */
 
-  overflow: hidden;
-  max-height: 35em; /* this is a bit of a hack */
-  background: #eee;
-  border: solid;
-  border-width: 0px;
-  border-radius: 1em;
-  box-shadow: inset 0px 0px 0.4em #000;
+  overflow:       hidden;
+  max-height:     35em; /* this is a bit of a hack */
+  background:     #eee;
+  border:         solid;
+  border-width:   0px;
+  border-radius:  1em;
+  box-shadow:     inset 0px 0px 0.4em #000;
 }
 
 #controls ul {
-  float: left;
-  list-style: none;
-  padding: 0.5em 0.5em 0.5em 0.5em;
-  margin: 0;
-  border-left: dashed grey;
-  border-top: dashed grey;
+  float:        left;
+  list-style:   none;
+  padding:      0.5em 0.5em 0.5em 0.5em;
+  margin:       0;
+  border-left:  dashed grey;
+  border-top:   dashed grey;
 }
 
 #controls ul:not(:first-child) {
-  border-left: dashed grey;
-  border-top: dashed grey;
+  border-left:  dashed grey;
+  border-top:   dashed grey;
 }
 
 input[type="checkbox"] {
-  width: 1em; /* grow with the text */
-  height: 1em;
-  disabled: true;
+  width:     1em; /* grow with the text */
+  height:    1em;
+  disabled:  true;
 }
 
 /* Loading Animation {{{*/
