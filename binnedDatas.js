@@ -40,6 +40,14 @@ binnedDatas = function (maxbins) {
 
     //{{{ HELPER METHODS
 
+    function sizeOf (obj) {
+        var size = 0, key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) size++;
+        }
+        return size;
+    }
+
     function inAButNotInB(arr1, arr2) {
       return _.filter(arr1, function (d) {
         return !_.contains(arr2, d);
@@ -89,34 +97,6 @@ binnedDatas = function (maxbins) {
         });
     }
 
-    function addRawDataToBins(data) {
-        // TODO: take into account different keys ('average', 'q1'...)
-        var lvl = 0;
-        var splitData = splitIntoBinsAtLevel(data, lvl);
-
-        for (var prop in splitData) {
-            var overflow = splitData[prop];
-            console.log(prop);
-            while (overflow){
-                // Check to see if we have a binData
-                // for this level and key
-                if( !bds[lvl] ) {
-                    bds[lvl] = {};
-                }
-                if( !bds[lvl][prop] ) {
-                    bds[lvl][prop] = binnedData(maxNumberOfBins);
-                }
-
-                // TODO: combine this data with that data
-                overflow = bds[lvl][prop].addRawData(splitData, false);
-                //console.log(overflow);
-                console.log("log:", bds[lvl][prop].addRawData);
-                overflow = false;
-            }
-        }
-
-    }
-
     function getSurroundingBins (start, end, lvl) {
         // return all bin starts at this level between start and end
         // INCLUDING the highest point if it is equal to end
@@ -136,6 +116,17 @@ binnedDatas = function (maxbins) {
         return false;
     }
 
+    function callForAllAtLevelAndCombineResults (func, lvl) {
+        // func must return an array
+        result = [];
+
+        for (i in bds[lvl]) {
+            result = result.concat(func(bds[lvl][i]));
+        }
+
+        return result;
+    }
+
     // HELPER METHODS }}}
 
     //{{{ MY (runs whenever something changes)
@@ -147,15 +138,34 @@ binnedDatas = function (maxbins) {
 
     //{{{ PUBLIC METHODS
 
-    my.addRawData = function (rData, dontBin) {
-        // TODO: see which bins we need to create
-        // TODO: create them if needed
-        // TODO: add corresponding data to bds' bins
-        addRawDataToBins(rData);
+    my.addRawData = function (data, dontBin) {
+        // TODO: take into account different keys ('average', 'q1'...)
+        var lvl = 0;
+        var splitData = splitIntoBinsAtLevel(data, lvl);
+
+        for (var prop in splitData) {
+            var overflow = splitData[prop];
+
+            while (overflow){
+                // Check to see if we have a binData
+                // for this level and key
+                if( !bds[lvl] ) {
+                    bds[lvl] = {};
+                }
+                if( !bds[lvl][prop] ) {
+                    bds[lvl][prop] = binnedData(maxNumberOfBins);
+                }
+
+                // TODO: combine this data with that data
+                overflow = bds[lvl][prop].addRawData(splitData[prop], false);
+                //console.log(overflow);
+            }
+        }
+
         return my;
     }
 
-    my.replaceRawData = function (rData, dontBin) {
+    my.replaceRawData = function (data, dontBin) {
         // TODO
         return my;
     }
@@ -233,6 +243,12 @@ binnedDatas = function (maxbins) {
     my.getKeys = function () {
         // TODO
         return my;
+    }
+
+    my.getAllRawData = function () {
+        return callForAllAtLevelAndCombineResults(function (d) {
+            return d.getRawData();
+        }, 0);
     }
 
     my.bds = function () { // TODO: JUST FOR TESTING

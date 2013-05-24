@@ -247,7 +247,7 @@ binnedData = function () {
       rebin(range, 0);
     }
 
-    return my;
+    return false; // TODO: return overflow
   }
 
   my.replaceRawData = function (rData, dontBin) {
@@ -561,6 +561,10 @@ binnedData = function () {
     return _.filter(bd[key].levels[lvl], function (d, i) {
       return d.ms <= range[1] && d.ms >= range[0];
     });
+  }
+
+  my.getRawData = function () {
+      return bd.rawData.levels[0];
   }
 
   my.removeAllLevelsBelow = function(LowestLevel) {

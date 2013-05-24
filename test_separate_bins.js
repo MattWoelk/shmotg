@@ -1,3 +1,6 @@
+//path = require("path")
+//var filename = path.resolve('./binnedData.js');
+//delete require.cache[filename];
 require("./binnedData.js");
 require("./binnedDatas.js");
 _ = require('underscore');
@@ -41,4 +44,7 @@ var brds = binnedDatas().addRawData([
   {ms: 1005, val: 10},
 ]);
 
-assert(brds.bds()[0][1000].bd().rawData.levels[0], [1000, 1005], 'adding raw and reading raw');
+assert(
+    _.pluck(brds.getAllRawData(), 'ms'),
+    [1000, 1005],
+    'adding raw and reading raw');
