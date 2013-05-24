@@ -48,3 +48,18 @@ assert(
     _.pluck(brds.getAllRawData(), 'ms'),
     [1000, 1005],
     'adding raw and reading raw');
+
+assert(
+    _.pluck(brds.getDateRange('rawData', 0, [0, 5000]), 'ms'),
+    [1000, 1005],
+    'getDateRange for rawData');
+
+assert(
+    _.pluck(brds.getDateRange('rawData', 1, [0, 5000]), 'ms'),
+    [1000, 1005],
+    'getDateRange for level 1');
+
+assert(
+    _.pluck(brds.getAllInRange(1, [0, 5000]), 'ms'),
+    [1000, 1005],
+    'getAllInRange');

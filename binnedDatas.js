@@ -116,12 +116,24 @@ binnedDatas = function (maxbins) {
         return false;
     }
 
+    function isArray(a) {
+        return Object.prototype.toString.call(a) === '[object Array]';
+    }
+
     function callForAllAtLevelAndCombineResults (func, lvl) {
         // func must return an array
         result = [];
 
         for (i in bds[lvl]) {
-            result = result.concat(func(bds[lvl][i]));
+            var res = func(bds[lvl][i]);
+            console.log("res:", res);
+
+            if(isArray(res)) {
+                result = result.concat(res);
+            } else {
+                // TODO
+                //result = //TODO: combineAndSortArraysOfDateValObjects(result, res);
+            }
         }
 
         return result;
@@ -226,13 +238,15 @@ binnedDatas = function (maxbins) {
     }
 
     my.getAllInRange = function(lvl, range) {
-        // TODO
-        return my;
+        return callForAllAtLevelAndCombineResults(function (d) {
+            return d.getAllInRange(lvl, range);
+        }, 0);
     }
 
     my.getDateRange = function (key, lvl, range) {
-        // TODO
-        return my;
+        return callForAllAtLevelAndCombineResults(function (d) {
+            return d.getDateRange(key, lvl, range);
+        }, 0);
     }
 
     my.removeAllLevelsBelow = function(LowestLevel) {
