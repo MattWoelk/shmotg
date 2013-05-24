@@ -3,9 +3,6 @@
 // binnedData object.
 
 // TODO: remove these requires! They are just for testing!
-require("./binnedData.js");
-_ = require('underscore');
-d3 = require("d3");
 
 binnedDatas = function (maxbins) {
 
@@ -92,8 +89,31 @@ binnedDatas = function (maxbins) {
         });
     }
 
-    function addDataToBinsAtLevel(data, lvl) {
+    function addRawDataToBins(data) {
+        // TODO: take into account different keys ('average', 'q1'...)
+        var lvl = 0;
         var splitData = splitIntoBinsAtLevel(data, lvl);
+
+        for (var prop in splitData) {
+            var overflow = splitData[prop];
+            console.log(prop);
+            while (overflow){
+                // Check to see if we have a binData
+                // for this level and key
+                if( !bds[lvl] ) {
+                    bds[lvl] = {};
+                }
+                if( !bds[lvl][prop] ) {
+                    bds[lvl][prop] = binnedData(maxNumberOfBins);
+                }
+
+                // TODO: combine this data with that data
+                overflow = bds[lvl][prop].addRawData(splitData, false);
+                //console.log(overflow);
+                console.log("log:", bds[lvl][prop].addRawData);
+                overflow = false;
+            }
+        }
 
     }
 
@@ -131,6 +151,7 @@ binnedDatas = function (maxbins) {
         // TODO: see which bins we need to create
         // TODO: create them if needed
         // TODO: add corresponding data to bds' bins
+        addRawDataToBins(rData);
         return my;
     }
 
