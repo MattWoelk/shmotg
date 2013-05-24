@@ -9,6 +9,22 @@ d3 = require("d3");
 
 binnedDatas = function (maxbins) {
 
+    //{{{ INITIALIZATION (runs once)
+    assert(getKeyForTimeAtLevel (11, 0), 10, "get key 11, 0");
+    assert(getKeyForTimeAtLevel (11, 1), 10, "get key 11, 1");
+    assert(getKeyForTimeAtLevel (11, 2), 0,  "get key 11, 2");
+
+    assertDirect(
+        splitIntoBinsAtLevel([{ms: 3},{ms: 5},{ms: 7},{ms: 9},], 0),
+            {'0': [{ms: 3}],
+             '5': [{ms: 5}, {ms: 7}, {ms: 9}]},
+        "splitIntoBinsAtLevel, 0");
+
+    assert(getSurroundingBins(0, 16, 0), [0, 5, 10, 15], "all between 1");
+    assert(getSurroundingBins(2, 20, 0), [0, 5, 10, 15, 20], "all between 2");
+
+    // INITIALIZATION }}}
+
     //{{{ VARIABLES
 
     var maxNumberOfBins = maxbins ? maxbins : 3;
@@ -22,14 +38,65 @@ binnedDatas = function (maxbins) {
 
     //{{{ HELPER METHODS
 
+    function inAButNotInB(arr1, arr2) {
+      return _.filter(arr1, function (d) {
+        return !_.contains(arr2, d);
+      });
+    }
+
+    function assertDirect(a, b, test) {
+      if(a.toString().localeCompare(b.toString()) === 0) {
+        console.log("+ Passed:", test);
+      } else {
+        console.log("- "+red+"Failed"+reset+":", test);
+        console.log("  Result is", a);
+        console.log("  Should be", b);
+      }
+    }
+
+    function assert(a, b, test) {
+      if(inAButNotInB(a, b).length === 0 && inAButNotInB(b, a).length === 0) {
+        console.log("+ Passed:", test);
+      } else {
+        console.log("- "+red+"Failed"+reset+":", test);
+        console.log("  Result is", a);
+        console.log("  Should be", b);
+      }
+    }
+
     function getKeyForTimeAtLevel (ms, lvl) {
         // TODO: calculate the starting ms of the bin [at this
         //       level] in which this ms would fit.
 
         var oneSample = 1000 / 200; // milliseconds per sample
-        var sampleSize = Math.pow(2, curLevel) * oneSample;
+        var sampleSize = Math.pow(2, lvl) * oneSample;
 
-        return Math.floor(ms / ( Math.pow(2, curLevel+1) * sampleSize )) * sampleSize;
+        return Math.floor(ms / ( Math.pow(2, lvl) * sampleSize )) * sampleSize;
+    }
+
+    function splitIntoBinsAtLevel (data, lvl) {
+        // TODO: round level down to nearest maxNumberOfBins
+        //       then separate the data out into a structure:
+        //       { '0': [{ms: 3}, {ms: 4}]
+        //         '5': [{ms: 5}, {ms: 9}]}
+        //       This function is to be used when adding raw data
+        // Assumption: data is ordered and continuous
+
+        return _.groupBy(data, function (d) {
+            return getKeyForTimeAtLevel(d.ms, lvl);
+        });
+    }
+
+    function getSurroundingBins (start, end, lvl) {
+        // return all bin starts at this level between start and end
+        // INCLUDING the highest point if it is equal to end
+
+        var oneSample = 1000 / 200; // milliseconds per sample
+        var binSize = Math.pow(2, lvl) * oneSample;
+
+        var startRounded = getKeyForTimeAtLevel(start, lvl);
+
+        return _.range(startRounded, end+1, binSize);
     }
 
     function doWeHaveBinsForThisRangeAndLevel (rng, lvl) {
@@ -38,6 +105,7 @@ binnedDatas = function (maxbins) {
         }
         return false;
     }
+
     // HELPER METHODS }}}
 
     //{{{ MY (runs whenever something changes)
