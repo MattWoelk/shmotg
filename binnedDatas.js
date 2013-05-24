@@ -29,10 +29,15 @@ binnedDatas = function (maxbins) {
 
     var maxNumberOfBins = maxbins ? maxbins : 3;
 
-    var bds = []; // array of objects. Each object contains a first
-                  // property which stores the first data point which
-                  // it can store. Each level corresponds to a
-                  // binning level.
+    var bds = []; // array of objects of binData'
+                  // [
+                  //  { '0': binData(), '5':   binData()}, // level 0
+                  //  { '0': binData(), '20':  binData()}, // level 2
+                  //  { '0': binData(), '80':  binData()}, // level 4
+                  //  { '0': binData(), '320': binData()}  // level 8
+                  // ]
+                  // This diagram ^^^ shows the result when
+                  // maxNumberOfBins is 2
 
     /// VARIABLES }}}
 
@@ -85,6 +90,11 @@ binnedDatas = function (maxbins) {
         return _.groupBy(data, function (d) {
             return getKeyForTimeAtLevel(d.ms, lvl);
         });
+    }
+
+    function addDataToBinsAtLevel(data, lvl) {
+        var splitData = splitIntoBinsAtLevel(data, lvl);
+
     }
 
     function getSurroundingBins (start, end, lvl) {
