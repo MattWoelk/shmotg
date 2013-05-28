@@ -139,6 +139,32 @@ binnedDatas = function (maxbins) {
         return result;
     }
 
+    function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
+        // - data is split into sections
+        // - func will be applied to each binnedData at level lvl
+        //   using the split data
+
+        // TODO TODO TODO: test this function!
+
+        var splitData = splitIntoBinsAtLevel(data, lvl);
+
+        for (i in bds[lvl]) {
+
+            // Create if we don't have:
+            if( !bds[lvl] ) { bds[lvl] = {}; }
+            if( !bds[lvl][prop] ) { bds[lvl][prop] = binnedData(maxNumberOfBins); }
+
+            var overflow = func.call(bds[lvl][i], splitData[i]);
+            // TODO: May have to use apply instead
+            //       so as to transfer arguments
+
+            //while (overflow){
+                // TODO TODO: handle overflows!
+            //}
+        }
+
+    }
+
     // HELPER METHODS }}}
 
     //{{{ MY (runs whenever something changes)
@@ -152,33 +178,23 @@ binnedDatas = function (maxbins) {
 
     my.addRawData = function (data, dontBin) {
         // TODO: take into account different keys ('average', 'q1'...)
-        var lvl = 0;
-        var splitData = splitIntoBinsAtLevel(data, lvl);
-
-        for (var prop in splitData) {
-            var overflow = splitData[prop];
-
-            while (overflow){
-                // Check to see if we have a binData
-                // for this level and key
-                if( !bds[lvl] ) {
-                    bds[lvl] = {};
-                }
-                if( !bds[lvl][prop] ) {
-                    bds[lvl][prop] = binnedData(maxNumberOfBins);
-                }
-
-                // TODO: combine this data with that data
-                overflow = bds[lvl][prop].addRawData(splitData[prop], false);
-                //console.log(overflow);
-            }
-        }
+        splitAndApplyToEachWithOverflowAtLevel(
+            data,
+            binnedData().addRawData,
+            0);
 
         return my;
     }
 
     my.replaceRawData = function (data, dontBin) {
-        // TODO TODO
+        // TODO TODO: test this
+
+        // reset bds
+        bds = [];
+
+        // addRawData
+        my.addRawData(data, dontBin);
+
         return my;
     }
 
