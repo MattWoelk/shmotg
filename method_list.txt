@@ -42,3 +42,26 @@
               binData.addRawData(queryResult);
 
             var x = JSON.stringify(binData.bd());
+
+
+== LIST: ==
+
+addRawData
+getMaxRaw
+getMinRaw
+getDateRange
+haveDataInRange
+getColor
+addBinnedData
+getKeys
+getOpacity
+replaceRawData
+replaceBinnedData
+missingRawBinsUnderThisRangeAndLevel
+getAllInRange
+missingBins
+getMinRawMS
+getMaxRawMS
+bd --> perhaps should be very different and rethought
+       because it's just used to store the data as a file
+       so it should reflect how it's stored here, too...
