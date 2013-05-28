@@ -49,7 +49,7 @@
 addRawData
 getMaxRaw
 getMinRaw
-getDateRange
+getDateRange //done?
 haveDataInRange
 getColor
 addBinnedData
@@ -58,7 +58,7 @@ getOpacity
 replaceRawData
 replaceBinnedData
 missingRawBinsUnderThisRangeAndLevel
-getAllInRange
+getAllInRange //done?
 missingBins
 getMinRawMS
 getMaxRawMS

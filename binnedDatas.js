@@ -178,62 +178,62 @@ binnedDatas = function (maxbins) {
     }
 
     my.replaceRawData = function (data, dontBin) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.addBinnedData = function (bData, lvl, dontBin) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.replaceBinnedData = function(bData, lvl, dontBin) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.haveDataInRange = function(ms_range, level) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.missingBins = function(ms_range, level, samplesInsteadOfRanges) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.missingRawBinsUnderThisRangeAndLevel = function (ms_range, level) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.getMinRaw = function () {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.getMaxRaw = function () {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.getMinRawMS = function () {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.getMaxRawMS = function () {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.getColor = function (key) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
     my.getOpacity = function (key) {
-        // TODO
+        // TODO TODO
         return my;
     }
 
@@ -255,7 +255,7 @@ binnedDatas = function (maxbins) {
     }
 
     my.getKeys = function () {
-        // TODO
+        // TODO TODO
         return my;
     }
 
@@ -265,8 +265,8 @@ binnedDatas = function (maxbins) {
         }, 0);
     }
 
-    my.bds = function () { // TODO: JUST FOR TESTING
-        // TODO
+    my.bd = function () { // TODO: JUST FOR TESTING
+        // TODO TODO
         return bds;
     }
 
