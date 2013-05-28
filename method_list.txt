@@ -1,0 +1,44 @@
+=== FROM BINNEDCHART.JS: ===
+
+  binData.addRawData(data);
+
+      .domain([binData.getMinRaw(), binData.getMaxRaw()])
+
+        binData.getDateRange('mins', whichLevelToRender, renderRange),
+
+          var q1Filter = binData.getDateRange('q1', whichLevelToRender, renderRange);
+
+      if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
+
+                   function (d) { return binData.getColor(d.key); },
+
+      binData.addRawData(datas);
+
+      binData.addBinnedData(datas, level);
+
+  var keys = bin.getKeys();
+
+    sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
+
+
+=== FROM SERV.JS: ===
+
+  binData.replaceRawData(datDat.rawData.levels[0], true);
+
+    binData.replaceBinnedData(datDat, i, true);
+
+  binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
+
+          send_req = binData.getDateRange("rawData", req.bin_level, range);
+
+          send_req = binData.getAllInRange(req.bin_level, range);
+
+      var missingRanges = binData.missingBins(range, req.bin_level);
+
+      var minval = binData.getMinRawMS();
+
+      var maxval = binData.getMaxRawMS();
+
+              binData.addRawData(queryResult);
+
+            var x = JSON.stringify(binData.bd());
