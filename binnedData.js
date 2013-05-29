@@ -503,7 +503,6 @@ binnedData = function () {
   }
 
   my.getAllInRange = function(lvl, range) {
-    // TODO TODO TODO
     // return a bd-like data structure but only
     // with data in the following range and level
     // from all keys
@@ -514,22 +513,23 @@ binnedData = function () {
     for (var i = 0; i < theKeys.length; i++) {
       send_req[theKeys[i]] = {};
       send_req[theKeys[i]].levels = [];
-      send_req[theKeys[i]].levels[lvl] = my.getDateRange(theKeys[i], lvl, range);
+      send_req[theKeys[i]].levels[lvl] = this.getDateRange(theKeys[i], lvl, range);
     }
-    //for(i=0;i<howManyPointsToGenerate;i++) {
-    //  var val = randomPoint();
-    //  var val_q1 = val - (Math.random() * 1.2);
-    //  var val_q3 = val + (Math.random() * 1.2);
-    //  var val_min = val_q1 - (Math.random() * 2);
-    //  var val_max = val_q3 + (Math.random() * 2);
-    //  var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin) - 5; // TODO: magic hack
 
-    //  send_req.average.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val});
-    //  send_req.q1.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q1});
-    //  send_req.q3.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q3});
-    //  send_req.mins.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_min});
-    //  send_req.maxes.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_max});
-    //}
+    return send_req;
+  }
+
+  my.getAllInRangeRaw = function(range) {
+    // return a bd-like data structure but only
+    // with data in the following range and level
+    // from all keys
+
+    // initialize the data structure to be sent
+    var send_req = {};
+    send_req["rawData"] = {};
+    send_req["rawData"].levels = [];
+    send_req["rawData"].levels[0] = this.getDateRange("rawData", 0, range);
+
     return send_req;
   }
 

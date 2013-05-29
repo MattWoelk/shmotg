@@ -122,15 +122,24 @@ binnedDatas = function (maxbins) {
 
     function callForAllAtLevelAndCombineResults (func, lvl) {
         // func must return an array
-        result = [];
+
+        var result = [];
 
         for (i in bds[lvl]) {
             var res = func(bds[lvl][i]);
 
             if(isArray(res)) {
                 result = result.concat(res);
+            } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
+                if (isArray(result)) { result = binnedData(); }
+
+                if (lvl === 0) {
+                    result.addRawData(res.rawData.levels[0]);
+                }else {
+                    result.addBinnedData(res);
+                }
+
             } else {
-                // TODO
                 result = binnedData().combineAndSortArraysOfDateValObjects(result, res);
             }
         }
@@ -254,9 +263,19 @@ binnedDatas = function (maxbins) {
     }
 
     my.getAllInRange = function(lvl, range) {
-        return callForAllAtLevelAndCombineResults(function (d) {
-            return d.getAllInRange(lvl, range);
-        }, 0);
+        if (lvl === 0) {
+            var y = callForAllAtLevelAndCombineResults(function (d) {
+                var x = d.getAllInRangeRaw(range);
+                //console.log("intermediate:", x);
+                return x;
+            }, 0);
+            //console.log("y:",y);
+            return y.bd().rawData.levels[0];
+        } else {
+            return callForAllAtLevelAndCombineResults(function (d) {
+                return d.getAllInRange(lvl, range);
+            }, 0);
+        }
     }
 
     my.getDateRange = function (key, lvl, range) {

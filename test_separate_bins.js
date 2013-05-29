@@ -56,10 +56,10 @@ assert(
 
 assert(
     _.pluck(brds.getDateRange('rawData', 1, [0, 5000]), 'ms'),
-    [1000, 1005],
+    [1000],
     'getDateRange for level 1');
 
 assert(
-    _.pluck(brds.getAllInRange(1, [0, 5000]), 'ms'),
+    _.pluck(brds.getAllInRange(0, [0, 5000]), 'ms'),
     [1000, 1005],
     'getAllInRange');
