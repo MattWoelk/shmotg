@@ -91,7 +91,7 @@ binnedData = function () {
         // Combine what was already there and what was just calculated
         // - What was already in this bin level gets precedence
         //   over what is being binned from the lower level
-        bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
+        bd[key].levels[j] = my.combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
       } // for each key
     } // for each bin level
     //console.log("rebin time:", new Date() - tic);
@@ -186,31 +186,6 @@ binnedData = function () {
     return [first, second];
   };
 
-  function combineAndSortArraysOfDateValObjects (arr1, arr2) {
-    // Add the objects from arr2 (array) to arr1 (array)
-    //   only if the object from arr2 has a ms value
-    //   which no object in arr1 has.
-    // AKA: arr1 gets precedence
-    //var result = arr1.concat(_.filter(arr2, function(d) {
-    //  var b = !_.some(arr1, function(g) {
-    //    return d.ms === g.ms;
-    //  });
-    //  return b;
-    //}));
-
-    var arr1_range = d3.extent(arr1, function (d) { return d.ms; });
-
-    if (!arr1_range[0]) { arr1_range = [999999999999999999, -99999999999999]; }
-    var filteredArr2Low = _.filter(arr2, function (d) { return d.ms < arr1_range[0]; });
-    var filteredArr2High = _.filter(arr2, function (d) { return d.ms > arr1_range[0]; })
-
-    var result = filteredArr2Low.concat(arr1,filteredArr2High);
-
-    // sort the result
-    result.sort(function (a, b) { return a.ms - b.ms; });
-    return result;
-  }
-
   function inAButNotInB(arr1, arr2) {
     return _.filter(arr1, function (d) {
       return !_.contains(arr2, d);
@@ -242,7 +217,7 @@ binnedData = function () {
     // make this level if it does not yet exist
     if (!this.bd().rawData.levels[0]) { this.bd().rawData.levels[0] = []; }
 
-    this.bd().rawData.levels[0] = combineAndSortArraysOfDateValObjects(this.bd().rawData.levels[0], rData);
+    this.bd().rawData.levels[0] = my.combineAndSortArraysOfDateValObjects(this.bd().rawData.levels[0], rData);
 
     var range = d3.extent(this.bd().rawData.levels[0], function(d) { return d.ms; });
 
@@ -310,7 +285,7 @@ binnedData = function () {
       }
 
       if(bData[key].levels) {
-        this.bd()[key].levels[lvl] = combineAndSortArraysOfDateValObjects(this.bd()[key].levels[lvl], bData[key].levels[lvl]);
+        this.bd()[key].levels[lvl] = my.combineAndSortArraysOfDateValObjects(this.bd()[key].levels[lvl], bData[key].levels[lvl]);
       }
     }; // for each of max_val, min_val, etc.
 
@@ -591,6 +566,31 @@ binnedData = function () {
 
   my.getKeys = function () {
     return this.bd().keys.slice(0); // give a copy of the array
+  }
+
+  my.combineAndSortArraysOfDateValObjects = function (arr1, arr2) {
+    // Add the objects from arr2 (array) to arr1 (array)
+    //   only if the object from arr2 has a ms value
+    //   which no object in arr1 has.
+    // AKA: arr1 gets precedence
+    //var result = arr1.concat(_.filter(arr2, function(d) {
+    //  var b = !_.some(arr1, function(g) {
+    //    return d.ms === g.ms;
+    //  });
+    //  return b;
+    //}));
+
+    var arr1_range = d3.extent(arr1, function (d) { return d.ms; });
+
+    if (!arr1_range[0]) { arr1_range = [999999999999999999, -99999999999999]; }
+    var filteredArr2Low = _.filter(arr2, function (d) { return d.ms < arr1_range[0]; });
+    var filteredArr2High = _.filter(arr2, function (d) { return d.ms > arr1_range[0]; })
+
+    var result = filteredArr2Low.concat(arr1,filteredArr2High);
+
+    // sort the result
+    result.sort(function (a, b) { return a.ms - b.ms; });
+    return result;
   }
 
   my.bd = function () {

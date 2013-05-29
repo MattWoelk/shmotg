@@ -131,7 +131,7 @@ binnedDatas = function (maxbins) {
                 result = result.concat(res);
             } else {
                 // TODO
-                //result = //TODO: combineAndSortArraysOfDateValObjects(result, res);
+                result = binnedData().combineAndSortArraysOfDateValObjects(result, res);
             }
         }
 
