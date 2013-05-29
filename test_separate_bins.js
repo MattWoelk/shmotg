@@ -60,6 +60,16 @@ assert(
     'getMinRaw');
 
 assert(
+    [brds.getMinRawMS()],
+    [1000],
+    'getMinRawMS');
+
+assert(
+    [brds.getMaxRawMS()],
+    [1005],
+    'getMaxRawMS');
+
+assert(
     _.pluck(brds.getDateRange('rawData', 0, [0, 5000]), 'ms'),
     [1000, 1005],
     'getDateRange for rawData');

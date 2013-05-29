@@ -47,8 +47,8 @@
 == LIST: ==
 
 addRawData   // done
-getMaxRaw    // done
-getMinRaw    // done
+getMaxRaw
+getMinRaw
 getDateRange // ?
 haveDataInRange
 getColor     // done
@@ -60,8 +60,8 @@ replaceBinnedData
 missingRawBinsUnderThisRangeAndLevel
 getAllInRange //done?
 missingBins
-getMinRawMS
-getMaxRawMS
+getMinRawMS   // done
+getMaxRawMS   // done
 bd --> perhaps should be very different and rethought
        because it's just used to store the data as a file
        so it should reflect how it's stored here, too...
