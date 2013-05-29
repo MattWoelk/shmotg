@@ -57,7 +57,7 @@ getKeys      // done
 getOpacity   // done
 replaceRawData
 replaceBinnedData
-missingRawBinsUnderThisRangeAndLevel
+missingRawBinsUnderThisRangeAndLevel // not needed after all perhaps
 getAllInRange //done?
 missingBins
 getMinRawMS   // done

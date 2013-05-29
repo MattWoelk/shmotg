@@ -207,7 +207,6 @@ binnedDatas = function (maxbins) {
     //{{{ PUBLIC METHODS
 
     my.addRawData = function (data, dontBin) {
-        // TODO: take into account different keys ('average', 'q1'...)
         splitAndApplyToEachWithOverflowAtLevel(
             data,
             binnedData().addRawData,
@@ -230,6 +229,14 @@ binnedDatas = function (maxbins) {
 
     my.addBinnedData = function (bData, lvl, dontBin) {
         // TODO TODO
+        // TODO: take into account different keys ('average', 'q1'...)
+
+        // TODO: make a binnedData object, then call getDateRange
+        //       on it for each bin
+
+        var tmpBinnedData = binnedData();
+        tmpBinnedData.addBinnedData(bData, lvl, dontBin);
+
         return my;
     }
 
