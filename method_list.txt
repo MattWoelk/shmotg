@@ -53,7 +53,7 @@ getDateRange // ?
 haveDataInRange
 getColor     // done
 addBinnedData
-getKeys
+getKeys      // done
 getOpacity
 replaceRawData
 replaceBinnedData

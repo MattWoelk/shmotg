@@ -83,3 +83,9 @@ assert(
     [brds.getColor('rawData')],
     ["#000"],
     'getColor');
+
+assert(
+    brds.getKeys(),
+    ['average', 'maxes', 'mins', 'q1', 'q3'],
+    'getKeys');
+

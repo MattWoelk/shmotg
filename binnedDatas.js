@@ -151,6 +151,7 @@ binnedDatas = function (maxbins) {
             if(isArray(res)) {
                 result = result.concat(res);
             } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
+                console.log(res);
                 if (isArray(result)) { result = binnedData(); }
 
                 if (lvl === 0) {
@@ -324,8 +325,7 @@ binnedDatas = function (maxbins) {
     }
 
     my.getKeys = function () {
-        // TODO TODO
-        return my;
+        return binnedData().getKeys();
     }
 
     my.getAllRawData = function () {
