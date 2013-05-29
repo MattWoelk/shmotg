@@ -131,6 +131,7 @@ binnedDatas = function (maxbins) {
             if(isArray(res)) {
                 result = result.concat(res);
             } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
+                console.log(res);
                 if (isArray(result)) { result = binnedData(); }
 
                 if (lvl === 0) {
@@ -274,7 +275,7 @@ binnedDatas = function (maxbins) {
         } else {
             return callForAllAtLevelAndCombineResults(function (d) {
                 return d.getAllInRange(lvl, range);
-            }, 0);
+            }, lvl);
         }
     }
 

@@ -62,4 +62,9 @@ assert(
 assert(
     _.pluck(brds.getAllInRange(0, [0, 5000]), 'ms'),
     [1000, 1005],
-    'getAllInRange');
+    'getAllInRange lvl 0');
+
+assert(
+    _.pluck(brds.getAllInRange(1, [0, 5000]), 'ms'),
+    [1000, 1005],
+    'getAllInRange lvl 1');
