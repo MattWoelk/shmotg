@@ -7,18 +7,18 @@
 binnedDatas = function (maxbins) {
 
     //{{{ INITIALIZATION (runs once)
-    assert(getKeyForTimeAtLevel (11, 0), 10, "get key 11, 0");
-    assert(getKeyForTimeAtLevel (11, 1), 10, "get key 11, 1");
-    assert(getKeyForTimeAtLevel (11, 2), 0,  "get key 11, 2");
+    //assert(getKeyForTimeAtLevel (11, 0), 10, "get key 11, 0");
+    //assert(getKeyForTimeAtLevel (11, 1), 10, "get key 11, 1");
+    //assert(getKeyForTimeAtLevel (11, 2), 0,  "get key 11, 2");
 
-    assertDirect(
-        splitIntoBinsAtLevel([{ms: 3},{ms: 5},{ms: 7},{ms: 9},], 0),
-            {'0': [{ms: 3}],
-             '5': [{ms: 5}, {ms: 7}, {ms: 9}]},
-        "splitIntoBinsAtLevel, 0");
+    //assertDirect(
+    //    splitIntoBinsAtLevel([{ms: 3},{ms: 5},{ms: 7},{ms: 9},], 0),
+    //        {'0': [{ms: 3}],
+    //         '5': [{ms: 5}, {ms: 7}, {ms: 9}]},
+    //    "splitIntoBinsAtLevel, 0");
 
-    assert(getSurroundingBins(0, 16, 0), [0, 5, 10, 15], "all between 1");
-    assert(getSurroundingBins(2, 20, 0), [0, 5, 10, 15, 20], "all between 2");
+    //assert(getSurroundingBins(0, 16, 0), [0, 5, 10, 15], "all between 1");
+    //assert(getSurroundingBins(2, 20, 0), [0, 5, 10, 15, 20], "all between 2");
 
     // INITIALIZATION }}}
 
@@ -126,7 +126,6 @@ binnedDatas = function (maxbins) {
 
         for (i in bds[lvl]) {
             var res = func(bds[lvl][i]);
-            console.log("res:", res);
 
             if(isArray(res)) {
                 result = result.concat(res);
@@ -148,13 +147,14 @@ binnedDatas = function (maxbins) {
 
         var splitData = splitIntoBinsAtLevel(data, lvl);
 
-        for (i in bds[lvl]) {
+        for (prop in splitData) {
 
             // Create if we don't have:
             if( !bds[lvl] ) { bds[lvl] = {}; }
             if( !bds[lvl][prop] ) { bds[lvl][prop] = binnedData(maxNumberOfBins); }
 
-            var overflow = func.call(bds[lvl][i], splitData[i]);
+            var overflow = func.call(bds[lvl][prop], splitData[prop]);
+            //console.log("overflow:", overflow);
             // TODO: May have to use apply instead
             //       so as to transfer arguments
 

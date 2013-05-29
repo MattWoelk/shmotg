@@ -10,6 +10,9 @@ binnedData = function () {
 
   //{{{ VARIABLES
 
+  // NOTE: in method (not functions) these variables must
+  //       be used in the this.bd() manner instead of directly
+
   var bd = { // where all of the data is stored
     keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
     rawData : {
@@ -237,11 +240,11 @@ binnedData = function () {
     // ],
 
     // make this level if it does not yet exist
-    if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = []; }
+    if (!this.bd().rawData.levels[0]) { this.bd().rawData.levels[0] = []; }
 
-    bd.rawData.levels[0] = combineAndSortArraysOfDateValObjects(bd.rawData.levels[0], rData);
+    this.bd().rawData.levels[0] = combineAndSortArraysOfDateValObjects(this.bd().rawData.levels[0], rData);
 
-    var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
+    var range = d3.extent(this.bd().rawData.levels[0], function(d) { return d.ms; });
 
     if(!dontBin) {
       rebin(range, 0);
@@ -259,11 +262,11 @@ binnedData = function () {
     // ],
 
     // make this level if it does not yet exist
-    if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = []; }
+    if (!this.bd().rawData.levels[0]) { this.bd().rawData.levels[0] = []; }
 
-    bd.rawData.levels[0] = rData;
+    this.bd().rawData.levels[0] = rData;
 
-    var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
+    var range = d3.extent(this.bd().rawData.levels[0], function(d) { return d.ms; });
 
     if(!dontBin) {
       rebin(range, 0);
@@ -291,29 +294,29 @@ binnedData = function () {
     //   etc: {},
     // }
 
-    for (var k in bd.keys) { // for each of max_val, min_val, etc.
-      var key = bd.keys[k];
+    for (var k in this.bd().keys) { // for each of max_val, min_val, etc.
+      var key = this.bd().keys[k];
       //if we don't have a lvl for this already, initialize one
-      if (!bd[key]) {
-        bd[key] = {};
+      if (!this.bd()[key]) {
+        this.bd()[key] = {};
       }
 
-      if (!bd[key].levels) {
-        bd[key].levels = [];
+      if (!this.bd()[key].levels) {
+        this.bd()[key].levels = [];
       }
 
-      if (!bd[key].levels[lvl]) {
-        bd[key].levels[lvl] = [];
+      if (!this.bd()[key].levels[lvl]) {
+        this.bd()[key].levels[lvl] = [];
       }
 
       if(bData[key].levels) {
-        bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
+        this.bd()[key].levels[lvl] = combineAndSortArraysOfDateValObjects(this.bd()[key].levels[lvl], bData[key].levels[lvl]);
       }
     }; // for each of max_val, min_val, etc.
 
     var range = [];
-    if ( bd.rawData.levels[lvl] ) {
-      range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
+    if ( this.bd().rawData.levels[lvl] ) {
+      range = d3.extent(this.bd().rawData.levels[lvl], function(d) { return d.ms; });
     }
 
     if(!dontBin) {
@@ -342,21 +345,21 @@ binnedData = function () {
     //   etc: {},
     // }
 
-    for (var k in bd.keys) { // for each of max_val, min_val, etc.
-      var key = bd.keys[k];
+    for (var k in this.bd().keys) { // for each of max_val, min_val, etc.
+      var key = this.bd().keys[k];
       //if we don't have a lvl for this already, initialize one
-      if (!bd[key].levels[lvl]) {
-        bd[key].levels[lvl] = [];
+      if (!this.bd()[key].levels[lvl]) {
+        this.bd()[key].levels[lvl] = [];
       }
 
       if(bData[key].levels) {
-        bd[key].levels[lvl] = bData[key].levels[lvl];
+        this.bd()[key].levels[lvl] = bData[key].levels[lvl];
       }
     }; // for each of max_val, min_val, etc.
 
     var range = [];
-    if ( bd.rawData.levels[lvl] ) {
-      range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
+    if ( this.bd().rawData.levels[lvl] ) {
+      range = d3.extent(this.bd().rawData.levels[lvl], function(d) { return d.ms; });
     }
 
     if(!dontBin) {
@@ -442,7 +445,7 @@ binnedData = function () {
     if(samplesInsteadOfRanges) { return missingSamples; }
 
     //console.log("    missingSamples[0]:", missingSamples[0]);
-    //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
+    //console.log("    actually missing?", !_.findWhere(this.bd().rawData.levels[0], {ms: missingSamples[0]}));
     var missingRanges = [];
 
     _.each(missingSamples, function (d,i) {
@@ -458,7 +461,7 @@ binnedData = function () {
     var nextMissingBinStarts = [];
 
     console.log("levels:");
-    //console.log(bd.average.levels);
+    //console.log(this.bd().average.levels);
 
     var oneSample = 1000 / 200; // milliseconds per sample
     var sampleSize = Math.pow(2, level) * oneSample;
@@ -497,31 +500,31 @@ binnedData = function () {
   }
 
   my.getMinRaw = function () {
-    return d3.min(bd.rawData.levels[0], function(d) { return d.val; });
+    return d3.min(this.bd().rawData.levels[0], function(d) { return d.val; });
   }
 
   my.getMaxRaw = function () {
-    return d3.max(bd.rawData.levels[0], function(d) { return d.val; });
+    return d3.max(this.bd().rawData.levels[0], function(d) { return d.val; });
   }
 
   my.getMinRawMS = function () {
-    if (!bd.rawData.levels[0])
+    if (!this.bd().rawData.levels[0])
       return -1;
-    return d3.min(bd.rawData.levels[0], function(d) { return d.ms; });
+    return d3.min(this.bd().rawData.levels[0], function(d) { return d.ms; });
   }
 
   my.getMaxRawMS = function () {
-    if (!bd.rawData.levels[0])
+    if (!this.bd().rawData.levels[0])
       return -1;
-    return d3.max(bd.rawData.levels[0], function(d) { return d.ms; });
+    return d3.max(this.bd().rawData.levels[0], function(d) { return d.ms; });
   }
 
   my.getColor = function (key) {
-    return bd[key].color;
+    return this.bd()[key].color;
   }
 
   my.getOpacity = function (key) {
-    return bd[key].opacity;
+    return this.bd()[key].opacity;
   }
 
   my.getAllInRange = function(lvl, range) {
@@ -558,39 +561,39 @@ binnedData = function () {
   my.getDateRange = function (key, lvl, range) {
     // filter an array so that we don't render much more
     // than the required amount of line and area
-    return _.filter(bd[key].levels[lvl], function (d, i) {
+    return _.filter(this.bd()[key].levels[lvl], function (d, i) {
       return d.ms <= range[1] && d.ms >= range[0];
     });
   }
 
   my.getRawData = function () {
-      return bd.rawData.levels[0];
+      return this.bd().rawData.levels[0];
   }
 
   my.removeAllLevelsBelow = function(LowestLevel) {
     //TODO
     for(var i = 0; i < LowestLevel; i++) {
-      for(k in bd.keys) {
-        var key = bd.keys[k];
+      for(k in this.bd().keys) {
+        var key = this.bd().keys[k];
         //console.log("removing", key, i);
-        bd[key].levels[i] = [];
+        this.bd()[key].levels[i] = [];
       }
     }
 
     // remove rawData, too
     if (LowestLevel > 0) {
       //console.log("removing", "rawData", 0);
-      bd.rawData.levels[0] = [];
+      this.bd().rawData.levels[0] = [];
     }
 
     //console.log("removing ;]");
   }
 
   my.getKeys = function () {
-    return bd.keys.slice(0); // give a copy of the array
+    return this.bd().keys.slice(0); // give a copy of the array
   }
 
-  my.bd = function () { // TODO: JUST FOR TESTING
+  my.bd = function () {
     return bd;
   }
 
