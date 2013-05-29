@@ -41,13 +41,23 @@ assert(brds(), [], 'initialization');
 
 var brds = binnedDatas().addRawData([
   {ms: 1000, val: 10},
-  {ms: 1005, val: 10},
+  {ms: 1005, val: 11},
 ]);
 
 assert(
     _.pluck(brds.getAllRawData(), 'ms'),
     [1000, 1005],
     'adding raw and reading raw');
+
+assert(
+    [brds.getMinRaw()],
+    [10],
+    'getMaxRaw');
+
+assert(
+    [brds.getMaxRaw()],
+    [11],
+    'getMinRaw');
 
 assert(
     _.pluck(brds.getDateRange('rawData', 0, [0, 5000]), 'ms'),

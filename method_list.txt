@@ -46,10 +46,10 @@
 
 == LIST: ==
 
-addRawData
-getMaxRaw
-getMinRaw
-getDateRange //done?
+addRawData   // done
+getMaxRaw    // done
+getMinRaw    // done
+getDateRange // ?
 haveDataInRange
 getColor
 addBinnedData

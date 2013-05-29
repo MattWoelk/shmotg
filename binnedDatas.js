@@ -234,13 +234,27 @@ binnedDatas = function (maxbins) {
     }
 
     my.getMinRaw = function () {
-        // TODO TODO
-        return my;
+        // pick the minimum bin (highest key) in bds level 0
+        // and ask for the lowest raw value
+
+        var getMinOfArray = function (numArray) {
+            return Math.min.apply(null, numArray);
+        }
+
+        var keys = Object.keys(bds[0]);
+        return bds[0][getMinOfArray(keys)].getMinRaw();
     }
 
     my.getMaxRaw = function () {
-        // TODO TODO
-        return my;
+        // pick the maximum bin (highest key) in bds level 0
+        // and ask for the highest raw value
+
+        var getMaxOfArray = function (numArray) {
+            return Math.max.apply(null, numArray);
+        }
+
+        var keys = Object.keys(bds[0]);
+        return bds[0][getMaxOfArray(keys)].getMaxRaw();
     }
 
     my.getMinRawMS = function () {
