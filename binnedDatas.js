@@ -288,13 +288,11 @@ binnedDatas = function (maxbins) {
     }
 
     my.getColor = function (key) {
-        // TODO TODO
         return colors[key];
     }
 
     my.getOpacity = function (key) {
-        // TODO TODO
-        return my;
+        return opacities[key];
     }
 
     my.getAllInRange = function(lvl, range) {

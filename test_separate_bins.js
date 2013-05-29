@@ -89,3 +89,8 @@ assert(
     ['average', 'maxes', 'mins', 'q1', 'q3'],
     'getKeys');
 
+assert(
+    brds.getOpacity('mins'),
+    1,
+    'getOpacity');
+
