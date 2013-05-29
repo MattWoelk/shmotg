@@ -51,7 +51,7 @@ getMaxRaw    // done
 getMinRaw    // done
 getDateRange // ?
 haveDataInRange
-getColor
+getColor     // done
 addBinnedData
 getKeys
 getOpacity

@@ -36,6 +36,26 @@ binnedDatas = function (maxbins) {
                   // This diagram ^^^ shows the result when
                   // maxNumberOfBins is 2
 
+    var colors = {
+        rawData : '#000',
+        average : '#F00',
+        maxes : '#000FB5',
+        mins : '#00B515',
+        q1 : '#800',
+        q3 : '#800',
+        quartiles : '#800',
+    };
+
+    var opacities = {
+        rawData : 0.5,
+        average : 1,
+        maxes : 1,
+        mins : 1,
+        q1 : 1,
+        q3 : 1,
+        quartiles : 0.3,
+    };
+
     /// VARIABLES }}}
 
     //{{{ HELPER METHODS
@@ -131,7 +151,6 @@ binnedDatas = function (maxbins) {
             if(isArray(res)) {
                 result = result.concat(res);
             } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
-                console.log(res);
                 if (isArray(result)) { result = binnedData(); }
 
                 if (lvl === 0) {
@@ -269,7 +288,7 @@ binnedDatas = function (maxbins) {
 
     my.getColor = function (key) {
         // TODO TODO
-        return my;
+        return colors[key];
     }
 
     my.getOpacity = function (key) {

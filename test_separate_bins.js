@@ -29,8 +29,8 @@ function assert(a, b, test) {
     console.log("+ Passed:", test);
   } else {
     console.log("- "+red+"Failed"+reset+":", test);
-    console.log("  Result is", a);
-    console.log("  Should be", b);
+    console.log("    Result is", a);
+    console.log("    Should be", b);
   }
 }
 
@@ -78,3 +78,8 @@ assert(
     _.pluck(brds.getAllInRange(1, [0, 5000]), 'ms'),
     [1000, 1005],
     'getAllInRange lvl 1');
+
+assert(
+    [brds.getColor('rawData')],
+    ["#000"],
+    'getColor');
