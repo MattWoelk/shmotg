@@ -608,7 +608,14 @@ binnedData = function () {
     }
 
     my.getMaxRaw = function () {
-        return d3.max(bd.rawData.levels[0], function(d) { return d.val; });
+        var highestValue = -999999;
+
+        for (key in bd.rawData.levels[0]) {
+            highestValue = Math.max(d3.max(bd.rawData.levels[0][key], function (d) { return d.val; }),
+                                    highestValue);
+        }
+
+        return highestValue;
     }
 
     my.getMinRawMS = function () {
