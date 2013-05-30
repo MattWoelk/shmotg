@@ -214,8 +214,9 @@ binnedData = function () {
     return false; // TODO: return overflow
   }
 
-  my.replaceRawData = function (rData, dontBin) {
+  my.replaceRawData = function (rData) {
     var q = new Date();
+    var dontBin = true;
     // data must be in the following form: (example)
     // [ {val: value_point, ms: ms_since_epoch},
     //   {val: value_point, ms: ms_since_epoch},

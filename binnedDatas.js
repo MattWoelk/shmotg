@@ -206,7 +206,6 @@ binnedDatas = function (maxbins) {
     //{{{ PUBLIC METHODS
 
     my.addRawData = function (data, dontBin) {
-        // TODO: take into account different keys ('average', 'q1'...)
         splitAndApplyToEachWithOverflowAtLevel(
             data,
             binnedData().addRawData,
@@ -216,13 +215,22 @@ binnedDatas = function (maxbins) {
     }
 
     my.replaceRawData = function (data, dontBin) {
-        // TODO TODO: test this
+        // data must be in the following form: (example)
+        // [ {val: value_point, ms: ms_since_epoch},
+        //   {val: value_point, ms: ms_since_epoch},
+        //   {etc...},
+        // ],
 
-        // reset bds
-        bds = [];
+        // clear all raw data
+        for (var i in bds[0]) {
+            bds[0][i].replaceRawData([]);
+        };
 
-        // addRawData
-        my.addRawData(data, dontBin);
+        // replace it with new data
+        splitAndApplyToEachWithOverflowAtLevel(
+            data,
+            binnedData().replaceRawData,
+            0);
 
         return my;
     }

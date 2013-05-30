@@ -55,7 +55,7 @@ getColor     // done
 addBinnedData
 getKeys      // done
 getOpacity   // done
-replaceRawData
+replaceRawData // done
 replaceBinnedData
 missingRawBinsUnderThisRangeAndLevel
 getAllInRange //done?
