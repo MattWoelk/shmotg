@@ -61,6 +61,12 @@ binnedData = function () {
 
     //{{{ HELPER METHODS
 
+    // TODO: use this instead of manually doing it everywhere
+    function binSize (lvl) {
+        var oneSample = 1000 / 200; // milliseconds per sample
+        return Math.pow(2, lvl) * oneSample;
+    }
+
     function getKeyForTimeAtLevel (ms, lvl) {
         // TODO: calculate the starting ms of the bin [at this
         //       level] in which this ms would fit.
@@ -626,7 +632,6 @@ binnedData = function () {
     }
 
     my.getAllInRange = function(lvl, range) {
-        // TODO TODO TODO
         // return a bd-like data structure but only
         // with data in the following range and level
         // from all keys
@@ -634,33 +639,43 @@ binnedData = function () {
         // initialize the data structure to be sent
         var theKeys = ["average", "q1", "q3", "mins", "maxes"];
         var send_req = {};
+
         for (var i = 0; i < theKeys.length; i++) {
             send_req[theKeys[i]] = {};
             send_req[theKeys[i]].levels = [];
             send_req[theKeys[i]].levels[lvl] = my.getDateRange(theKeys[i], lvl, range);
         }
-        //for(i=0;i<howManyPointsToGenerate;i++) {
-        //  var val = randomPoint();
-        //  var val_q1 = val - (Math.random() * 1.2);
-        //  var val_q3 = val + (Math.random() * 1.2);
-        //  var val_min = val_q1 - (Math.random() * 2);
-        //  var val_max = val_q3 + (Math.random() * 2);
-        //  var dat = parseInt(req.ms_start) - (parseInt(req.ms_start) % msPerBin) - 5; // TODO: magic hack
 
-        //  send_req.average.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val});
-        //  send_req.q1.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q1});
-        //  send_req.q3.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_q3});
-        //  send_req.mins.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_min});
-        //  send_req.maxes.levels[req.bin_level].push({ms: dat + (i * msPerBin), val: val_max});
-        //}
         return send_req;
     }
 
     my.getDateRange = function (key, lvl, range) {
         // filter an array so that we don't render much more
         // than the required amount of line and area
-        return _.filter(bd[key].levels[lvl], function (d, i) {
-            return d.ms <= range[1] && d.ms >= range[0];
+
+        var result = [];
+
+        _.each(bd[key].levels[lvl], function (dat, k) {
+            // d is the array, k is the key for this object
+
+            if (range[0] <= parseInt(k) && range[1] >= parseInt(k) + binSize(lvl)) {
+                // requested range surrounds this bin container
+                // add all of it
+                result.concat(dat);
+            } else if (range[1] < parseInt(k) || range[0] >= parseInt(k) + binSize(lvl)) {
+                // requested range is below or above this bin container
+                // do nothing
+            } else {
+                // requested range intersects this bin container
+                result.concat(_.filter(dat, function (d, i) {
+                    return d.ms <= range[1] && d.ms >= range[0];
+                }));
+            }
+
+            if (range[0] < parseInt(k) + binSize(lvl) || range[1] >= parseInt(k)) {
+                // TODO: add the corresponding data to result
+                result.concat();
+            }
         });
     }
 
@@ -670,14 +685,14 @@ binnedData = function () {
             for(k in bd.keys) {
                 var key = bd.keys[k];
                 //console.log("removing", key, i);
-                bd[key].levels[i] = [];
+                bd[key].levels[i] = {};
             }
         }
 
         // remove rawData, too
         if (LowestLevel > 0) {
             //console.log("removing", "rawData", 0);
-            bd.rawData.levels[0] = [];
+            bd.rawData.levels[0] = {};
         }
 
         //console.log("removing ;]");
