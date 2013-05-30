@@ -61,6 +61,106 @@ binnedData = function () {
 
     //{{{ HELPER METHODS
 
+    function getKeyForTimeAtLevel (ms, lvl) {
+        // TODO: calculate the starting ms of the bin [at this
+        //       level] in which this ms would fit.
+
+        var oneSample = 1000 / 200; // milliseconds per sample
+        var sampleSize = Math.pow(2, lvl) * oneSample;
+
+        return Math.floor(ms / ( Math.pow(2, lvl) * sampleSize )) * sampleSize;
+    }
+
+    function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
+        // - data is split into sections
+        // - func will be applied to each binnedData at level lvl
+        //   using the split data
+
+        // TODO TODO TODO: test this function!
+
+        var splitData = splitIntoBinsAtLevel(data, lvl);
+
+        for (prop in splitData) {
+
+            // Create if we don't have:
+            if( !bds[lvl] ) { bds[lvl] = {}; }
+            if( !bds[lvl][prop] ) { bds[lvl][prop] = binnedData(maxNumberOfBins); }
+
+            var overflow = func.call(bds[lvl][prop], splitData[prop]);
+            //console.log("overflow:", overflow);
+            // TODO: May have to use apply instead
+            //       so as to transfer arguments
+
+            //while (overflow){
+                // TODO TODO: handle overflows!
+            //}
+        }
+
+    }
+
+    function callForAllAtLevelAndCombineResults (func, lvl) {
+        // func must return an array
+
+        var result = [];
+
+        for (key in bds[lvl]) {
+            var res = func(bds[lvl][key]);
+
+            if(isArray(res)) {
+                result = result.concat(res);
+            } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
+                if (isArray(result)) { result = binnedData(); }
+
+                if (lvl === 0) {
+                    result.addRawData(res.rawData.levels[0]);
+                }else {
+                    result.addBinnedData(res);
+                }
+
+            } else {
+                result = binnedData().combineAndSortArraysOfDateValObjects(result, res);
+            }
+        }
+
+        return result;
+    }
+
+    function doWeHaveBinsForThisRangeAndLevel (rng, lvl) {
+        // TODO: calculate the key we're looking for
+        if (key in bds[lvl]) {
+        }
+        return false;
+    }
+
+    function isArray(a) {
+        return Object.prototype.toString.call(a) === '[object Array]';
+    }
+
+    function getSurroundingBins (start, end, lvl) {
+        // return all bin starts at this level between start and end
+        // INCLUDING the highest point if it is equal to end
+
+        var oneSample = 1000 / 200; // milliseconds per sample
+        var binSize = Math.pow(2, lvl) * oneSample;
+
+        var startRounded = getKeyForTimeAtLevel(start, lvl);
+
+        return _.range(startRounded, end+1, binSize);
+    }
+
+    function splitIntoBinsAtLevel (data, lvl) {
+        // TODO: round level down to nearest maxNumberOfBins
+        //       then separate the data out into a structure:
+        //       { '0': [{ms: 3}, {ms: 4}]
+        //         '5': [{ms: 5}, {ms: 9}]}
+        //       This function is to be used when adding raw data
+        // Assumption: data is ordered and continuous
+
+        return _.groupBy(data, function (d) {
+            return getKeyForTimeAtLevel(d.ms, lvl);
+        });
+    }
+
     function rebin (range_to_rebin, level_to_rebin) {
         var tic = new Date();
         for (var keyValue in bd.keys) {
