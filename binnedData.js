@@ -677,6 +677,8 @@ binnedData = function () {
                 result.concat();
             }
         });
+
+        return result;
     }
 
     my.removeAllLevelsBelow = function(LowestLevel) {
