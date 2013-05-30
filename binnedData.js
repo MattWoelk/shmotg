@@ -2,6 +2,7 @@
 
 //{{{ CONSTANTS
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
+var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 5;
   // TODO: phase this out (preferable) OR set it as a really high number
 
 /// CONSTANTS }}}
@@ -14,8 +15,9 @@ binnedData = function () {
     rawData : {
       color: '#000',
       opacity: 0.5,
-      levels: [], // stores all of the values for each level in an array.
-                  // example: [[{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}], [etc.]]
+      levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
+                  // with one key for each range of object, up to a maximum size
+                  // example: [{ ms_since_epoch: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
     },
     average : {
       color : '#F00',
