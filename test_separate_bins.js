@@ -52,12 +52,12 @@ assert(
 assert(
     [brds.getMinRaw()],
     [10],
-    'getMaxRaw');
+    'getMinRaw');
 
 assert(
     [brds.getMaxRaw()],
     [11],
-    'getMinRaw');
+    'getMaxRaw');
 
 assert(
     [brds.getMinRawMS()],
