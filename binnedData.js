@@ -604,7 +604,14 @@ binnedData = function () {
     }
 
     my.getMinRaw = function () {
-        return d3.min(bd.rawData.levels[0], function(d) { return d.val; });
+        var lowestValue = 999999;
+
+        for (key in bd.rawData.levels[0]) {
+            lowestValue = Math.max(d3.max(bd.rawData.levels[0][key], function (d) { return d.val; }),
+                                    lowestValue);
+        }
+
+        return lowestValue;
     }
 
     my.getMaxRaw = function () {
@@ -619,9 +626,16 @@ binnedData = function () {
     }
 
     my.getMinRawMS = function () {
-        if (!bd.rawData.levels[0])
-            return -1;
-        return d3.min(bd.rawData.levels[0], function(d) { return d.ms; });
+        // pick the minimum bin (highest key) in bds level 0
+        // and ask for the lowest raw value
+
+
+        var getMinOfArray = function (numArray) {
+            return Math.min.apply(null, numArray);
+        }
+
+        var keys = Object.keys(bd.rawData.levels[0]);
+        return d3.min(bd.rawData.levels[0][getMinOfArray(keys)], function (d) { return d.ms; });
     }
 
     my.getMaxRawMS = function () {
