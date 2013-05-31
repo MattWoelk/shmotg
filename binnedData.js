@@ -2,7 +2,7 @@
 
 //{{{ CONSTANTS
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
-var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 5;
+var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 4; // MUST BE A POWER OF 2
 // TODO: phase this out (preferable) OR set it as a really high number
 
 /// CONSTANTS }}}
@@ -17,7 +17,8 @@ binnedData = function () {
             opacity: 0.5,
             levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
                         // with one key for each range of object, up to a maximum size
-                        // example: [{ ms_since_epoch: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
+                        // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
+                        //           ^-- a "bin container" -----------------------------------------------------^
         },
         average : {
             color : '#F00',
@@ -74,6 +75,7 @@ binnedData = function () {
         var oneSample = 1000 / 200; // milliseconds per sample
         var sampleSize = Math.pow(2, lvl) * oneSample;
 
+        // TODO TODO TODO: USE/FIX THIS !!
         var sizeOfTheBinInMS = sampleSize * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
 
         return Math.floor(ms / ( sizeOfTheBinInMS )) * sizeOfTheBinInMS;
@@ -146,14 +148,14 @@ binnedData = function () {
 
     function getSurroundingBins (start, end, lvl) {
         // return all bin starts at this level between start and end
-        // INCLUDING the highest point if it is equal to end
+        // NOT INCLUDING the highest point if it is equal to end
 
         var oneSample = 1000 / 200; // milliseconds per sample
         var binSize = Math.pow(2, lvl) * oneSample;
 
         var startRounded = getKeyForTimeAtLevel(start, lvl);
 
-        return _.range(startRounded, end+1, binSize);
+        return _.range(startRounded, end, binSize);
     }
 
     function splitIntoBinsAtLevel (data, lvl) {
@@ -169,13 +171,34 @@ binnedData = function () {
         });
     }
 
-    function rebin (level_to_rebin) {
-        var tic = new Date();
+    //function rebin (range_to_rebin, level_to_rebin) {
+    //    var carryOver = true;
+    //    var curLevel = 0;
+
+    //    while (carryOver) { // for each level
+    //        for (var keyValue in bd.keys) { // for each key
+    //            var key = bd.keys[keyValue];
+
+    //            // if we do not have an object for this level yet, make one
+    //            if (bd[key].levels.length < curLevel + 1) {
+    //                bd[key].levels[curLevel] = {};
+    //            }
+    //                for // each bin container in that level {
+    //                    // TODO: grab two at a time, and send them up to the next bin
+    //                    //       OR store them, and combine later
+    //        } // for each key
+
+    //        // TODO: increment to the next level
+    //        // TODO: set carryOver if we did any binning
+    //    } // for each level
+    //}
+
+    function rebin (range_to_rebin, level_to_rebin) {
+        // link raw data to the source
         for (var keyValue in bd.keys) {
             var key = bd.keys[keyValue];
-            bd[key].levels[0] = bd.rawData.levels[0]; // update raw data from the source
+            bd[key].levels[0] = bd.rawData.levels[0];
         }
-
 
         // for each level other than raw data level,
         // for each key,
@@ -185,7 +208,7 @@ binnedData = function () {
                 var key = bd.keys[keyValue];
 
                 // bin and store data from lower bin
-                var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
+                var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func, range_to_rebin);
                 if (newData.length === 0) {
                     continue;
                 }
@@ -197,22 +220,38 @@ binnedData = function () {
                 // - What was already in this bin level gets precedence
                 //   over what is being binned from the lower level
                 bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
+                // TODO TODO: use my.addBinnedData() here (with no rebin) instead
+
             } // for each key
         } // for each bin level
-        //console.log("rebin time:", new Date() - tic);
     }
 
+    function combineFilteredBinContainerInformation (bin, lvl, key, range) {
+        // TODO: return ALL data from any container which intersects the requested range
+        //       TODO: should grab all containers which line up with the containers of the
+        //       one-higher level's intersection with this range
+
+        // get lvl+1's range of containers for this range
+        var upperLevelRange = [ // range until very end
+            getKeyForTimeAtLevel(range[0], lvl+1),
+            getKeyForTimeAtLevel(range[1], lvl+1) + binSize(lvl+1)
+        ];
+
+        // get lvl range of containers for that range
+        var binsToBeCombined = getSurroundingBins(upperLevelRange[0], upperLevelRange[1], lvl);
+
+        var combo = [];
+        for (var i in binsToBeCombined) {
+            if (bin[key].levels[lvl][binsToBeCombined[i]]){
+                combo = combo.concat(bin[key].levels[lvl][binsToBeCombined[i]]);
+            }
+        }
+
+        return combo;
+    }
 
     // Bin the data in a level into abstracted bins
-    // TODO: This is where the problem is
-    //       The bins must all have 0ms as a point-of-reference
-    //       so that they don't get rendered differently on the
-    //       server and the client.
-    //       To fix this, choose whether or not to skip certain
-    //       values which are being binned.
-    //       If they are being skipped, the next one will be the
-    //       first of the two samples to be binned.
-    function binTheDataWithFunction (bin, curLevel, key, func) {
+    function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) {
         var bDat = new Array();
         if (!bin[key].levels[curLevel]) {
             return bDat;
@@ -221,13 +260,11 @@ binnedData = function () {
         var oneSample = 1000 / 200; // milliseconds per sample
         var sampleSize = Math.pow(2, curLevel) * oneSample;
 
-        // TODO TODO TODO: for efficiency, do this in reverse:
-        // ??? see which bins need to be created
-        // (perhaps store which these are when data is being added)
-        // then only calculate the new bins.
-        // this will save MUCH time
+        // Combine all data which is within range_to_rebin
+        var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
 
-        for(var i = 0; i < bin[key].levels[curLevel].length; i = i + 2){
+        // Use this new combined data instead of bin[key].levels[curLevel].length
+        for(var i = 0; i < combo; i = i + 2){
             // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
             var sampleIsAtModularLocation = bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel+1) * 5) === 0;
             var nextSampleExists = bin.q1.levels[curLevel].length > i + 1;
@@ -236,16 +273,10 @@ binnedData = function () {
                 bin.q1.levels[curLevel][i+1].ms - bin.q1.levels[curLevel][i].ms === sampleSize :
                 true;
 
-            //if (nextSampleExists) {
-            //  console.log(bin.q1.levels[curLevel][i+1].ms - bin.q1.levels[curLevel][i].ms);
-            //}
-
-            //console.log(i, sampleIsAtModularLocation, nextSampleExists, nextSampleIsRightDistanceAway);
-
             if (!sampleIsAtModularLocation || !nextSampleExists || !nextSampleIsRightDistanceAway) {
-                // TODO: Magic: 5 is the number of ms per sample
                 // This is here so that both the server and client's bins start and end at the same place
                 // no matter what range of data they have to work with.
+                // we skip over values which are not at the beginning of a bin
                 i = i - 1;
                 continue;
             }
@@ -342,7 +373,7 @@ binnedData = function () {
         //   {val: value_point, ms: ms_since_epoch},
         //   {etc...},
         // ],
-
+        var range = d3.extent(data, function (d) { return d.ms; });
         var splitData = splitIntoBinsAtLevel(data, 0);
 
         for (prop in splitData) {
@@ -354,27 +385,28 @@ binnedData = function () {
         }
 
         if(!dontBin) {
-            rebin(0);
+            rebin(range, 0);
         }
 
         return my;
 
     }
 
-    my.replaceRawData = function (rData, dontBin) {
+    my.replaceRawData = function (data, dontBin) {
         // data must be in the following form: (example)
         // [ {val: value_point, ms: ms_since_epoch},
         //   {val: value_point, ms: ms_since_epoch},
         //   {etc...},
         // ],
+        var range = d3.extent(data, function (d) { return d.ms; });
 
         // make this level if it does not yet exist
         if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = []; }
 
-        bd.rawData.levels[0] = rData;
+        bd.rawData.levels[0] = data;
 
         if(!dontBin) {
-            rebin(0);
+            rebin(range, 0);
         }
 
         return my;
@@ -399,6 +431,8 @@ binnedData = function () {
         //   etc: {},
         // }
 
+        var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
+
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
             //if we don't have a lvl for this already, initialize one
@@ -420,7 +454,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(0);
+            rebin(range, 0);
         }
 
         return my;
@@ -445,8 +479,11 @@ binnedData = function () {
         //   etc: {},
         // }
 
+        var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
+
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
+
             //if we don't have a lvl for this already, initialize one
             if (!bd[key].levels[lvl]) {
                 bd[key].levels[lvl] = [];
@@ -458,7 +495,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(0);
+            rebin(range, 0);
         }
 
         return my;
@@ -598,7 +635,7 @@ binnedData = function () {
         var lowestValue = 999999;
 
         for (key in bd.rawData.levels[0]) {
-            lowestValue = Math.max(d3.max(bd.rawData.levels[0][key], function (d) { return d.val; }),
+            lowestValue = Math.min(d3.min(bd.rawData.levels[0][key], function (d) { return d.val; }),
                                     lowestValue);
         }
 
@@ -629,9 +666,12 @@ binnedData = function () {
     }
 
     my.getMaxRawMS = function () {
-        if (!bd.rawData.levels[0])
-            return -1;
-        return d3.max(bd.rawData.levels[0], function(d) { return d.ms; });
+        var getMaxOfArray = function (numArray) {
+            return Math.max.apply(null, numArray);
+        }
+
+        var keys = Object.keys(bd.rawData.levels[0]);
+        return d3.max(bd.rawData.levels[0][getMaxOfArray(keys)], function (d) { return d.ms; });
     }
 
     my.getColor = function (key) {
@@ -669,6 +709,10 @@ binnedData = function () {
         _.each(bd[key].levels[lvl], function (dat, k) {
             // d is the array, k is the key for this object
 
+            // TODO TODO: instead of all these checks, just see if it intersects at all,
+            //            then combine it all, and filter it. This is as opposed to
+            //            filtering and then combining (which won't be much quicker,
+            //            if at all)
             if (range[0] <= parseInt(k) && range[1] >= parseInt(k) + binSize(lvl)) {
                 // requested range surrounds this bin container
                 // add all of it

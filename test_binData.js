@@ -43,12 +43,14 @@ function assertDirect(a, b, test) {
 var brd = binnedData().addRawData([
                                   {ms: 1000, val: 10},
                                   {ms: 1005, val: 12},
+                                  {ms: 1010, val: 13},
 ]);
 
-assert(_.pluck(brd.bd().rawData.levels[0]['1000'], 'ms'), [1000, 1005], 'adding raw and reading raw');
-assertDirect(brd.getMaxRaw(), 12, 'getMaxRaw');
+assert(_.pluck(brd.bd().rawData.levels[0]['1000'], 'ms'), [1000, 1005, 1010], 'adding raw and reading raw');
+assert(_.pluck(brd.bd().rawData.levels[1], 'ms'), [1000], 'adding raw and reading lvl 1');
+assertDirect(brd.getMaxRaw(), 13, 'getMaxRaw');
 assertDirect(brd.getMinRaw(), 10, 'getMinRaw');
-assertDirect(brd.getMaxRawMS(), 1005, 'getMaxRawMS');
+assertDirect(brd.getMaxRawMS(), 1010, 'getMaxRawMS');
 assertDirect(brd.getMinRawMS(), 1000, 'getMinRawMS');
 
 // Missing in the middle.
@@ -86,8 +88,8 @@ var burd = binnedData().addRawData([
 assert(_.flatten(burd.missingBins([1000, 1055], 0)), [], 'No Missing Data: lvl 0 raw data')
 assert(_.pluck(burd.bd().average.levels[1], 'ms'), [1000, 1010, 1020, 1030, 1040, 1050], 'No Missing Data: lvl 1 bins');
 assert([burd.bd().average.levels[0].length], [12], 'No Missing Data: lvl 0 length');
-assert([burd.bd().average.levels[1].length], [6], 'No Missing Data: lvl 1 length');
-assert([burd.bd().average.levels[2].length], [3], 'No Missing Data: lvl 2 length');
+assert([burd.bd().average.levels[1]], [6], 'No Missing Data: lvl 1 length');
+assert([burd.bd().average.levels[2]], [3], 'No Missing Data: lvl 2 length');
 
 // Missing at end
 assert(_.flatten(burd.missingBins([1000, 1065], 0)), [1060, 1065, 1065, 1070], 'missing at end');
