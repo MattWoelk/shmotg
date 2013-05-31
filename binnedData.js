@@ -74,7 +74,9 @@ binnedData = function () {
         var oneSample = 1000 / 200; // milliseconds per sample
         var sampleSize = Math.pow(2, lvl) * oneSample;
 
-        return Math.floor(ms / ( Math.pow(2, lvl) * sampleSize )) * sampleSize;
+        var sizeOfTheBinInMS = sampleSize * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+
+        return Math.floor(ms / ( sizeOfTheBinInMS )) * sizeOfTheBinInMS;
     }
 
     function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
@@ -167,7 +169,7 @@ binnedData = function () {
         });
     }
 
-    function rebin (range_to_rebin, level_to_rebin) {
+    function rebin (level_to_rebin) {
         var tic = new Date();
         for (var keyValue in bd.keys) {
             var key = bd.keys[keyValue];
@@ -175,19 +177,18 @@ binnedData = function () {
         }
 
 
-        // for each level other than raw data level, for each key, bin the data from the lower level
+        // for each level other than raw data level,
+        // for each key,
+        // bin the data from the lower level
         for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
             for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
                 var key = bd.keys[keyValue];
 
                 // bin and store data from lower bin
-                var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func, range_to_rebin);
+                var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func);
                 if (newData.length === 0) {
                     continue;
                 }
-
-                // get range of newly binned data
-                var range = d3.extent(newData, function (d) { return d.ms; });
 
                 // What was already in this bin level
                 var oldUnfiltered = _.filter(bd[key].levels[j], function (d) { return true; });
@@ -211,7 +212,7 @@ binnedData = function () {
     //       values which are being binned.
     //       If they are being skipped, the next one will be the
     //       first of the two samples to be binned.
-    function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) { // TODO: use range_to_rebin to speed up this function
+    function binTheDataWithFunction (bin, curLevel, key, func) {
         var bDat = new Array();
         if (!bin[key].levels[curLevel]) {
             return bDat;
@@ -335,30 +336,32 @@ binnedData = function () {
 
     //{{{ PUBLIC METHODS
 
-    my.addRawData = function (rData, dontBin) {
-        var q = new Date();
+    my.addRawData = function (data, dontBin) {
         // data must be in the following form: (example)
         // [ {val: value_point, ms: ms_since_epoch},
         //   {val: value_point, ms: ms_since_epoch},
         //   {etc...},
         // ],
 
-        // make this level if it does not yet exist
-        if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = []; }
+        var splitData = splitIntoBinsAtLevel(data, 0);
 
-        bd.rawData.levels[0] = combineAndSortArraysOfDateValObjects(bd.rawData.levels[0], rData);
+        for (prop in splitData) {
+            // Create if we don't have:
+            if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = {}; }
+            if (!bd.rawData.levels[0][prop]) { bd.rawData.levels[0][prop] = []; }
 
-        var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
+            bd.rawData.levels[0][prop] = combineAndSortArraysOfDateValObjects(bd.rawData.levels[0][prop], splitData[prop]);
+        }
 
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(0);
         }
 
         return my;
+
     }
 
     my.replaceRawData = function (rData, dontBin) {
-        var q = new Date();
         // data must be in the following form: (example)
         // [ {val: value_point, ms: ms_since_epoch},
         //   {val: value_point, ms: ms_since_epoch},
@@ -370,10 +373,8 @@ binnedData = function () {
 
         bd.rawData.levels[0] = rData;
 
-        var range = d3.extent(bd.rawData.levels[0], function(d) { return d.ms; });
-
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(0);
         }
 
         return my;
@@ -418,13 +419,8 @@ binnedData = function () {
             }
         }; // for each of max_val, min_val, etc.
 
-        var range = [];
-        if ( bd.rawData.levels[lvl] ) {
-            range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
-        }
-
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(0);
         }
 
         return my;
@@ -461,13 +457,8 @@ binnedData = function () {
             }
         }; // for each of max_val, min_val, etc.
 
-        var range = [];
-        if ( bd.rawData.levels[lvl] ) {
-            range = d3.extent(bd.rawData.levels[lvl], function(d) { return d.ms; });
-        }
-
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(0);
         }
 
         return my;
@@ -628,7 +619,6 @@ binnedData = function () {
     my.getMinRawMS = function () {
         // pick the minimum bin (highest key) in bds level 0
         // and ask for the lowest raw value
-
 
         var getMinOfArray = function (numArray) {
             return Math.min.apply(null, numArray);
