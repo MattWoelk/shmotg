@@ -68,6 +68,19 @@ binnedData = function () {
         return Math.pow(2, lvl) * oneSample;
     }
 
+    //TESTS FOR getKeyForTimeAtLevel :
+    //console.log(getKeyForTimeAtLevel(1,  0));
+    //console.log(getKeyForTimeAtLevel(11, 0));
+    //console.log(getKeyForTimeAtLevel(21, 0));
+    //console.log(getKeyForTimeAtLevel(31, 0));
+    //console.log(getKeyForTimeAtLevel(41, 0));
+
+    //console.log(getKeyForTimeAtLevel(1,  1));
+    //console.log(getKeyForTimeAtLevel(11, 1));
+    //console.log(getKeyForTimeAtLevel(21, 1));
+    //console.log(getKeyForTimeAtLevel(31, 1));
+    //console.log(getKeyForTimeAtLevel(41, 1));
+
     function getKeyForTimeAtLevel (ms, lvl) {
         // TODO: calculate the starting ms of the bin [at this
         //       level] in which this ms would fit.
@@ -76,9 +89,9 @@ binnedData = function () {
         var sampleSize = Math.pow(2, lvl) * oneSample;
 
         // TODO TODO TODO: USE/FIX THIS !!
-        var sizeOfTheBinInMS = sampleSize * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+        var sizeOfTheBinContainerInMS = sampleSize * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
 
-        return Math.floor(ms / ( sizeOfTheBinInMS )) * sizeOfTheBinInMS;
+        return Math.floor(ms / ( sizeOfTheBinContainerInMS )) * sizeOfTheBinContainerInMS;
     }
 
     function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
