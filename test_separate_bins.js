@@ -52,12 +52,12 @@ assert(
 assert(
     [brds.getMinRaw()],
     [10],
-    'getMaxRaw');
+    'getMinRaw');
 
 assert(
     [brds.getMaxRaw()],
     [11],
-    'getMinRaw');
+    'getMaxRaw');
 
 assert(
     [brds.getMinRawMS()],
@@ -104,3 +104,7 @@ assert(
     1,
     'getOpacity');
 
+assert(
+    _.pluck(brds.replaceRawData([{ms: 0, val: 30}, {ms: 302, val: 40}]).getAllInRange(0, [0, 5000]), 'val'),
+    [30, 40],
+    'replaceRawData');

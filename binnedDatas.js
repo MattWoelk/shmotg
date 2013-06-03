@@ -145,13 +145,12 @@ binnedDatas = function (maxbins) {
 
         var result = [];
 
-        for (i in bds[lvl]) {
-            var res = func(bds[lvl][i]);
+        for (key in bds[lvl]) {
+            var res = func(bds[lvl][key]);
 
             if(isArray(res)) {
                 result = result.concat(res);
             } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
-                console.log(res);
                 if (isArray(result)) { result = binnedData(); }
 
                 if (lvl === 0) {
@@ -216,13 +215,22 @@ binnedDatas = function (maxbins) {
     }
 
     my.replaceRawData = function (data, dontBin) {
-        // TODO TODO: test this
+        // data must be in the following form: (example)
+        // [ {val: value_point, ms: ms_since_epoch},
+        //   {val: value_point, ms: ms_since_epoch},
+        //   {etc...},
+        // ],
 
-        // reset bds
-        bds = [];
+        // clear all raw data
+        for (var i in bds[0]) {
+            bds[0][i].replaceRawData([]);
+        };
 
-        // addRawData
-        my.addRawData(data, dontBin);
+        // replace it with new data
+        splitAndApplyToEachWithOverflowAtLevel(
+            data,
+            binnedData().replaceRawData,
+            0);
 
         return my;
     }
@@ -261,29 +269,29 @@ binnedDatas = function (maxbins) {
     }
 
     my.getMinRaw = function () {
-        // TODO TODO TODO This is incorrect! need to go through all bins!
         // pick the minimum bin (highest key) in bds level 0
         // and ask for the lowest raw value
 
-        var getMinOfArray = function (numArray) {
-            return Math.min.apply(null, numArray);
+        var lowestValue = 999999;
+
+        for (key in bds[0]) {
+            lowestValue = Math.min(bds[0][key].getMinRaw(), lowestValue);
         }
 
-        var keys = Object.keys(bds[0]);
-        return bds[0][getMinOfArray(keys)].getMinRaw();
+        return lowestValue;
     }
 
     my.getMaxRaw = function () {
-        // TODO TODO TODO This is incorrect! need to go through all bins!
         // pick the maximum bin (highest key) in bds level 0
         // and ask for the highest raw value
 
-        var getMaxOfArray = function (numArray) {
-            return Math.max.apply(null, numArray);
+        var highestValue = -999999;
+
+        for (key in bds[0]) {
+            highestValue = Math.max(bds[0][key].getMaxRaw(), highestValue);
         }
 
-        var keys = Object.keys(bds[0]);
-        return bds[0][getMaxOfArray(keys)].getMaxRaw();
+        return highestValue;
     }
 
     my.getMinRawMS = function () {
