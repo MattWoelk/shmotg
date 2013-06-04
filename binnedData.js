@@ -121,6 +121,18 @@ binnedData = function () {
 
     }
 
+    function combineAllOfKeyAndLevel(key, lvl) {
+        var result = [];
+
+        for (var keyValue in bd.keys) {
+            var key = bd.keys[keyValue];
+            console.log("key", key);
+            result = result.concat(bd[key].levels[lvl]);
+        }
+
+        return result;
+    }
+
     function callForAllAtLevelAndCombineResults (func, lvl) {
         // func must return an array
 
@@ -572,43 +584,41 @@ binnedData = function () {
         var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
         var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
 
-        var normalizedRange = [ fir * Math.pow(2, level) * oneSample,
-            (las + 1) * Math.pow(2, level) * oneSample ];
-            var datedRange = my.getDateRange(key, level, normalizedRange);
+        var normalizedRange = [ fir * Math.pow(2, level) * oneSample, (las + 1) * Math.pow(2, level) * oneSample ];
+        var datedRange = my.getDateRange(key, level, normalizedRange);
 
-            if (datedRange.length === 0) {
-                console.log(",.-' jumping ship. had nothing in range");
-                // TODO TODO TODO this should not be happening when
-                // we already have the data!
-                if (samplesInsteadOfRanges) { return ms_range[0]; }
-                return [ms_range];
-            }
+        if (datedRange.length === 0) {
+            console.log(",.-' jumping ship. had nothing in range");
+            // TODO TODO TODO this should not be happening when
+            // we already have the data!
+            if (samplesInsteadOfRanges) { return ms_range[0]; }
+            return [ms_range];
+        }
 
+        var sampleSize = Math.pow(2, level) * oneSample; // TODO: replace with function which does this for us.
 
-            var sampleSize = Math.pow(2, level) * oneSample;
+        var neededBins = _.range(normalizedRange[0], normalizedRange[1], sampleSize);
+        neededBins.forEach(function (d) {
+            d = d * Math.pow(2, level) * oneSample;
+        });
 
-            var neededBins = _.range(normalizedRange[0], normalizedRange[1], sampleSize);
-            neededBins.forEach(function (d) {
-                d = d * Math.pow(2, level) * oneSample;
-            });
+        //console.log("    neededBins:", neededBins);
+        //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
 
-            //console.log("    neededBins:", neededBins);
-            //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
+        var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
 
-            var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
+        if(samplesInsteadOfRanges) { return missingSamples; }
 
-            if(samplesInsteadOfRanges) { return missingSamples; }
+        //console.log("    missingSamples[0]:", missingSamples[0]);
+        //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
+        var missingRanges = [];
 
-            //console.log("    missingSamples[0]:", missingSamples[0]);
-            //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
-            var missingRanges = [];
+        _.each(missingSamples, function (d,i) {
+            missingRanges.push([d, d + sampleSize]);
+            // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+        });
 
-            _.each(missingSamples, function (d,i) {
-                missingRanges.push([d, d + sampleSize]);
-                // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
-            });
-
-            return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+        return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
     }
 
     my.missingRawBinsUnderThisRangeAndLevel = function (ms_range, level) {
