@@ -68,6 +68,10 @@ binnedData = function () {
         return Math.pow(2, lvl) * oneSample;
     }
 
+    function binContainerSize (lvl) {
+        return binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+    }
+
     //TESTS FOR getKeyForTimeAtLevel :
     //console.log(getKeyForTimeAtLevel(1,  0));
     //console.log(getKeyForTimeAtLevel(11, 0));
@@ -484,7 +488,6 @@ binnedData = function () {
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
-            console.log("gets called");
             my.addData(bData[key].levels[lvl], key, lvl);
         }; // for each of max_val, min_val, etc.
 
@@ -602,15 +605,10 @@ binnedData = function () {
             d = d * Math.pow(2, level) * oneSample;
         });
 
-        //console.log("    neededBins:", neededBins);
-        //console.log("    binsWeHave:", _.pluck(datedRange, 'ms'));
-
         var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
 
         if(samplesInsteadOfRanges) { return missingSamples; }
 
-        //console.log("    missingSamples[0]:", missingSamples[0]);
-        //console.log("    actually missing?", !_.findWhere(bd.rawData.levels[0], {ms: missingSamples[0]}));
         var missingRanges = [];
 
         _.each(missingSamples, function (d,i) {
@@ -746,7 +744,7 @@ binnedData = function () {
             //            then combine it all, and filter it. This is as opposed to
             //            filtering and then combining (which won't be much quicker,
             //            if at all)
-            if (range[1] < parseInt(k) || range[0] >= parseInt(k) + binSize(lvl)) {
+            if (range[1] < parseInt(k) || range[0] >= parseInt(k) + binContainerSize(lvl)) {
                 // requested range is below or above this bin container
                 // do nothing
             } else {
