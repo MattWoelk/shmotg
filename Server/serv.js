@@ -33,12 +33,12 @@ try {
   console.log(datDat.mins.levels[1].length);
   console.log(datDat.maxes.levels[1].length);
 
-  binData.replaceRawData(datDat.rawData.levels[0], true);
+  binData.replaceAllData(datDat);
 
-  for (var i = 0; i < datDat.average.levels.length; i++) {
-    console.log("reading in level", i);
-    binData.replaceBinnedData(datDat, i, true);
-  }
+  //for (var i = 0; i < datDat.average.levels.length; i++) {
+  //  console.log("reading in level", i);
+  //  binData.replaceBinnedData(datDat, i, true);
+  //}
   console.log("all has been read");
   //binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
 } catch (err) {

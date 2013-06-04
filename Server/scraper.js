@@ -137,7 +137,7 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
 
 function saveItOut () {
   // Save binData to a file
-  var x = JSON.stringify(binData.bd());
+  var x = JSON.stringify(binData.toString());
   fs.writeFile("/Users/woelk/scraped_"+lowestLevelToKeep, x, function(err) {
     if(err) {
       console.log(err);

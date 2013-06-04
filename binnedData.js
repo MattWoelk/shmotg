@@ -542,6 +542,11 @@ binnedData = function () {
         return my;
     }
 
+    my.replaceAllData = function (bDat) {
+        // Replace all data with what is given
+        my.bd = bDat;
+    }
+
 
     my.haveDataInRange = function(ms_range, level) {
         // Determine the number of samples which we should have in the given range.
