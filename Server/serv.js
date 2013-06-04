@@ -40,7 +40,7 @@ try {
     binData.replaceBinnedData(datDat, i, true);
   }
   console.log("all has been read");
-  binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
+  //binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
 } catch (err) {
   console.log(err);
   throw err;
@@ -354,7 +354,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
             sendToClient();
 
             // Save binData to a file
-            var x = JSON.stringify(binData.bd());
+            var x = binData.toString();
             fs.writeFile("/Users/woelk/test", x, function(err) {
               if(err) {
                 console.log(err);

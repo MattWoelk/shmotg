@@ -160,7 +160,7 @@ var bard = binnedData().addRawData([
                                    {ms: 55, val: 2},
 ]);
 
-assert(_.flatten(bard.missingRawBinsUnderThisRangeAndLevel([20, 40], 2)), [0, 10, 20, 30, 30, 40], 'raw bins required under level');
+//assert(_.flatten(bard.missingRawBinsUnderThisRangeAndLevel([20, 40], 2)), [0, 10, 20, 30, 30, 40], 'raw bins required under level');
 
 
 

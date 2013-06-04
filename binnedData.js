@@ -92,38 +92,37 @@ binnedData = function () {
         var oneSample = 1000 / 200; // milliseconds per sample
         var sampleSize = Math.pow(2, lvl) * oneSample;
 
-        // TODO TODO TODO: USE/FIX THIS !!
         var sizeOfTheBinContainerInMS = sampleSize * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
 
         return Math.floor(ms / ( sizeOfTheBinContainerInMS )) * sizeOfTheBinContainerInMS;
     }
 
-    function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
-        // - data is split into sections
-        // - func will be applied to each binnedData at level lvl
-        //   using the split data
+    //function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
+    //    // - data is split into sections
+    //    // - func will be applied to each binnedData at level lvl
+    //    //   using the split data
 
-        // TODO TODO TODO: test this function!
+    //    // TODO TODO TODO: test this function!
 
-        var splitData = splitIntoBinsAtLevel(data, lvl);
+    //    var splitData = splitIntoBinsAtLevel(data, lvl);
 
-        for (prop in splitData) {
+    //    for (prop in splitData) {
 
-            // Create if we don't have:
-            if( !bds[lvl] ) { bds[lvl] = {}; }
-            if( !bds[lvl][prop] ) { bds[lvl][prop] = binnedData(maxNumberOfBins); }
+    //        // Create if we don't have:
+    //        if( !bds[lvl] ) { bds[lvl] = {}; }
+    //        if( !bds[lvl][prop] ) { bds[lvl][prop] = binnedData(maxNumberOfBins); }
 
-            var overflow = func.call(bds[lvl][prop], splitData[prop]);
-            //console.log("overflow:", overflow);
-            // TODO: May have to use apply instead
-            //       so as to transfer arguments
+    //        var overflow = func.call(bds[lvl][prop], splitData[prop]);
+    //        //console.log("overflow:", overflow);
+    //        // TODO: May have to use apply instead
+    //        //       so as to transfer arguments
 
-            //while (overflow){
-                // TODO TODO: handle overflows!
-            //}
-        }
+    //        //while (overflow){
+    //            // TODO TODO: handle overflows!
+    //        //}
+    //    }
 
-    }
+    //}
 
     function combineAllOfKeyAndLevel(key, lvl) {
         var result = [];
@@ -452,6 +451,8 @@ binnedData = function () {
         //   {val: value_point, ms: ms_since_epoch},
         //   {etc...},
         // ],
+
+        // TODO TODO TODO: update for new bin containers
         var range = d3.extent(data, function (d) { return d.ms; });
 
         // make this level if it does not yet exist
@@ -517,6 +518,8 @@ binnedData = function () {
         //   etc: {},
         // }
 
+        // TODO TODO TODO: update for new bin containers
+
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
@@ -542,6 +545,8 @@ binnedData = function () {
 
     my.haveDataInRange = function(ms_range, level) {
         // Determine the number of samples which we should have in the given range.
+
+        // TODO TODO TODO: update for new bin containers
 
         var key;
         if (level === 0) {
@@ -619,48 +624,50 @@ binnedData = function () {
         return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
     }
 
-    my.missingRawBinsUnderThisRangeAndLevel = function (ms_range, level) {
-        var currentMissingBinStarts = my.missingBins(ms_range, level);
-        var nextMissingBinStarts = [];
+    //my.missingRawBinsUnderThisRangeAndLevel = function (ms_range, level) {
 
-        console.log("levels:");
-        //console.log(bd.average.levels);
+    //    // TODO TODO TODO: update for new bin containers
+    //    var currentMissingBinStarts = my.missingBins(ms_range, level);
+    //    var nextMissingBinStarts = [];
 
-        var oneSample = 1000 / 200; // milliseconds per sample
-        var sampleSize = Math.pow(2, level) * oneSample;
+    //    console.log("levels:");
+    //    //console.log(bd.average.levels);
 
-        //console.log("currentMissingBinStarts", currentMissingBinStarts);
+    //    var oneSample = 1000 / 200; // milliseconds per sample
+    //    var sampleSize = Math.pow(2, level) * oneSample;
 
-        // for each level, going DOWN to zero:
-        for(var lvl = level; lvl >= 0; lvl--) {
-            sampleSize = Math.pow(2, lvl);
-            //console.log("level", lvl);
+    //    //console.log("currentMissingBinStarts", currentMissingBinStarts);
 
-            // for each range
-            // - find which bins are missing in the previous level's ranges
-            for(var rng = 0; rng < currentMissingBinStarts.length; rng++) {
-                //console.log("  checking range", currentMissingBinStarts[rng]);
-                // add the start of each missing range found within
-                // the above missing range
-                nextMissingBinStarts.push(my.missingBins(currentMissingBinStarts[rng], lvl, true));
-            }
+    //    // for each level, going DOWN to zero:
+    //    for(var lvl = level; lvl >= 0; lvl--) {
+    //        sampleSize = Math.pow(2, lvl);
+    //        //console.log("level", lvl);
 
-            // swap the variables
-            var flattened = _.uniq(_.flatten(nextMissingBinStarts).sort());
+    //        // for each range
+    //        // - find which bins are missing in the previous level's ranges
+    //        for(var rng = 0; rng < currentMissingBinStarts.length; rng++) {
+    //            //console.log("  checking range", currentMissingBinStarts[rng]);
+    //            // add the start of each missing range found within
+    //            // the above missing range
+    //            nextMissingBinStarts.push(my.missingBins(currentMissingBinStarts[rng], lvl, true));
+    //        }
+
+    //        // swap the variables
+    //        var flattened = _.uniq(_.flatten(nextMissingBinStarts).sort());
 
 
-            var missingRanges = [];
-            _.each(flattened, function (d,i) {
-                missingRanges.push([d, d + sampleSize]);
-                // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
-            });
-            //console.log("  level", lvl, "was missing", missingRanges);
-            currentMissingBinStarts = missingRanges;
-            nextMissingBinStarts = [];
-        }
+    //        var missingRanges = [];
+    //        _.each(flattened, function (d,i) {
+    //            missingRanges.push([d, d + sampleSize]);
+    //            // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
+    //        });
+    //        //console.log("  level", lvl, "was missing", missingRanges);
+    //        currentMissingBinStarts = missingRanges;
+    //        nextMissingBinStarts = [];
+    //    }
 
-        return currentMissingBinStarts;
-    }
+    //    return currentMissingBinStarts;
+    //}
 
     my.getMinRaw = function () {
         var lowestValue = 999999;
@@ -781,10 +788,10 @@ binnedData = function () {
         return bd.keys.slice(0); // give a copy of the array
     }
 
-    my.bd = function () { // TODO: JUST FOR TESTING
-        return bd;
+    my.toString = function () {
+        // Give bd as a string
+        return JSON.stringify(bd);
     }
-
 
     // PUBLIC METHODS }}}
 
