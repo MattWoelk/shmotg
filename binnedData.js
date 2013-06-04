@@ -184,26 +184,38 @@ binnedData = function () {
         });
     }
 
+    // DO NOT USE THIS SECTION. IT IS LIKELY USELESS
     //function rebin (range_to_rebin, level_to_rebin) {
-    //    var carryOver = true;
-    //    var curLevel = 0;
+    //    // link raw data to the source
+    //    for (var keyValue in bd.keys) {
+    //        var key = bd.keys[keyValue];
+    //        bd[key].levels[0] = bd.rawData.levels[0];
+    //    }
 
-    //    while (carryOver) { // for each level
-    //        for (var keyValue in bd.keys) { // for each key
-    //            var key = bd.keys[keyValue];
+    //    console.log("--  rebin  --");
+
+    //    for (var keyValue in bd.keys) { // for each key
+    //        var curLevel = 0;
+    //        var carryOver = true;
+    //        var key = bd.keys[keyValue];
+
+    //        while (carryOver) { // for each level
+    //            console.log("now binning", key, curLevel);
 
     //            // if we do not have an object for this level yet, make one
     //            if (bd[key].levels.length < curLevel + 1) {
     //                bd[key].levels[curLevel] = {};
     //            }
-    //                for // each bin container in that level {
-    //                    // TODO: grab two at a time, and send them up to the next bin
-    //                    //       OR store them, and combine later
-    //        } // for each key
 
-    //        // TODO: increment to the next level
-    //        // TODO: set carryOver if we did any binning
-    //    } // for each level
+    //            for /* each bin container in that level */ {
+    //                // TODO: grab two at a time, and send them up to the next bin
+    //                //       OR store them, and combine later
+    //            }
+
+    //            carryOver = false;
+    //            curLevel++;
+    //        } // for each level
+    //    } // for each key
     //}
 
     function rebin (range_to_rebin, level_to_rebin) {
@@ -212,6 +224,7 @@ binnedData = function () {
             var key = bd.keys[keyValue];
             bd[key].levels[0] = bd.rawData.levels[0];
         }
+
 
         // for each level other than raw data level,
         // for each key,
@@ -232,7 +245,8 @@ binnedData = function () {
                 // Combine what was already there and what was just calculated
                 // - What was already in this bin level gets precedence
                 //   over what is being binned from the lower level
-                bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
+                //bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
+                my.addData(newData, key, j);
                 // TODO TODO: use my.addBinnedData() here (with no rebin) instead
 
             } // for each key
@@ -240,8 +254,8 @@ binnedData = function () {
     }
 
     function combineFilteredBinContainerInformation (bin, lvl, key, range) {
-        // TODO: return ALL data from any container which intersects the requested range
-        //       TODO: should grab all containers which line up with the containers of the
+        // Return ALL data from any container which intersects the requested range
+        // TODO: should grab ALL containers which line up with the containers of the
         //       one-higher level's intersection with this range
 
         // get lvl+1's range of containers for this range
@@ -277,13 +291,12 @@ binnedData = function () {
         var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
 
         // Use this new combined data instead of bin[key].levels[curLevel].length
-        for(var i = 0; i < combo; i = i + 2){
+        for(var i = 0; i < combo.length; i = i + 2){
             // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
-            var sampleIsAtModularLocation = bin.q1.levels[curLevel][i].ms % (Math.pow(2, curLevel+1) * 5) === 0;
-            var nextSampleExists = bin.q1.levels[curLevel].length > i + 1;
-            //console.log("nextSampleExists", nextSampleExists, bin.q1.levels[curLevel].length, i + 1);
+            var sampleIsAtModularLocation = combo[i].ms % (Math.pow(2, curLevel+1) * 5) === 0;
+            var nextSampleExists = combo.length > i + 1;
             var nextSampleIsRightDistanceAway = nextSampleExists ?
-                bin.q1.levels[curLevel][i+1].ms - bin.q1.levels[curLevel][i].ms === sampleSize :
+                combo[i+1].ms - combo[i].ms === sampleSize :
                 true;
 
             if (!sampleIsAtModularLocation || !nextSampleExists || !nextSampleIsRightDistanceAway) {
@@ -294,20 +307,20 @@ binnedData = function () {
                 continue;
             }
 
-            if (bin[key].levels[curLevel][i+1]){
-                var newdate = bin.q1.levels[curLevel][i/*+1*/].ms;
+            if (combo[i+1]){
+                var newdate = combo[i/*+1*/].ms;
 
                 if (key === 'q1' || key === 'q3') {
                     bDat.push({ val:  func(
-                        bin.q1.levels[curLevel][i].val,
-                        bin.q1.levels[curLevel][i+1].val,
-                        bin.q3.levels[curLevel][i].val,
-                        bin.q3.levels[curLevel][i+1].val)
+                        combo[i].val,
+                        combo[i+1].val,
+                        combo[i].val,
+                        combo[i+1].val)
               , ms: newdate }); // This is messy and depends on a lot of things
                 }else{
                     bDat.push( { val: func(
-                        bin[key].levels[curLevel][i].val,
-                        bin[key].levels[curLevel][i+1].val)
+                        combo[i].val,
+                        combo[i+1].val)
               , ms: newdate });
                 }
             }
@@ -380,22 +393,34 @@ binnedData = function () {
 
     //{{{ PUBLIC METHODS
 
+    my.addData = function (data, key, lvl) {
+        // data must be in the following form: (example)
+        // [ {val: value_point, ms: ms_since_epoch},
+        //   {val: value_point, ms: ms_since_epoch},
+        //   {etc...},
+        // ],
+
+        var splitData = splitIntoBinsAtLevel(data, lvl);
+
+        for (prop in splitData) {
+            // Create if we don't have:
+            if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
+            if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
+
+            bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
+        }
+    }
+
     my.addRawData = function (data, dontBin) {
         // data must be in the following form: (example)
         // [ {val: value_point, ms: ms_since_epoch},
         //   {val: value_point, ms: ms_since_epoch},
         //   {etc...},
         // ],
+
         var range = d3.extent(data, function (d) { return d.ms; });
-        var splitData = splitIntoBinsAtLevel(data, 0);
 
-        for (prop in splitData) {
-            // Create if we don't have:
-            if (!bd.rawData.levels[0]) { bd.rawData.levels[0] = {}; }
-            if (!bd.rawData.levels[0][prop]) { bd.rawData.levels[0][prop] = []; }
-
-            bd.rawData.levels[0][prop] = combineAndSortArraysOfDateValObjects(bd.rawData.levels[0][prop], splitData[prop]);
-        }
+        my.addData(data, 'rawData', 0);
 
         if(!dontBin) {
             rebin(range, 0);
@@ -447,23 +472,8 @@ binnedData = function () {
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
-            var key = bd.keys[k];
-            //if we don't have a lvl for this already, initialize one
-            if (!bd[key]) {
-                bd[key] = {};
-            }
-
-            if (!bd[key].levels) {
-                bd[key].levels = [];
-            }
-
-            if (!bd[key].levels[lvl]) {
-                bd[key].levels[lvl] = [];
-            }
-
-            if(bData[key].levels) {
-                bd[key].levels[lvl] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl], bData[key].levels[lvl]);
-            }
+            console.log("gets called");
+            my.addData(bData[key].levels[lvl], key, lvl);
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
