@@ -726,23 +726,14 @@ binnedData = function () {
             //            then combine it all, and filter it. This is as opposed to
             //            filtering and then combining (which won't be much quicker,
             //            if at all)
-            if (range[0] <= parseInt(k) && range[1] >= parseInt(k) + binSize(lvl)) {
-                // requested range surrounds this bin container
-                // add all of it
-                result.concat(dat);
-            } else if (range[1] < parseInt(k) || range[0] >= parseInt(k) + binSize(lvl)) {
+            if (range[1] < parseInt(k) || range[0] >= parseInt(k) + binSize(lvl)) {
                 // requested range is below or above this bin container
                 // do nothing
             } else {
                 // requested range intersects this bin container
-                result.concat(_.filter(dat, function (d, i) {
+                result = result.concat(_.filter(dat, function (d, i) {
                     return d.ms <= range[1] && d.ms >= range[0];
                 }));
-            }
-
-            if (range[0] < parseInt(k) + binSize(lvl) || range[1] >= parseInt(k)) {
-                // TODO: add the corresponding data to result
-                result.concat();
             }
         });
 

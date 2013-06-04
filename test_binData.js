@@ -46,8 +46,8 @@ var brd = binnedData().addRawData([
                                   {ms: 1010, val: 13},
 ]);
 
-assert(_.pluck(brd.bd().rawData.levels[0]['1000'], 'ms'), [1000, 1005, 1010], 'adding raw and reading raw');
-assert(_.pluck(brd.bd().rawData.levels[1], 'ms'), [1000], 'adding raw and reading lvl 1');
+assert(_.pluck(brd.getDateRange('rawData', 0, [0, 2000]), 'ms'), [1000, 1005, 1010], 'adding raw and reading raw');
+assert(_.pluck(brd.getDateRange('rawData', 1, [0, 2000]), 'ms'), [1000, 1005, 1010],  'adding raw and reading lvl 1');
 assertDirect(brd.getMaxRaw(), 13, 'getMaxRaw');
 assertDirect(brd.getMinRaw(), 10, 'getMinRaw');
 assertDirect(brd.getMaxRawMS(), 1010, 'getMaxRawMS');
