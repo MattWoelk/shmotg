@@ -767,6 +767,9 @@ binnedData = function () {
             }
         });
 
+        // sort it
+        result = result.sort(function (a, b) { return a.ms - b.ms; });
+
         return result;
     }
 
@@ -791,6 +794,10 @@ binnedData = function () {
 
     my.getKeys = function () {
         return bd.keys.slice(0); // give a copy of the array
+    }
+
+    my.bd = function () {
+        return bd;
     }
 
     my.toString = function () {

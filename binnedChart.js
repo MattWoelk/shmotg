@@ -93,13 +93,6 @@ function maxBinRenderSize () {
 var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, interp) {
   var resultArray = new Array();
 
-  if (whichLines.indexOf('rawData') > -1){
-    resultArray.push({
-      key: 'rawData',
-      which: 0
-    });
-  }
-
   var j = 0;
   var keys = bin.getKeys();
   for (var keyValue in keys){ // for each of 'average', 'max', 'min'
