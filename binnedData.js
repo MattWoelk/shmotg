@@ -305,6 +305,13 @@ binnedData = function () {
         // Combine all data which is within range_to_rebin
         var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
 
+        // if we're calculating for quartiles, then we need the other quartile as well
+        if (key === 'q1') {
+            var combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q3', range_to_rebin);
+        } else if (key === 'q3'){
+            var combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q1', range_to_rebin);
+        }
+
         // Use this new combined data instead of bin[key].levels[curLevel].length
         for(var i = 0; i < combo.length; i = i + 2){
             // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
@@ -327,15 +334,15 @@ binnedData = function () {
 
                 if (key === 'q1' || key === 'q3') {
                     bDat.push({ val:  func(
-                        combo[i].val,
-                        combo[i+1].val,
-                        combo[i].val,
-                        combo[i+1].val)
-              , ms: newdate }); // This is messy and depends on a lot of things
+                                        combo[i].val,
+                                        combo[i+1].val,
+                                        combo2[i].val,
+                                        combo2[i+1].val)
+                              , ms: newdate }); // This is messy and depends on a lot of things
                 }else{
                     bDat.push( { val: func(
-                        combo[i].val,
-                        combo[i+1].val)
+                                        combo[i].val,
+                                        combo[i+1].val)
               , ms: newdate });
                 }
             }

@@ -396,7 +396,7 @@ function rundemo() {
 
     initPlot(json);
 
-    console.log(plots[0].bd().bd());
+    //console.log(plots[0].bd().bd());
   });
 }
 
