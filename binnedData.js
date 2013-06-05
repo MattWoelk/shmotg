@@ -62,6 +62,57 @@ binnedData = function () {
 
     //{{{ HELPER METHODS
 
+    // testing this function. It works.
+    //console.log(combineWithoutDuplicates([{ms: 1}, {ms: 2}, {ms: 3, lvl: 5}, {ms: 4}],
+    //                                     [{ms: 1}, {ms: 1}, {ms: 3}, {ms: 5}]));
+
+    function combineWithoutDuplicates(arr1, arr2) {
+        // ASSUMPTION: arr1 and arr2 are both sorted
+        //             arr1 and arr2 are in the format: [{ms: _}, {ms: _}]
+        // TODO: arr1 gets precedence. Return an array which has no duplicates in the 'ms' field.
+
+        var uniques = []; // The values found in arr2 which were not in arr1
+        var arr1Length = arr1.length;
+        var arr1Index = 0;
+
+        for (var i = 0; i < arr2.length; i++) {
+            // For each element of arr2, go through arr1,
+            // element by element, and see how their ms compare
+            //
+
+            if (arr1Index >= arr1Length) { break; } // we've run out of arr1
+
+            while (1) {
+                if (arr1Index >= arr1Length) {
+                    uniques.push(arr2[i]);
+                    break;
+                } // we've run out of arr1
+
+                if (arr1[arr1Index].ms > arr2[i].ms) {
+                    // If the next one is higher,
+                    // add this one to the list,
+                    // and move on to the next arr2 (don't increment)
+
+                    uniques.push(arr2[i]);
+
+                    break;
+                } else if (arr1[arr1Index].ms === arr2[i].ms) {
+                    // If the next one is the same,
+                    // move on to the next arr2 (don't increment)
+
+                    break;
+                } else {
+                    // If the next one is lower than this one,
+                    // increment and compare to the new one from arr1
+
+                    arr1Index++;
+                }
+            }
+        }
+
+        return arr1.concat(uniques);
+    }
+
     // TODO: use this instead of manually doing it everywhere
     function binSize (lvl) {
         var oneSample = 1000 / 200; // milliseconds per sample
@@ -202,16 +253,16 @@ binnedData = function () {
 
                 // bin and store data from lower bin
                 var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func, range_to_rebin);
+
                 if (newData.length === 0) {
-                    continue;
+                    continue; // Nothing to add; move along.
                 }
 
-                // What was already in this bin level
-                var oldUnfiltered = _.filter(bd[key].levels[j], function (d) { return true; });
-
+                // TODO: filter out what is already in the old data, OR add that ability to addData();
                 // Combine what was already there and what was just calculated
                 // - What was already in this bin level gets precedence
                 //   over what is being binned from the lower level
+
                 my.addData(newData, key, j);
 
             } // for each key
@@ -327,7 +378,7 @@ binnedData = function () {
         // AKA: arr1 gets precedence
 
         // concat them
-        var result = arr2.concat(arr1);
+        var result = arr2.concat(arr1); // TODO TODO TODO: use combineWithoutDuplicates instead
 
         // sort the result
         result.sort(function (a, b) { return a.ms - b.ms; });
