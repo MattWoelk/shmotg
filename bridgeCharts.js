@@ -385,7 +385,7 @@ setTimeout(rundemo, 1500);
 //rundemo();
 
 function rundemo() {
-  d3.json("Server/esg_time.js", function (error, data) {
+  d3.json("Server/esg_time_small.js", function (error, data) {
     if (error || plots.length > 0) {
       return;
     }
