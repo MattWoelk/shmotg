@@ -72,19 +72,6 @@ binnedData = function () {
         return binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
     }
 
-    //TESTS FOR getKeyForTimeAtLevel :
-    //console.log(getKeyForTimeAtLevel(1,  0));
-    //console.log(getKeyForTimeAtLevel(11, 0));
-    //console.log(getKeyForTimeAtLevel(21, 0));
-    //console.log(getKeyForTimeAtLevel(31, 0));
-    //console.log(getKeyForTimeAtLevel(41, 0));
-
-    //console.log(getKeyForTimeAtLevel(1,  1));
-    //console.log(getKeyForTimeAtLevel(11, 1));
-    //console.log(getKeyForTimeAtLevel(21, 1));
-    //console.log(getKeyForTimeAtLevel(31, 1));
-    //console.log(getKeyForTimeAtLevel(41, 1));
-
     function getKeyForTimeAtLevel (ms, lvl) {
         // TODO: calculate the starting ms of the bin [at this
         //       level] in which this ms would fit.
@@ -199,40 +186,6 @@ binnedData = function () {
         });
     }
 
-    // DO NOT USE THIS SECTION. IT IS LIKELY USELESS
-    //function rebin (range_to_rebin, level_to_rebin) {
-    //    // link raw data to the source
-    //    for (var keyValue in bd.keys) {
-    //        var key = bd.keys[keyValue];
-    //        bd[key].levels[0] = bd.rawData.levels[0];
-    //    }
-
-    //    console.log("--  rebin  --");
-
-    //    for (var keyValue in bd.keys) { // for each key
-    //        var curLevel = 0;
-    //        var carryOver = true;
-    //        var key = bd.keys[keyValue];
-
-    //        while (carryOver) { // for each level
-    //            console.log("now binning", key, curLevel);
-
-    //            // if we do not have an object for this level yet, make one
-    //            if (bd[key].levels.length < curLevel + 1) {
-    //                bd[key].levels[curLevel] = {};
-    //            }
-
-    //            for /* each bin container in that level */ {
-    //                // TODO: grab two at a time, and send them up to the next bin
-    //                //       OR store them, and combine later
-    //            }
-
-    //            carryOver = false;
-    //            curLevel++;
-    //        } // for each level
-    //    } // for each key
-    //}
-
     function rebin (range_to_rebin, level_to_rebin) {
         // link raw data to the source
         for (var keyValue in bd.keys) {
@@ -240,10 +193,9 @@ binnedData = function () {
             bd[key].levels[0] = bd.rawData.levels[0];
         }
 
-
         // for each level other than raw data level,
-        // for each key,
-        // bin the data from the lower level
+        //   for each key,
+        //     bin the data from the lower level
         for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
             for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
                 var key = bd.keys[keyValue];
@@ -260,17 +212,15 @@ binnedData = function () {
                 // Combine what was already there and what was just calculated
                 // - What was already in this bin level gets precedence
                 //   over what is being binned from the lower level
-                //bd[key].levels[j] = combineAndSortArraysOfDateValObjects(oldUnfiltered, newData);
                 my.addData(newData, key, j);
-                // TODO TODO: use my.addBinnedData() here (with no rebin) instead
 
             } // for each key
         } // for each bin level
     }
 
     function combineFilteredBinContainerInformation (bin, lvl, key, range) {
-        // Return ALL data from any container which intersects the requested range
-        // TODO: should grab ALL containers which line up with the containers of the
+        // Returns ALL data from any container which intersects the requested range
+        // AKA:  Grabs ALL containers which line up with the containers of the
         //       one-higher level's intersection with this range
 
         // get lvl+1's range of containers for this range
@@ -375,23 +325,13 @@ binnedData = function () {
         //   only if the object from arr2 has a ms value
         //   which no object in arr1 has.
         // AKA: arr1 gets precedence
-        //var result = arr1.concat(_.filter(arr2, function(d) {
-        //  var b = !_.some(arr1, function(g) {
-        //    return d.ms === g.ms;
-        //  });
-        //  return b;
-        //}));
 
-        var arr1_range = d3.extent(arr1, function (d) { return d.ms; });
-
-        if (!arr1_range[0]) { arr1_range = [999999999999999999, -99999999999999]; }
-        var filteredArr2Low = _.filter(arr2, function (d) { return d.ms < arr1_range[0]; });
-        var filteredArr2High = _.filter(arr2, function (d) { return d.ms > arr1_range[0]; })
-
-        var result = filteredArr2Low.concat(arr1,filteredArr2High);
+        // concat them
+        var result = arr2.concat(arr1);
 
         // sort the result
         result.sort(function (a, b) { return a.ms - b.ms; });
+
         return result;
     }
 
@@ -429,6 +369,7 @@ binnedData = function () {
             if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
             if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
 
+            // combine and put in bd
             bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
         }
     }
@@ -494,10 +435,6 @@ binnedData = function () {
         // }
 
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
-        //if (bData.average.levels[lvl].length === 0) {
-        //    console.log("WE RECEIVED NOTHING");
-        //    return;
-        //}
 
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
@@ -505,7 +442,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(range, lvl);
         }
 
         return my;
