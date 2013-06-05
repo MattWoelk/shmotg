@@ -78,9 +78,6 @@ binnedData = function () {
         for (var i = 0; i < arr2.length; i++) {
             // For each element of arr2, go through arr1,
             // element by element, and see how their ms compare
-            //
-
-            if (arr1Index >= arr1Length) { break; } // we've run out of arr1
 
             while (1) {
                 if (arr1Index >= arr1Length) {
@@ -95,16 +92,19 @@ binnedData = function () {
 
                     uniques.push(arr2[i]);
 
+                    //console.log("add them:", arr1[arr1Index].ms, arr2[i].ms);
                     break;
                 } else if (arr1[arr1Index].ms === arr2[i].ms) {
                     // If the next one is the same,
                     // move on to the next arr2 (don't increment)
 
+                    //console.log("dont add:", arr1[arr1Index].ms, arr2[i].ms);
                     break;
                 } else {
                     // If the next one is lower than this one,
                     // increment and compare to the new one from arr1
 
+                    //console.log("continue:", arr1[arr1Index].ms, arr2[i].ms);
                     arr1Index++;
                 }
             }
@@ -378,7 +378,8 @@ binnedData = function () {
         // AKA: arr1 gets precedence
 
         // concat them
-        var result = arr2.concat(arr1); // TODO TODO TODO: use combineWithoutDuplicates instead
+        //var result = arr2.concat(arr1); // TODO TODO TODO: use combineWithoutDuplicates instead
+        var result = combineWithoutDuplicates(arr1, arr2);
 
         // sort the result
         result.sort(function (a, b) { return a.ms - b.ms; });
