@@ -53,6 +53,7 @@ assertDirect(brd.getMaxRaw(), 13, 'getMaxRaw');
 assertDirect(brd.getMinRaw(), 10, 'getMinRaw');
 assertDirect(brd.getMaxRawMS(), 1010, 'getMaxRawMS');
 assertDirect(brd.getMinRawMS(), 1000, 'getMinRawMS');
+assert(_.pluck(brd.getAllInRange(1, [0, 2000]).average.levels[1], 'ms'), [1000], 'adding raw --> getAllInRange');
 
 // Missing in the middle.
 var bird = binnedData().addRawData([

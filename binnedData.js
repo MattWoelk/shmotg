@@ -551,7 +551,7 @@ binnedData = function () {
 
     my.replaceAllData = function (bDat) {
         // Replace all data with what is given
-        my.bd = bDat;
+        bd = bDat;
     }
 
 

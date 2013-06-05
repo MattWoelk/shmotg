@@ -21,17 +21,11 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 try {
-  var oldBinData = fs.readFileSync('/Users/woelk/scraped_7_90min').toString(); // block while getting the girder contents.
-  console.log("reading");
+  var oldBinData = fs.readFileSync('/Users/woelk/scraped2.0_7').toString(); // block while getting the girder contents.
   //binData.bd() = JSON.parse(oldBinData);
   //console.log(JSON.parse(oldBinData).rawData.levels[0]);
   var datDat = JSON.parse(oldBinData);
-  console.log(datDat.rawData.levels[0].length);
-  console.log(datDat.average.levels[1].length);
-  console.log(datDat.q1.levels[1].length);
-  console.log(datDat.q3.levels[1].length);
-  console.log(datDat.mins.levels[1].length);
-  console.log(datDat.maxes.levels[1].length);
+  console.log("reading", datDat);
 
   binData.replaceAllData(datDat);
 
@@ -273,7 +267,9 @@ mysqlconnection.query(query, function (err, rows, fields) {
         console.log("- sent to client");
       };
 
+
       // See if our binned data has the requested range
+      /* !!!! This is temporarily avoiding any new requests to the database
       var missingRanges = binData.missingBins(range, req.bin_level);
       // TODO TODO TODO CURRENT TASK: get this working.
       //console.log('missing ranges', missingRanges);
@@ -306,9 +302,10 @@ mysqlconnection.query(query, function (err, rows, fields) {
           }
         }
       } // for each missing range
+      */
 
       //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
-      if (newMissingValues.length !== 0) {
+      if (false /*newMissingValues.length !== 0*/) { // !!!! This is temporarily avoiding any new requests to the database
         for (var i = 0; i < newMissingValues.length; i++) {
           // Request more data from the server
           var dtr = dt(parseInt(newMissingValues[i][0])); // date to request

@@ -72,10 +72,10 @@ handleDisconnect(mysqlconnection);
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 
-var rangeToWalk = [1325567000000, 1325579000000];
-var stepSize = 600000; // 10000 is 2400 samples each time
+var rangeToWalk = [1325567000000, 1325568000000];
+var stepSize = 100000; // 10000 is 2400 samples each time
                        // 100000 is 1:40 each time
-                       // 600000 is ten minutes each time
+                       // 600000 is ten minutes each time (works best for binning 1.0)
 
 var lowestLevelToKeep = 7;
 
@@ -137,12 +137,12 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
 
 function saveItOut () {
   // Save binData to a file
-  var x = JSON.stringify(binData.toString());
-  fs.writeFile("/Users/woelk/scraped_"+lowestLevelToKeep, x, function(err) {
+  var x = binData.toString();
+  fs.writeFile("/Users/woelk/scraped2.0_"+lowestLevelToKeep, x, function(err) {
     if(err) {
       console.log(err);
     } else {
-      console.log("The file was saved to /Users/woelk/scraped_"+lowestLevelToKeep);
+      console.log("The file was saved to /Users/woelk/scraped2.0_"+lowestLevelToKeep);
     }
   });
 }
