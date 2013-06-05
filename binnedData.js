@@ -2,7 +2,7 @@
 
 //{{{ CONSTANTS
 var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with ../binnedChart.js
-var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 4; // MUST BE A POWER OF 2
+var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2
 // TODO: phase this out (preferable) OR set it as a really high number
 
 /// CONSTANTS }}}
@@ -494,8 +494,13 @@ binnedData = function () {
         // }
 
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
+        //if (bData.average.levels[lvl].length === 0) {
+        //    console.log("WE RECEIVED NOTHING");
+        //    return;
+        //}
 
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
+            var key = bd.keys[k];
             my.addData(bData[key].levels[lvl], key, lvl);
         }; // for each of max_val, min_val, etc.
 
