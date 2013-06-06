@@ -675,47 +675,71 @@ binnedData = function () {
     //    return currentMissingBinStarts;
     //}
 
-    my.getMinRaw = function () {
+    my.getMin = function (lvl) {
         var lowestValue = 999999;
 
-        for (key in bd.rawData.levels[0]) {
-            lowestValue = Math.min(d3.min(bd.rawData.levels[0][key], function (d) { return d.val; }),
+        if (lvl === 0) {
+            var k = "rawData";
+        } else {
+            var k = "average";
+        }
+
+        for (key in bd[k].levels[lvl]) {
+            lowestValue = Math.min(d3.min(bd[k].levels[lvl][key], function (d) { return d.val; }),
                                     lowestValue);
         }
 
         return lowestValue;
     }
 
-    my.getMaxRaw = function () {
+    my.getMax = function (lvl) {
         var highestValue = -999999;
 
-        for (key in bd.rawData.levels[0]) {
-            highestValue = Math.max(d3.max(bd.rawData.levels[0][key], function (d) { return d.val; }),
+        if (lvl === 0) {
+            var k = "rawData";
+        } else {
+            var k = "average";
+        }
+
+        for (key in bd[k].levels[lvl]) {
+            highestValue = Math.max(d3.max(bd[k].levels[lvl][key], function (d) { return d.val; }),
                                     highestValue);
         }
 
         return highestValue;
     }
 
-    my.getMinRawMS = function () {
-        // pick the minimum bin (highest key) in bds level 0
+    my.getMinMS = function (lvl) {
+        // pick the minimum bin (highest key) in bds level lvl
         // and ask for the lowest raw value
+
+        if (lvl === 0) {
+            var k = "rawData";
+        } else {
+            var k = "average";
+        }
 
         var getMinOfArray = function (numArray) {
             return Math.min.apply(null, numArray);
         }
 
-        var keys = Object.keys(bd.rawData.levels[0]);
-        return d3.min(bd.rawData.levels[0][getMinOfArray(keys)], function (d) { return d.ms; });
+        var keys = Object.keys(bd[k].levels[lvl]);
+        return d3.min(bd[k].levels[lvl][getMinOfArray(keys)], function (d) { return d.ms; });
     }
 
-    my.getMaxRawMS = function () {
+    my.getMaxMS = function (lvl) {
+        if (lvl === 0) {
+            var k = "rawData";
+        } else {
+            var k = "average";
+        }
+
         var getMaxOfArray = function (numArray) {
             return Math.max.apply(null, numArray);
         }
 
-        var keys = Object.keys(bd.rawData.levels[0]);
-        return d3.max(bd.rawData.levels[0][getMaxOfArray(keys)], function (d) { return d.ms; });
+        var keys = Object.keys(bd[k].levels[lvl]);
+        return d3.max(bd[k].levels[lvl][getMaxOfArray(keys)], function (d) { return d.ms; });
     }
 
     my.getColor = function (key) {

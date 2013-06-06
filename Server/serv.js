@@ -277,8 +277,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
       // Filter the ranges for only those which we don't have raw data
       // TODO: this is a temporary fix!
       //       once missingRanges is working properly, we won't need this
-      var minval = binData.getMinRawMS();
-      var maxval = binData.getMaxRawMS();
+      var minval = binData.getMinMS(0);
+      var maxval = binData.getMaxMS(0);
       var newMissingValues = [];
       for (var i = 0; i < missingRanges.length; i++) {
         // if the range is not within what we have, use it

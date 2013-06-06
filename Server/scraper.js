@@ -21,6 +21,23 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 
+console.log("== reading in old data ==");
+
+// Grab the already-stored data
+var oldBinData = fs.readFileSync('/Users/woelk/scraped2.0_6_base').toString(); // block while getting the girder contents.
+var datDat = JSON.parse(oldBinData);
+
+console.log("reading", datDat);
+binData.replaceAllData(datDat);
+
+var defaultBinnedData = binnedData();
+
+// Add in the functions which we need: KEEP SYNCD WITH binnedData.js
+binData.bd().average.func = defaultBinnedData.bd().average.func;
+binData.bd().mins.func = defaultBinnedData.bd().mins.func;
+binData.bd().maxes.func = defaultBinnedData.bd().maxes.func;
+binData.bd().q1.func = defaultBinnedData.bd().q1.func;
+binData.bd().q3.func = defaultBinnedData.bd().q3.func;
 
 // Override Date.prototype.toJSON
 // because JSON.stringify() uses it to change
@@ -72,12 +89,25 @@ handleDisconnect(mysqlconnection);
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 
-var rangeToWalk = [1325560000000, 1325720000000];
+var lowestLevelToKeep = 6;
+
+// TODO TODO TODO: Do not request data which we already have
+var theMin = binData.getMinMS(lowestLevelToKeep);
+var theMax = binData.getMaxMS(lowestLevelToKeep);
+
+console.log("start:", dt(theMax).toUTCString());
+
+var rangeToWalk = [theMax, (new Date(2012, 0, 5, 1)).getTime()];
+                           //        YYYY,MM-1,DD,HH,...
+
+if (rangeToWalk[0] >= rangeToWalk[1]) {
+    console.log("we already have that time span");
+    return;
+}
+
 var stepSize = 100000; // 10000 is 2400 samples each time
                        // 100000 is 1:40 each time
                        // 600000 is ten minutes each time (works best for binning 1.0)
-
-var lowestLevelToKeep = 6;
 
 // TODO: walk through each section of the database
 for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
@@ -103,10 +133,10 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
   var queryTail = '';
 
   console.log("querying for range:",
-      pad(dtr.getDate()),
+      pad(dtr.getFullYear() + "-" + dtr.getMonth() + "-" + dtr.getDate()),
       pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
   console.log("                  :",
-      pad(dtr2.getDate()),
+      pad(dtr2.getFullYear() + "-" + dtr2.getMonth() + "-" + dtr2.getDate()),
       pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
 
   var query = queryHead + query1 + queryMid + query2 + queryTail;
@@ -138,6 +168,11 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
 function saveItOut () {
   // Save binData to a file
   var x = binData.toString();
+
+  console.log("SAVING");
+
+  // TODO TODO TODO: store the date along with it
+  //                 no need for version number anymore
   fs.writeFile("/Users/woelk/scraped2.0_"+lowestLevelToKeep, x, function(err) {
     if(err) {
       console.log(err);

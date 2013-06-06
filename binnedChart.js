@@ -326,7 +326,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
     if (!yScale){ yScale = d3.scale.linear(); }
     yScale
-      .domain([binData.getMinRaw(), binData.getMaxRaw()])
+      .domain([binData.getMin(0), binData.getMax(0)])
       .range([height, 0]);
 
     // SELECTION AND SCALES }}}
