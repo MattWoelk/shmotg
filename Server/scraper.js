@@ -72,7 +72,7 @@ handleDisconnect(mysqlconnection);
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 
-var rangeToWalk = [1325560000000, 1325640000000];
+var rangeToWalk = [1325560000000, 1325720000000];
 var stepSize = 100000; // 10000 is 2400 samples each time
                        // 100000 is 1:40 each time
                        // 600000 is ten minutes each time (works best for binning 1.0)
