@@ -22,6 +22,8 @@ var listOfFilesToImport = [
   "/Users/woelk/scraped_piece_6_1325480400000-1325484000000",
   "/Users/woelk/scraped_piece_6_1325484000000-1325505600000",
   "/Users/woelk/scraped_piece_6_1325505600000-1325527200000",
+  "/Users/woelk/scraped_piece_6_1325527200000-1325548800000",
+  "/Users/woelk/scraped_piece_6_1325548800000-1325570400000",
 ]
 
 

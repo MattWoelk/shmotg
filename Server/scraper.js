@@ -100,7 +100,7 @@ var lowestLevelToKeep = 6;
 // var rangeToWalk = [theMax, (new Date(2012, 0, 5, 1)).getTime()];
                            //        YYYY,MM-1,DD,HH,...
 
-var rangeToWalk = [(new Date(2012, 0, 2, 12)).getTime(), (new Date(2012, 0, 2, 18)).getTime()];
+var rangeToWalk = [(new Date(2012, 0, 2, 24)).getTime(), (new Date(2012, 0, 3, 6)).getTime()];
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
