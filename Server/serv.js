@@ -24,6 +24,8 @@ var listOfFilesToImport = [
   "/Users/woelk/scraped_piece_6_1325505600000-1325527200000",
   "/Users/woelk/scraped_piece_6_1325527200000-1325548800000",
   "/Users/woelk/scraped_piece_6_1325548800000-1325570400000",
+  "/Users/woelk/scraped_piece_6_1325570400000-1325592000000",
+  "/Users/woelk/scraped_piece_6_1325592000000-1325613600000",
 ]
 
 
@@ -48,7 +50,7 @@ try {
     //  console.log("reading in level", i);
     //  binData.replaceBinnedData(datDat, i, true);
     //}
-    console.log("all have been read");
+    console.log("All have been read.");
     //binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
 } catch (err) {
     console.log(err);
