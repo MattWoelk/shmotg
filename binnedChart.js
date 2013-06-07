@@ -1,5 +1,5 @@
 // {{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with Server/serv.js
+var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with Server/serv.js
   // TODO: phase this out (preferable) OR set it as a really high number
 var TIME_CONTEXT_VERTICAL_EACH = 25;
   // vertical size of each section of the user time context system
