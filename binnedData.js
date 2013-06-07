@@ -378,10 +378,9 @@ binnedData = function () {
         // AKA: arr1 gets precedence
 
         // concat them
-        //var result = arr2.concat(arr1); // TODO TODO TODO: use combineWithoutDuplicates instead
         var result = combineWithoutDuplicates(arr1, arr2);
 
-        // sort the result
+        // sort the result TODO: may not be required, as combineWithoutDuplicates gives a sorted result
         result.sort(function (a, b) { return a.ms - b.ms; });
 
         return result;
@@ -815,6 +814,33 @@ binnedData = function () {
         }
 
         //console.log("removing ;]");
+    }
+
+    my.importDataFromAnotherBinnedDataObject = function (otherBinnedData) {
+        for (k in otherBinnedData.keys) {
+            var key = otherBinnedData.keys[k];
+            // for each key in otherBinnedData
+
+            for (var l = 0; l < MAX_NUMBER_OF_BIN_LEVELS; l++) {
+                // for each level
+
+                if (!otherBinnedData[key].levels[l]) { continue; }
+
+                for (b in otherBinnedData[key].levels[l]) {
+                    // for each bin container
+
+                    if (!bd[key].levels[l].hasOwnProperty(b)) {
+                        // If we don't have it already, plunk it in
+                       bd[key].levels[l][b] = otherBinnedData[key].levels[l][b];
+                    } else {
+                        // If we do, combine them.
+                       bd[key].levels[l][b] = combineWithoutDuplicates(
+                           bd[key].levels[l][b],
+                           otherBinnedData[key].levels[l][b]);
+                    }
+                } // for each bin container
+            } // for each level
+        } // for each key
     }
 
     my.getKeys = function () {

@@ -21,23 +21,23 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 
-console.log("== reading in old data ==");
-
-// Grab the already-stored data
-var oldBinData = fs.readFileSync('/Users/woelk/scraped2.0_6_base').toString(); // block while getting the girder contents.
-var datDat = JSON.parse(oldBinData);
-
-console.log("reading", datDat);
-binData.replaceAllData(datDat);
-
-var defaultBinnedData = binnedData();
-
-// Add in the functions which we need: KEEP SYNCD WITH binnedData.js
-binData.bd().average.func = defaultBinnedData.bd().average.func;
-binData.bd().mins.func = defaultBinnedData.bd().mins.func;
-binData.bd().maxes.func = defaultBinnedData.bd().maxes.func;
-binData.bd().q1.func = defaultBinnedData.bd().q1.func;
-binData.bd().q3.func = defaultBinnedData.bd().q3.func;
+// console.log("== reading in old data ==");
+//
+// // Grab the already-stored data
+// var oldBinData = fs.readFileSync('/Users/woelk/scraped2.0_6_base').toString(); // block while getting the girder contents.
+// var datDat = JSON.parse(oldBinData);
+//
+// console.log("reading", datDat);
+// binData.replaceAllData(datDat);
+//
+// var defaultBinnedData = binnedData();
+//
+// // Add in the functions which we need: KEEP SYNCD WITH binnedData.js
+// binData.bd().average.func = defaultBinnedData.bd().average.func;
+// binData.bd().mins.func = defaultBinnedData.bd().mins.func;
+// binData.bd().maxes.func = defaultBinnedData.bd().maxes.func;
+// binData.bd().q1.func = defaultBinnedData.bd().q1.func;
+// binData.bd().q3.func = defaultBinnedData.bd().q3.func;
 
 // Override Date.prototype.toJSON
 // because JSON.stringify() uses it to change
@@ -92,13 +92,15 @@ handleDisconnect(mysqlconnection);
 var lowestLevelToKeep = 6;
 
 // TODO TODO TODO: Do not request data which we already have
-var theMin = binData.getMinMS(lowestLevelToKeep);
-var theMax = binData.getMaxMS(lowestLevelToKeep);
+// var theMin = binData.getMinMS(lowestLevelToKeep);
+// var theMax = binData.getMaxMS(lowestLevelToKeep);
 
-console.log("start:", dt(theMax).toUTCString());
+// console.log("start:", dt(theMax).toUTCString());
 
-var rangeToWalk = [theMax, (new Date(2012, 0, 5, 1)).getTime()];
+// var rangeToWalk = [theMax, (new Date(2012, 0, 5, 1)).getTime()];
                            //        YYYY,MM-1,DD,HH,...
+
+var rangeToWalk = [(new Date(2012, 0, 2, 12)).getTime(), (new Date(2012, 0, 2, 18)).getTime()];
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
@@ -173,11 +175,14 @@ function saveItOut () {
 
   // TODO TODO TODO: store the date along with it
   //                 no need for version number anymore
-  fs.writeFile("/Users/woelk/scraped2.0_"+lowestLevelToKeep, x, function(err) {
+
+  var saveName = "/Users/woelk/scraped_piece_"+lowestLevelToKeep+"_"+rangeToWalk[0]+"-"+rangeToWalk[1];
+
+  fs.writeFile(saveName, x, function(err) {
     if(err) {
       console.log(err);
     } else {
-      console.log("The file was saved to /Users/woelk/scraped2.0_"+lowestLevelToKeep);
+      console.log("The file was saved to"+saveName);
     }
   });
 }

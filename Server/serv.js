@@ -17,27 +17,40 @@ function dt (num) {
   return newdate;
 }
 
+var listOfFilesToImport = [
+  "/Users/woelk/scraped_piece_6_1325476800000-1325480400000",
+  "/Users/woelk/scraped_piece_6_1325480400000-1325484000000",
+  "/Users/woelk/scraped_piece_6_1325484000000-1325505600000",
+  "/Users/woelk/scraped_piece_6_1325505600000-1325527200000",
+]
+
 
 // GLOBAL VARIABLES
 var binData = binnedData();
 try {
-  var oldBinData = fs.readFileSync('/Users/woelk/scraped2.0_6').toString(); // block while getting the girder contents.
-  //binData.bd() = JSON.parse(oldBinData);
-  //console.log(JSON.parse(oldBinData).rawData.levels[0]);
-  var datDat = JSON.parse(oldBinData);
-  console.log("reading", datDat);
+    console.log("reading file", 0);
+    var oldBinData = fs.readFileSync(listOfFilesToImport[0]).toString(); // block while getting the girder contents.
+    var datDat = JSON.parse(oldBinData);
 
-  binData.replaceAllData(datDat);
+    binData.replaceAllData(datDat);
 
-  //for (var i = 0; i < datDat.average.levels.length; i++) {
-  //  console.log("reading in level", i);
-  //  binData.replaceBinnedData(datDat, i, true);
-  //}
-  console.log("all has been read");
-  //binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
+    for (var i = 1; i < listOfFilesToImport.length; i++) {
+        console.log("reading file", i);
+        var oldBinData = fs.readFileSync(listOfFilesToImport[i]).toString(); // block while getting the girder contents.
+        var datDat = JSON.parse(oldBinData);
+
+        binData.importDataFromAnotherBinnedDataObject(datDat);
+    }
+
+    //for (var i = 0; i < datDat.average.levels.length; i++) {
+    //  console.log("reading in level", i);
+    //  binData.replaceBinnedData(datDat, i, true);
+    //}
+    console.log("all have been read");
+    //binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
 } catch (err) {
-  console.log(err);
-  throw err;
+    console.log(err);
+    throw err;
 }
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
