@@ -71,7 +71,7 @@ handleDisconnect(mysqlconnection);
 
 var lowestLevelToKeep = 6;
 
-var rangeToWalk = [(new Date(2012, 0, 3, 12)).getTime(), (new Date(2012, 0, 3, 18)).getTime()];
+var rangeToWalk = [(new Date(2012, 0, 3, 18)).getTime(), (new Date(2012, 0, 3, 24)).getTime()];
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
