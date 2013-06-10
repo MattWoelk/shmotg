@@ -35,7 +35,7 @@ function transformScale(scal, oldScal, mar) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW) {
+function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
   //update
   if (toTransition) {
     sel.attr("transform", transformScale(scalOld, renScale, mar))
@@ -50,7 +50,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
 
   //enter
   var sels = sel.enter().append("path")
-    .attr("class", "posPath")
+    .attr("class", name)
     .attr("fill", fill)
     .style("stroke-width", strokeW)
     .attr("d", function (d, i) { return d0s[d.key][d.which]; })
@@ -502,10 +502,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
       //Make and render the Positive lines.
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
-      var currentSelection = paths.selectAll(".posPath")
+      var pathSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) { return d.key + d.which + d.interpolate; });
 
-      drawElements(currentSelection,
+      drawElements(pathSelection,
                    function (d) { return "rgba(0,0,0,0)"; },
                    function (d) { return binData.getColor(d.key); },
                    xScale,
@@ -517,17 +517,18 @@ var binnedLineChart = function (data, dataRequester, girder) {
                    binData,
                    margin,
                    renderScale,
-                   strokeWidth);
+                   strokeWidth,
+                   "posPath");
 
       // LINES }}}
 
       //{{{ AREAS
       //make and render the area
       var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
-      currentSelection = paths.selectAll(".posArea")
+      var areaSelection = paths.selectAll(".posArea")
         .data(quartileObjectForKeyFanciness, function (d) {return d.key + d.which + d.interpolate; });
 
-      drawElements(currentSelection,
+      drawElements(areaSelection,
                    function (d) { return binData.getColor(d.key); },
                    function (d) { return "rgba(0,0,0,0)"; },
                    xScale,
@@ -539,7 +540,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
                    binData,
                    margin,
                    renderScale,
-                   strokeWidth);
+                   strokeWidth,
+                   "posArea");
 
       // AREAS }}}
 
