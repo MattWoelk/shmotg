@@ -136,7 +136,7 @@ function initPlot(data, first) {
     xScale = plot.xScale();
     yScale = plot.yScale();
     zoom.x(xScale);
-    zoom.y(yScale);
+    //zoom.y(yScale); // This breaks proper updating of the y axis when you scroll left and right.
   };
 
   updateZoom();

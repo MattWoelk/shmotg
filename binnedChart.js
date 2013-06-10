@@ -324,10 +324,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
     if (!xScale) { xScale = d3.scale.linear().domain([0, 100]); }
     xScale.range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
-    if (!yScale){ yScale = d3.scale.linear(); }
-    yScale
-      .domain([binData.getMin(0), binData.getMax(0)])
-      .range([height, 0]);
+    if (!yScale){ yScale = d3.scale.linear().range([height, 0]); }
+    yScale.range([height, 0]);
 
     // SELECTION AND SCALES }}}
 
@@ -378,9 +376,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
         binData.getDateRange('maxes', whichLevelToRender, renderRange),
         function(d) { return d.val; } );
 
-    yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
-                  , maxFilter ? maxFilter : yScale.domain()[1] ]);
-
     // for each key
     // 1. find out whether we should render things
     for (var keyValue in renderThis) {
@@ -398,6 +393,9 @@ var binnedLineChart = function (data, dataRequester, girder) {
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
         //render the new stuff
         didWeRenderAnything = true;
+
+        yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
+                      , maxFilter ? maxFilter : yScale.domain()[1] ]);
 
         if (key === 'quartiles') {
           // render AREA d0s
@@ -458,6 +456,13 @@ var binnedLineChart = function (data, dataRequester, girder) {
     //// SELECTION.EACH ////
 
     selection.each(function () {
+
+      yAxis = d3.svg.axis()
+        .scale(yScale)
+        .ticks(6)
+        .tickSubdivide(true)
+        .tickSize(width, 0, 0) // major, minor, end
+        .orient("left");
 
       //{{{ CONTAINER AND CLIPPING
 
@@ -559,13 +564,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
       } else {
         xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
       }
-
-      yAxis = d3.svg.axis()
-        .scale(yScale)
-        .ticks(6)
-        .tickSubdivide(true)
-        .tickSize(width, 0, 0) // major, minor, end
-        .orient("left");
 
       if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
       yAxisContainer.attr("class", "y axis")
