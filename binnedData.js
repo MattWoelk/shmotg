@@ -277,7 +277,7 @@ binnedData = function () {
         // get lvl+1's range of containers for this range
         var upperLevelRange = [ // range until very end
             getKeyForTimeAtLevel(range[0], lvl+1),
-            getKeyForTimeAtLevel(range[1], lvl+1) + binSize(lvl+1)
+            getKeyForTimeAtLevel(range[1], lvl+1) + binContainerSize(lvl+1)
         ];
 
         // get lvl range of containers for that range
