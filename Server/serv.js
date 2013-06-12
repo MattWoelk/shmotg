@@ -30,10 +30,9 @@ function dt (num) {
 //  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325635200000-1325656800000",
 //]
 
-var listOfFilesToImport = [
-    "/Users/woelk/scraped_2.1_6/scraped_piece_6_2012-0-2-18_2012-0-2-24",
-    "/Users/woelk/scraped_2.1_6/scraped_piece_6_2012-0-2-24_2012-0-3-6",
-]
+var dir = "/Users/woelk/scraped_2.1_6/";
+var listOfFilesToImport = fs.readdirSync(dir);
+listOfFilesToImport = _.map(listOfFilesToImport, function (d) { return dir + d; })
 
 
 // GLOBAL VARIABLES
