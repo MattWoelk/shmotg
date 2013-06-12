@@ -38,14 +38,14 @@ listOfFilesToImport = _.map(listOfFilesToImport, function (d) { return dir + d; 
 // GLOBAL VARIABLES
 var binData = binnedData();
 try {
-    console.log("reading file", 0);
+    console.log("reading file", listOfFilesToImport[0]);
     var oldBinData = fs.readFileSync(listOfFilesToImport[0]).toString(); // block while getting the girder contents.
     var datDat = JSON.parse(oldBinData);
 
     binData.replaceAllData(datDat);
 
     for (var i = 1; i < listOfFilesToImport.length; i++) {
-        console.log("reading file", i);
+        console.log("reading file", listOfFilesToImport[i]);
         var oldBinData = fs.readFileSync(listOfFilesToImport[i]).toString(); // block while getting the girder contents.
         var datDat = JSON.parse(oldBinData);
 

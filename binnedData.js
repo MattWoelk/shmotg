@@ -281,6 +281,10 @@ binnedData = function () {
         ];
 
         // get lvl range of containers for that range
+        if (!upperLevelRange[0] || !upperLevelRange[1]) {
+            console.log(upperLevelRange[0], upperLevelRange[1]);
+            return [];
+        }
         var binsToBeCombined = getSurroundingBins(upperLevelRange[0], upperLevelRange[1], lvl);
 
         var combo = [];
