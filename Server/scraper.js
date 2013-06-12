@@ -1,3 +1,4 @@
+// {{{ SETUP
 var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
@@ -16,12 +17,13 @@ function dt (num) {
   newdate.setTime(num);
   return newdate;
 }
+// SETUP }}}
 
-// GLOBAL VARIABLES
+// {{{ GLOBAL VARIABLES
 var binData = binnedData();
+// GLOBAL VARIABLES}}}
 
-
-// COMMAND LINE INPUT
+// {{{ COMMAND LINE INPUT
 if (process.argv[9] === undefined) {
     console.log("USAGE:");
     console.log("  start_year(YYYY) start_month(0-11) start_day(0-30) start_hour(0-23)");
@@ -38,7 +40,9 @@ var end_year  = process.argv[6];
 var end_month = process.argv[7];
 var end_day   = process.argv[8];
 var end_hour  = process.argv[9];
+// COMMAND LINE INPUT }}}
 
+//{{{ PROTOTYPE
 // Override Date.prototype.toJSON
 // because JSON.stringify() uses it to change
 // the format of our dates when they're converted
@@ -51,9 +55,9 @@ Date.prototype.toJSON = function (key) {
   //console.log(key, this);
   return this + "";
 };
+// PROTOTYPE }}}
 
-var send_to_user = "";
-
+// {{{ CONNECTION
 var mysqlconnection = mysql.createConnection({
   host     : 'shm1.ee.umanitoba.ca',
   user     : 'mattwoelk',
@@ -83,11 +87,9 @@ function handleDisconnect(connection) {
 }
 
 handleDisconnect(mysqlconnection);
+// CONNECTION }}}
 
-
-//////////////////////////////////////////////////
-//////////////////////////////////////////////////
-
+// {{{ WHERE TO WALK
 var lowestLevelToKeep = 6;
 
 var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour)).getTime(),
@@ -102,12 +104,12 @@ var stepSize = 60000; // 10000 is 2400 samples each time
                       // 60000 is 1 minute each time
                       // 100000 is 1:40 each time
                       // 600000 is ten minutes each time (works best for binning 1.0)
+// WHERE TO WALK }}}
 
 // TODO: walk through each section of the database
 for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
   var dtr = dt(i); // date to request
   var dtr2 = dt(i+stepSize); // second date to request
-
 
   // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
   var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
@@ -125,13 +127,6 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
                ':' + pad(dtr2.getMinutes()) +
                ':' + pad(dtr2.getSeconds() + 1) + '"';
   var queryTail = '';
-
-  //console.log("querying for range:",
-  //    pad(dtr.getFullYear() + "-" + dtr.getMonth() + "-" + dtr.getDate()),
-  //    pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
-  //console.log("                  :",
-  //    pad(dtr2.getFullYear() + "-" + dtr2.getMonth() + "-" + dtr2.getDate()),
-  //    pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
 
   var query = queryHead + query1 + queryMid + query2 + queryTail;
 
@@ -236,3 +231,4 @@ function pad(integ) {
   return i;
 }
 
+/* vim: set foldmethod=marker: */
