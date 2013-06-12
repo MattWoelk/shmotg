@@ -20,6 +20,25 @@ function dt (num) {
 // GLOBAL VARIABLES
 var binData = binnedData();
 
+
+// COMMAND LINE INPUT
+if (process.argv[9] === undefined) {
+    console.log("USAGE:");
+    console.log("  start_year(YYYY) start_month(0-11) start_day(0-30) start_hour(0-23)");
+    console.log("  end_year(YYYY) end_month(0-11) end_day(0-30) end_hour(0-23)");
+    return
+}
+
+var start_year  = process.argv[2];
+var start_month = process.argv[3];
+var start_day   = process.argv[4];
+var start_hour  = process.argv[5];
+
+var end_year  = process.argv[6];
+var end_month = process.argv[7];
+var end_day   = process.argv[8];
+var end_hour  = process.argv[9];
+
 // Override Date.prototype.toJSON
 // because JSON.stringify() uses it to change
 // the format of our dates when they're converted
@@ -71,7 +90,8 @@ handleDisconnect(mysqlconnection);
 
 var lowestLevelToKeep = 6;
 
-var rangeToWalk = [(new Date(2012, 0, 3, 18)).getTime(), (new Date(2012, 0, 3, 24)).getTime()];
+var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour)).getTime(),
+                   (new Date(end_year, end_month, end_day, end_hour)).getTime()];
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
@@ -106,12 +126,12 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
                ':' + pad(dtr2.getSeconds() + 1) + '"';
   var queryTail = '';
 
-  console.log("querying for range:",
-      pad(dtr.getFullYear() + "-" + dtr.getMonth() + "-" + dtr.getDate()),
-      pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
-  console.log("                  :",
-      pad(dtr2.getFullYear() + "-" + dtr2.getMonth() + "-" + dtr2.getDate()),
-      pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
+  //console.log("querying for range:",
+  //    pad(dtr.getFullYear() + "-" + dtr.getMonth() + "-" + dtr.getDate()),
+  //    pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
+  //console.log("                  :",
+  //    pad(dtr2.getFullYear() + "-" + dtr2.getMonth() + "-" + dtr2.getDate()),
+  //    pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
 
   var query = queryHead + query1 + queryMid + query2 + queryTail;
 
@@ -148,7 +168,9 @@ function saveItOut () {
   // TODO TODO TODO: store the date along with it
   //                 no need for version number anymore
 
-  var saveName = "/Users/woelk/scraped_piece_"+lowestLevelToKeep+"_"+rangeToWalk[0]+"-"+rangeToWalk[1];
+  var saveName = "/Users/woelk/scraped_2.1_6/scraped_piece_"+lowestLevelToKeep
+                 +"_"+start_year+"-"+start_month+"-"+start_day+"-"+start_hour
+                 +"_"+end_year+"-"+end_month+"-"+end_day+"-"+end_hour
 
   fs.writeFile(saveName, x, function(err) {
     if(err) {
@@ -192,7 +214,6 @@ function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
 }
 
 function sendDatabaseQuery(query, doWithResult) {
-  console.log("- receiving data from server...");
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) {console.log("err: ", err); return err;}
     console.log(red+query, blue+rows.length+reset);

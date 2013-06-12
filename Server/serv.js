@@ -17,15 +17,22 @@ function dt (num) {
   return newdate;
 }
 
+//var listOfFilesToImport = [
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325476800000-1325480400000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325480400000-1325484000000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325484000000-1325505600000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325505600000-1325527200000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325527200000-1325548800000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325548800000-1325570400000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325570400000-1325592000000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325592000000-1325613600000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325613600000-1325635200000",
+//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325635200000-1325656800000",
+//]
+
 var listOfFilesToImport = [
-  "/Users/woelk/scraped_piece_6_1325476800000-1325480400000",
-  "/Users/woelk/scraped_piece_6_1325480400000-1325484000000",
-  "/Users/woelk/scraped_piece_6_1325484000000-1325505600000",
-  "/Users/woelk/scraped_piece_6_1325505600000-1325527200000",
-  "/Users/woelk/scraped_piece_6_1325527200000-1325548800000",
-  "/Users/woelk/scraped_piece_6_1325548800000-1325570400000",
-  "/Users/woelk/scraped_piece_6_1325570400000-1325592000000",
-  "/Users/woelk/scraped_piece_6_1325592000000-1325613600000",
+    "/Users/woelk/scraped_2.1_6/scraped_piece_6_2012-0-2-18_2012-0-2-24",
+    "/Users/woelk/scraped_2.1_6/scraped_piece_6_2012-0-2-24_2012-0-3-6",
 ]
 
 
