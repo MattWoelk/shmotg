@@ -26,8 +26,8 @@ var binData = binnedData();
 // {{{ COMMAND LINE INPUT
 if (process.argv[9] === undefined) {
     console.log("USAGE:");
-    console.log("  start_year(YYYY) start_month(0-11) start_day(0-30) start_hour(0-23)");
-    console.log("  end_year(YYYY) end_month(0-11) end_day(0-30) end_hour(0-23)");
+    console.log("  start_year(YYYY) start_month(0-11) start_day(0-30) start_hour(1-24)");
+    console.log("  end_year(YYYY) end_month(0-11) end_day(0-30) end_hour(1-24)");
     return
 }
 
@@ -95,6 +95,10 @@ var lowestLevelToKeep = 6;
 var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour)).getTime(),
                    (new Date(end_year, end_month, end_day, end_hour)).getTime()];
 
+// console.log(dt( rangeToWalk[0] ).getHours()+":"+dt( rangeToWalk[0] ).getMinutes());
+// console.log(dt( rangeToWalk[1] ).getHours()+":"+dt( rangeToWalk[1] ).getMinutes());
+// console.log(rangeToWalk[1]-rangeToWalk[0]);
+
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
     return;
@@ -106,8 +110,35 @@ var stepSize = 60000; // 10000 is 2400 samples each time
                       // 600000 is ten minutes each time (works best for binning 1.0)
 // WHERE TO WALK }}}
 
+
+var current_starts = [(dt(rangeToWalk[0]).getFullYear()),
+                   dt(rangeToWalk[0]).getMonth(),
+                   dt(rangeToWalk[0]).getDate(),
+                   dt(rangeToWalk[0]).getHours()]
+var current_ends   = [(dt(rangeToWalk[1]).getFullYear()),
+                   dt(rangeToWalk[1]).getMonth(),
+                   dt(rangeToWalk[1]).getDate(),
+                   dt(rangeToWalk[1]).getHours()]
+
 // TODO: walk through each section of the database
 for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
+  var reset_it = false;
+
+  if (i % 21600000 === 0) {
+    // TODO: reset binData, and TODO TODO TODO: start a new file (ASYNCHRONOUSLY!)
+    //                                          or start using a new bindata, which isn't as efficient
+    current_starts = [(dt(i).getFullYear()),
+                       dt(i).getMonth(),
+                       dt(i).getDate(),
+                       dt(i).getHours()]
+    current_ends   = [(dt(i+21600000).getFullYear()),
+                       dt(i+21600000).getMonth(),
+                       dt(i+21600000).getDate(),
+                       dt(i+21600000).getHours()]
+    reset_it = true;
+    //console.log(dt(i).getHours() + ":" + dt(i).getMinutes(), dt(i+21600000).getHours() + ":" + dt(i+21600000).getMinutes());
+  }
+
   var dtr = dt(i); // date to request
   var dtr2 = dt(i+stepSize); // second date to request
 
@@ -130,42 +161,41 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
 
   var query = queryHead + query1 + queryMid + query2 + queryTail;
 
-  sendDatabaseQuery(query, function (queryResult) {
+  sendDatabaseQuery(query, function (queryResult, st, en, res) {
     // Bin the new data
     console.log("- data received. binning data...");
     try {
       // For each one, add its rawData to binData, and bin it all
+      if (res) {
+          // reset it, because we're starting a new file now
+          binData = binnedData();
+      }
       binData.addRawData(queryResult);
 
       // Delete the bottom few levels
       binData.removeAllLevelsBelow(lowestLevelToKeep);
 
       // Save the data-structure
-      saveItOut();
+      saveItOut(st, en);
     } catch (e) {
       console.log(magenta+"=*= ERROR =*="+reset, e.message);
       throw e;
     }
     console.log("...done binning");
-  });
+  }, current_starts, current_ends, reset_it);
 }
 
 
 
 
 
-function saveItOut () {
+function saveItOut (st, en) {
   // Save binData to a file
   var x = binData.toString();
 
-  console.log("SAVING");
-
-  // TODO TODO TODO: store the date along with it
-  //                 no need for version number anymore
-
   var saveName = "/Users/woelk/scraped_2.1_6/scraped_piece_"+lowestLevelToKeep
-                 +"_"+start_year+"-"+start_month+"-"+start_day+"-"+start_hour
-                 +"_"+end_year+"-"+end_month+"-"+end_day+"-"+end_hour
+                 +"_"+st[0]+"-"+st[1]+"-"+st[2]+"-"+st[3]
+                 +"_"+en[0]+"-"+en[1]+"-"+en[2]+"-"+en[3]
 
   fs.writeFile(saveName, x, function(err) {
     if(err) {
@@ -208,7 +238,7 @@ function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
-function sendDatabaseQuery(query, doWithResult) {
+function sendDatabaseQuery(query, doWithResult, st, en, res) {
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) {console.log("err: ", err); return err;}
     console.log(red+query, blue+rows.length+reset);
@@ -221,7 +251,7 @@ function sendDatabaseQuery(query, doWithResult) {
              };
     });
 
-    doWithResult(send_object); // send_object is always raw data
+    doWithResult(send_object, st, en, res); // send_object is always raw data
   });
 }
 
