@@ -63,9 +63,52 @@ try {
     throw err;
 }
 
-console.log("truly"); // TODO: do the very selective rebinning here
-                      //       to get rid of missing bins at the intersections
-                      //       of files
+// Add in the functions which we need to rebin:
+var defaultBinnedData = binnedData();
+binData.bd().average.func = defaultBinnedData.bd().average.func;
+binData.bd().mins.func = defaultBinnedData.bd().mins.func;
+binData.bd().maxes.func = defaultBinnedData.bd().maxes.func;
+binData.bd().q1.func = defaultBinnedData.bd().q1.func;
+binData.bd().q3.func = defaultBinnedData.bd().q3.func;
+
+// Do the very selective rebinning here to get rid of missing
+// bins at the intersections of files
+console.log("rebinning missing regions...");
+var range_of_all_data = [binData.getMinMS(6), binData.getMaxMS(6)];
+// Date(2012, 0-11, 1-31, 0-23, 0-59, 0-59, 0-999)
+// Date(YYYY, MM  , DD  , HR  , MIN , SEC , MSEC )
+
+
+// TODO TODO TODO: instead of doing this manually, or by calculation,
+//                 just keep track of the ranges of the data which is
+//                 being read in! Store those values, then iterate
+//                 over them! :)
+binData.rebinAll([(new Date(2012, 0, 1,  5, 59)).getTime(), (new Date(2012, 0, 1,  6, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 1, 11, 59)).getTime(), (new Date(2012, 0, 1, 12, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 1, 17, 59)).getTime(), (new Date(2012, 0, 1, 18, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 1, 23, 59)).getTime(), (new Date(2012, 0, 2,  0, 1)).getTime()], 6);
+
+binData.rebinAll([(new Date(2012, 0, 2,  5, 59)).getTime(), (new Date(2012, 0, 2,  6, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 2, 11, 59)).getTime(), (new Date(2012, 0, 2, 12, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 2, 17, 59)).getTime(), (new Date(2012, 0, 2, 18, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 2, 23, 59)).getTime(), (new Date(2012, 0, 3,  0, 1)).getTime()], 6);
+
+binData.rebinAll([(new Date(2012, 0, 3,  5, 59)).getTime(), (new Date(2012, 0, 3,  6, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 3, 11, 59)).getTime(), (new Date(2012, 0, 3, 12, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 3, 17, 59)).getTime(), (new Date(2012, 0, 3, 18, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 3, 23, 59)).getTime(), (new Date(2012, 0, 4,  0, 1)).getTime()], 6);
+
+binData.rebinAll([(new Date(2012, 0, 4,  5, 59)).getTime(), (new Date(2012, 0, 4,  6, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 4, 11, 59)).getTime(), (new Date(2012, 0, 4, 12, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 4, 17, 59)).getTime(), (new Date(2012, 0, 4, 18, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 4, 23, 59)).getTime(), (new Date(2012, 0, 5,  0, 1)).getTime()], 6);
+
+binData.rebinAll([(new Date(2012, 0, 5,  5, 59)).getTime(), (new Date(2012, 0, 5,  6, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 5, 11, 59)).getTime(), (new Date(2012, 0, 5, 12, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 5, 17, 59)).getTime(), (new Date(2012, 0, 5, 18, 1)).getTime()], 6);
+binData.rebinAll([(new Date(2012, 0, 5, 23, 59)).getTime(), (new Date(2012, 0, 6,  0, 1)).getTime()], 6);
+
+console.log("missing regions rebinned!");
 
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
@@ -265,7 +308,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var sendToClient = function () {
         // get result ready to send
         var send_req = {};
-        console.log("== BINNED. sending now");
+        console.log("== SENDING TO CLIENT ==");
 
         if (req.bin_level === 0) {
           // send raw data
