@@ -5,6 +5,7 @@ var mysql = require('mysql');
 _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
+require("./database.js");
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -41,53 +42,6 @@ var end_month = process.argv[7];
 var end_day   = process.argv[8];
 var end_hour  = process.argv[9];
 // COMMAND LINE INPUT }}}
-
-//{{{ PROTOTYPE
-// Override Date.prototype.toJSON
-// because JSON.stringify() uses it to change
-// the format of our dates when they're converted
-// back to strings
-// NOTE: this is not actually required anymore
-// because we're sending milliseconds instead of
-// date strings, but it's nice to have around. :)
-Date.prototype.toJSON = function (key) {
-  //console.log("key: ");
-  //console.log(key, this);
-  return this + "";
-};
-// PROTOTYPE }}}
-
-// {{{ CONNECTION
-var mysqlconnection = mysql.createConnection({
-  host     : 'shm1.ee.umanitoba.ca',
-  user     : 'mattwoelk',
-  password : fs.readFileSync(__dirname + '/ps').toString().trim(),
-  database : 'SPB_SHM_2012MM01',
-});
-
-mysqlconnection.connect(); // perhaps not necessary; seems to be working without it
-
-// DISCONNECTS FROM THE MYSQL DATABASE
-function handleDisconnect(connection) {
-  connection.on('error', function(err) {
-    if (!err.fatal) {
-      return;
-    }
-
-    if (err.code !== 'PROTOCOL_CONNECTION_LOST') {
-      throw err;
-    }
-
-    console.log('Re-connecting lost connection: ' + err.stack);
-
-    connection = mysql.createConnection(connection.config);
-    handleDisconnect(connection);
-    connection.connect();
-  });
-}
-
-handleDisconnect(mysqlconnection);
-// CONNECTION }}}
 
 // {{{ WHERE TO WALK
 var lowestLevelToKeep = 6;
@@ -139,27 +93,7 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
     //console.log(dt(i).getHours() + ":" + dt(i).getMinutes(), dt(i+21600000).getHours() + ":" + dt(i+21600000).getMinutes());
   }
 
-  var dtr = dt(i); // date to request
-  var dtr2 = dt(i+stepSize); // second date to request
-
-  // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-  var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
-  var query1 = ' "' + dtr.getFullYear() +
-               '-' + pad(dtr.getMonth() + 1) +
-               '-' + pad(dtr.getDate()) +
-               ' ' + pad(dtr.getHours()) +
-               ':' + pad(dtr.getMinutes()) +
-               ':' + pad(dtr.getSeconds()) + '"';
-  var queryMid = ' AND ';
-  var query2 = '"' + dtr2.getFullYear() +
-               '-' + pad(dtr2.getMonth() + 1) +
-               '-' + pad(dtr2.getDate()) +
-               ' ' + pad(dtr2.getHours()) +
-               ':' + pad(dtr2.getMinutes()) +
-               ':' + pad(dtr2.getSeconds() + 1) + '"';
-  var queryTail = '';
-
-  var query = queryHead + query1 + queryMid + query2 + queryTail;
+  var query = makeQuery(i, i+stepSize);
 
   sendDatabaseQuery(query, function (queryResult, st, en, res) {
     // Bin the new data
@@ -185,10 +119,6 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
   }, current_starts, current_ends, reset_it);
 }
 
-
-
-
-
 function saveItOut (st, en) {
   // Save binData to a file
   var x = binData.toString();
@@ -204,61 +134,6 @@ function saveItOut (st, en) {
       console.log("The file was saved to"+saveName);
     }
   });
-}
-
-//var query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function dateStringToMilliseconds (dateStr) {
-  return d3.time.format("%a %b %d %Y %H:%M:%S")
-    .parse(dateStr.substring(0, 24))
-    .getTime();
-}
-
-function samplesToMilliseconds (sampleIndex) {
-  var samplesPerSecond = 200;
-  var msPerSample = 1000/samplesPerSecond;
-  var mils = sampleIndex * msPerSample;
-  return mils;
-}
-
-function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
-  return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
-}
-
-function sendDatabaseQuery(query, doWithResult, st, en, res) {
-  mysqlconnection.query(query, function (err, rows, fields) {
-    if (err) {console.log("err: ", err); return err;}
-    console.log(red+query, blue+rows.length+reset);
-    //console.log("ROWS: ", rows);
-    var send_object = rows.map(function (d) {
-      return { val: d.ESGgirder18 ,
-               ms: dateAndSampleIndexStringToMilliseconds(
-                 d.Time + "",
-                 d.SampleIndex)
-             };
-    });
-
-    doWithResult(send_object, st, en, res); // send_object is always raw data
-  });
-}
-
-function pad(integ) {
-  var i = "" + integ;
-  if (i.length === 1) { i = "0" + i; } // pad with a zero if necessary
-  return i;
 }
 
 /* vim: set foldmethod=marker: */

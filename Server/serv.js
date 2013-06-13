@@ -4,6 +4,7 @@ var mysql = require('mysql');
 _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
+require("./database.js");
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -83,30 +84,21 @@ var range_of_all_data = [binData.getMinMS(6), binData.getMaxMS(6)];
 //                 just keep track of the ranges of the data which is
 //                 being read in! Store those values, then iterate
 //                 over them! :)
-binData.rebinAll([(new Date(2012, 0, 1,  5, 59)).getTime(), (new Date(2012, 0, 1,  6, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 1, 11, 59)).getTime(), (new Date(2012, 0, 1, 12, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 1, 17, 59)).getTime(), (new Date(2012, 0, 1, 18, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 1, 23, 59)).getTime(), (new Date(2012, 0, 2,  0, 1)).getTime()], 6);
-
-binData.rebinAll([(new Date(2012, 0, 2,  5, 59)).getTime(), (new Date(2012, 0, 2,  6, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 2, 11, 59)).getTime(), (new Date(2012, 0, 2, 12, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 2, 17, 59)).getTime(), (new Date(2012, 0, 2, 18, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 2, 23, 59)).getTime(), (new Date(2012, 0, 3,  0, 1)).getTime()], 6);
-
-binData.rebinAll([(new Date(2012, 0, 3,  5, 59)).getTime(), (new Date(2012, 0, 3,  6, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 3, 11, 59)).getTime(), (new Date(2012, 0, 3, 12, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 3, 17, 59)).getTime(), (new Date(2012, 0, 3, 18, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 3, 23, 59)).getTime(), (new Date(2012, 0, 4,  0, 1)).getTime()], 6);
-
-binData.rebinAll([(new Date(2012, 0, 4,  5, 59)).getTime(), (new Date(2012, 0, 4,  6, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 4, 11, 59)).getTime(), (new Date(2012, 0, 4, 12, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 4, 17, 59)).getTime(), (new Date(2012, 0, 4, 18, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 4, 23, 59)).getTime(), (new Date(2012, 0, 5,  0, 1)).getTime()], 6);
-
-binData.rebinAll([(new Date(2012, 0, 5,  5, 59)).getTime(), (new Date(2012, 0, 5,  6, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 5, 11, 59)).getTime(), (new Date(2012, 0, 5, 12, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 5, 17, 59)).getTime(), (new Date(2012, 0, 5, 18, 1)).getTime()], 6);
-binData.rebinAll([(new Date(2012, 0, 5, 23, 59)).getTime(), (new Date(2012, 0, 6,  0, 1)).getTime()], 6);
+for (var year = 2012; year < 2013; year++) {
+    for (var month = 0; month < 3; month++) {
+        for (var day = 1; day < 31; day++) {
+            console.log("  ", year, month, day);
+            binData.rebinAll([(new Date(year, month, day  ,  5, 59)).getTime(),
+                              (new Date(year, month, day  ,  6, 1)).getTime()], 6);
+            binData.rebinAll([(new Date(year, month, day  , 11, 59)).getTime(),
+                              (new Date(year, month, day  , 12, 1)).getTime()], 6);
+            binData.rebinAll([(new Date(year, month, day  , 17, 59)).getTime(),
+                              (new Date(year, month, day  , 18, 1)).getTime()], 6);
+            binData.rebinAll([(new Date(year, month, day  , 23, 59)).getTime(),
+                              (new Date(year, month, day+1,  0, 1)).getTime()], 6);
+        }
+    }
+}
 
 console.log("missing regions rebinned!");
 
@@ -308,7 +300,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
       var sendToClient = function () {
         // get result ready to send
         var send_req = {};
-        console.log("== SENDING TO CLIENT ==");
+        console.log("== PREPARING DATA FOR CLIENT ==");
+        // TODO: why is this taking so long ???
 
         if (req.bin_level === 0) {
           // send raw data
@@ -325,6 +318,8 @@ mysqlconnection.query(query, function (err, rows, fields) {
           console.log(dt(range[1]));
           //console.log(send_req);
         }
+
+        console.log("== SENDING TO CLIENT ==")
 
         // Send requested data to client
         var toBeSent = {
