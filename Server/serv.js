@@ -63,6 +63,10 @@ try {
     throw err;
 }
 
+console.log("truly"); // TODO: do the very selective rebinning here
+                      //       to get rid of missing bins at the intersections
+                      //       of files
+
 //var app = http.createServer(); //(handler); //if we want to serve html, too. // for html
 var io = require('socket.io').listen(8080); //(app) for html
 io.configure(function () { io.set('log level', 2); });

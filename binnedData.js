@@ -833,6 +833,10 @@ binnedData = function () {
                 for (b in otherBinnedData[key].levels[l]) {
                     // for each bin container
 
+                    if (!bd[key].levels[l]) {
+                        bd[key].levels[l] = {};
+                    }
+
                     if (!bd[key].levels[l].hasOwnProperty(b)) {
                         // If we don't have it already, plunk it in
                        bd[key].levels[l][b] = otherBinnedData[key].levels[l][b];
@@ -858,6 +862,10 @@ binnedData = function () {
     my.toString = function () {
         // Give bd as a string
         return JSON.stringify(bd);
+    }
+
+    my.rebinAll = function (a,b) {
+        rebin(a, b);
     }
 
     // PUBLIC METHODS }}}
