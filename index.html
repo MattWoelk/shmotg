@@ -36,6 +36,19 @@
     </div>
     <!--}}}-->
 
+    <script>
+    function showhide() {
+        var element1 = document.getElementById("di1");
+        var element2 = document.getElementById("di2");
+        if (element1.style.display == "none") {
+            element1.style.display = "block";
+            element2.style.display = "none";
+        } else {
+            element1.style.display = "none";
+            element2.style.display = "block";
+        }
+    }
+    </script>
 
     <div id="chartContainer" style="overflow:none; width:100%; overflow:none; float:left;">
       <div id="charts"></div>
@@ -93,6 +106,9 @@
 
     <!--<button id='fade' onclick='fade()'>fade</button>-->
 
+
+    <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
+    <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:block; cursor:pointer"></img></a>
   </body>
   <!-- <script src="node_modules/socket.io/lib/socket.io.js"></script> -->
   <script src="node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>

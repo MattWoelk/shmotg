@@ -247,6 +247,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
   var previousXScale = d3.scale.linear(); // used for rendering transitions
   var previousLevelToRender; // used for rendering transitions;
   var timeContextContainer;
+  var yAxisLockContainer;
 
   var chart; // the svg element (?)
   var paths;
@@ -573,6 +574,14 @@ var binnedLineChart = function (data, dataRequester, girder) {
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
       // AXES }}}
+
+      // {{{ Y AXIS LOCK
+      if (!yAxisLockContainer) { yAxisLockContainer = chart.append("g"); }
+
+      // Draw Y Axis Lock
+      var yAxisLockSelection = yAxisLockContainer.selectAll("img")
+        .data()
+      // Y AXIS LOCK }}}
 
       //{{{ TIME CONTEXT
       if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
