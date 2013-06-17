@@ -22,7 +22,7 @@ function dt (num) {
 
 // {{{ GLOBAL VARIABLES
 var binData = binnedData();
-var READ_OLD_DATA = false;
+var READ_OLD_DATA = true;
 // GLOBAL VARIABLES}}}
 
 if (READ_OLD_DATA) {
@@ -305,16 +305,17 @@ mysqlconnection.query(query, function (err, rows, fields) {
                     id: id,
                     sensor: req.sensor,
                     bin_level: req.bin_level,
-                    req: send_req };
+                    req: send_req
+                };
 
-                    socket.emit('req_data', JSON.stringify(toBeSent));
-                    console.log("- sent to client");
+                socket.emit('req_data', JSON.stringify(toBeSent));
+                console.log("- sent to client", id);
             };
             // SEND TO CLIENT }}}
 
             // See if we need to get data from the database (because the level is lower than we have pre-binned)
             if (req.bin_level < 6) { // TODO: magic
-                console.log("** LOW LEVEL: GET FROM DATABASE **");
+                console.log("** LOW LEVEL: GET FROM DATABASE **", req.bin_level);
                 // Request more data from the server
                 var dtr = dt(range[0]); // date to request
                 var dtr2 = dt(range[1]); // second date to request
@@ -344,7 +345,7 @@ mysqlconnection.query(query, function (err, rows, fields) {
                     // Bin the new data
                     console.log("- data received. binning data...");
                     try {
-                        tmpData.addRawData(queryResult);
+                        tmpData.addRawData(queryResult, req.bin_level == 0);
                     } catch (e) {
                         console.log(magenta+"=*= ERROR =*="+reset, e.message);
                         throw e;
