@@ -191,7 +191,7 @@ io.sockets.on('connection', function (socket) {
         // SEND TO CLIENT }}}
 
         // See if we need to get data from the database (because the level is lower than we have pre-binned)
-        if (READ_OLD_DATA && req.bin_level < 6) { // TODO: magic
+        if (READ_NEW_DATA && req.bin_level < 6) { // TODO: magic
             // {{{ CREATE REQUEST
             console.log("** LOW LEVEL: GET FROM DATABASE **", req.bin_level);
 
