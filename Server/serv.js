@@ -13,24 +13,12 @@ blue = '\033[36m';
 reset = '\033[0m';
 
 function dt (num) {
-  var newdate = new Date();
-  newdate.setTime(num);
-  return newdate;
+    var newdate = new Date();
+    newdate.setTime(num);
+    return newdate;
 }
 
-//var listOfFilesToImport = [
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325476800000-1325480400000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325480400000-1325484000000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325484000000-1325505600000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325505600000-1325527200000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325527200000-1325548800000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325548800000-1325570400000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325570400000-1325592000000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325592000000-1325613600000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325613600000-1325635200000",
-//  "/Users/woelk/scraped_2.0_old/scraped_piece_6_1325635200000-1325656800000",
-//]
-
+// LOAD OLD DATA
 var dir = "/Users/woelk/scraped_2.1_6/";
 var listOfFilesToImport = fs.readdirSync(dir);
 listOfFilesToImport = _.map(listOfFilesToImport, function (d) { return dir + d; })
@@ -85,17 +73,17 @@ var range_of_all_data = [binData.getMinMS(6), binData.getMaxMS(6)];
 //                 being read in! Store those values, then iterate
 //                 over them! :)
 for (var year = 2012; year < 2013; year++) {
-    for (var month = 0; month < 3; month++) {
+    for (var month = 0; month < 1; month++) {
         for (var day = 1; day < 31; day++) {
             console.log("  ", year, month, day);
             binData.rebinAll([(new Date(year, month, day  ,  5, 59)).getTime(),
                               (new Date(year, month, day  ,  6, 1)).getTime()], 6);
             binData.rebinAll([(new Date(year, month, day  , 11, 59)).getTime(),
-                              (new Date(year, month, day  , 12, 1)).getTime()], 6);
+                             (new Date(year, month, day  , 12, 1)).getTime()], 6);
             binData.rebinAll([(new Date(year, month, day  , 17, 59)).getTime(),
-                              (new Date(year, month, day  , 18, 1)).getTime()], 6);
+                             (new Date(year, month, day  , 18, 1)).getTime()], 6);
             binData.rebinAll([(new Date(year, month, day  , 23, 59)).getTime(),
-                              (new Date(year, month, day+1,  0, 1)).getTime()], 6);
+                             (new Date(year, month, day+1,  0, 1)).getTime()], 6);
         }
     }
 }
@@ -114,31 +102,31 @@ var jsonData = fs.readFileSync(__dirname + '/esg_time.js').toString(); // block 
 
 var listOfGirders = ['ESGgirder18'];
 var sensorBins = []; // an array of binData in the following form:
-                     // sensorBins = [ { sensor: 'ESGgirder18', binData: [just like in binnedChart.js] },
-                     //                { sensor: 'another', binData: [etc.]},
-                     //                { etc ... }]
+// sensorBins = [ { sensor: 'ESGgirder18', binData: [just like in binnedChart.js] },
+//                { sensor: 'another', binData: [etc.]},
+//                { etc ... }]
 
 // initialize sensorBins
 var i = 0;
 for (var li in listOfGirders) {
-  var l = listOfGirders[li];
-  sensorBins[l] = { keys : ['average', 'maxes', 'mins', 'q1', 'q3'] };
-  i = i + 1;
+    var l = listOfGirders[li];
+    sensorBins[l] = { keys : ['average', 'maxes', 'mins', 'q1', 'q3'] };
+    i = i + 1;
 }
 
 
 var handler = function (req, res) {
-  // for html:
-  //fs.readFile(__dirname + '/index.html',
-  //function (err, data) {
-  //  if (err) {
-  //    res.writeHead(500);
-  //    return res.end('Error loading index.html');
-  //  }
+    // for html:
+    //fs.readFile(__dirname + '/index.html',
+    //function (err, data) {
+    //  if (err) {
+    //    res.writeHead(500);
+    //    return res.end('Error loading index.html');
+    //  }
 
     res.writeHead(200);
     res.end(data);
-  //});
+    //});
 };
 
 // Override Date.prototype.toJSON
@@ -149,9 +137,9 @@ var handler = function (req, res) {
 // because we're sending milliseconds instead of
 // date strings, but it's nice to have around. :)
 Date.prototype.toJSON = function (key) {
-  //console.log("key: ");
-  //console.log(key, this);
-  return this + "";
+    //console.log("key: ");
+    //console.log(key, this);
+    return this + "";
 };
 
 
@@ -164,10 +152,10 @@ Date.prototype.toJSON = function (key) {
 var send_to_user = "";
 
 var mysqlconnection = mysql.createConnection({
-  host     : 'shm1.ee.umanitoba.ca',
-  user     : 'mattwoelk',
-  password : fs.readFileSync(__dirname + '/ps').toString().trim(),
-  database : 'SPB_SHM_2012MM01',
+    host     : 'shm1.ee.umanitoba.ca',
+    user     : 'mattwoelk',
+    password : fs.readFileSync(__dirname + '/ps').toString().trim(),
+    database : 'SPB_SHM_2012MM01',
 });
 
 mysqlconnection.connect(); // perhaps not necessary; seems to be working without it
@@ -175,21 +163,21 @@ mysqlconnection.connect(); // perhaps not necessary; seems to be working without
 
 // DISCONNECTS FROM THE MYSQL DATABASE
 function handleDisconnect(connection) {
-  connection.on('error', function(err) {
-    if (!err.fatal) {
-      return;
-    }
+    connection.on('error', function(err) {
+        if (!err.fatal) {
+            return;
+        }
 
-    if (err.code !== 'PROTOCOL_CONNECTION_LOST') {
-      throw err;
-    }
+        if (err.code !== 'PROTOCOL_CONNECTION_LOST') {
+            throw err;
+        }
 
-    console.log('Re-connecting lost connection: ' + err.stack);
+        console.log('Re-connecting lost connection: ' + err.stack);
 
-    connection = mysql.createConnection(connection.config);
-    handleDisconnect(connection);
-    connection.connect();
-  });
+        connection = mysql.createConnection(connection.config);
+        handleDisconnect(connection);
+        connection.connect();
+    });
 }
 
 handleDisconnect(mysqlconnection);
@@ -220,239 +208,239 @@ query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LI
 //----------------------------//
 
 function dateStringToMilliseconds (dateStr) {
-  return d3.time.format("%a %b %d %Y %H:%M:%S")
+    return d3.time.format("%a %b %d %Y %H:%M:%S")
     .parse(dateStr.substring(0, 24))
     .getTime();
 }
 
 function samplesToMilliseconds (sampleIndex) {
-  var samplesPerSecond = 200;
-  var msPerSample = 1000/samplesPerSecond;
-  var mils = sampleIndex * msPerSample;
-  return mils;
+    var samplesPerSecond = 200;
+    var msPerSample = 1000/samplesPerSecond;
+    var mils = sampleIndex * msPerSample;
+    return mils;
 }
 
 function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
-  return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
+    return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
 function sendDatabaseQuery(query, doWithResult) {
-  console.log("- receiving data from server...");
-  //mysqlconnection.query(query, function (err, rows, fields) {
-  //  if (err) {console.log("err: ", err); return err;}
-  //  console.log(red+query, blue+rows.length+reset);
-  //  //console.log("ROWS: ", rows);
-  //  var send_object = rows.map(function (d) {
-  //    return { val: d.ESGgirder18 ,
-  //             ms: dateAndSampleIndexStringToMilliseconds(
-  //               d.Time + "",
-  //               d.SampleIndex)
-  //           };
-  //  });
+    console.log("- receiving data from server...");
+    //mysqlconnection.query(query, function (err, rows, fields) {
+    //  if (err) {console.log("err: ", err); return err;}
+    //  console.log(red+query, blue+rows.length+reset);
+    //  //console.log("ROWS: ", rows);
+    //  var send_object = rows.map(function (d) {
+    //    return { val: d.ESGgirder18 ,
+    //             ms: dateAndSampleIndexStringToMilliseconds(
+    //               d.Time + "",
+    //               d.SampleIndex)
+    //           };
+    //  });
 
-  //  doWithResult(send_object); // send_object is always raw data
-  //});
-  doWithResult({}); // send_object is always raw data
+    //  doWithResult(send_object); // send_object is always raw data
+    //});
+    doWithResult({}); // send_object is always raw data
 }
 
 function pad(integ) {
-  var i = "" + integ;
-  if (i.length === 1) { i = "0" + i; } // pad with a zero if necessary
-  return i;
+    var i = "" + integ;
+    if (i.length === 1) { i = "0" + i; } // pad with a zero if necessary
+    return i;
 }
 
 mysqlconnection.query(query, function (err, rows, fields) {
-  if (err) return err;
-  //console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
-  //console.log(query, rows.length);
+    if (err) return err;
+    //console.log(query, "\n\n", "rows:\n", rows, "\n\nfields:\n", fields, "\n\n");
+    //console.log(query, rows.length);
 
-  var send_object = rows.map(function (d) {
-    return { val: d.ESGgirder18 ,
-             ms: dateAndSampleIndexStringToMilliseconds(
-               d.Time + "",
-               d.SampleIndex)
-           };
-  });
-
-  var send_to_user = JSON.stringify(send_object);
-
-  //console.log(send_to_user); // to print out test file
-
-  // TODO: binnedData is included: console.log(binnedData());
-
-  io.sockets.on('connection', function (socket) {
-    socket.emit('news', send_to_user);
-
-    socket.on('ack', function (data) {
-      console.log("client: " + data); //ack
+    var send_object = rows.map(function (d) {
+        return { val: d.ESGgirder18 ,
+            ms: dateAndSampleIndexStringToMilliseconds(
+                d.Time + "",
+                d.SampleIndex)
+        };
     });
 
-    socket.on('req', function (sendReq) {
-      var received = JSON.parse(sendReq);
-      var req = received.req;
-      var id = received.id;
-      //console.log("client req: " + JSON.stringify(received));
-      //sendDatabaseQuery('SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10');
+    var send_to_user = JSON.stringify(send_object);
 
-      // See if we have the requested data at the requested bin level
-      var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
+    //console.log(send_to_user); // to print out test file
 
-      var sendToClient = function () {
-        // get result ready to send
-        var send_req = {};
-        console.log("== PREPARING DATA FOR CLIENT ==");
-        // TODO: why is this taking so long ???
+    // TODO: binnedData is included: console.log(binnedData());
 
-        if (req.bin_level === 0) {
-          // send raw data
-          send_req = binData.getDateRange("rawData", req.bin_level, range);
-          console.log("# range for client: #");
-          console.log(dt(range[0]));
-          console.log(dt(range[1]));
-          //console.log(send_req);
-        } else {
-          // send binned data
-          send_req = binData.getAllInRange(req.bin_level, range);
-          console.log("# range for client: #");
-          console.log(dt(range[0]));
-          console.log(dt(range[1]));
-          //console.log(send_req);
-        }
+    io.sockets.on('connection', function (socket) {
+        socket.emit('news', send_to_user);
 
-        console.log("== SENDING TO CLIENT ==")
+        socket.on('ack', function (data) {
+            console.log("client: " + data); //ack
+        });
 
-        // Send requested data to client
-        var toBeSent = {
-          id: id,
-          sensor: req.sensor,
-          bin_level: req.bin_level,
-          req: send_req };
+        socket.on('req', function (sendReq) {
+            var received = JSON.parse(sendReq);
+            var req = received.req;
+            var id = received.id;
+            //console.log("client req: " + JSON.stringify(received));
+            //sendDatabaseQuery('SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10');
 
-        socket.emit('req_data', JSON.stringify(toBeSent));
-        console.log("- sent to client");
-      };
+            // See if we have the requested data at the requested bin level
+            var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
+
+            var sendToClient = function () {
+                // get result ready to send
+                var send_req = {};
+                console.log("== PREPARING DATA FOR CLIENT ==");
+                // TODO: why is this taking so long ???
+
+                if (req.bin_level === 0) {
+                    // send raw data
+                    send_req = binData.getDateRange("rawData", req.bin_level, range);
+                    console.log("# range for client: #");
+                    console.log(dt(range[0]));
+                    console.log(dt(range[1]));
+                    //console.log(send_req);
+                } else {
+                    // send binned data
+                    send_req = binData.getAllInRange(req.bin_level, range);
+                    console.log("# range for client: #");
+                    console.log(dt(range[0]));
+                    console.log(dt(range[1]));
+                    //console.log(send_req);
+                }
+
+                console.log("== SENDING TO CLIENT ==")
+
+                // Send requested data to client
+                var toBeSent = {
+                    id: id,
+                    sensor: req.sensor,
+                    bin_level: req.bin_level,
+                    req: send_req };
+
+                    socket.emit('req_data', JSON.stringify(toBeSent));
+                    console.log("- sent to client");
+            };
 
 
-      // See if our binned data has the requested range
-      /* !!!! This is temporarily avoiding any new requests to the database
-      var missingRanges = binData.missingBins(range, req.bin_level);
-      // TODO TODO TODO CURRENT TASK: get this working.
-      //console.log('missing ranges', missingRanges);
+            // See if our binned data has the requested range
+            /* !!!! This is temporarily avoiding any new requests to the database
+            var missingRanges = binData.missingBins(range, req.bin_level);
+            // TODO TODO TODO CURRENT TASK: get this working.
+            //console.log('missing ranges', missingRanges);
 
-      // Filter the ranges for only those which we don't have raw data
-      // TODO: this is a temporary fix!
-      //       once missingRanges is working properly, we won't need this
-      var minval = binData.getMinMS(0);
-      var maxval = binData.getMaxMS(0);
-      var newMissingValues = [];
-      for (var i = 0; i < missingRanges.length; i++) {
-        // if the range is not within what we have, use it
-        var low;
-        var high;
+            // Filter the ranges for only those which we don't have raw data
+            // TODO: this is a temporary fix!
+            //       once missingRanges is working properly, we won't need this
+            var minval = binData.getMinMS(0);
+            var maxval = binData.getMaxMS(0);
+            var newMissingValues = [];
+            for (var i = 0; i < missingRanges.length; i++) {
+            // if the range is not within what we have, use it
+            var low;
+            var high;
 
-        low = Math.min(missingRanges[i][1]);
-        if (missingRanges[i][0] < minval) {
-          if (missingRanges[i][1] > minval) {
+            low = Math.min(missingRanges[i][1]);
+            if (missingRanges[i][0] < minval) {
+            if (missingRanges[i][1] > minval) {
             newMissingValues.push([missingRanges[i][0], minval]);
-          } else {
+            } else {
             newMissingValues.push([missingRanges[i][0], missingRanges[i][1]]);
-          }
-        }
-
-        if (missingRanges[i][1] > maxval) {
-          if (missingRanges[i][0] > maxval) {
-            newMissingValues.push([missingRanges[i][0], missingRanges[i][1]]);
-          } else {
-            newMissingValues.push([maxval, missingRanges[i][1]]);
-          }
-        }
-      } // for each missing range
-      */
-
-      //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
-      if (false /*newMissingValues.length !== 0*/) { // !!!! This is temporarily avoiding any new requests to the database
-        for (var i = 0; i < newMissingValues.length; i++) {
-          // Request more data from the server
-          var dtr = dt(parseInt(newMissingValues[i][0])); // date to request
-          var dtr2 = dt(parseInt(newMissingValues[i][1])); // second date to request
-
-          // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-          var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
-          var query1 = ' "' + dtr.getFullYear() +
-                       '-' + pad(dtr.getMonth() + 1) +
-                       '-' + pad(dtr.getDate()) +
-                       ' ' + pad(dtr.getHours()) +
-                       ':' + pad(dtr.getMinutes()) +
-                       ':' + pad(dtr.getSeconds()) + '"';
-          var queryMid = ' AND ';
-          var query2 = '"' + dtr2.getFullYear() +
-                       '-' + pad(dtr2.getMonth() + 1) +
-                       '-' + pad(dtr2.getDate()) +
-                       ' ' + pad(dtr2.getHours()) +
-                       ':' + pad(dtr2.getMinutes()) +
-                       ':' + pad(dtr2.getSeconds() + 1) + '"';
-          var queryTail = '';
-
-          console.log("querying for range:",
-              pad(dtr.getDate()),
-              pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
-          console.log("                  :",
-              pad(dtr2.getDate()),
-              pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
-
-          var query = queryHead + query1 + queryMid + query2 + queryTail;
-
-          sendDatabaseQuery(query, function (queryResult) {
-            // Bin the new data
-            console.log("- data received. binning data...");
-            try {
-              binData.addRawData(queryResult);
-            } catch (e) {
-              console.log(magenta+"=*= ERROR =*="+reset, e.message);
-              throw e;
             }
-            console.log("- done binning data. sending to client.");
+            }
 
-            sendToClient();
+            if (missingRanges[i][1] > maxval) {
+            if (missingRanges[i][0] > maxval) {
+            newMissingValues.push([missingRanges[i][0], missingRanges[i][1]]);
+            } else {
+            newMissingValues.push([maxval, missingRanges[i][1]]);
+            }
+            }
+            } // for each missing range
+            */
 
-            // Save binData to a file
-            var x = binData.toString();
-            fs.writeFile("/Users/woelk/test", x, function(err) {
-              if(err) {
-                console.log(err);
-              } else {
-                console.log("The file was saved to /Users/woelk/test");
-              }
-            });
+            //var query = 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
+            if (false /*newMissingValues.length !== 0*/) { // !!!! This is temporarily avoiding any new requests to the database
+                for (var i = 0; i < newMissingValues.length; i++) {
+                    // Request more data from the server
+                    var dtr = dt(parseInt(newMissingValues[i][0])); // date to request
+                    var dtr2 = dt(parseInt(newMissingValues[i][1])); // second date to request
 
-            // TODO MAYBE: remove lower bins to save space.
-          });
-        } // for each missing range
-      } else {
-        // we do not need to retrieve data from the database
-        console.log("** ALREADY HAD THAT DATA **");
-        // TODO TODO TODO this never happens. :/
-        sendToClient();
-      } // if we need data from the database
+                    // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
+                    var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
+                    var query1 = ' "' + dtr.getFullYear() +
+                        '-' + pad(dtr.getMonth() + 1) +
+                        '-' + pad(dtr.getDate()) +
+                        ' ' + pad(dtr.getHours()) +
+                        ':' + pad(dtr.getMinutes()) +
+                        ':' + pad(dtr.getSeconds()) + '"';
+                    var queryMid = ' AND ';
+                    var query2 = '"' + dtr2.getFullYear() +
+                        '-' + pad(dtr2.getMonth() + 1) +
+                        '-' + pad(dtr2.getDate()) +
+                        ' ' + pad(dtr2.getHours()) +
+                        ':' + pad(dtr2.getMinutes()) +
+                        ':' + pad(dtr2.getSeconds() + 1) + '"';
+                    var queryTail = '';
 
+                    console.log("querying for range:",
+                                pad(dtr.getDate()),
+                                pad(dtr.getHours()) + ":" + pad(dtr.getMinutes()) + ":" + pad(dtr.getSeconds()) );
+                    console.log("                  :",
+                                pad(dtr2.getDate()),
+                                pad(dtr2.getHours()) + ":" + pad(dtr2.getMinutes()) + ":" + pad(dtr2.getSeconds() + 1) );
+
+                    var query = queryHead + query1 + queryMid + query2 + queryTail;
+
+                    sendDatabaseQuery(query, function (queryResult) {
+                        // Bin the new data
+                        console.log("- data received. binning data...");
+                        try {
+                            binData.addRawData(queryResult);
+                        } catch (e) {
+                            console.log(magenta+"=*= ERROR =*="+reset, e.message);
+                            throw e;
+                        }
+                        console.log("- done binning data. sending to client.");
+
+                        sendToClient();
+
+                        // Save binData to a file
+                        var x = binData.toString();
+                        fs.writeFile("/Users/woelk/test", x, function(err) {
+                            if(err) {
+                                console.log(err);
+                            } else {
+                                console.log("The file was saved to /Users/woelk/test");
+                            }
+                        });
+
+                                                // TODO MAYBE: remove lower bins to save space.
+                    });
+                } // for each missing range
+            } else {
+                // we do not need to retrieve data from the database
+                console.log("** ALREADY HAD THAT DATA **");
+                // TODO TODO TODO this never happens. :/
+                sendToClient();
+            } // if we need data from the database
+
+        });
     });
-  });
 });
 
 
 
 /*
 http.createServer(function(req, res) {
-  res.writeHead(200);
-  //res.writeHead(200, {'Content-Type': 'text/plain'});
-  //res.writeHead(200, {'charset': 'UTF-8'});
-  //res.writeHead(200);
+res.writeHead(200);
+//res.writeHead(200, {'Content-Type': 'text/plain'});
+//res.writeHead(200, {'charset': 'UTF-8'});
+//res.writeHead(200);
 
-  fs.readFile('index.html', function (err, contents) {
-    res.write(contents);
-    res.write(send_to_user);
-    res.end();
-  });
+fs.readFile('index.html', function (err, contents) {
+res.write(contents);
+res.write(send_to_user);
+res.end();
+});
 }).listen(8080);
 */
 
