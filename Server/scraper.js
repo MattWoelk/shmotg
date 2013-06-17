@@ -54,14 +54,6 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
     return;
 }
 
-var stepSize = 60000; // 10000 is 2400 samples each time
-// 60000 is 1 minute each time
-// 100000 is 1:40 each time
-// 600000 is ten minutes each time (works best for binning 1.0)
-
-// WHERE TO WALK }}}
-
-
 var current_starts = [dt(rangeToWalk[0]).getFullYear(),
                       dt(rangeToWalk[0]).getMonth(),
                       dt(rangeToWalk[0]).getDate(),
@@ -70,6 +62,13 @@ var current_ends   = [dt(rangeToWalk[1]).getFullYear(),
                       dt(rangeToWalk[1]).getMonth(),
                       dt(rangeToWalk[1]).getDate(),
                       dt(rangeToWalk[1]).getHours()];
+
+var stepSize = 60000; // 10000 is 2400 samples each time
+// 60000 is 1 minute each time
+// 100000 is 1:40 each time
+// 600000 is ten minutes each time (works best for binning 1.0)
+
+// WHERE TO WALK }}}
 
 // TODO: walk through each section of the database
 for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {

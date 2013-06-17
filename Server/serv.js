@@ -100,8 +100,10 @@ if (READ_OLD_DATA) {
     // CLEANUPS }}}
 }
 
+// {{{ LISTEN FOR CLIENTS
 var io = require('socket.io').listen(8080); //(app) for html
 io.configure(function () { io.set('log level', 2); });
+// LISTEN FOR CLIENTS }}}
 
 // {{{ HELPER FUNCTIONS
 function dateStringToMilliseconds (dateStr) {
@@ -131,19 +133,23 @@ function pad(integ) {
 var send_to_user = JSON.stringify({});
 
 io.sockets.on('connection', function (socket) {
+    // {{{ CONNECT WITH CLIENT
     socket.emit('news', send_to_user);
 
     socket.on('ack', function (data) {
-        console.log("client: " + data); //ack
+        console.log("client: " + data);
     });
+    // CONNECT WITH CLIENT }}}
 
     socket.on('req', function (sendReq) {
+        //{{{ PARSE REQUEST
         var received = JSON.parse(sendReq);
         var req = received.req;
         var id = received.id;
 
         // See if we have the requested data at the requested bin level
         var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
+        //}}} PARSE REQUEST
 
         // {{{ SEND TO CLIENT
         var sendToClient = function (dat) {
@@ -185,6 +191,7 @@ io.sockets.on('connection', function (socket) {
 
         // See if we need to get data from the database (because the level is lower than we have pre-binned)
         if (req.bin_level < 6) { // TODO: magic
+            // {{{ CREATE REQUEST
             console.log("** LOW LEVEL: GET FROM DATABASE **", req.bin_level);
 
             // Request more data from the server
@@ -208,7 +215,9 @@ io.sockets.on('connection', function (socket) {
             var queryTail = '';
 
             var query = queryHead + query1 + queryMid + query2 + queryTail;
+            // CREATE REQUEST }}}
 
+            // {{{ GET AND SEND REQUEST
             var tmpData = binnedData();
 
             sendDatabaseQuery(query, function (queryResult) {
@@ -224,10 +233,13 @@ io.sockets.on('connection', function (socket) {
 
                 sendToClient(tmpData);
             });
+            // GET AND SEND REQUEST }}}
         } else {
             // we do not need to retrieve data from the database
+            // {{{ SEND TO CLIENT
             console.log("** ALREADY HAD THAT DATA **");
             sendToClient(binData);
+            // SEND TO CLIENT }}}
         } // if we need data from the database
 
     });
