@@ -41,9 +41,11 @@
         var element1 = document.getElementById("di1");
         var element2 = document.getElementById("di2");
         if (element1.style.display == "none") {
+            setAllYAxisLocks(false);
             element1.style.display = "inline";
             element2.style.display = "none";
         } else {
+            setAllYAxisLocks(true);
             element1.style.display = "none";
             element2.style.display = "inline";
         }

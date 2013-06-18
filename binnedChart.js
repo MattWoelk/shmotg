@@ -248,6 +248,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
   var previousLevelToRender; // used for rendering transitions;
   var timeContextContainer;
   var yAxisLockContainer;
+  var yAxisLock;
 
   var chart; // the svg element (?)
   var paths;
@@ -325,7 +326,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     if (!xScale) { xScale = d3.scale.linear().domain([0, 100]); }
     xScale.range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
-    if (!yScale){ yScale = d3.scale.linear().range([height, 0]); }
+    if (!yScale){ yScale = d3.scale.linear(); }
     yScale.range([height, 0]);
 
     // SELECTION AND SCALES }}}
@@ -395,8 +396,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
         //render the new stuff
         didWeRenderAnything = true;
 
-        yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
-                      , maxFilter ? maxFilter : yScale.domain()[1] ]);
+        if (!yAxisLock) {
+            yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
+                          , maxFilter ? maxFilter : yScale.domain()[1] ]);
+        }
 
         if (key === 'quartiles') {
           // render AREA d0s
@@ -442,7 +445,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
         }
 
         waitingForServer = true;
-        if (!dataReq(req)) {
+        if (dataReq !== undefined && !dataReq(req)) {
           // if it's too soon, or it failed
           waitingForServer = false;
         }
@@ -458,12 +461,14 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
     selection.each(function () {
 
-      yAxis = d3.svg.axis()
-        .scale(yScale)
-        .ticks(6)
-        .tickSubdivide(true)
-        .tickSize(width, 0, 0) // major, minor, end
-        .orient("left");
+        if (!yAxisLock) {
+            yAxis = d3.svg.axis()
+            .scale(yScale)
+            .ticks(6)
+            .tickSubdivide(true)
+            .tickSize(width, 0, 0) // major, minor, end
+            .orient("left");
+        }
 
       //{{{ CONTAINER AND CLIPPING
 
@@ -730,6 +735,19 @@ var binnedLineChart = function (data, dataRequester, girder) {
   my.uniqueID = function (value) {
     if (!arguments.length) return whichGirder;
     whichGirder = value;
+    return my;
+  }
+
+  my.yAxisLock = function (value) {
+    if (!arguments.length) return yAxisLock;
+    console.log("setting lock:", value);
+    if (yAxisLock == true && value == false) {
+        // redraw everything
+        my.reRenderTheNextTime(true);
+        yAxisLock = value;
+        my.update();
+    }
+    yAxisLock = value;
     return my;
   }
 
