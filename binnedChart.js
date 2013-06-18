@@ -740,7 +740,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
   my.yAxisLock = function (value) {
     if (!arguments.length) return yAxisLock;
-    console.log("setting lock:", value);
     if (yAxisLock == true && value == false) {
         // redraw everything
         my.reRenderTheNextTime(true);

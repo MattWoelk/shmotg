@@ -71,7 +71,6 @@ var getTotalChartHeight = function () {
 }
 
 var setAllYAxisLocks = function (toLock) {
-    console.log("locking", toLock);
     plots.forEach(function (plt) {
         plt.yAxisLock(toLock);
     });
