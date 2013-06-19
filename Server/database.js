@@ -111,7 +111,7 @@ dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
 sendDatabaseQuery = function(query, doWithResult, st, en, res) {
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) {console.log("err: ", err); return err;}
-    console.log(red+query, blue+rows.length+reset);
+    //console.log(red+query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
       return { val: d.ESGgirder18 ,
