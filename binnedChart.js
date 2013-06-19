@@ -1,5 +1,5 @@
 // {{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 34; // keep sync'd with Server/serv.js
+var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with Server/serv.js
   // TODO: phase this out (preferable) OR set it as a really high number
 var TIME_CONTEXT_VERTICAL_EACH = 25;
   // vertical size of each section of the user time context system
@@ -35,7 +35,7 @@ function transformScale(scal, oldScal, mar) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW) {
+function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
   //update
   if (toTransition) {
     sel.attr("transform", transformScale(scalOld, renScale, mar))
@@ -50,7 +50,7 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
 
   //enter
   var sels = sel.enter().append("path")
-    .attr("class", "posPath")
+    .attr("class", name)
     .attr("fill", fill)
     .style("stroke-width", strokeW)
     .attr("d", function (d, i) { return d0s[d.key][d.which]; })
@@ -92,13 +92,6 @@ function maxBinRenderSize () {
 // ]
 var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, interp) {
   var resultArray = new Array();
-
-  if (whichLines.indexOf('rawData') > -1){
-    resultArray.push({
-      key: 'rawData',
-      which: 0
-    });
-  }
 
   var j = 0;
   var keys = bin.getKeys();
@@ -254,6 +247,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
   var previousXScale = d3.scale.linear(); // used for rendering transitions
   var previousLevelToRender; // used for rendering transitions;
   var timeContextContainer;
+  var yAxisLockContainer;
+  var yAxisLock;
 
   var chart; // the svg element (?)
   var paths;
@@ -332,9 +327,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
     xScale.range([0, width]); // So that the furthest-right point is at the right edge of the plot
 
     if (!yScale){ yScale = d3.scale.linear(); }
-    yScale
-      .domain([binData.getMinRaw(), binData.getMaxRaw()])
-      .range([height, 0]);
+    yScale.range([height, 0]);
 
     // SELECTION AND SCALES }}}
 
@@ -385,9 +378,6 @@ var binnedLineChart = function (data, dataRequester, girder) {
         binData.getDateRange('maxes', whichLevelToRender, renderRange),
         function(d) { return d.val; } );
 
-    yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
-                  , maxFilter ? maxFilter : yScale.domain()[1] ]);
-
     // for each key
     // 1. find out whether we should render things
     for (var keyValue in renderThis) {
@@ -405,6 +395,11 @@ var binnedLineChart = function (data, dataRequester, girder) {
       if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
         //render the new stuff
         didWeRenderAnything = true;
+
+        if (!yAxisLock) {
+            yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
+                          , maxFilter ? maxFilter : yScale.domain()[1] ]);
+        }
 
         if (key === 'quartiles') {
           // render AREA d0s
@@ -450,7 +445,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
         }
 
         waitingForServer = true;
-        if (!dataReq(req)) {
+        if (dataReq !== undefined && !dataReq(req)) {
           // if it's too soon, or it failed
           waitingForServer = false;
         }
@@ -465,6 +460,15 @@ var binnedLineChart = function (data, dataRequester, girder) {
     //// SELECTION.EACH ////
 
     selection.each(function () {
+
+        if (!yAxisLock) {
+            yAxis = d3.svg.axis()
+            .scale(yScale)
+            .ticks(6)
+            .tickSubdivide(true)
+            .tickSize(width, 0, 0) // major, minor, end
+            .orient("left");
+        }
 
       //{{{ CONTAINER AND CLIPPING
 
@@ -504,10 +508,10 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
       //Make and render the Positive lines.
       var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
-      var currentSelection = paths.selectAll(".posPath")
+      var pathSelection = paths.selectAll(".posPath")
         .data(dataObjectForKeyFanciness, function (d) { return d.key + d.which + d.interpolate; });
 
-      drawElements(currentSelection,
+      drawElements(pathSelection,
                    function (d) { return "rgba(0,0,0,0)"; },
                    function (d) { return binData.getColor(d.key); },
                    xScale,
@@ -519,17 +523,18 @@ var binnedLineChart = function (data, dataRequester, girder) {
                    binData,
                    margin,
                    renderScale,
-                   strokeWidth);
+                   strokeWidth,
+                   "posPath");
 
       // LINES }}}
 
       //{{{ AREAS
       //make and render the area
       var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
-      currentSelection = paths.selectAll(".posArea")
+      var areaSelection = paths.selectAll(".posArea")
         .data(quartileObjectForKeyFanciness, function (d) {return d.key + d.which + d.interpolate; });
 
-      drawElements(currentSelection,
+      drawElements(areaSelection,
                    function (d) { return binData.getColor(d.key); },
                    function (d) { return "rgba(0,0,0,0)"; },
                    xScale,
@@ -541,7 +546,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
                    binData,
                    margin,
                    renderScale,
-                   strokeWidth);
+                   strokeWidth,
+                   "posArea");
 
       // AREAS }}}
 
@@ -567,19 +573,20 @@ var binnedLineChart = function (data, dataRequester, girder) {
         xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
       }
 
-      yAxis = d3.svg.axis()
-        .scale(yScale)
-        .ticks(6)
-        .tickSubdivide(true)
-        .tickSize(width, 0, 0) // major, minor, end
-        .orient("left");
-
       if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
       yAxisContainer.attr("class", "y axis")
         .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
         //.attr("transform", "translate(" + margin.left + "," + height + ")");
       yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
       // AXES }}}
+
+      // {{{ Y AXIS LOCK
+      if (!yAxisLockContainer) { yAxisLockContainer = chart.append("g"); }
+
+      // Draw Y Axis Lock
+      var yAxisLockSelection = yAxisLockContainer.selectAll("img")
+        .data()
+      // Y AXIS LOCK }}}
 
       //{{{ TIME CONTEXT
       if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
@@ -728,6 +735,18 @@ var binnedLineChart = function (data, dataRequester, girder) {
   my.uniqueID = function (value) {
     if (!arguments.length) return whichGirder;
     whichGirder = value;
+    return my;
+  }
+
+  my.yAxisLock = function (value) {
+    if (!arguments.length) return yAxisLock;
+    if (yAxisLock == true && value == false) {
+        // redraw everything
+        my.reRenderTheNextTime(true);
+        yAxisLock = value;
+        my.update();
+    }
+    yAxisLock = value;
     return my;
   }
 

@@ -70,6 +70,12 @@ var getTotalChartHeight = function () {
   return total;
 }
 
+var setAllYAxisLocks = function (toLock) {
+    plots.forEach(function (plt) {
+        plt.yAxisLock(toLock);
+    });
+}
+
 var redraw = function () {
   plots.forEach(function (plt) {
     plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -97,9 +103,9 @@ function setLoadingIcon(on) {
 }
 
 var uniqueID = 0;
-function initPlot(data, first) {
+function initPlot(data, first, sendReq) {
   if (first) {
-    var plot = binnedLineChart(data, sendRequestToServer, "ESGgirder18");
+    var plot = binnedLineChart(data, sendReq, "ESGgirder18");
   } else {
     var plot = binnedLineChart(data, function () {}, uniqueID);
   }
@@ -136,7 +142,7 @@ function initPlot(data, first) {
     xScale = plot.xScale();
     yScale = plot.yScale();
     zoom.x(xScale);
-    zoom.y(yScale);
+    //zoom.y(yScale); // This breaks proper updating of the y axis when you scroll left and right.
   };
 
   updateZoom();
@@ -291,7 +297,7 @@ socket.on('news', function (data) {
   socket.emit('ack', "Message received!");
 
   //initPlot(json);
-  initPlot(json, true);
+  initPlot(json, true, sendRequestToServer);
 
   //initPlot(_.map(json, function (d) {
   //  return { val: Math.random() * 5 + d.val,
@@ -321,6 +327,7 @@ function addToServerQueue(ob) {
 var uniqueRequestID = 0;
 var timeOfLastRequest = 0;
 var listOfRequestsMade = [];
+
 function sendRequestToServer(req) {
   // turn on loading icon
   setLoadingIcon(true);
@@ -394,7 +401,9 @@ function rundemo() {
       return {val: d.ESGgirder18, ms: d.ms};
     });
 
-    initPlot(json);
+    initPlot(json, true);
+
+    //console.log(plots[0].bd().bd());
   });
 }
 
