@@ -22,8 +22,8 @@ function dt (num) {
 
 // {{{ GLOBAL VARIABLES
 var binData = binnedData();
-var READ_OLD_DATA = true;
-var READ_NEW_DATA = false;
+var READ_OLD_DATA = false;
+var READ_NEW_DATA = true;
 // GLOBAL VARIABLES}}}
 
 if (READ_OLD_DATA) {
@@ -153,25 +153,29 @@ io.sockets.on('connection', function (socket) {
         //}}} PARSE REQUEST
 
         // {{{ SEND TO CLIENT
-        var sendToClient = function (dat) {
+        var sendToClient = function (dat, lvl) {
             // get result ready to send
             var send_req = {};
-            console.log("== PREPARING DATA FOR CLIENT ==");
+            console.log("== PREPARING DATA FOR CLIENT == lvl:", lvl);
 
             if (req.bin_level === 0) {
                 // send raw data
                 // TODO: to further speed things up, make a getDateRange replacement
                 //       which sends each bin container as it comes.
+                //       doToEachContainerInRange
                 //       When the (same!) client has another request, stop doing
                 //       these sendings.
-                send_req = dat.getDateRange("rawData", req.bin_level, range);
+                //       The last sending should have the same id as the original
+                //       one so the client knows to hide its loading icon.
+                //       The others should have a sub name "10-1", "10-2" or similar
+                send_req = dat.getDateRange("rawData", lvl, range);
                 console.log("# range for client: #");
                 console.log(dt(range[0]));
                 console.log(dt(range[1]));
                 //console.log(send_req);
             } else {
                 // send binned data
-                send_req = dat.getAllInRange(req.bin_level, range);
+                send_req = dat.getAllInRange(lvl, range);
                 console.log("# range for client: #");
                 console.log(dt(range[0]));
                 console.log(dt(range[1]));
@@ -184,12 +188,12 @@ io.sockets.on('connection', function (socket) {
             var toBeSent = {
                 id: id,
                 sensor: req.sensor,
-                bin_level: req.bin_level,
+                bin_level: lvl,
                 req: send_req
             };
 
             socket.emit('req_data', JSON.stringify(toBeSent));
-            console.log("- sent to client", id);
+            console.log("- sent to client");
         };
         // SEND TO CLIENT }}}
 
@@ -235,14 +239,14 @@ io.sockets.on('connection', function (socket) {
                 }
                 console.log("- done binning data. sending to client.");
 
-                sendToClient(tmpData);
+                sendToClient(tmpData, 0); // Send raw data to the client (testing)
             });
             // GET AND SEND REQUEST }}}
         } else {
             // we do not need to retrieve data from the database
             // {{{ SEND TO CLIENT
             console.log("** ALREADY HAD THAT DATA **");
-            sendToClient(binData);
+            sendToClient(binData, req.bin_level);
             // SEND TO CLIENT }}}
         } // if we need data from the database
 

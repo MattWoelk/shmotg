@@ -784,6 +784,7 @@ binnedData = function () {
         var whichBinsToLookIn = getSurroundingBins(range[0], range[1], lvl);
 
         _.each(whichBinsToLookIn, function (n) {
+            if(!bd[key].levels[lvl]) { return; }
             var dat = bd[key].levels[lvl][n];
 
             result = result.concat(_.filter(dat, function (d, i) {
