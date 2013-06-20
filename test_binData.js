@@ -49,10 +49,10 @@ var brd = binnedData().addRawData([
 assert(_.pluck(brd.getDateRange('rawData', 0, [0, 2000]), 'ms'), [1000, 1005, 1010], 'adding raw and reading raw');
 assert(_.pluck(brd.getDateRange('average', 1, [0, 2000]), 'ms'), [1000],  'adding raw and reading lvl 1a');
 assert(_.pluck(brd.getDateRange('average', 1, [0, 2000]), 'val'), [11],   'adding raw and reading lvl 1b');
-assertDirect(brd.getMaxRaw(), 13, 'getMaxRaw');
-assertDirect(brd.getMinRaw(), 10, 'getMinRaw');
-assertDirect(brd.getMaxRawMS(), 1010, 'getMaxRawMS');
-assertDirect(brd.getMinRawMS(), 1000, 'getMinRawMS');
+assertDirect(brd.getMax(1), 13, 'getMaxRaw');
+assertDirect(brd.getMin(1), 10, 'getMinRaw');
+assertDirect(brd.getMaxMS(1), 1010, 'getMaxRawMS');
+assertDirect(brd.getMinMS(1), 1000, 'getMinRawMS');
 assert(_.pluck(brd.getAllInRange(1, [0, 2000]).average.levels[1], 'ms'), [1000], 'adding raw --> getAllInRange');
 
 // Missing in the middle.
