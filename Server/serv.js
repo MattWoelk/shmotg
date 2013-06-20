@@ -154,22 +154,29 @@ io.sockets.on('connection', function (socket) {
         //}}} PARSE REQUEST
 
         // {{{ SEND TO CLIENT
-        var sendToClient = function (dat) {
+        var sendToClient = function (dat, lvl) {
             // get result ready to send
             var send_req = {};
-            console.log("== PREPARING DATA FOR CLIENT ==");
-            // TODO: why is this taking so long ???
+            console.log("== PREPARING DATA FOR CLIENT == lvl:", lvl);
 
-            if (req.bin_level === 0) {
+            if (lvl == 0) {
                 // send raw data
-                send_req = dat.getDateRange("rawData", req.bin_level, range);
+                // TODO: to further speed things up, make a getDateRange replacement
+                //       which sends each bin container as it comes.
+                //       doToEachContainerInRange
+                //       When the (same!) client has another request, stop doing
+                //       these sendings.
+                //       The last sending should have the same id as the original
+                //       one so the client knows to hide its loading icon.
+                //       The others should have a sub name "10-1", "10-2" or similar
+                send_req = dat; // dat in this case is not a binnedData object; just an array.
                 console.log("# range for client: #");
                 console.log(dt(range[0]));
                 console.log(dt(range[1]));
                 //console.log(send_req);
             } else {
                 // send binned data
-                send_req = dat.getAllInRange(req.bin_level, range);
+                send_req = dat.getAllInRange(lvl, range);
                 console.log("# range for client: #");
                 console.log(dt(range[0]));
                 console.log(dt(range[1]));
@@ -182,29 +189,27 @@ io.sockets.on('connection', function (socket) {
             var toBeSent = {
                 id: id,
                 sensor: req.sensor,
-                bin_level: req.bin_level,
+                bin_level: lvl,
                 req: send_req
             };
 
             socket.emit('req_data', JSON.stringify(toBeSent));
-            console.log("- sent to client", id);
+            console.log("- sent to client");
         };
         // SEND TO CLIENT }}}
 
         // See if we need to get data from the database (because the level is lower than we have pre-binned)
         if (READ_NEW_DATA && req.bin_level < 6) { // TODO: magic
-            // TODO: create child process
-            // TODO: send out result from child process
-            var ls = spawn('node', ['/Users/woelk/www/Server/gather.js', 2012, 0, 1, 2, 2, 2, 2012, 0, 1, 2, 2, 3]);
+            //// GET AND SEND REQUEST {{{
+            console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
+
+            var ls = spawn('node', ['/Users/woelk/www/Server/gather.js', range[0], range[1]]);
 
             ls.stdout.on('data', function (data) {
-                console.log('stdout: ' + data);
-                var datDat = JSON.parse(data);
-
-                var tmpData = binnedData();
-                tmpData.addRawData(datDat, req.bin_level == 0);
+                //console.log('stdout: ' + data);
+                var queryResult = JSON.parse(data);
                 console.log("- done binning data. sending to client.");
-                sendToClient(tmpData);
+                sendToClient(queryResult, 0); // Send raw data to the client (testing)
             });
 
             ls.stderr.on('data', function (data) {
@@ -214,55 +219,12 @@ io.sockets.on('connection', function (socket) {
             ls.on('close', function (code) {
                 console.log('child process exited with code ' + code);
             });
-
-            // {{{ CREATE REQUEST
-            //console.log("** LOW LEVEL: GET FROM DATABASE **", req.bin_level);
-
-            //// Request more data from the server
-            //var dtr = dt(range[0]); // date to request
-            //var dtr2 = dt(range[1]); // second date to request
-
-            //var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
-            //var query1 = ' "' + dtr.getFullYear() +
-            //    '-' + pad(dtr.getMonth() + 1) +
-            //    '-' + pad(dtr.getDate()) +
-            //    ' ' + pad(dtr.getHours()) +
-            //    ':' + pad(dtr.getMinutes()) +
-            //    ':' + pad(dtr.getSeconds()) + '"';
-            //var queryMid = ' AND ';
-            //var query2 = '"' + dtr2.getFullYear() +
-            //    '-' + pad(dtr2.getMonth() + 1) +
-            //    '-' + pad(dtr2.getDate()) +
-            //    ' ' + pad(dtr2.getHours()) +
-            //    ':' + pad(dtr2.getMinutes()) +
-            //    ':' + pad(dtr2.getSeconds() + 1) + '"';
-            //var queryTail = '';
-
-            //var query = queryHead + query1 + queryMid + query2 + queryTail;
-            //// CREATE REQUEST }}}
-
-            //// {{{ GET AND SEND REQUEST
-            //var tmpData = binnedData();
-
-            //sendDatabaseQuery(query, function (queryResult) {
-            //    // Bin the new data
-            //    console.log("- data received. binning data...");
-            //    try {
-            //        tmpData.addRawData(queryResult, req.bin_level == 0);
-            //    } catch (e) {
-            //        console.log(magenta+"=*= ERROR =*="+reset, e.message);
-            //        throw e;
-            //    }
-            //    console.log("- done binning data. sending to client.");
-
-            //    sendToClient(tmpData);
-            //});
             //// GET AND SEND REQUEST }}}
         } else {
             // we do not need to retrieve data from the database
             // {{{ SEND TO CLIENT
             console.log("** ALREADY HAD THAT DATA **");
-            sendToClient(binData);
+            sendToClient(binData, req.bin_level);
             // SEND TO CLIENT }}}
         } // if we need data from the database
 

@@ -29,26 +29,11 @@ var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
 // {{{ COMMAND LINE INPUT
-if (process.argv[13] === undefined) {
+if (process.argv[3] === undefined) {
     return // not enough inputs
 }
 
-var start_year  = process.argv[2];
-var start_month = process.argv[3];
-var start_day   = process.argv[4];
-var start_hour  = process.argv[5];
-var start_minute  = process.argv[6];
-var start_second  = process.argv[7];
-
-var end_year  = process.argv[8];
-var end_month = process.argv[9];
-var end_day   = process.argv[10];
-var end_hour  = process.argv[11];
-var end_minute  = process.argv[12];
-var end_second  = process.argv[13];
-
-var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour, start_minute, start_second)).getTime(),
-                   (new Date(end_year  , end_month  , end_day  , end_hour  , end_minute  , end_second  )).getTime()];
+var rangeToWalk = [process.argv[2], process.argv[3]];
 
 // COMMAND LINE INPUT }}}
 
