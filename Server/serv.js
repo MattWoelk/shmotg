@@ -157,10 +157,13 @@ io.sockets.on('connection', function (socket) {
             // get result ready to send
             var send_req = {};
             console.log("== PREPARING DATA FOR CLIENT ==");
-            // TODO: why is this taking so long ???
 
             if (req.bin_level === 0) {
                 // send raw data
+                // TODO: to further speed things up, make a getDateRange replacement
+                //       which sends each bin container as it comes.
+                //       When the (same!) client has another request, stop doing
+                //       these sendings.
                 send_req = dat.getDateRange("rawData", req.bin_level, range);
                 console.log("# range for client: #");
                 console.log(dt(range[0]));
