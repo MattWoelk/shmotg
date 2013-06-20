@@ -199,27 +199,13 @@ io.sockets.on('connection', function (socket) {
 
         // See if we need to get data from the database (because the level is lower than we have pre-binned)
         if (READ_NEW_DATA && req.bin_level < 6) { // TODO: magic
-            // {{{ CREATE REQUEST
-            console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
-
-            var query = makeQuery(range[0], range[1]);
-            // CREATE REQUEST }}}
-
             // {{{ GET AND SEND REQUEST
-            var tmpData = binnedData(); // TODO TODO: this doesn't need to be a full-blown object...
-                                        //            just make it readable and throw it on through
+            console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
+            var query = makeQuery(range[0], range[1]);
 
             sendDatabaseQuery(query, function (queryResult) {
                 // Bin the new data
-                console.log("- data received...");
-                try {
-                    tmpData.addRawData(queryResult, true); // don't waste time binning because we're going to send the raw data anyway.
-                } catch (e) {
-                    console.log(magenta+"=*= ERROR =*="+reset, e.message);
-                    throw e;
-                }
-                console.log("- sending data to client.");
-
+                console.log("- data received - sending data to client.");
                 sendToClient(queryResult, 0); // Send raw data to the client (testing)
             });
             // GET AND SEND REQUEST }}}
