@@ -207,7 +207,8 @@ io.sockets.on('connection', function (socket) {
 
             ls.stdout.on('data', function (data) {
                 //console.log('stdout: ' + data);
-                var queryResult = JSON.parse(data);
+                var buffer = data;
+                var queryResult = JSON.parse(buffer);
                 console.log("- done binning data. sending to client.");
                 sendToClient(queryResult, 0); // Send raw data to the client (testing)
             });

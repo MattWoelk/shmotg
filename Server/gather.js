@@ -42,16 +42,8 @@ var query = makeQuery(rangeToWalk[0], rangeToWalk[1]);
 //console.log(query);
 
 return sendDatabaseQuery(query, function (queryResult) {
-    // Bin the new data
-    var tmpData = binnedData();
-    try {
-        tmpData.addRawData(queryResult);
-    } catch (e) {
-        throw e;
-    }
-
-    var a = JSON.stringify(tmpData.bd());
-
+    var a = JSON.stringify(queryResult);
+    //process.stdout.write(a);
     console.log(a);
     process.exit(1);
 });
