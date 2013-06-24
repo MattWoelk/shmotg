@@ -107,6 +107,17 @@ path, line {
   border-top: dashed grey;
 }
 
+/*{{{ GIANT SLIDER ON MOBILE */
+input[type='range'] {
+    height:30px;
+}
+
+input[type='range']::-webkit-slider-thumb {
+    height:30px;
+    width:30px;
+}
+/* GIANT SLIDER ON MOBILE }}}*/
+
 /*{{{ Custom Checkboxes*/
 label {
     cursor: pointer;

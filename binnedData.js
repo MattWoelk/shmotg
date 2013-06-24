@@ -282,7 +282,7 @@ binnedData = function () {
 
         // get lvl range of containers for that range
         if (!upperLevelRange[0] || !upperLevelRange[1]) {
-            console.log(upperLevelRange[0], upperLevelRange[1]);
+            //console.log(upperLevelRange[0], upperLevelRange[1]);
             return [];
         }
         var binsToBeCombined = getSurroundingBins(upperLevelRange[0], upperLevelRange[1], lvl);
@@ -772,27 +772,24 @@ binnedData = function () {
     }
 
     my.getDateRange = function (key, lvl, range) {
+        // give the range of data for this key and level
+        // NOT including the highest value in range
+        // USE:
         // filter an array so that we don't render much more
         // than the required amount of line and area
 
         var result = [];
 
-        _.each(bd[key].levels[lvl], function (dat, k) {
-            // d is the array, k is the key for this object
+        // where to look for this data:
+        var whichBinsToLookIn = getSurroundingBins(range[0], range[1], lvl);
 
-            // TODO TODO: instead of all these checks, just see if it intersects at all,
-            //            then combine it all, and filter it. This is as opposed to
-            //            filtering and then combining (which won't be much quicker,
-            //            if at all)
-            if (range[1] < parseInt(k) || range[0] >= parseInt(k) + binContainerSize(lvl)) {
-                // requested range is below or above this bin container
-                // do nothing
-            } else {
-                // requested range intersects this bin container
-                result = result.concat(_.filter(dat, function (d, i) {
-                    return d.ms <= range[1] && d.ms >= range[0];
-                }));
-            }
+        _.each(whichBinsToLookIn, function (n) {
+            if(!bd[key].levels[lvl]) { return; }
+            var dat = bd[key].levels[lvl][n];
+
+            result = result.concat(_.filter(dat, function (d, i) {
+                return d.ms <= range[1] && d.ms >= range[0];
+            }));
         });
 
         // sort it
