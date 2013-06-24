@@ -130,13 +130,29 @@ input[type="checkbox"] {
   float: left;
 }
 
+input[type="radio"] {
+  width: 0em;
+  height: 0em;
+  opacity: 0;
+  float: left;
+}
+
 input[type="checkbox"] + label{
-    padding: 0 0 0 1em;
-    margin: 0 .3em 0 0;
-    width: 1em;
-    height: 1em;
-    clear: none;
-    cursor: pointer;
+  padding: 0 0 0 1em;
+  margin: 0 .3em 0 0;
+  width: 1em;
+  height: 1em;
+  clear: none;
+  cursor: pointer;
+}
+
+input[type="radio"] + label {
+  padding: 0 0 0 1em;
+  margin: 0 .3em 0 0;
+  width: 1em;
+  height: 1em;
+  clear: none;
+  cursor: pointer;
 }
 
 #isexpanded + label{
@@ -207,7 +223,39 @@ input[type="checkbox"] + label{
 #quartiles:checked + label{
     background: url(./img/red_light1.svg) left center no-repeat;
     background-size: contain;
-}/*}}}*/
+}
+
+#stp_rad + label{
+    background: url(./img/circ0.svg) left center no-repeat;
+    background-size: contain;
+}
+
+#stp_rad:checked + label{
+    background: url(./img/circ1.svg) left center no-repeat;
+    background-size: contain;
+}
+
+#mon_rad + label{
+    background: url(./img/circ0.svg) left center no-repeat;
+    background-size: contain;
+}
+
+#mon_rad:checked + label{
+    background: url(./img/circ1.svg) left center no-repeat;
+    background-size: contain;
+}
+
+#lin_rad + label{
+    background: url(./img/circ0.svg) left center no-repeat;
+    background-size: contain;
+}
+
+#lin_rad:checked + label{
+    background: url(./img/circ1.svg) left center no-repeat;
+    background-size: contain;
+}
+
+/*}}}*/
 
 /* Loading Animation {{{*/
 /* From http://cssload.net/ */

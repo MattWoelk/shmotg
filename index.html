@@ -95,10 +95,10 @@
 
           <ul id="render-method">
             Interpolation<br />Method:
-            <li><label><input type="radio"         name="render-method" value="linear"/>Linear</li>
-            <li><label><input type="radio" checked name="render-method" value="step-after"/>Step-After</li>
-              <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>-->
-              <li><label><input type="radio"                   name="render-method" value="monotone"/>Monotone</li>
+            <li><input type="radio"         id="lin_rad"  name="render-method" value="linear"/><label for="lin_rad"></label><label for="lin_rad">Linear</li>
+            <li><input type="radio" checked id="stp_rad" name="render-method" value="step-after"/><label for="stp_rad"></label><label for="stp_rad">Step-After</li>
+            <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>-->
+            <li><input type="radio"         id="mon_rad" name="render-method" value="monotone"/><label for="mon_rad"></label><label for="mon_rad">Monotone</li>
           </ul>
         </form>
       </div>
@@ -119,6 +119,8 @@
     <img src="./img/red_light1.svg" style="display:none">
     <img src="./img/black0.svg" style="display:none">
     <img src="./img/black1.svg" style="display:none">
+    <img src="./img/circ0.svg" style="display:none">
+    <img src="./img/circ1.svg" style="display:none">
     <!--}}}-->
 
   </body>
