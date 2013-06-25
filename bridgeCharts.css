@@ -1,111 +1,111 @@
 body {
-  background-color: #FFF;
-  font-family: sans-serif;
-  color: #000;
-  font-size: 20px;
+    background-color: #FFF;
+    font-family: sans-serif;
+    color: #000;
+    font-size: 20px;
 }
 
 a, input, button {
-  -ms-touch-action: none !important;
+    -ms-touch-action: none !important;
 }
 
 #chart {
-  font: 10px sans-serif;
-  overflow: none;
+    font: 10px sans-serif;
+    overflow: none;
 }
 
 path, line {
-  /*shape-rendering: crispEdges;*/
+    /*shape-rendering: crispEdges;*/
 }
 
 .axis path, .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
 .axis path {
-  /* Don't show the axis lines. */
-  display: none;
+    /* Don't show the axis lines. */
+    display: none;
 }
 
 .y.axis line {
-  stroke: #999;
-  stroke-dasharray: 3, 3;
+    stroke: #999;
+    stroke-dasharray: 3, 3;
 }
 
 #chart_container {
-  position: relative;
-  overflow: none;
+    position: relative;
+    overflow: none;
 }
 
 #charts {
-  overflow: none;
+    overflow: none;
 }
 
 #zoomSVG {
-  position: absolute;
-  top: 0;
-  left: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 #zoomRect {
-  border-style: solid;
-  border-width: 1px;
-  cursor: col-resize;
+    border-style: solid;
+    border-width: 1px;
+    cursor: col-resize;
 }
 
 #expand-btn {
-  /*padding: 0 0.25em 0 0.25em;*/
-  /*border-radius: 1em;*/ /*16px;*/
-  /*box-shadow: 0px 0px 0.4em #000;*/
+    /*padding: 0 0.25em 0 0.25em;*/
+    /*border-radius: 1em;*/ /*16px;*/
+    /*box-shadow: 0px 0px 0.4em #000;*/
 }
 
 /*#isexpanded:checked ~ #expand-btn {
-  box-shadow:inset 0px 0px 0.2em #000;
+box-shadow:inset 0px 0px 0.2em #000;
 }*/
 
-#controls {
-  -moz-transition: max-height 0.5s ease-out;
-  -webkit-transition: max-height 0.5s ease-out;
-  transition: max-height 0.5s ease-out; /* this is a bit of a hack */
+    #controls {
+        -moz-transition: max-height 0.5s ease-out;
+        -webkit-transition: max-height 0.5s ease-out;
+        transition: max-height 0.5s ease-out; /* this is a bit of a hack */
 
-  overflow: hidden;
-  max-height: 0;
-  background-color: #eee;
-  border: solid;
-  border-width: 0px;
-  border-radius: 1em;
-  box-shadow: inset 0px 0px 0.4em #000;
-}
+        overflow: hidden;
+        max-height: 0;
+        background-color: #eee;
+        border: solid;
+        border-width: 0px;
+        border-radius: 1em;
+        box-shadow: inset 0px 0px 0.4em #000;
+    }
 
-#isexpanded:checked ~ #controls {
-  -moz-transition: max-height 0.5s ease-in;
-  -webkit-transition: max-height 0.5s ease-in;
-  transition: max-height 0.5s ease-in; /* this is a bit of a hack */
+    #isexpanded:checked ~ #controls {
+        -moz-transition: max-height 0.5s ease-in;
+        -webkit-transition: max-height 0.5s ease-in;
+        transition: max-height 0.5s ease-in; /* this is a bit of a hack */
 
-  overflow: hidden;
-  max-height: 35em; /* this is a bit of a hack */
-  background: #eee;
-  border: solid;
-  border-width: 0px;
-  border-radius: 1em;
-  box-shadow: inset 0px 0px 0.4em #000;
-}
+        overflow: hidden;
+        max-height: 35em; /* this is a bit of a hack */
+        background: #eee;
+        border: solid;
+        border-width: 0px;
+        border-radius: 1em;
+        box-shadow: inset 0px 0px 0.4em #000;
+    }
 
-#controls ul {
-  float: left;
-  list-style: none;
-  padding: 0.5em 0.5em 0.5em 0.5em;
-  margin: 0;
-  border-left: dashed grey;
-  border-top: dashed grey;
-}
+    #controls ul {
+        float: left;
+        list-style: none;
+        padding: 0.5em 0.5em 0.5em 0.5em;
+        margin: 0;
+        border-left: dashed grey;
+        border-top: dashed grey;
+    }
 
-#controls ul:not(:first-child) {
-  border-left: dashed grey;
-  border-top: dashed grey;
-}
+    #controls ul:not(:first-child) {
+        border-left: dashed grey;
+        border-top: dashed grey;
+    }
 
 /*{{{ GIANT SLIDER ON MOBILE */
 input[type='range'] {
@@ -124,35 +124,35 @@ label {
 }
 
 input[type="checkbox"] {
-  width: 0em; /* grow with the text */
-  height: 0em;
-  opacity: 0;
-  float: left;
+    width: 0em; /* grow with the text */
+    height: 0em;
+    opacity: 0;
+    float: left;
 }
 
 input[type="radio"] {
-  width: 0em;
-  height: 0em;
-  opacity: 0;
-  float: left;
+    width: 0em;
+    height: 0em;
+    opacity: 0;
+    float: left;
 }
 
 input[type="checkbox"] + label{
-  padding: 0 0 0 1em;
-  margin: 0 .3em 0 0;
-  width: 1em;
-  height: 1em;
-  clear: none;
-  cursor: pointer;
+    padding: 0 0 0 1em;
+    margin: 0 .3em 0 0;
+    width: 1em;
+    height: 1em;
+    clear: none;
+    cursor: pointer;
 }
 
 input[type="radio"] + label {
-  padding: 0 0 0 1em;
-  margin: 0 .3em 0 0;
-  width: 1em;
-  height: 1em;
-  clear: none;
-  cursor: pointer;
+    padding: 0 0 0 1em;
+    margin: 0 .3em 0 0;
+    width: 1em;
+    height: 1em;
+    clear: none;
+    cursor: pointer;
 }
 
 #isexpanded + label{
@@ -213,7 +213,7 @@ input[type="radio"] + label {
 #average:checked + label{
     background: url(./img/red_dark1.svg) left center no-repeat;
     background-size: contain;
-}/*}}}*/
+}
 
 #quartiles + label{
     background: url(./img/red_light0.svg) left center no-repeat;
