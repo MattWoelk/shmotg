@@ -35,7 +35,10 @@ function transformScale(scal, oldScal, mar) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
+function drawElements(keyObject, container, id, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
+    var sel = container.selectAll("."+name+id)
+            .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
+
     //update
     if (toTransition) {
         sel.attr("transform", transformScale(scalOld, renScale, mar))
@@ -49,30 +52,30 @@ function drawElements(sel, fill, stroke, scal, toTransition, scalOld, ease, dur,
     }
 
     //enter
-    var sels = sel.enter().append("path")
-            .attr("class", name)
+    sel.enter()/*.append("g").attr("class", name)*/.append("path")
+            .attr("class", name+id)
             .attr("fill", fill)
             .style("stroke-width", strokeW)
             .attr("d", function (d, i) { return d0s[d.key][d.which]; })
             .style("stroke", stroke);
 
     if (toTransition) {
-        sels.attr("transform", transformScale(scalOld, renScale, mar))
+        sel.attr("transform", transformScale(scalOld, renScale, mar))
             .attr("opacity", 0)
             .transition().ease(ease).duration(dur)
             .attr("transform", transformScale(scal, renScale, mar))
             .attr("opacity", function (d) { return bin.getOpacity(d.key); });
     } else {
-        sels.attr("transform", transformScale(scal, renScale, mar))
+        sel.attr("transform", transformScale(scal, renScale, mar))
             .attr("opacity", function (d) { return bin.getOpacity(d.key); });
     }
 
     //exit
-    var sels = toTransition ?
+    var sel = toTransition ?
         sel.exit().transition().ease(ease).duration(dur) :
         sel.exit();
 
-    sels.attr("transform", transformScale(scal, scalOld, mar))
+    sel.attr("transform", transformScale(scal, scalOld, mar))
         .attr("opacity", 0)
         .remove();
 }
@@ -249,7 +252,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
     var yAxisLock;
 
     var chart; // the svg element (?)
-    var paths;
+    var pathArea;
+    var pathPath;
 
     var slctn; // Save the selection so that my.update() works.
 
@@ -489,45 +493,21 @@ var binnedLineChart = function (data, dataRequester, girder) {
                    .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
                    .attr("height", height);
 
-            //Apply the clipPath
-            paths = !paths ? chart.append("g") : paths;
-            paths.attr("clip-path", "url(#clip" + whichGirder + ")")
-                 .attr("class", "paths")
-                 .attr("height", height);
-
             // CONTAINER AND CLIPPING }}}
 
-            //{{{ LINES
-
-            //Make and render the Positive lines.
-            var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
-            var pathSelection = paths.selectAll(".posPath")
-                    .data(dataObjectForKeyFanciness, function (d) { return d.key + d.which + d.interpolate; });
-
-            drawElements(pathSelection,
-                         function (d) { return "rgba(0,0,0,0)"; },
-                         function (d) { return binData.getColor(d.key); },
-                         xScale,
-                         transitionNextTime,
-                         previousXScale,
-                         easingMethod,
-                         transitionDuration,
-                         renderedD0s,
-                         binData,
-                         margin,
-                         renderScale,
-                         strokeWidth,
-                         "posPath");
-
-                         // LINES }}}
-
             //{{{ AREAS
+
+            //Apply the clipPath
+            pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+whichGirder+"posArea");
+            pathArea.attr("clip-path", "url(#clip" + whichGirder + ")")
+                    .attr("height", height);
+
             //make and render the area
             var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
-            var areaSelection = paths.selectAll(".posArea")
-                    .data(quartileObjectForKeyFanciness, function (d) {return d.key + d.which + d.interpolate; });
 
-            drawElements(areaSelection,
+            drawElements(quartileObjectForKeyFanciness,
+                         pathArea,
+                         whichGirder,
                          function (d) { return binData.getColor(d.key); },
                          function (d) { return "rgba(0,0,0,0)"; },
                          xScale,
@@ -543,6 +523,35 @@ var binnedLineChart = function (data, dataRequester, girder) {
                          "posArea");
 
             // AREAS }}}
+
+            //{{{ LINES
+
+            //Apply the clipPath
+            pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+whichGirder+"posPath");
+            pathPath.attr("clip-path", "url(#clip" + whichGirder + ")")
+                    .attr("height", height);
+
+            //Make and render the Positive lines.
+            var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
+
+            drawElements(dataObjectForKeyFanciness,
+                         pathPath,
+                         whichGirder,
+                         function (d) { return "rgba(0,0,0,0)"; },
+                         function (d) { return binData.getColor(d.key); },
+                         xScale,
+                         transitionNextTime,
+                         previousXScale,
+                         easingMethod,
+                         transitionDuration,
+                         renderedD0s,
+                         binData,
+                         margin,
+                         renderScale,
+                         strokeWidth,
+                         "posPath");
+
+                         // LINES }}}
 
             //{{{ AXES
             // Draw Axes using msToCentury.js format and values

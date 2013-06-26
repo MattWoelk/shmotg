@@ -106,13 +106,14 @@ var uniqueID = 0;
 function initPlot(data, first, sendReq) {
     if (first) {
         var plot = binnedLineChart(data, sendReq, "ESGgirder18");
+        plot.xScale(xScale.copy());
+        var pl = d3.select("#charts").append("svg").attr("id", "chartESGgirder18").call(plot);
     } else {
         var plot = binnedLineChart(data, function () {}, uniqueID);
+        plot.xScale(xScale.copy());
+        var pl = d3.select("#charts").append("svg").attr("id", "chart"+uniqueID).call(plot);
     }
-    uniqueID = uniqueID + 1;
-    plot.xScale(xScale.copy());
 
-    var pl = d3.select("#charts").append("svg").call(plot);
 
     if (first) {
         plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(true).milliSecondsPerSample(msPS).update();
@@ -146,6 +147,7 @@ function initPlot(data, first, sendReq) {
     };
 
     updateZoom();
+    uniqueID = uniqueID + 1;
 }
 
 // this will be changed once 'news' is sent from the server

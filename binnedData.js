@@ -21,7 +21,7 @@ binnedData = function () {
                         //           ^-- a "bin container" -----------------------------------------------------^
         },
         average : {
-            color : '#F00',
+            color : '#800',
             opacity: 1,
             func   : function (a, b) { return (a+b)/2; },
             levels: [],
