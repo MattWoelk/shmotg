@@ -1,17 +1,14 @@
 var cradle = require('cradle')
-var db = new(cradle.Connection)().database('starwars');
+var db = new(cradle.Connection)().database('bridge_test');
 
 // THIS worked.
-db.save('skywalker', { force: 'light', name: 'Luke Skywalker' }, function (err, res) {
-    if (err) {
-        //Handle error
-    } else {
-        // Handle success
-        //console.log(res);
-    }
-});
-
-db.save('vader', { force: 'dark', name: 'Darth Vader' }, function (err, res) {
+db.save('ESGgirder18-average-4-204840', {
+    data: [
+        {ms: 204840, val: 93.50},
+        {ms: 204860, val: 94.75},
+        {ms: 204880, val: 92.25}
+    ]
+}, function (err, res) {
     if (err) {
         //Handle error
     } else {
@@ -21,9 +18,9 @@ db.save('vader', { force: 'dark', name: 'Darth Vader' }, function (err, res) {
 });
 
 // THIS WORKS! (Will try to do things this way)
-db.get('skywalker', function (err, doc) {
-    doc.name; // 'Darth Vader'
-    console.log(doc.force, '== dark');
+db.get('ESGgirder18-average-4-204840', function (err, doc) {
+    console.log(doc.data);
+    console.log(doc.data[0].ms);
 });
 
 // THIS WORKS!
