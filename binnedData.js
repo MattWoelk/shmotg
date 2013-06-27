@@ -2,7 +2,7 @@
 
 //{{{ CONSTANTS
 var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js
-var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2
+var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of items per bin container
 // TODO: phase this out (preferable) OR set it as a really high number
 
 /// CONSTANTS }}}
