@@ -78,22 +78,21 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
 }
 
 var stepSize = 60000; // 10000 is 2400 samples each time
-// 60000 is 1 minute each time
-// 100000 is 1:40 each time
-// 600000 is ten minutes each time (works best for binning 1.0)
+                      // 60000 is 1 minute each time
+                      // 100000 is 1:40 each time
+                      // 600000 is ten minutes each time (works best for binning 1.0)
 
 // WHERE TO WALK }}}
 
-function async(arg, callback) {
+function async_function_example(arg, callback) {
   console.log('do something with \''+arg+'\', return 0.1 sec later');
   setTimeout(function() { callback(arg); }, 100);
 }
 
-//sendQuery("asdfasdfasdfasdf", function () {
-//    console.log("working?");
-//});
+//Heavy inspiration from: http://book.mixu.net/ch7.html
+function sendQuerySync(item, callback) {
+    var query = makeQuery(item, item+stepSize);
 
-function sendQuery(query, callback) {
     sendDatabaseQuery(query, function (queryResult) {
         // Bin the new data
         console.log("- data received. binning data...");
@@ -115,18 +114,13 @@ function sendQuery(query, callback) {
     });
 }
 
-var results = [];
-function series(item) {
+function series(item, func) {
     if(item) {
-        var query = makeQuery(item, item+stepSize);
-        results.push(results);
-        sendQuery( query, function() {
-            // TODO: get results from mysql and add them to binData.
-            console.log("working??");
-            return series(walk_steps.shift());
+        func(item, function() {
+            return series(walk_steps.shift(), func);
         });
     } else {
-        return final();
+        return saveIt(final);
     }
 }
 
@@ -136,15 +130,16 @@ for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
 }
 
 // Run the series
-series(walk_steps.shift());
+series(walk_steps.shift(), sendQuerySync);
 
 // Final task (same in all the examples)
 function final() {
     // TODO: save it out to couchdb
-    saveIt();
     console.log('Done');
     //process.exit(0);
 }
+
+
 
 return;
 
@@ -177,7 +172,12 @@ function createIDString(girder, key, level, ms_start) {
     return "" + girder + "-" + key + "-" + level + "-" + ms_start;
 }
 
-function saveIt() {
+function makeListForCouch(item) {
+    // TODO: store a global list, adding things that couch should send
+    // TODO: then synchronously send them out using magic
+}
+
+function saveIt(callback) {
     console.log("trying to save now");
 
     var something = false;
@@ -203,7 +203,7 @@ function saveIt() {
     }
 
     if (!something) {
-        console.log("stop waiting. nothing to save");
+        console.log("there was nothing to save");
     }
 }
 
