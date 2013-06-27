@@ -2,7 +2,6 @@
 var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
-var async = require('async');
 _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");

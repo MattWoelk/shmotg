@@ -75,7 +75,7 @@ function saveToCouch(id, data) {
     }, function (err, res) {
         if (err) {
             //Handle error
-            console.log("saving ERROR");
+            console.log("saving ERROR", id);
         } else {
             // Handle success
             console.log("saving success:", id);
@@ -141,18 +141,19 @@ function final() {
 
 function createIDString(girder, key, level, ms_start) {
     // returns the ID which the couchdb database will use.
-    return "" + girder + "-" + key + "-" + level + "-" + ms_start;
+    return "" + girder + "-" + level + "-" + ms_start;
 }
 
 function saveIt(callback) {
-    for (var ke in binData.getKeys()) { // for each key
-        var k = binData.getKeys()[ke];
-
-        for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
-            if (!binData.bd()[k]) { continue; }
-
-            for (var c in binData.bd()[k].levels[l]) { // for each bin container
+    var dummykey = "average";
+    for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
+        for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
+            for (var ke in binData.getKeys()) { // for each key
+                var k = binData.getKeys()[ke];
                 var id = createIDString(WHICH_GIRDER, k, l, c);
+
+                if (!binData.bd()[k]) { continue; }
+
                 var dat = binData.bd()[k].levels[l][c];
                 console.log("saving:", id, "to couchDB");
 
