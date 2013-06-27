@@ -8,8 +8,6 @@ require("../binnedData.js");
 require("./database.js");
 //require("./couchAccess.js");
 
-var WAIT = false; // synchronisation hack
-var WAIT_TOO = false;
 
 var cradle = require('cradle')
 var db = new(cradle.Connection)().database('bridge_test');
@@ -26,7 +24,6 @@ function saveToCouch(id, data) {
             // Handle success
             console.log("saving success");
         }
-        WAIT = false;
     });
 }
 
@@ -92,14 +89,18 @@ function async(arg, callback) {
   setTimeout(function() { callback(arg); }, 100);
 }
 
-sendQuery("asdfasdfasdfasdf", function () {
-    console.log("working?");
-});
+//sendQuery("asdfasdfasdfasdf", function () {
+//    console.log("working?");
+//});
 
 function sendQuery(query, callback) {
     sendDatabaseQuery(query, function (queryResult) {
         // Bin the new data
         console.log("- data received. binning data...");
+        if(queryResult == null) {
+            callback();
+            return;
+        }
         try {
             binData.addRawData(queryResult);
 
@@ -109,7 +110,6 @@ function sendQuery(query, callback) {
             console.log(magenta+"=*= ERROR =*="+reset, e.message);
             throw e;
         }
-        WAIT_TOO = false;
         console.log("...done binning");
         callback();
     });
@@ -118,10 +118,11 @@ function sendQuery(query, callback) {
 var results = [];
 function series(item) {
     if(item) {
-        var query = makeQuery(item, i+stepSize);
+        var query = makeQuery(item, item+stepSize);
         results.push(results);
         sendQuery( query, function() {
             // TODO: get results from mysql and add them to binData.
+            console.log("working??");
             return series(walk_steps.shift());
         });
     } else {
@@ -154,7 +155,6 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
     var query = makeQuery(i, i+stepSize);
 
     console.log("WAIT_TOO");
-    WAIT_TOO = true;
 
     sendDatabaseQuery(query, function (queryResult, res) {
         // Bin the new data
@@ -168,10 +168,8 @@ for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
             console.log(magenta+"=*= ERROR =*="+reset, e.message);
             throw e;
         }
-        WAIT_TOO = false;
         console.log("...done binning");
     }, reset_it);
-    //while(WAIT_TOO) {};
 }
 
 function createIDString(girder, key, level, ms_start) {
@@ -206,7 +204,6 @@ function saveIt() {
 
     if (!something) {
         console.log("stop waiting. nothing to save");
-        WAIT = false;
     }
 }
 
