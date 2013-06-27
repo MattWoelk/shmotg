@@ -2,6 +2,7 @@
 var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
+var async = require('async');
 _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
@@ -108,9 +109,10 @@ dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
-sendDatabaseQuery = function(query, doWithResult, st, en, res) {
+sendDatabaseQuery = function(query, doWithResult) {
+  console.log("sending db query");
   mysqlconnection.query(query, function (err, rows, fields) {
-    if (err) {console.log("err: ", err); return err;}
+    if (err) { console.log("err: ", err); return err; }
     console.log(red+query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
@@ -121,7 +123,7 @@ sendDatabaseQuery = function(query, doWithResult, st, en, res) {
              };
     });
 
-    doWithResult(send_object, st, en, res); // send_object is always raw data
+    doWithResult(send_object); // send_object is always raw data
   });
 }
 

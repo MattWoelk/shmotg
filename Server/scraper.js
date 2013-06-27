@@ -6,6 +6,29 @@ _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
 require("./database.js");
+//require("./couchAccess.js");
+
+var WAIT = false; // synchronisation hack
+var WAIT_TOO = false;
+
+var cradle = require('cradle')
+var db = new(cradle.Connection)().database('bridge_test');
+
+function saveToCouch(id, data) {
+    console.log("saveToCouch");
+    db.save(id, {
+        data: data
+    }, function (err, res) {
+        if (err) {
+            //Handle error
+            console.log("saving ERROR");
+        } else {
+            // Handle success
+            console.log("saving success");
+        }
+        WAIT = false;
+    });
+}
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -18,6 +41,9 @@ function dt (num) {
     newdate.setTime(num);
     return newdate;
 }
+
+var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
+var WHICH_GIRDER = "ESGgirder18";
 // SETUP }}}
 
 // {{{ GLOBAL VARIABLES
@@ -54,15 +80,6 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
     return;
 }
 
-var current_starts = [dt(rangeToWalk[0]).getFullYear(),
-                      dt(rangeToWalk[0]).getMonth(),
-                      dt(rangeToWalk[0]).getDate(),
-                      dt(rangeToWalk[0]).getHours()];
-var current_ends   = [dt(rangeToWalk[1]).getFullYear(),
-                      dt(rangeToWalk[1]).getMonth(),
-                      dt(rangeToWalk[1]).getDate(),
-                      dt(rangeToWalk[1]).getHours()];
-
 var stepSize = 60000; // 10000 is 2400 samples each time
 // 60000 is 1 minute each time
 // 100000 is 1:40 each time
@@ -70,52 +87,130 @@ var stepSize = 60000; // 10000 is 2400 samples each time
 
 // WHERE TO WALK }}}
 
-// TODO: walk through each section of the database
-for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
-    var reset_it = false;
+function async(arg, callback) {
+  console.log('do something with \''+arg+'\', return 0.1 sec later');
+  setTimeout(function() { callback(arg); }, 100);
+}
 
-    if (i % 21600000 === 0) {
-        // TODO: reset binData, and TODO TODO TODO: start a new file (ASYNCHRONOUSLY!)
-        //                                          or start using a new bindata, which isn't as efficient
-        current_starts = [dt(i).getFullYear(),
-                          dt(i).getMonth(),
-                          dt(i).getDate(),
-                          dt(i).getHours()];
-        current_ends   = [dt(i+21600000).getFullYear(),
-                          dt(i+21600000).getMonth(),
-                          dt(i+21600000).getDate(),
-                          dt(i+21600000).getHours()]
-        reset_it = true;
-        //console.log(dt(i).getHours() + ":" + dt(i).getMinutes(), dt(i+21600000).getHours() + ":" + dt(i+21600000).getMinutes());
-    }
+sendQuery("asdfasdfasdfasdf", function () {
+    console.log("working?");
+});
 
-    var query = makeQuery(i, i+stepSize);
-
-    sendDatabaseQuery(query, function (queryResult, st, en, res) {
+function sendQuery(query, callback) {
+    sendDatabaseQuery(query, function (queryResult) {
         // Bin the new data
         console.log("- data received. binning data...");
         try {
-            // For each one, add its rawData to binData, and bin it all
-            if (res) {
-                // reset it, because we're starting a new file now
-                binData = binnedData();
-            }
             binData.addRawData(queryResult);
 
             // Delete the bottom few levels
             binData.removeAllLevelsBelow(lowestLevelToKeep);
-
-            // Save the data-structure
-            saveItOut(st, en);
         } catch (e) {
             console.log(magenta+"=*= ERROR =*="+reset, e.message);
             throw e;
         }
+        WAIT_TOO = false;
         console.log("...done binning");
-    }, current_starts, current_ends, reset_it);
+        callback();
+    });
 }
 
-function saveItOut (st, en) {
+var results = [];
+function series(item) {
+    if(item) {
+        var query = makeQuery(item, i+stepSize);
+        results.push(results);
+        sendQuery( query, function() {
+            // TODO: get results from mysql and add them to binData.
+            return series(walk_steps.shift());
+        });
+    } else {
+        return final();
+    }
+}
+
+var walk_steps = [];
+for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
+    walk_steps.push(i);
+}
+
+// Run the series
+series(walk_steps.shift());
+
+// Final task (same in all the examples)
+function final() {
+    // TODO: save it out to couchdb
+    saveIt();
+    console.log('Done');
+    //process.exit(0);
+}
+
+return;
+
+// TODO: walk through each section of the database
+for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
+    var reset_it = false;
+
+    var query = makeQuery(i, i+stepSize);
+
+    console.log("WAIT_TOO");
+    WAIT_TOO = true;
+
+    sendDatabaseQuery(query, function (queryResult, res) {
+        // Bin the new data
+        console.log("- data received. binning data...");
+        try {
+            binData.addRawData(queryResult);
+
+            // Delete the bottom few levels
+            binData.removeAllLevelsBelow(lowestLevelToKeep);
+        } catch (e) {
+            console.log(magenta+"=*= ERROR =*="+reset, e.message);
+            throw e;
+        }
+        WAIT_TOO = false;
+        console.log("...done binning");
+    }, reset_it);
+    //while(WAIT_TOO) {};
+}
+
+function createIDString(girder, key, level, ms_start) {
+    // returns the ID which the couchdb database will use.
+    return "" + girder + "-" + key + "-" + level + "-" + ms_start;
+}
+
+function saveIt() {
+    console.log("trying to save now");
+
+    var something = false;
+
+    for (var ke in binData.getKeys()) { // for each key
+        var k = binData.getKeys()[ke];
+
+        for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
+            if (!binData.bd()[k]) {
+                console.log('continue:', k);
+                continue;
+            }
+
+            for (var c in binData.bd()[k].levels[l]) { // for each bin container
+                something = true;
+                var id = createIDString(WHICH_GIRDER, k, l, c);
+                var dat = binData.bd()[k].levels[l][c];
+                console.log("saving:", id, "to couchDB");
+                saveToCouch(id, dat);
+                //var currentBinContainer = binData.bd()[key].levels[level][ms_start]
+            }
+        }
+    }
+
+    if (!something) {
+        console.log("stop waiting. nothing to save");
+        WAIT = false;
+    }
+}
+
+function saveItOld (st, en) {
     // Save binData to a file
     var x = binData.toString();
 
