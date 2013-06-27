@@ -12,21 +12,6 @@ require("./database.js");
 var cradle = require('cradle')
 var db = new(cradle.Connection)().database('bridge_test');
 
-function saveToCouch(id, data) {
-    console.log("saveToCouch");
-    db.save(id, {
-        data: data
-    }, function (err, res) {
-        if (err) {
-            //Handle error
-            console.log("saving ERROR");
-        } else {
-            // Handle success
-            console.log("saving success");
-        }
-    });
-}
-
 red = '\033[31m';
 yellow = '\033[33m';
 magenta = '\033[35m';
@@ -38,12 +23,17 @@ function dt (num) {
     newdate.setTime(num);
     return newdate;
 }
-
-var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
-var WHICH_GIRDER = "ESGgirder18";
 // SETUP }}}
 
 // {{{ GLOBAL VARIABLES
+var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
+var WHICH_GIRDER = "ESGgirder18";
+
+var STEP_SIZE = 600000; // 10000 is 2400 samples each time
+                      // 60000 is 1 minute each time
+                      // 100000 is 1:40 each time
+                      // 600000 is ten minutes each time (works best for binning 1.0)
+
 var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
@@ -77,12 +67,21 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
     return;
 }
 
-var stepSize = 60000; // 10000 is 2400 samples each time
-                      // 60000 is 1 minute each time
-                      // 100000 is 1:40 each time
-                      // 600000 is ten minutes each time (works best for binning 1.0)
-
 // WHERE TO WALK }}}
+
+function saveToCouch(id, data) {
+    db.save(id, {
+        data: data
+    }, function (err, res) {
+        if (err) {
+            //Handle error
+            console.log("saving ERROR");
+        } else {
+            // Handle success
+            console.log("saving success:", id);
+        }
+    });
+}
 
 function async_function_example(arg, callback) {
   console.log('do something with \''+arg+'\', return 0.1 sec later');
@@ -91,7 +90,7 @@ function async_function_example(arg, callback) {
 
 //Heavy inspiration from: http://book.mixu.net/ch7.html
 function sendQuerySync(item, callback) {
-    var query = makeQuery(item, item+stepSize);
+    var query = makeQuery(item, item + STEP_SIZE);
 
     sendDatabaseQuery(query, function (queryResult) {
         // Bin the new data
@@ -120,12 +119,13 @@ function series(item, func) {
             return series(walk_steps.shift(), func);
         });
     } else {
+        console.log("saving now");
         return saveIt(final);
     }
 }
 
 var walk_steps = [];
-for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
+for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + STEP_SIZE) {
     walk_steps.push(i);
 }
 
@@ -139,89 +139,27 @@ function final() {
     //process.exit(0);
 }
 
-
-
-return;
-
-// TODO: walk through each section of the database
-for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
-    var reset_it = false;
-
-    var query = makeQuery(i, i+stepSize);
-
-    console.log("WAIT_TOO");
-
-    sendDatabaseQuery(query, function (queryResult, res) {
-        // Bin the new data
-        console.log("- data received. binning data...");
-        try {
-            binData.addRawData(queryResult);
-
-            // Delete the bottom few levels
-            binData.removeAllLevelsBelow(lowestLevelToKeep);
-        } catch (e) {
-            console.log(magenta+"=*= ERROR =*="+reset, e.message);
-            throw e;
-        }
-        console.log("...done binning");
-    }, reset_it);
-}
-
 function createIDString(girder, key, level, ms_start) {
     // returns the ID which the couchdb database will use.
     return "" + girder + "-" + key + "-" + level + "-" + ms_start;
 }
 
-function makeListForCouch(item) {
-    // TODO: store a global list, adding things that couch should send
-    // TODO: then synchronously send them out using magic
-}
-
 function saveIt(callback) {
-    console.log("trying to save now");
-
-    var something = false;
-
     for (var ke in binData.getKeys()) { // for each key
         var k = binData.getKeys()[ke];
 
         for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
-            if (!binData.bd()[k]) {
-                console.log('continue:', k);
-                continue;
-            }
+            if (!binData.bd()[k]) { continue; }
 
             for (var c in binData.bd()[k].levels[l]) { // for each bin container
-                something = true;
                 var id = createIDString(WHICH_GIRDER, k, l, c);
                 var dat = binData.bd()[k].levels[l][c];
                 console.log("saving:", id, "to couchDB");
+
                 saveToCouch(id, dat);
-                //var currentBinContainer = binData.bd()[key].levels[level][ms_start]
             }
         }
     }
-
-    if (!something) {
-        console.log("there was nothing to save");
-    }
-}
-
-function saveItOld (st, en) {
-    // Save binData to a file
-    var x = binData.toString();
-
-    var saveName = "/Users/woelk/scraped_2.1_6/scraped_piece_"+lowestLevelToKeep
-    +"_"+st[0]+"-"+st[1]+"-"+st[2]+"-"+st[3]
-    +"_"+en[0]+"-"+en[1]+"-"+en[2]+"-"+en[3]
-
-    fs.writeFile(saveName, x, function(err) {
-        if(err) {
-            console.log(err);
-        } else {
-            console.log("The file was saved to"+saveName);
-        }
-    });
 }
 
 /* vim: set foldmethod=marker: */
