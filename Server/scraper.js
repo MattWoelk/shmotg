@@ -6,7 +6,7 @@ _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
 require("./database.js");
-//require("./couchAccess.js");
+require("./couchAccess.js");
 
 
 var cradle = require('cradle')
@@ -28,6 +28,8 @@ function dt (num) {
 // {{{ GLOBAL VARIABLES
 var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
 var WHICH_GIRDER = "ESGgirder18";
+var SENSOR_TYPE = "girder";
+var GIRDER_NUMBER = 18;
 
 var STEP_SIZE = 600000; // 10000 is 2400 samples each time
                       // 60000 is 1 minute each time
@@ -69,20 +71,6 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
 
 // WHERE TO WALK }}}
 
-function saveToCouch(id, data) {
-    db.save(id, {
-        data: data
-    }, function (err, res) {
-        if (err) {
-            //Handle error
-            console.log("saving ERROR", id);
-        } else {
-            // Handle success
-            console.log("saving success:", id);
-        }
-    });
-}
-
 function async_function_example(arg, callback) {
   console.log('do something with \''+arg+'\', return 0.1 sec later');
   setTimeout(function() { callback(arg); }, 100);
@@ -108,7 +96,7 @@ function sendQuerySync(item, callback) {
             console.log(magenta+"=*= ERROR =*="+reset, e.message);
             throw e;
         }
-        console.log("...done binning");
+        console.log("   ...done binning");
         callback();
     });
 }
@@ -139,25 +127,20 @@ function final() {
     //process.exit(0);
 }
 
-function createIDString(girder, key, level, ms_start) {
-    // returns the ID which the couchdb database will use.
-    return "" + girder + "-" + level + "-" + ms_start;
-}
-
 function saveIt(callback) {
     var dummykey = "average";
     for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
         for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
             for (var ke in binData.getKeys()) { // for each key
                 var k = binData.getKeys()[ke];
-                var id = createIDString(WHICH_GIRDER, k, l, c);
+                var id = makeIDString(WHICH_GIRDER, k, l, c);
 
                 if (!binData.bd()[k]) { continue; }
 
                 var dat = binData.bd()[k].levels[l][c];
                 console.log("saving:", id, "to couchDB");
 
-                saveToCouch(id, dat);
+                saveToCouch(SENSOR_TYPE, GIRDER_NUMBER, k, l, dat[0].ms, dat); // TODO: replace dat[0].ms with the actual surrounding container ms_start
             }
         }
     }
