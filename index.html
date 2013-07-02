@@ -1,127 +1,130 @@
 <!DOCTYPE HTML>
 <html lang="en">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="normalize.css">
-    <link type="text/css" rel="stylesheet" href="bridgeCharts.css"/>
-    <!--[if lt IE 9]>
+<head><!--{{{-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1">
+<meta charset="UTF-8">
+<link rel="stylesheet" href="normalize.css">
+<link type="text/css" rel="stylesheet" href="bridgeCharts.css"/>
+<!--[if lt IE 9]>
     <script src="html5shiv.js"></script>
     <![endif]-->
 
-    <script type='application/javascript' src='node_modules/fastclick/lib/fastclick.js'></script>
-    <script type='application/javascript'>
-      window.addEventListener('load', function() {
-        FastClick.attach(document.body);
-      }, false);
-    </script>
+<script type='application/javascript' src='node_modules/fastclick/lib/fastclick.js'></script>
+<script type='application/javascript'>
+window.addEventListener('load', function() {
+    FastClick.attach(document.body);
+}, false);
+</script>
 
-    <title>Bridge Data Analysis</title>
-  </head>
-  <body>
+<title>Bridge Data Analysis</title>
+</head><!--}}}-->
 
-    <!-- Loading Animation {{{-->
-    <!-- From http://cssload.net/ -->
-    <div id="circularG">
-      <div id="circularG_1" class="circularG"> </div>
-      <div id="circularG_2" class="circularG"> </div>
-      <div id="circularG_3" class="circularG"> </div>
-      <div id="circularG_4" class="circularG"> </div>
-      <div id="circularG_5" class="circularG"> </div>
-      <div id="circularG_6" class="circularG"> </div>
-      <div id="circularG_7" class="circularG"> </div>
-      <div id="circularG_8" class="circularG"> </div>
-    </div>
-    <!--}}}-->
+<body>
+<!-- Loading Animation {{{-->
+<!-- From http://cssload.net/ -->
+<div id="circularG">
+    <div id="circularG_1" class="circularG"> </div>
+    <div id="circularG_2" class="circularG"> </div>
+    <div id="circularG_3" class="circularG"> </div>
+    <div id="circularG_4" class="circularG"> </div>
+    <div id="circularG_5" class="circularG"> </div>
+    <div id="circularG_6" class="circularG"> </div>
+    <div id="circularG_7" class="circularG"> </div>
+    <div id="circularG_8" class="circularG"> </div>
+</div>
+<!--}}}-->
 
-    <script>
-    function showhide() {
-        var element1 = document.getElementById("di1");
-        var element2 = document.getElementById("di2");
-        if (element1.style.display == "none") {
-            setAllYAxisLocks(false);
-            element1.style.display = "inline";
-            element2.style.display = "none";
-        } else {
-            setAllYAxisLocks(true);
-            element1.style.display = "none";
-            element2.style.display = "inline";
-        }
+<!--{{{ SHOWHIDE JAVASCRIPT-->
+<script>
+function showhide() {
+    var element1 = document.getElementById("di1");
+    var element2 = document.getElementById("di2");
+    if (element1.style.display == "none") {
+        setAllYAxisLocks(false);
+        element1.style.display = "inline";
+        element2.style.display = "none";
+    } else {
+        setAllYAxisLocks(true);
+        element1.style.display = "none";
+        element2.style.display = "inline";
     }
-    </script>
+}
+</script>
+<!-- SHOWHIDE JAVASCRIPT }}}-->
 
-    <div id="chartContainer" style="overflow:none; width:100%; overflow:none; float:left;">
-      <div id="charts"></div>
-      <svg id="zoomSVG"><rect id="zoomRect" /></svg>
-    </div>
-    <!-- the following diagram might have to all be done in the SVG for dragging to work properly -->
-    <!-- on the other hand, we can probably use some html5 dragg events and connect them properly -->
-    <div id="undercharts" style="clear:left">
-      <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
-      <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
-      <button id='scrollleft' title="scroll left">&lt;</button>
-      <button id='zoomin' title="zoom in">+</button>
-      <button id='zoomout' title="zoom out">-</button>
-      <button id='scrollright' title="scroll right">&gt;</button>
-      <button id='reload' onclick='window.location.reload(false); return true;'>reload page</button>
+<div id="chartContainer" style="overflow:none; width:100%; overflow:none; float:left;">
+    <div id="charts"></div>
+    <svg id="zoomSVG"><rect id="zoomRect" /></svg>
+</div>
 
-      <input type="checkbox" checked id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
-      <label for="isexpanded"></label>
-      <label for="isexpanded" id="expand-btn">Controls</label>
+<div id="undercharts" style="clear:left">
+    <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
+    <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
+    <button id='scrollleft' title="scroll left">&lt;</button>
+    <button id='zoomin' title="zoom in">+</button>
+    <button id='zoomout' title="zoom out">-</button>
+    <button id='scrollright' title="scroll right">&gt;</button>
+    <button id='reload' onclick='window.location.reload(false); return true;'>reload page</button>
 
-      </br> <!-- to keep the controls on the next line -->
+    <input type="checkbox" checked id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
+    <label for="isexpanded"></label>
+    <label for="isexpanded" id="expand-btn">Controls</label>
 
-      <div id="controls">
+    </br> <!-- to keep the controls on the next line -->
+
+    <div id="controls">
         <form>
-          <ul id="render-lines">
-            Which functions<br />to render:
-        <!--<li><label><input type="checkbox"         value="rawData"/>Raw Data</label></li>-->
-            <li><input type="checkbox" checked id="average"   value="average"/>  <label for="average"></label><label for="average">Averages</label></li>
-            <li><input type="checkbox" checked id="maxes"     value="maxes"/>    <label for="maxes"></label><label for="maxes">Maximums</label></li>
-            <li><input type="checkbox" checked id="mins"      value="mins"/>     <label for="mins"></label><label for="mins">Minimums</label></li>
-            <li><input type="checkbox"         id="q1"        value="q1"/>       <label for="q1"></label><label for="q1">1st Quartile</label></li>
-            <li><input type="checkbox"         id="q3"        value="q3"/>       <label for="q3"></label><label for="q3">3st Quartile</label></li>
-            <li><input type="checkbox" checked id="quartiles" value="quartiles"/><label for="quartiles"></label><label for="quartiles">Quartile Area</label></li>
-          </ul>
+            <ul id="render-lines">
+                Which functions<br />to render:
+                <!--<li><label><input type="checkbox"         value="rawData"/>Raw Data</label></li>-->
+                <li><input type="checkbox" checked id="maxes"     value="maxes"/>    <label for="maxes"></label><label for="maxes">Maximums</label></li>
+                <li><input type="checkbox"         id="q3"        value="q3"/>       <label for="q3"></label><label for="q3">3st Quartile</label></li>
+                <li><input type="checkbox" checked id="average"   value="average"/>  <label for="average"></label><label for="average">Averages</label></li>
+                <li><input type="checkbox" checked id="quartiles" value="quartiles"/><label for="quartiles"></label><label for="quartiles">Quartile Area</label></li>
+                <li><input type="checkbox"         id="q1"        value="q1"/>       <label for="q1"></label><label for="q1">1st Quartile</label></li>
+                <li><input type="checkbox" checked id="mins"      value="mins"/>     <label for="mins"></label><label for="mins">Minimums</label></li>
+            </ul>
 
-          <ul id="render-depth">
-            <!-- Idea: instead of all this, we could have more bullets which would be options for how many pixels per bin. It would automatically update still, but you'd have some control over when and how much this way. -->
-            Maximum Bin<br />Render Size:
-            <br />
-            <label><input type="range" min="10" max="200" id="renderdepth" value="40" style="width:200px"/>
-          </ul>
+            <ul id="render-depth">
+                <!-- Idea: instead of all this, we could have more bullets which would be options for how many pixels per bin. It would automatically update still, but you'd have some control over when and how much this way. -->
+                Maximum Bin<br />Render Size:
+                <br />
+                <label><input type="range" min="10" max="200" id="renderdepth" value="40" style="width:200px"/></label>
+            </ul>
 
-          <ul id="render-method">
-            Interpolation<br />Method:
-            <li><label><input type="radio"         name="render-method" value="linear"/>Linear</li>
-            <li><label><input type="radio" checked name="render-method" value="step-after"/>Step-After</li>
-              <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>-->
-              <li><label><input type="radio"                   name="render-method" value="monotone"/>Monotone</li>
-          </ul>
+            <ul id="render-method">
+                Interpolation<br />Method:
+                <li><input type="radio"         id="lin_rad"  name="render-method" value="linear"/><label for="lin_rad"></label><label for="lin_rad">Linear</label></li>
+                <li><input type="radio" checked id="stp_rad" name="render-method" value="step-after"/><label for="stp_rad"></label><label for="stp_rad">Step-After</label></li>
+                <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>-->
+                <li><input type="radio"         id="mon_rad" name="render-method" value="monotone"/><label for="mon_rad"></label><label for="mon_rad">Monotone</label></li>
+            </ul>
         </form>
-      </div>
     </div>
+</div>
 
-    <!--<button id='fade' onclick='fade()'>fade</button>-->
+<!--<button id='fade' onclick='fade()'>fade</button>-->
 
-    <svg id="custom_checkboxes"></svg>
+<svg id="custom_checkboxes"></svg>
 
-    <!--{{{ PRELOAD IMAGES FOR CUSTOM CHCKBOXES-->
-    <img src="./img/blue0.svg" style="display:none">
-    <img src="./img/blue1.svg" style="display:none">
-    <img src="./img/green0.svg" style="display:none">
-    <img src="./img/green1.svg" style="display:none">
-    <img src="./img/red_dark0.svg" style="display:none">
-    <img src="./img/red_dark1.svg" style="display:none">
-    <img src="./img/red_light0.svg" style="display:none">
-    <img src="./img/red_light1.svg" style="display:none">
-    <img src="./img/black0.svg" style="display:none">
-    <img src="./img/black1.svg" style="display:none">
-    <!--}}}-->
+<!--{{{ PRELOAD IMAGES FOR CUSTOM CHCKBOXES-->
+<img src="./img/blue0.svg" style="display:none">
+<img src="./img/blue1.svg" style="display:none">
+<img src="./img/green0.svg" style="display:none">
+<img src="./img/green1.svg" style="display:none">
+<img src="./img/red_dark0.svg" style="display:none">
+<img src="./img/red_dark1.svg" style="display:none">
+<img src="./img/red_light0.svg" style="display:none">
+<img src="./img/red_light1.svg" style="display:none">
+<img src="./img/black0.svg" style="display:none">
+<img src="./img/black1.svg" style="display:none">
+<img src="./img/circ0.svg" style="display:none">
+<img src="./img/circ1.svg" style="display:none">
+<!--}}}-->
 
-  </body>
+<!--{{{ JAVASCRIPT LOADING-->
   <script src="socket.io.min.js"></script>
   <script src="d3/d3.min.js"></script>
   <script src="node_modules/underscore/underscore-min.js"></script>
@@ -130,6 +133,7 @@
   <script src="bridgeCharts.js"></script>
   <script src="msToCentury.js"></script>
   <script src="html5slider.js"></script>
+<!-- JAVASCRIPT LOADING }}}-->
 </html>
 
 <!-- vim: set foldmethod=marker: -->

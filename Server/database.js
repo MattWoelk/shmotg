@@ -108,20 +108,21 @@ dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
-sendDatabaseQuery = function(query, doWithResult, st, en, res) {
+sendDatabaseQuery = function(query, doWithResult) {
+  console.log("sending db query");
   mysqlconnection.query(query, function (err, rows, fields) {
-    if (err) {console.log("err: ", err); return err;}
+    if (err) { console.log("err: ", err); doWithResult(null); return; }
     console.log(red+query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
-      return { val: d.ESGgirder18 ,
-               ms: dateAndSampleIndexStringToMilliseconds(
+        return { val: d.ESGgirder18 ,
+                 ms: dateAndSampleIndexStringToMilliseconds(
                  d.Time + "",
                  d.SampleIndex)
-             };
+               };
     });
 
-    doWithResult(send_object, st, en, res); // send_object is always raw data
+    doWithResult(send_object); // send_object is always raw data
   });
 }
 

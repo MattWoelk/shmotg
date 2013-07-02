@@ -6,6 +6,11 @@ _ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
 require("./database.js");
+require("./couchAccess.js");
+
+
+var cradle = require('cradle')
+var db = new(cradle.Connection)().database('bridge_test');
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -21,6 +26,16 @@ function dt (num) {
 // SETUP }}}
 
 // {{{ GLOBAL VARIABLES
+var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
+var WHICH_GIRDER = "ESGgirder18";
+var SENSOR_TYPE = "girder";
+var GIRDER_NUMBER = 18;
+
+var STEP_SIZE = 600000; // 10000 is 2400 samples each time
+                      // 60000 is 1 minute each time
+                      // 100000 is 1:40 each time
+                      // 600000 is ten minutes each time (works best for binning 1.0)
+
 var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
@@ -54,82 +69,81 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
     return;
 }
 
-var current_starts = [dt(rangeToWalk[0]).getFullYear(),
-                      dt(rangeToWalk[0]).getMonth(),
-                      dt(rangeToWalk[0]).getDate(),
-                      dt(rangeToWalk[0]).getHours()];
-var current_ends   = [dt(rangeToWalk[1]).getFullYear(),
-                      dt(rangeToWalk[1]).getMonth(),
-                      dt(rangeToWalk[1]).getDate(),
-                      dt(rangeToWalk[1]).getHours()];
-
-var stepSize = 60000; // 10000 is 2400 samples each time
-// 60000 is 1 minute each time
-// 100000 is 1:40 each time
-// 600000 is ten minutes each time (works best for binning 1.0)
-
 // WHERE TO WALK }}}
 
-// TODO: walk through each section of the database
-for (var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + stepSize) {
-    var reset_it = false;
+function async_function_example(arg, callback) {
+  console.log('do something with \''+arg+'\', return 0.1 sec later');
+  setTimeout(function() { callback(arg); }, 100);
+}
 
-    if (i % 21600000 === 0) {
-        // TODO: reset binData, and TODO TODO TODO: start a new file (ASYNCHRONOUSLY!)
-        //                                          or start using a new bindata, which isn't as efficient
-        current_starts = [dt(i).getFullYear(),
-                          dt(i).getMonth(),
-                          dt(i).getDate(),
-                          dt(i).getHours()];
-        current_ends   = [dt(i+21600000).getFullYear(),
-                          dt(i+21600000).getMonth(),
-                          dt(i+21600000).getDate(),
-                          dt(i+21600000).getHours()]
-        reset_it = true;
-        //console.log(dt(i).getHours() + ":" + dt(i).getMinutes(), dt(i+21600000).getHours() + ":" + dt(i+21600000).getMinutes());
-    }
+//Heavy inspiration from: http://book.mixu.net/ch7.html
+function sendQuerySync(item, callback) {
+    var query = makeQuery(item, item + STEP_SIZE);
 
-    var query = makeQuery(i, i+stepSize);
-
-    sendDatabaseQuery(query, function (queryResult, st, en, res) {
+    sendDatabaseQuery(query, function (queryResult) {
         // Bin the new data
         console.log("- data received. binning data...");
+        if(queryResult == null) {
+            callback();
+            return;
+        }
         try {
-            // For each one, add its rawData to binData, and bin it all
-            if (res) {
-                // reset it, because we're starting a new file now
-                binData = binnedData();
-            }
             binData.addRawData(queryResult);
 
             // Delete the bottom few levels
             binData.removeAllLevelsBelow(lowestLevelToKeep);
-
-            // Save the data-structure
-            saveItOut(st, en);
         } catch (e) {
             console.log(magenta+"=*= ERROR =*="+reset, e.message);
             throw e;
         }
-        console.log("...done binning");
-    }, current_starts, current_ends, reset_it);
+        console.log("   ...done binning");
+        callback();
+    });
 }
 
-function saveItOut (st, en) {
-    // Save binData to a file
-    var x = binData.toString();
+function series(item, func) {
+    if(item) {
+        func(item, function() {
+            return series(walk_steps.shift(), func);
+        });
+    } else {
+        console.log("saving now");
+        return saveIt(final);
+    }
+}
 
-    var saveName = "/Users/woelk/scraped_2.1_6/scraped_piece_"+lowestLevelToKeep
-    +"_"+st[0]+"-"+st[1]+"-"+st[2]+"-"+st[3]
-    +"_"+en[0]+"-"+en[1]+"-"+en[2]+"-"+en[3]
+var walk_steps = [];
+for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + STEP_SIZE) {
+    walk_steps.push(i);
+}
 
-    fs.writeFile(saveName, x, function(err) {
-        if(err) {
-            console.log(err);
-        } else {
-            console.log("The file was saved to"+saveName);
+// Run the series
+series(walk_steps.shift(), sendQuerySync);
+
+// Final task (same in all the examples)
+function final() {
+    // TODO: save it out to couchdb
+    console.log('Done');
+    //process.exit(0);
+}
+
+function saveIt(callback) {
+    var dummykey = "average";
+    for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
+        for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
+            for (var ke in binData.getKeys()) { // for each key
+                var k = binData.getKeys()[ke];
+                var id = makeIDString(WHICH_GIRDER, k, l, c);
+
+                if (!binData.bd()[k]) { continue; }
+
+                var dat = binData.bd()[k].levels[l][c];
+                console.log("saving:", id, "to couchDB");
+
+                saveToCouch(SENSOR_TYPE, GIRDER_NUMBER, k, l, dat[0].ms, dat); // TODO: replace dat[0].ms with the actual surrounding container ms_start
+            }
         }
-    });
+    }
 }
 
 /* vim: set foldmethod=marker: */

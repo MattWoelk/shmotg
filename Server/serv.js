@@ -3,9 +3,9 @@ var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
 _ = require('underscore');
-d3 = require("d3");
 require("../binnedData.js");
 require("./database.js");
+require("./couchAccess.js");
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -22,7 +22,7 @@ function dt (num) {
 
 // {{{ GLOBAL VARIABLES
 var binData = binnedData();
-var READ_OLD_DATA = true;
+var READ_OLD_DATA = false;
 var READ_NEW_DATA = true;
 // GLOBAL VARIABLES}}}
 
@@ -113,17 +113,6 @@ function dateStringToMilliseconds (dateStr) {
     .getTime();
 }
 
-function samplesToMilliseconds (sampleIndex) {
-    var samplesPerSecond = 200;
-    var msPerSample = 1000/samplesPerSecond;
-    var mils = sampleIndex * msPerSample;
-    return mils;
-}
-
-function dateAndSampleIndexStringToMilliseconds (dateStr, sampleIndex) {
-    return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
-}
-
 function pad(integ) {
     var i = "" + integ;
     if (i.length === 1) { i = "0" + i; } // pad with a zero if necessary
@@ -148,7 +137,6 @@ io.sockets.on('connection', function (socket) {
         var req = received.req;
         var id = received.id;
 
-        // See if we have the requested data at the requested bin level
         var range = [parseInt(req.ms_start), parseInt(req.ms_end)];
         //}}} PARSE REQUEST
 
@@ -187,7 +175,8 @@ io.sockets.on('connection', function (socket) {
             // Send requested data to client
             var toBeSent = {
                 id: id,
-                sensor: req.sensor,
+                sensorType: req.sensorType,
+                sensorNumber: req.sensorNumber,
                 bin_level: lvl,
                 req: send_req
             };
@@ -225,6 +214,20 @@ io.sockets.on('connection', function (socket) {
             // GET AND SEND REQUEST }}}
         } else {
             // we do not need to retrieve data from the database
+            // but we do from couchdb
+
+            // TODO: calculate which bin containers we need
+            // TODO: request those from the database
+            //var a, q1, q3, mi, ma;
+            //binData.doToEachContainerInRange(range, req.bin_level, function (d) {
+            //    var lvl = req.bin_level;
+            //    a = getFromCouch(req.sensorType, req.sensorNumber, "average", lvl, d);
+            //    q1 = getFromCouch(req.sensorType, req.sensorNumber, "q1", lvl, d);
+            //    q3 = getFromCouch(req.sensorType, req.sensorNumber, "q3", lvl, d);
+            //    mi = getFromCouch(req.sensorType, req.sensorNumber, "mins", lvl, d);
+            //    ma = getFromCouch(req.sensorType, req.sensorNumber, "maxes", lvl, d);
+            //});
+
             // {{{ SEND TO CLIENT
             console.log("** ALREADY HAD THAT DATA **");
             sendToClient(binData, req.bin_level);
