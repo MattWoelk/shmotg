@@ -205,13 +205,14 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, girder) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     //{{{ VARIABLES
 
     var dataReq = dataRequester;
     var strokeWidth = 1;
-    var whichGirder = girder;
+    var sensorType = sensorT;
+    var sensorNumber = sensorN;
 
     // the frequency of the data samples
     var milliSecondsPerSample = 1;
@@ -440,7 +441,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
             // If we don't have every piece of data in this range, ask for it all.
             if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
                 var req = {
-                    sensor: whichGirder,
+                    sensorNumber: sensorNumber,
+                    sensorType: sensorType,
                     ms_start: renderRange[0],
                     ms_end: renderRange[1],
                     bin_level: whichLevelToRender,
@@ -487,7 +489,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
 
             //Make the clipPath (for cropping the paths)
-            if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + whichGirder).append("rect"); }
+            if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + sensorType + sensorNumber).append("rect"); }
             defclip.attr("width", width)
                    //.transition().duration(transitionDuration)
                    .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
@@ -498,8 +500,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
             //{{{ AREAS
 
             //Apply the clipPath
-            pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+whichGirder+"posArea");
-            pathArea.attr("clip-path", "url(#clip" + whichGirder + ")")
+            pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
+            pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
                     .attr("height", height);
 
             //make and render the area
@@ -507,7 +509,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
             drawElements(quartileObjectForKeyFanciness,
                          pathArea,
-                         whichGirder,
+                         sensorType+sensorNumber,
                          function (d) { return binData.getColor(d.key); },
                          function (d) { return "rgba(0,0,0,0)"; },
                          xScale,
@@ -527,8 +529,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
             //{{{ LINES
 
             //Apply the clipPath
-            pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+whichGirder+"posPath");
-            pathPath.attr("clip-path", "url(#clip" + whichGirder + ")")
+            pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
+            pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
                     .attr("height", height);
 
             //Make and render the Positive lines.
@@ -536,7 +538,7 @@ var binnedLineChart = function (data, dataRequester, girder) {
 
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
-                         whichGirder,
+                         sensorType+sensorNumber,
                          function (d) { return "rgba(0,0,0,0)"; },
                          function (d) { return binData.getColor(d.key); },
                          xScale,
@@ -734,8 +736,8 @@ var binnedLineChart = function (data, dataRequester, girder) {
     };
 
     my.uniqueID = function (value) {
-        if (!arguments.length) return whichGirder;
-        whichGirder = value;
+        if (!arguments.length) return sensorType+sensorNumber;
+        sensorType+sensorNumber = value;
         return my;
     }
 

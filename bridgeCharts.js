@@ -105,11 +105,11 @@ function setLoadingIcon(on) {
 var uniqueID = 0;
 function initPlot(data, first, sendReq) {
     if (first) {
-        var plot = binnedLineChart(data, sendReq, "ESGgirder18");
+        var plot = binnedLineChart(data, sendReq, "girder", 18);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", "chartESGgirder18").call(plot);
+        var pl = d3.select("#charts").append("svg").attr("id", "girder"+18).call(plot);
     } else {
-        var plot = binnedLineChart(data, function () {}, uniqueID);
+        var plot = binnedLineChart(data, function () {}, "girder", uniqueID);
         plot.xScale(xScale.copy());
         var pl = d3.select("#charts").append("svg").attr("id", "chart"+uniqueID).call(plot);
     }
@@ -377,7 +377,7 @@ socket.on('req_data', function (data) {
     }// else { console.log("Server returned DATA"); }
 
     for (i=0;i<plots.length;i++) {
-        if (plots[i].uniqueID() === received.sensor) {
+        if (plots[i].uniqueID() === "" + received.sensorType + received.sensorNumber) {
             plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
         }
     }

@@ -123,9 +123,9 @@ binnedData = function () {
         return binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
     }
 
-    function getKeyForTimeAtLevel (ms, lvl) {
-        // TODO: calculate the starting ms of the bin [at this
-        //       level] in which this ms would fit.
+    function getMSStartForTimeAtLevel (ms, lvl) {
+        // TODO: calculate the starting ms of the bin container
+        // [at this level] in which this ms would fit.
 
         var oneSample = 1000 / 200; // milliseconds per sample
         var sampleSize = Math.pow(2, lvl) * oneSample;
@@ -219,7 +219,18 @@ binnedData = function () {
         var oneSample = 1000 / 200; // milliseconds per sample
         var binSize = Math.pow(2, lvl) * oneSample;
 
-        var startRounded = getKeyForTimeAtLevel(start, lvl);
+        var startRounded = getMSStartForTimeAtLevel(start, lvl);
+
+        return _.range(startRounded, end, binSize);
+    }
+
+    function getSurroundingBinContainers (start, end, lvl) {
+        // return all bin container starts at this level between start and end
+        // NOT INCLUDING the highest point if it is equal to end
+
+        var binSize = binContainerSize(lvl);
+
+        var startRounded = getMSStartForTimeAtLevel(start, lvl);
 
         return _.range(startRounded, end, binSize);
     }
@@ -233,7 +244,7 @@ binnedData = function () {
         // Assumption: data is ordered and continuous
 
         return _.groupBy(data, function (d) {
-            return getKeyForTimeAtLevel(d.ms, lvl);
+            return getMSStartForTimeAtLevel(d.ms, lvl);
         });
     }
 
@@ -276,8 +287,8 @@ binnedData = function () {
 
         // get lvl+1's range of containers for this range
         var upperLevelRange = [ // range until very end
-            getKeyForTimeAtLevel(range[0], lvl+1),
-            getKeyForTimeAtLevel(range[1], lvl+1) + binContainerSize(lvl+1)
+            getMSStartForTimeAtLevel(range[0], lvl+1),
+            getMSStartForTimeAtLevel(range[1], lvl+1) + binContainerSize(lvl+1)
         ];
 
         // get lvl range of containers for that range
@@ -285,7 +296,7 @@ binnedData = function () {
             //console.log(upperLevelRange[0], upperLevelRange[1]);
             return [];
         }
-        var binsToBeCombined = getSurroundingBins(upperLevelRange[0], upperLevelRange[1], lvl);
+        var binsToBeCombined = getSurroundingBinContainers(upperLevelRange[0], upperLevelRange[1], lvl);
 
         var combo = [];
         for (var i in binsToBeCombined) {
@@ -781,7 +792,7 @@ binnedData = function () {
         var result = [];
 
         // where to look for this data:
-        var whichBinsToLookIn = getSurroundingBins(range[0], range[1], lvl);
+        var whichBinsToLookIn = getSurroundingBinContainers(range[0], range[1], lvl);
 
         _.each(whichBinsToLookIn, function (n) {
             if(!bd[key].levels[lvl]) { return; }
@@ -846,6 +857,12 @@ binnedData = function () {
                 } // for each bin container
             } // for each level
         } // for each key
+    }
+
+    my.doToEachContainerInRange = function (range, level, func) {
+        getSurroundingBinContainers(range[0], range[1], level).forEach(function (d) {
+            func(d);
+        });
     }
 
     my.getKeys = function () {
