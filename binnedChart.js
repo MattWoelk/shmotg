@@ -737,7 +737,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     my.uniqueID = function (value) {
         if (!arguments.length) return sensorType+sensorNumber;
-        sensorType+sensorNumber = value;
         return my;
     }
 
