@@ -103,7 +103,7 @@ require("./couchAccess.js");
 //});
 
 // THIS WORKS!
-getFromCouch('girder', '18', 'average', 5, 40);
+getFromCouch('girder', '18', 'average', 5, 40, console.log);
 
 // THIS WORKS!
 //db.temporaryView({

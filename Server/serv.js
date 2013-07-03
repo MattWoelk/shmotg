@@ -215,23 +215,60 @@ io.sockets.on('connection', function (socket) {
         } else {
             // we do not need to retrieve data from the database
             // but we do from couchdb
+            console.log("** GET FROM COUCH **");
 
-            // TODO: calculate which bin containers we need
-            // TODO: request those from the database
-            //var a, q1, q3, mi, ma;
-            //binData.doToEachContainerInRange(range, req.bin_level, function (d) {
-            //    var lvl = req.bin_level;
-            //    a = getFromCouch(req.sensorType, req.sensorNumber, "average", lvl, d);
-            //    q1 = getFromCouch(req.sensorType, req.sensorNumber, "q1", lvl, d);
-            //    q3 = getFromCouch(req.sensorType, req.sensorNumber, "q3", lvl, d);
-            //    mi = getFromCouch(req.sensorType, req.sensorNumber, "mins", lvl, d);
-            //    ma = getFromCouch(req.sensorType, req.sensorNumber, "maxes", lvl, d);
-            //});
+            var argsList = [];
+            var bdtemp = binnedData();
 
-            // {{{ SEND TO CLIENT
-            console.log("** ALREADY HAD THAT DATA **");
-            sendToClient(binData, req.bin_level);
-            // SEND TO CLIENT }}}
+            // TODO: finalFunc() should send bdtemp to the client
+            var sendOut = function () {
+                sendToClient(bdtemp, req.bin_level);
+            }
+
+            //Heavy inspiration from: http://book.mixu.net/ch7.html
+            function seriesOfFiveParameters(item, func, finalFunc) {
+                if(item) {
+                    func(item[0], item[1], item[2], item[3], item[4], function() {
+                        return seriesOfFiveParameters(argsList.shift(), func, finalFunc);
+                    });
+                } else {
+                    console.log(finalFunc);
+                    return finalFunc();
+                }
+            }
+
+            // get which bins we need
+            var binContainers = bdtemp.getSurroundingBinContainers(range[0], range[1], req.bin_level);
+
+            // make a list which looks like this: [{sensorType, sensorNumber, "average", lvl, bin}, etc for q1, q3, ...]
+            for (var i = 0; i < binContainers.length; i++) {
+                var keyList = ["average", "q1", "q3", "mins", "maxes"];
+                for (var j = 0; j < keyList.length; j++) {
+                    argsList.push([req.sensorType, req.sensorNumber, keyList[j], req.bin_level, binContainers[i]]);
+                }
+            }
+
+            // TODO: func() should make sendo, and add it to bdtemp.
+            var func = function (st, sn, k, l, d, callback) {
+                var clbk = function(d) {
+                    var sendo     = {};
+
+                    sendo.average        = {levels: []};
+                    sendo.q1             = {levels: []};
+                    sendo.q3             = {levels: []};
+                    sendo.mins           = {levels: []};
+                    sendo.maxes          = {levels: []};
+
+                    sendo[k].levels[l] = d;
+                    bdtemp.addBinnedData(sendo, l, true);
+                    callback();
+                }
+
+                getFromCouch(st, sn, k, l, d, clbk);
+            }
+
+            // TODO: call seriesOfFiveParameters(item.shift(), func)
+            seriesOfFiveParameters(argsList.shift(), func, sendOut);
         } // if we need data from the database
 
     });

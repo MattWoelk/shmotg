@@ -101,6 +101,7 @@ function sendQuerySync(item, callback) {
     });
 }
 
+//Heavy inspiration from: http://book.mixu.net/ch7.html
 function series(item, func) {
     if(item) {
         func(item, function() {
