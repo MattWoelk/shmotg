@@ -524,6 +524,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
+            console.log("rebinning");
             rebin(range, lvl);
         }
 
@@ -898,8 +899,8 @@ binnedData = function () {
         return JSON.stringify(bd);
     }
 
-    my.rebinAll = function (a,b) {
-        rebin(a, b);
+    my.rebinAll = function (range, lvl) {
+        rebin(range, lvl);
     }
 
     // PUBLIC METHODS }}}

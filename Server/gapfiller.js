@@ -1,5 +1,5 @@
-// This goes through the couchdb database
-// and rebins data as requested. (See USAGE);
+// This finds gaps in the database and fills it from mysql
+// run this, and then run rebinner.js
 
 // TODO: go through all of level 6 in couchdb, find missing ones, and retrieve them from the mysql database
 // TODO: save them back out to couchdb
@@ -95,8 +95,6 @@ var sendOut = function () {
     //TODO: rebin the entire thing:
     console.log("rebinning...")
     binData.rebinAll(rangeToWalk, 6);
-    console.log("...twice...");
-    binData.rebinAll(rangeToWalk, 6);
     console.log("...is done!");
 
     //TODO: save it all back out to couchdb
@@ -120,9 +118,9 @@ function seriesOfFiveParameters(item, func, finalFunc) {
 var binContainers = binData.getSurroundingBinContainers(rangeToWalk[0], rangeToWalk[1], req.bin_level);
 
 // make a list which looks like this: [{sensorType, sensorNumber, "average", lvl, bin}, etc for q1, q3, ...]
-var keyList = ["average", "q1", "q3", "mins", "maxes"];
-for (var j = 0; j < keyList.length; j++) {
-    for (var i = 0; i < binContainers.length; i++) {
+for (var i = 0; i < binContainers.length; i++) {
+    var keyList = ["average", "q1", "q3", "mins", "maxes"];
+    for (var j = 0; j < keyList.length; j++) {
         argsList.push([req.sensorType, req.sensorNumber, keyList[j], req.bin_level, binContainers[i]]);
     }
 }
@@ -145,6 +143,7 @@ var func = function (st, sn, k, l, d, callback) {
             console.log("  -- THERE was no DATA -- ");
         }
         binData.addBinnedData(sendo, l, true);
+        console.log(binData.bd().average.levels[7]);
         callback();
     }
 

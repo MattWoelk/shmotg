@@ -1,3 +1,6 @@
+// It is a good idea to run this on no more than 6 hours of data at a time; example:
+// node scraper 2012 0 5 24 2012 0 6 6
+
 // {{{ SETUP
 require("../binnedData.js");
 require("./database.js");
@@ -130,7 +133,7 @@ function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
                 var dat = binData.bd()[k].levels[l][c];
                 console.log("saving:", id, "to couchDB");
 
-                saveToCouch(SENSOR_TYPE, GIRDER_NUMBER, k, l, dat[0].ms, dat); // TODO: replace dat[0].ms with the actual surrounding container ms_start
+                saveWithMergeToCouch(SENSOR_TYPE, GIRDER_NUMBER, k, l, dat[0].ms, dat); // TODO: replace dat[0].ms with the actual surrounding container ms_start
             }
         }
     }
