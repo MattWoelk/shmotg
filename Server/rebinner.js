@@ -1,6 +1,10 @@
 // This goes through the couchdb database
 // and rebins data as requested.
 
+// TODO: go through all of level 6 in couchdb, find missing ones, and retrieve them from the mysql database
+// TODO: save them back out to couchdb
+// TODO: pull all of level 7 into memory and bin it, then save it back out to couchdb
+
 // {{{ SETUP
 var http = require('http');
 var fs = require('fs');

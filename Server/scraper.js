@@ -1,28 +1,14 @@
 // {{{ SETUP
-var http = require('http');
-var fs = require('fs');
-var mysql = require('mysql');
-_ = require('underscore');
-d3 = require("d3");
 require("../binnedData.js");
 require("./database.js");
 require("./couchAccess.js");
-
-
-var cradle = require('cradle')
-var db = new(cradle.Connection)().database('bridge_test');
+_ = require("underscore");
 
 red = '\033[31m';
 yellow = '\033[33m';
 magenta = '\033[35m';
 blue = '\033[36m';
 reset = '\033[0m';
-
-function dt (num) {
-    var newdate = new Date();
-    newdate.setTime(num);
-    return newdate;
-}
 // SETUP }}}
 
 // {{{ GLOBAL VARIABLES
@@ -67,9 +53,9 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
     return;
 }
-
 // WHERE TO WALK }}}
 
+// {{{ ASYNC
 function async_function_example(arg, callback) {
   console.log('do something with \''+arg+'\', return 0.1 sec later');
   setTimeout(function() { callback(arg); }, 100);
@@ -112,6 +98,15 @@ function series(item, func) {
     }
 }
 
+// Final task (same in all the examples)
+function final() {
+    // TODO: save it out to couchdb
+    console.log('Done');
+    //process.exit(0);
+}
+// ASYNC }}}
+
+// {{{ RUN
 var walk_steps = [];
 for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + STEP_SIZE) {
     walk_steps.push(i);
@@ -119,15 +114,10 @@ for(var i = rangeToWalk[0]; i < rangeToWalk[1]; i = i + STEP_SIZE) {
 
 // Run the series
 series(walk_steps.shift(), sendQuerySync);
+// RUN }}}
 
-// Final task (same in all the examples)
-function final() {
-    // TODO: save it out to couchdb
-    console.log('Done');
-    //process.exit(0);
-}
-
-function saveIt(callback) {
+// {{{ SAVE
+function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
     var dummykey = "average";
     for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
         for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
@@ -145,5 +135,6 @@ function saveIt(callback) {
         }
     }
 }
+// SAVE }}}
 
 /* vim: set foldmethod=marker: */
