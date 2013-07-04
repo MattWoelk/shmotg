@@ -39,11 +39,12 @@ makeIDString = function (sensorType, sensorNumber, type, level, ms_start) {
     return result;
 }
 
-getFromCouch = function (sensorType, sensorNumber, type, level, ms_start){
+getFromCouch = function (sensorType, sensorNumber, type, level, ms_start, callback){
     var idString = makeIDString(sensorType, sensorNumber, type, level, ms_start);
 
-    db.get(idString, function (err, doc) {
-        return doc ? doc.data : [];
+    return db.get(idString, function (err, doc) {
+        var result = doc ? doc.data : [];
+        callback(result);
         //console.log(doc.data[0].ms);
     });
 }

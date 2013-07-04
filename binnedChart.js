@@ -157,6 +157,9 @@ function goToLevel(scal, msPS) {
     var toLevel = d3.max([0, toLevel]);
     var toLevel = d3.min([MAX_NUMBER_OF_BIN_LEVELS - 1, toLevel]);
 
+    // TODO: this may not be the correct place for this: update the span with id "current_level"
+    d3.select("#current_level").text(toLevel);
+
     return toLevel;
 }
 

@@ -27,7 +27,6 @@ function dt (num) {
 
 // {{{ GLOBAL VARIABLES
 var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
-var WHICH_GIRDER = "ESGgirder18";
 var SENSOR_TYPE = "girder";
 var GIRDER_NUMBER = 18;
 
@@ -101,6 +100,7 @@ function sendQuerySync(item, callback) {
     });
 }
 
+//Heavy inspiration from: http://book.mixu.net/ch7.html
 function series(item, func) {
     if(item) {
         func(item, function() {
@@ -133,7 +133,7 @@ function saveIt(callback) {
         for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
             for (var ke in binData.getKeys()) { // for each key
                 var k = binData.getKeys()[ke];
-                var id = makeIDString(WHICH_GIRDER, k, l, c);
+                var id = makeIDString(SENSOR_TYPE, GIRDER_NUMBER, k, l, c);
 
                 if (!binData.bd()[k]) { continue; }
 

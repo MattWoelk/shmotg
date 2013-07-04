@@ -167,7 +167,6 @@ binnedData = function () {
 
         for (var keyValue in bd.keys) {
             var key = bd.keys[keyValue];
-            console.log("key", key);
             result = result.concat(bd[key].levels[lvl]);
         }
 
@@ -500,7 +499,24 @@ binnedData = function () {
         //   etc: {},
         // }
 
-        var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
+        var lows = [];
+        var highs = [];
+        var keys = ['average', 'q1', 'q3', 'mins', 'maxes'];
+
+        for (var i = 0; i < keys.length; i++) {
+            if (bData[keys[i]] && bData[keys[i]].levels && bData[keys[i]].levels[lvl]) {
+                var ext = d3.extent(bData[keys[i]].levels[lvl], function (d) { return d.ms; });
+                lows.push(ext[0]);
+                lows.push(ext[1]);
+            }
+        }
+
+        var range = [
+                d3.min(lows),
+                d3.max(highs)
+        ];
+
+        //var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
@@ -863,6 +879,10 @@ binnedData = function () {
         getSurroundingBinContainers(range[0], range[1], level).forEach(function (d) {
             func(d);
         });
+    }
+
+    my.getSurroundingBinContainers = function (r0, r1, lvl) {
+        return getSurroundingBinContainers(r0, r1, lvl);
     }
 
     my.getKeys = function () {
