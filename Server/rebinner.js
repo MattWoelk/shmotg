@@ -5,6 +5,12 @@
 // TODO: save them back out to couchdb
 // TODO: pull all of level 7 into memory and bin it, then save it back out to couchdb
 
+////////////////////////////////////////////////
+// Rebin at level 17 to best results.         //
+// Do this after scraper has run on all data. //
+// Then restart the server (it caches)        //
+////////////////////////////////////////////////
+
 // {{{ SETUP
 var http = require('http');
 var fs = require('fs');
@@ -17,7 +23,7 @@ require("./couchAccess.js");
 
 
 var cradle = require('cradle')
-var db = new(cradle.Connection)().database('bridge_test');
+var db = new(cradle.Connection)().database('bridge_test2');
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -92,16 +98,19 @@ var argsList = [];
 
 // TODO: finalFunc() should send binData to the client
 var sendOut = function () {
-    //TODO: rebin the entire thing:
+    // TODO: figure out which sections are missing
+
+    // TODO: fill the gaps from the mysql server
+
+    // rebin the entire thing:
     console.log("rebinning...")
     binData.rebinAll(rangeToWalk, 6);
     console.log("...twice...");
     binData.rebinAll(rangeToWalk, 6);
     console.log("...is done!");
 
-    //TODO: save it all back out to couchdb
+    // Save it all back out to couchdb
     saveIt();
-    //sendToClient(binData, req.bin_level);
 }
 
 //Heavy inspiration from: http://book.mixu.net/ch7.html
@@ -165,7 +174,13 @@ function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
 
                 var dat = binData.bd()[k].levels[l][c];
 
-                saveWithMergeToCouch(SENSOR_TYPE, GIRDER_NUMBER, k, l, dat[0].ms, dat); // TODO: replace dat[0].ms with the actual surrounding container ms_start
+                saveWithMergeToCouch(
+                        SENSOR_TYPE,
+                        GIRDER_NUMBER,
+                        k,
+                        l,
+                        binData.getBinContainerForMSAtLevel(dat[0].ms, l),
+                        dat);
             }
         }
     }

@@ -648,6 +648,7 @@ binnedData = function () {
         });
 
         var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
+        missingSamples.total = datedRange.length;
 
         if(samplesInsteadOfRanges) { return missingSamples; }
 
@@ -884,6 +885,10 @@ binnedData = function () {
 
     my.getSurroundingBinContainers = function (r0, r1, lvl) {
         return getSurroundingBinContainers(r0, r1, lvl);
+    }
+
+    my.getBinContainerForMSAtLevel = function (ms, lvl) {
+        return getMSStartForTimeAtLevel(ms, lvl);
     }
 
     my.getKeys = function () {

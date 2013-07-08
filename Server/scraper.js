@@ -52,6 +52,9 @@ var lowestLevelToKeep = 6;
 var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour)).getTime(),
     (new Date(end_year, end_month, end_day, end_hour)).getTime()];
 
+rangeToWalk[0] -= 10000; // buffer
+rangeToWalk[1] += 10000; // buffer
+
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
     return;
@@ -96,7 +99,7 @@ function series(item, func) {
             return series(walk_steps.shift(), func);
         });
     } else {
-        console.log("saving now");
+        //console.log("saving now");
         return saveIt(final);
     }
 }
@@ -120,22 +123,45 @@ series(walk_steps.shift(), sendQuerySync);
 // RUN }}}
 
 // {{{ SAVE
+var listOfThingsToDo = [];
+
 function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
     var dummykey = "average";
     for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
         for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
             for (var ke in binData.getKeys()) { // for each key
                 var k = binData.getKeys()[ke];
-                var id = makeIDString(SENSOR_TYPE, GIRDER_NUMBER, k, l, c);
 
                 if (!binData.bd()[k]) { continue; }
 
                 var dat = binData.bd()[k].levels[l][c];
-                console.log("saving:", id, "to couchDB");
+                var strt = binData.getBinContainerForMSAtLevel(dat[0].ms, l);
 
-                saveWithMergeToCouch(SENSOR_TYPE, GIRDER_NUMBER, k, l, dat[0].ms, dat); // TODO: replace dat[0].ms with the actual surrounding container ms_start
+                listOfThingsToDo.push([SENSOR_TYPE, GIRDER_NUMBER, k, l, strt, dat]);
             }
         }
+    }
+
+    //console.log(listOfThingsToDo);
+
+    function doIt(item, callback) {
+        var id = makeIDString(item[0], item[1], item[2], item[3], item[4]);
+        //console.log("saving:", id, "to couchDB");
+        saveWithMergeToCouch(item[0], item[1], item[2], item[3], item[4], item[5], callback);
+    }
+
+    seriesSave(listOfThingsToDo.shift(), doIt);
+}
+
+function seriesSave(item, func) {
+    if(item) {
+        func(item, function() {
+            //console.log(item);
+            return seriesSave(listOfThingsToDo.shift(), func);
+        });
+    } else {
+        console.log("DONE!");
+        process.exit(0);
     }
 }
 // SAVE }}}

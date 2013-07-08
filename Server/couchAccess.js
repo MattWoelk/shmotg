@@ -1,5 +1,5 @@
 var cradle = require('cradle')
-var db = new(cradle.Connection)().database('bridge_test');
+var db = new(cradle.Connection)().database('bridge_test2');
 
 // TODO TODO TODO: make a function which merges data instead of just overwriting it
 //                 and use it instead!
@@ -7,7 +7,7 @@ var db = new(cradle.Connection)().database('bridge_test');
 saveWithMergeToCouch = function (sensorType, sensorNumber, type, lvl, ms_start, data, callback) {
     getFromCouch(sensorType, sensorNumber, type, lvl, ms_start, function (d) {
         if (data.length > d.length) {
-            console.log("adding data", data.length, d.length, combineAndSortArraysOfDateValObjects(data, d).length);
+            //console.log("adding data", data.length, d.length, combineAndSortArraysOfDateValObjects(data, d).length);
         }
         saveToCouch(sensorType, sensorNumber, type, lvl, ms_start, combineAndSortArraysOfDateValObjects(data, d), callback);
     });
