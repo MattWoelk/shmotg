@@ -160,31 +160,49 @@ var func = function (st, sn, k, l, d, callback) {
     getFromCouch(st, sn, k, l, d, clbk);
 }
 
+// {{{ SAVE
+var listOfThingsToDo = [];
+
 function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
     var dummykey = "average";
     for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
-        console.log("saaving level:", l);
-        for (var ke in binData.getKeys()) { // for each key
-            var k = binData.getKeys()[ke];
-            for (var c in binData.bd()[k].levels[l]) { // for each bin container
-                var id = makeIDString(SENSOR_TYPE, GIRDER_NUMBER, k, l, c);
-                //console.log("saving:", id, "to couchDB");
+        for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
+            for (var ke in binData.getKeys()) { // for each key
+                var k = binData.getKeys()[ke];
 
                 if (!binData.bd()[k]) { continue; }
 
                 var dat = binData.bd()[k].levels[l][c];
+                var strt = binData.getBinContainerForMSAtLevel(dat[0].ms, l);
 
-                saveWithMergeToCouch(
-                        SENSOR_TYPE,
-                        GIRDER_NUMBER,
-                        k,
-                        l,
-                        binData.getBinContainerForMSAtLevel(dat[0].ms, l),
-                        dat);
+                listOfThingsToDo.push([SENSOR_TYPE, GIRDER_NUMBER, k, l, strt, dat]);
             }
         }
     }
+
+    //console.log(listOfThingsToDo);
+
+    function doIt(item, callback) {
+        var id = makeIDString(item[0], item[1], item[2], item[3], item[4]);
+        //console.log("saving:", id, "to couchDB");
+        saveWithMergeToCouch(item[0], item[1], item[2], item[3], item[4], item[5], callback);
+    }
+
+    seriesSave(listOfThingsToDo.shift(), doIt);
 }
+
+function seriesSave(item, func) {
+    if(item) {
+        func(item, function() {
+            //console.log(item);
+            return seriesSave(listOfThingsToDo.shift(), func);
+        });
+    } else {
+        console.log("DONE!");
+        process.exit(0);
+    }
+}
+// SAVE }}}
 
 // TODO: call seriesOfFiveParameters(item.shift(), func)
 seriesOfFiveParameters(argsList.shift(), func, sendOut);
