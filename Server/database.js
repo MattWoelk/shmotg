@@ -144,6 +144,9 @@ dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
 }
 
 getDataFromDataBaseInRange = function (ms0, ms1, callback) {
+    // TODO: if ms0 and ms=1 span months, query one for each month
+    //       (will only ever be two months, otherwise it would
+    //       take forever)
     vals = ['A','B','C','D','E','F'];
     queries = [];
     for (var i = 0, l = vals.length; i < l; i ++) {
