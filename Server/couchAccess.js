@@ -83,7 +83,7 @@ saveToCouch = function (sensorType, sensorNumber, type, level, ms_start, data, c
     }, function (err, res) {
         if (err) {
             //Handle error
-            console.log("saving ERROR");
+            console.log("saving ERROR", err);
         } else {
             // Handle success
             console.log("saving success!", idString);
