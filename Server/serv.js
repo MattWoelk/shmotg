@@ -113,14 +113,14 @@ io.sockets.on('connection', function (socket) {
             // {{{ CREATE REQUEST
             console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
 
-            var query = makeQuery(range[0], range[1]);
+            //var query = makeQuery(range[0], range[1]);
             // CREATE REQUEST }}}
 
             // {{{ GET AND SEND REQUEST
             var tmpData = binnedData(); // TODO TODO: this doesn't need to be a full-blown object...
                                         //            just make it readable and throw it on through
 
-            sendDatabaseQuery(query, function (queryResult) {
+            getDataFromDataBaseInRange(range[0], range[1], function (queryResult) {
                 // Bin the new data
                 console.log("- data received...");
                 try {

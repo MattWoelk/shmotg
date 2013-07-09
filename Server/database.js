@@ -35,13 +35,79 @@ Date.prototype.toJSON = function (key) {
 // {{{ CONNECTION
 // CONNECTION }}}
 
+// {{{ PRIVATE FUNCTIONS
+function combineAndSortArraysOfDateValObjects (arr1, arr2) {
+    // Add the objects from arr2 (array) to arr1 (array)
+    //   only if the object from arr2 has a ms value
+    //   which no object in arr1 has.
+    // ie. arr1 gets precedence
+
+    // concat them
+    var result = combineWithoutDuplicates(arr1, arr2);
+
+    // sort the result TODO: may not be required, as combineWithoutDuplicates gives a sorted result
+    result.sort(function (a, b) { return a.ms - b.ms; });
+
+    return result;
+}
+
+function combineWithoutDuplicates(arr1, arr2) {
+    // ASSUMPTION: arr1 and arr2 are both sorted
+    //             arr1 and arr2 are in the format: [{ms: _}, {ms: _}]
+    // TODO: arr1 gets precedence. Return an array which has no duplicates in the 'ms' field.
+
+    var uniques = []; // The values found in arr2 which were not in arr1
+    var arr1Length = arr1.length;
+    var arr1Index = 0;
+
+    for (var i = 0; i < arr2.length; i++) {
+        // For each element of arr2, go through arr1,
+        // element by element, and see how their ms compare
+
+        while (1) {
+            if (arr1Index >= arr1Length) {
+                uniques.push(arr2[i]);
+                break;
+            } // we've run out of arr1
+
+            if (arr1[arr1Index].ms > arr2[i].ms) {
+                // If the next one is higher,
+                // add this one to the list,
+                // and move on to the next arr2 (don't increment)
+
+                uniques.push(arr2[i]);
+
+                //console.log("add them:", arr1[arr1Index].ms, arr2[i].ms);
+                break;
+            } else if (arr1[arr1Index].ms === arr2[i].ms) {
+                // If the next one is the same,
+                // move on to the next arr2 (don't increment)
+
+                //console.log("dont add:", arr1[arr1Index].ms, arr2[i].ms);
+                break;
+            } else {
+                // If the next one is lower than this one,
+                // increment and compare to the new one from arr1
+
+                //console.log("continue:", arr1[arr1Index].ms, arr2[i].ms);
+                arr1Index++;
+            }
+        }
+    }
+
+    return arr1.concat(uniques);
+}
+// PRIVATE FUNCTION }}}
+
 // {{{ PUBLIC METHODS
-makeQuery = function(a, b) {
+makeQuery = function(a, b, letter) {
     var dtr = dt(a); // date to request
     var dtr2 = dt(b); // second date to request
 
+    var let = letter ? letter : 'A';
+
     // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-    var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0A WHERE Time BETWEEN';
+    var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0' + let + ' WHERE Time BETWEEN';
     var query1 = ' "' + dtr.getFullYear() +
                '-' + pad(dtr.getMonth() + 1) +
                '-' + pad(dtr.getDate()) +
@@ -75,6 +141,33 @@ samplesToMilliseconds = function (sampleIndex) {
 
 dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
+}
+
+getDataFromDataBaseInRange = function (ms0, ms1, callback) {
+    vals = ['A','B','C','D','E','F'];
+    queries = [];
+    for (var i = 0, l = vals.length; i < l; i ++) {
+        queries.push(makeQuery(ms0, ms1, vals[i]));
+    }
+
+    result = [];
+
+    // Get all queries in series,
+    // then callback with the combination of them all
+
+    //Heavy inspiration from: http://book.mixu.net/ch7.html
+    function series(item, func, callback) {
+        if(item) {
+            func(item, function(dat) {
+                result = combineAndSortArraysOfDateValObjects(result, dat);
+                return series(queries.shift(), func, callback);
+            });
+        } else {
+            return callback(result);
+        }
+    }
+
+    series(queries.shift(), sendDatabaseQuery, callback);
 }
 
 sendDatabaseQuery = function(query, doWithResult) {
