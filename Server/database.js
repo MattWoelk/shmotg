@@ -1,8 +1,6 @@
 // {{{ SETUP
-var http = require('http');
 var fs = require('fs');
 var mysql = require('mysql');
-_ = require('underscore');
 d3 = require("d3");
 require("../binnedData.js");
 
@@ -34,6 +32,7 @@ Date.prototype.toJSON = function (key) {
 };
 // PROTOTYPE }}}
 
+// {{{ CONNECTION
 var mysqlconnection = mysql.createConnection({
   host     : 'shm1.ee.umanitoba.ca',
   user     : 'mattwoelk',
@@ -41,7 +40,6 @@ var mysqlconnection = mysql.createConnection({
   database : 'SPB_SHM_2012MM01',
 });
 
-// {{{ CONNECTION
 mysqlconnection.connect(); // perhaps not necessary; seems to be working without it
 
 // DISCONNECTS FROM THE MYSQL DATABASE

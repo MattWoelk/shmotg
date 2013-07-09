@@ -1,11 +1,9 @@
 // {{{ SETUP
-var http = require('http');
 var fs = require('fs');
-var mysql = require('mysql');
-_ = require('underscore');
 require("../binnedData.js");
 require("./database.js");
 require("./couchAccess.js");
+_ = require("underscore");
 
 red = '\033[31m';
 yellow = '\033[33m';
@@ -21,85 +19,9 @@ function dt (num) {
 // SETUP }}}
 
 // {{{ GLOBAL VARIABLES
-var binData = binnedData();
-var READ_OLD_DATA = false;
-var READ_NEW_DATA = true;
+var READ_FROM_COUCHDB = true;
+var READ_FROM_MYSQL = true;
 // GLOBAL VARIABLES}}}
-
-if (READ_OLD_DATA) {
-    // {{{ OLD FILES
-    var dir = "/Users/woelk/scraped_2.1_6/";
-    var listOfFilesToImport = fs.readdirSync(dir);
-    listOfFilesToImport = _.map(listOfFilesToImport, function (d) { return dir + d; })
-
-    try {
-        console.log("reading file", listOfFilesToImport[0]);
-        var oldBinData = fs.readFileSync(listOfFilesToImport[0]).toString(); // block while getting the girder contents.
-        var datDat = JSON.parse(oldBinData);
-
-        binData.replaceAllData(datDat);
-
-        for (var i = 1; i < listOfFilesToImport.length; i++) {
-            console.log("reading file", listOfFilesToImport[i]);
-            var oldBinData = fs.readFileSync(listOfFilesToImport[i]).toString(); // block while getting the girder contents.
-            var datDat = JSON.parse(oldBinData);
-
-            binData.importDataFromAnotherBinnedDataObject(datDat);
-        }
-
-        //for (var i = 0; i < datDat.average.levels.length; i++) {
-        //  console.log("reading in level", i);
-        //  binData.replaceBinnedData(datDat, i, true);
-        //}
-        console.log("All have been read.");
-        //binData.missingRawBinsUnderThisRangeAndLevel([0, 100], 1);
-    } catch (err) {
-        console.log(err);
-        throw err;
-    }
-
-    // OLD FILES }}}
-
-    // {{{ CLEANUPS
-    // Add in the functions which we need to rebin:
-    var defaultBinnedData = binnedData();
-    binData.bd().average.func = defaultBinnedData.bd().average.func;
-    binData.bd().mins.func = defaultBinnedData.bd().mins.func;
-    binData.bd().maxes.func = defaultBinnedData.bd().maxes.func;
-    binData.bd().q1.func = defaultBinnedData.bd().q1.func;
-    binData.bd().q3.func = defaultBinnedData.bd().q3.func;
-
-    // Do the very selective rebinning here to get rid of missing
-    // bins at the intersections of files
-    console.log("rebinning missing regions...");
-    var range_of_all_data = [binData.getMinMS(6), binData.getMaxMS(6)]; // TODO: magic
-    // Date(2012, 0-11, 1-31, 0-23, 0-59, 0-59, 0-999)
-    // Date(YYYY, MM  , DD  , HR  , MIN , SEC , MSEC )
-
-
-    // TODO TODO TODO: instead of doing this manually, or by calculation,
-    //                 just keep track of the ranges of the data which is
-    //                 being read in! Store those values, then iterate
-    //                 over them! :)
-    for (var year = 2012; year < 2013; year++) {
-        for (var month = 0; month < 1; month++) {
-            for (var day = 1; day < 31; day++) {
-                console.log("  ", year, month, day);
-                binData.rebinAll([(new Date(year, month, day  ,  5, 59)).getTime(),
-                                  (new Date(year, month, day  ,  6, 1)).getTime()], 6);
-                binData.rebinAll([(new Date(year, month, day  , 11, 59)).getTime(),
-                                 (new Date(year, month, day  , 12, 1)).getTime()], 6);
-                binData.rebinAll([(new Date(year, month, day  , 17, 59)).getTime(),
-                                 (new Date(year, month, day  , 18, 1)).getTime()], 6);
-                binData.rebinAll([(new Date(year, month, day  , 23, 59)).getTime(),
-                                 (new Date(year, month, day+1,  0, 1)).getTime()], 6);
-            }
-        }
-    }
-
-    console.log("missing regions rebinned!");
-    // CLEANUPS }}}
-}
 
 // {{{ LISTEN FOR CLIENTS
 var io = require('socket.io').listen(8080); //(app) for html
@@ -187,7 +109,7 @@ io.sockets.on('connection', function (socket) {
         // SEND TO CLIENT }}}
 
         // See if we need to get data from the database (because the level is lower than we have pre-binned)
-        if (READ_NEW_DATA && req.bin_level < 6) { // TODO: magic
+        if (READ_FROM_MYSQL && req.bin_level < 6) { // TODO: magic
             // {{{ CREATE REQUEST
             console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
 
@@ -212,15 +134,15 @@ io.sockets.on('connection', function (socket) {
                 sendToClient(queryResult, 0); // Send raw data to the client (testing)
             });
             // GET AND SEND REQUEST }}}
-        } else {
+        } else if (req.bin_level >= 6 && READ_FROM_COUCHDB) {
+            // {{{ GET FROM COUCHDB
             // we do not need to retrieve data from the database
-            // but we do from couchdb
+            // but we do from the couchdb
             console.log("** GET FROM COUCH **");
 
             var argsList = [];
             var bdtemp = binnedData();
 
-            // TODO: finalFunc() should send bdtemp to the client
             var sendOut = function () {
                 sendToClient(bdtemp, req.bin_level);
             }
@@ -269,12 +191,13 @@ io.sockets.on('connection', function (socket) {
 
             // TODO: call seriesOfFiveParameters(item.shift(), func)
             seriesOfFiveParameters(argsList.shift(), func, sendOut);
-        } // if we need data from the database
-
+            // GET FROM COUCHDB }}}
+        } else {
+            // send a dummy back because we have nothing to send
+            sendToClient([], 0); // Send raw data to the client (testing)
+        }
     });
 });
 
-
 console.log('Server is running on port 8080');
-
 /* vim: set foldmethod=marker: */

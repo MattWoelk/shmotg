@@ -1,11 +1,5 @@
 // This goes through the couchdb database
-// and rebins data as requested. (See USAGE);
-
-////////////////////////////////////////////////
-// Rebin at level 13 to best results.         //
-// Do this after scraper has run on all data. //
-// Then restart the server (it caches)        //
-////////////////////////////////////////////////
+// and finds missing bins at a given level
 
 // {{{ SETUP
 var http = require('http');
@@ -45,7 +39,6 @@ var STEP_SIZE = 600000; // 10000 is 2400 samples each time
                       // 600000 is ten minutes each time (works best for binning 1.0)
 
 var req = {
-        bin_level: 0, // placeholder
         sensorNumber: 18,
         sensorType: "girder",
 }
@@ -73,12 +66,9 @@ var end_day   = process.argv[8];
 var end_hour  = process.argv[9];
 
 var lowestLevel = process.argv[10];
-req.bin_level = lowestLevel;
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK
-var lowestLevelToKeep = 6;
-
 var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour)).getTime(),
     (new Date(end_year, end_month, end_day, end_hour)).getTime()];
 
@@ -86,8 +76,8 @@ if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
     return;
 }
-
 // WHERE TO WALK }}}
+
 console.log("** GETTING FROM COUCH **");
 
 var argsList = [];
@@ -95,18 +85,13 @@ var argsList = [];
 // TODO: finalFunc() should send binData to the client
 var sendOut = function () {
     // TODO: figure out which sections are missing
+    var missing = binData.missingBins(rangeToWalk, lowestLevel, true);
 
-    // TODO: fill the gaps from the mysql server
-
-    // rebin the entire thing:
-    console.log("rebinning...")
-    binData.rebinAll(rangeToWalk, 6);
-    console.log("...twice...");
-    binData.rebinAll(rangeToWalk, 6);
-    console.log("...is done!");
-
-    // Save it all back out to couchdb
-    saveIt();
+    // TODO: print that to the screen in a human-readable way
+    console.log("Total:", missing.total, "- Missing:", missing.length);
+    console.log("missing:", missing);
+    console.log(missing.map(dt));
+    process.exit(0);
 }
 
 //Heavy inspiration from: http://book.mixu.net/ch7.html
@@ -116,19 +101,18 @@ function seriesOfFiveParameters(item, func, finalFunc) {
             return seriesOfFiveParameters(argsList.shift(), func, finalFunc);
         });
     } else {
-        console.log(finalFunc);
         return finalFunc();
     }
 }
 
 // get which bins we need
-var binContainers = binData.getSurroundingBinContainers(rangeToWalk[0], rangeToWalk[1], req.bin_level);
+var binContainers = binData.getSurroundingBinContainers(rangeToWalk[0], rangeToWalk[1], lowestLevel);
 
 // make a list which looks like this: [{sensorType, sensorNumber, "average", lvl, bin}, etc for q1, q3, ...]
 var keyList = ["average", "q1", "q3", "mins", "maxes"];
 for (var j = 0; j < keyList.length; j++) {
     for (var i = 0; i < binContainers.length; i++) {
-        argsList.push([req.sensorType, req.sensorNumber, keyList[j], req.bin_level, binContainers[i]]);
+        argsList.push([req.sensorType, req.sensorNumber, keyList[j], lowestLevel, binContainers[i]]);
     }
 }
 
@@ -155,50 +139,6 @@ var func = function (st, sn, k, l, d, callback) {
 
     getFromCouch(st, sn, k, l, d, clbk);
 }
-
-// {{{ SAVE
-var listOfThingsToDo = [];
-
-function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
-    var dummykey = "average";
-    for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
-        for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
-            for (var ke in binData.getKeys()) { // for each key
-                var k = binData.getKeys()[ke];
-
-                if (!binData.bd()[k]) { continue; }
-
-                var dat = binData.bd()[k].levels[l][c];
-                var strt = binData.getBinContainerForMSAtLevel(dat[0].ms, l);
-
-                listOfThingsToDo.push([SENSOR_TYPE, GIRDER_NUMBER, k, l, strt, dat]);
-            }
-        }
-    }
-
-    //console.log(listOfThingsToDo);
-
-    function doIt(item, callback) {
-        var id = makeIDString(item[0], item[1], item[2], item[3], item[4]);
-        //console.log("saving:", id, "to couchDB");
-        saveWithMergeToCouch(item[0], item[1], item[2], item[3], item[4], item[5], callback);
-    }
-
-    seriesSave(listOfThingsToDo.shift(), doIt);
-}
-
-function seriesSave(item, func) {
-    if(item) {
-        func(item, function() {
-            //console.log(item);
-            return seriesSave(listOfThingsToDo.shift(), func);
-        });
-    } else {
-        console.log("DONE!");
-        process.exit(0);
-    }
-}
-// SAVE }}}
 
 // TODO: call seriesOfFiveParameters(item.shift(), func)
 seriesOfFiveParameters(argsList.shift(), func, sendOut);

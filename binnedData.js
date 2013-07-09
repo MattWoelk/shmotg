@@ -524,6 +524,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
+            console.log("rebinning");
             rebin(range, lvl);
         }
 
@@ -647,6 +648,7 @@ binnedData = function () {
         });
 
         var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
+        missingSamples.total = datedRange.length;
 
         if(samplesInsteadOfRanges) { return missingSamples; }
 
@@ -885,6 +887,10 @@ binnedData = function () {
         return getSurroundingBinContainers(r0, r1, lvl);
     }
 
+    my.getBinContainerForMSAtLevel = function (ms, lvl) {
+        return getMSStartForTimeAtLevel(ms, lvl);
+    }
+
     my.getKeys = function () {
         return bd.keys.slice(0); // give a copy of the array
     }
@@ -898,8 +904,8 @@ binnedData = function () {
         return JSON.stringify(bd);
     }
 
-    my.rebinAll = function (a,b) {
-        rebin(a, b);
+    my.rebinAll = function (range, lvl) {
+        rebin(range, lvl);
     }
 
     // PUBLIC METHODS }}}
