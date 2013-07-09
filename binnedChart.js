@@ -402,7 +402,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                 //render the new stuff
                 didWeRenderAnything = true;
 
-                if (!yAxisLock) {
+                if (!yAxisLock && !waitingForServer) {
                     yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
                                   , maxFilter ? maxFilter : yScale.domain()[1] ]);
                 }
