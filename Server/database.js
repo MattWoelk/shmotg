@@ -33,35 +33,6 @@ Date.prototype.toJSON = function (key) {
 // PROTOTYPE }}}
 
 // {{{ CONNECTION
-var mysqlconnection = mysql.createConnection({
-  host     : 'shm1.ee.umanitoba.ca',
-  user     : 'mattwoelk',
-  password : fs.readFileSync(__dirname + '/ps').toString().trim(),
-  database : 'SPB_SHM_2012MM01',
-});
-
-mysqlconnection.connect(); // perhaps not necessary; seems to be working without it
-
-// DISCONNECTS FROM THE MYSQL DATABASE
-handleDisconnect = function(connection) {
-  connection.on('error', function(err) {
-    if (!err.fatal) {
-      return;
-    }
-
-    if (err.code !== 'PROTOCOL_CONNECTION_LOST') {
-      throw err;
-    }
-
-    console.log('Re-connecting lost connection: ' + err.stack);
-
-    connection = mysql.createConnection(connection.config);
-    handleDisconnect(connection);
-    connection.connect();
-  });
-}
-
-handleDisconnect(mysqlconnection);
 // CONNECTION }}}
 
 // {{{ PUBLIC METHODS
@@ -108,6 +79,13 @@ dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
 
 sendDatabaseQuery = function(query, doWithResult) {
   console.log("sending db query");
+  var mysqlconnection = mysql.createConnection({
+    host     : 'shm1.ee.umanitoba.ca',
+    user     : 'mattwoelk',
+    password : fs.readFileSync(__dirname + '/ps').toString().trim(),
+    database : 'SPB_SHM_2012MM01',
+  });
+
   mysqlconnection.query(query, function (err, rows, fields) {
     if (err) { console.log("err: ", err); doWithResult(null); return; }
     console.log(red+query, blue+rows.length+reset);
@@ -121,7 +99,10 @@ sendDatabaseQuery = function(query, doWithResult) {
     });
 
     doWithResult(send_object); // send_object is always raw data
+    //mysqlconnection.end();
   });
+
+  mysqlconnection.end();
 }
 
 pad = function(integ) {
