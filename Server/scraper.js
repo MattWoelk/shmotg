@@ -69,9 +69,7 @@ function async_function_example(arg, callback) {
 
 //Heavy inspiration from: http://book.mixu.net/ch7.html
 function sendQuerySync(item, callback) {
-    var query = makeQuery(item, item + STEP_SIZE);
-
-    sendDatabaseQuery(query, function (queryResult) {
+    getDataFromDataBaseInRange(item, item + STEP_SIZE, function (queryResult) {
         // Bin the new data
         console.log("- data received. binning data...");
         if(queryResult == null) {
