@@ -633,10 +633,8 @@ binnedData = function () {
         var datedRange = my.getDateRange(key, level, normalizedRange);
 
         if (datedRange.length === 0) {
-            console.log(",.-' jumping ship. had nothing in range");
-            // TODO TODO TODO this should not be happening when
-            // we already have the data!
-            if (samplesInsteadOfRanges) { return ms_range[0]; }
+            // TODO: for the grey missing data boxes, should this return something different?
+            if (samplesInsteadOfRanges) { return [ms_range[0]]; }
             return [ms_range];
         }
 
@@ -798,6 +796,26 @@ binnedData = function () {
         }
 
         return send_req;
+    }
+
+    my.getDateRangeWithMissingValues = function (key, lvl, range) {
+        // give the range of data for this key and level
+        // NOT including the highest value in range
+        // USE:
+        // filter an array so that we don't render much more
+        // than the required amount of line and area
+        // missing values are NaN's
+
+        var missings = my.missingBins(range, lvl, true);
+
+        missingsObjs = missings.map(function (d) {
+            return {ms: d, val: NaN};
+        });
+
+        return combineAndSortArraysOfDateValObjects(
+                missingsObjs,
+                my.getDateRange(key, lvl, range)
+                );
     }
 
     my.getDateRange = function (key, lvl, range) {
