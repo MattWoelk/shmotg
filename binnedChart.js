@@ -410,8 +410,16 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                 if (key === 'quartiles') {
                     // render AREA d0s
 
-                    var q1Filter = binData.getDateRangeWithMissingValues('q1', whichLevelToRender, renderRange);
-                    var q3Filter = binData.getDateRangeWithMissingValues('q3', whichLevelToRender, renderRange);
+                    var q1Filter = binData.getDateRangeWithMissingValues(
+                            'q1',
+                            whichLevelToRender,
+                            renderRange,
+                            interpolationMethod === "step-after");
+                    var q3Filter = binData.getDateRangeWithMissingValues(
+                            'q3',
+                            whichLevelToRender,
+                            renderRange,
+                            interpolationMethod === "step-after");
 
                     renderedD0s.quartiles[whichLevelToRender] = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
@@ -423,7 +431,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                 } else {
                     // render LINES d0s
 
-                    var lineFilter = binData.getDateRangeWithMissingValues(key, whichLevelToRender, renderRange);
+                    var lineFilter = binData.getDateRangeWithMissingValues(
+                            key,
+                            whichLevelToRender,
+                            renderRange,
+                            interpolationMethod === "step-after");
 
                     renderedD0s[key][whichLevelToRender] = d3.svg.line()
                             .defined(function (d) { return !isNaN(d.val); })

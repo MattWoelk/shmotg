@@ -798,7 +798,7 @@ binnedData = function () {
         return send_req;
     }
 
-    my.getDateRangeWithMissingValues = function (key, lvl, range) {
+    my.getDateRangeWithMissingValues = function (key, lvl, range, extra) {
         // give the range of data for this key and level
         // NOT including the highest value in range
         // USE:
@@ -812,10 +812,25 @@ binnedData = function () {
             return {ms: d, val: NaN};
         });
 
-        return combineAndSortArraysOfDateValObjects(
+        result = combineAndSortArraysOfDateValObjects(
                 missingsObjs,
                 my.getDateRange(key, lvl, range)
                 );
+
+        // if we should add in an extra value before each NaN
+        // so that everything looks nice for step-after interpolation
+        if (extra) {
+            var toEnd = result.length;
+            for (var i = 1; i < toEnd; i++) {
+                if (isNaN(result[i].val)) {
+                    result.splice(i, 0, { ms: result[i].ms, val: result[i-1].val });
+                    i++;
+                    toEnd++;
+                }
+            }
+        }
+
+        return result;
     }
 
     my.getDateRange = function (key, lvl, range) {
