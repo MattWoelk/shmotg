@@ -46,9 +46,9 @@ var brd = binnedData().addRawData([
                                   {ms: 1010, val: 13},
 ]);
 
-assert(_.pluck(brd.getDateRange('rawData', 0, [0, 2000]), 'ms'), [1000, 1005, 1010], 'adding raw and reading raw');
-assert(_.pluck(brd.getDateRange('average', 1, [0, 2000]), 'ms'), [1000],  'adding raw and reading lvl 1a');
-assert(_.pluck(brd.getDateRange('average', 1, [0, 2000]), 'val'), [11],   'adding raw and reading lvl 1b');
+assert(_.pluck(brd.getDateRange(['rawData'], 0, [0, 2000]), 'ms'), [1000, 1005, 1010], 'adding raw and reading raw');
+assert(_.pluck(brd.getDateRange(['average'], 1, [0, 2000]), 'ms'), [1000],  'adding raw and reading lvl 1a');
+assert(_.pluck(brd.getDateRange(['average'], 1, [0, 2000]), 'val'), [11],   'adding raw and reading lvl 1b');
 assertDirect(brd.getMax(1), 13, 'getMaxRaw');
 assertDirect(brd.getMin(1), 10, 'getMinRaw');
 assertDirect(brd.getMaxMS(1), 1010, 'getMaxRawMS');
@@ -88,10 +88,10 @@ var burd = binnedData().addRawData([
 ]);
 
 assert(_.flatten(burd.missingBins([1000, 1055], 0)), [], 'No Missing Data: lvl 0 raw data')
-assert(_.pluck(burd.getDateRange('average', 1, [0, 2000]), 'ms'), [1000, 1010, 1020, 1030, 1040, 1050], 'No Missing Data: lvl 1 bins');
-assert([burd.getDateRange('average', 0, [0, 2000]).length], [12], 'No Missing Data: lvl 0 length');
-assert([burd.getDateRange('average', 1, [0, 2000]).length], [6], 'No Missing Data: lvl 1 length');
-assert([burd.getDateRange('average', 2, [0, 2000]).length], [3], 'No Missing Data: lvl 2 length');
+assert(_.pluck(burd.getDateRange(['average'], 1, [0, 2000]), 'ms'), [1000, 1010, 1020, 1030, 1040, 1050], 'No Missing Data: lvl 1 bins');
+assert([burd.getDateRange(['average'], 0, [0, 2000]).length], [12], 'No Missing Data: lvl 0 length');
+assert([burd.getDateRange(['average'], 1, [0, 2000]).length], [6], 'No Missing Data: lvl 1 length');
+assert([burd.getDateRange(['average'], 2, [0, 2000]).length], [3], 'No Missing Data: lvl 2 length');
 
 // Missing at end
 assert(_.flatten(burd.missingBins([1000, 1065], 0)), [1060, 1065, 1065, 1070], 'missing at end');
@@ -126,10 +126,10 @@ var burd = binnedData().addRawData([
 ]);
 
 assert(_.flatten(burd.missingBins([1000, 1050], 0)), [1000, 1005], 'Missing Start: lvl 0 raw data');
-assert(_.pluck(burd.getDateRange('average', 1, [0, 2000]), 'ms'), [1010, 1020, 1030, 1040, 1050], 'Missing Start: lvl 1 bins');
+assert(_.pluck(burd.getDateRange(['average'], 1, [0, 2000]), 'ms'), [1010, 1020, 1030, 1040, 1050], 'Missing Start: lvl 1 bins');
 assert(_.flatten(burd.missingBins([1000, 1050], 1)), [1000, 1010], 'Missing Start: lvl 1 missing bins');
 
-assert(_.pluck(burd.getDateRange('average', 0, [0, 2000]), 'ms'), [1005, 1010, 1015, 1020, 1025, 1030, 1035, 1040, 1045, 1050, 1055], 'Missing End: bin check');
+assert(_.pluck(burd.getDateRange(['average'], 0, [0, 2000]), 'ms'), [1005, 1010, 1015, 1020, 1025, 1030, 1035, 1040, 1045, 1050, 1055], 'Missing End: bin check');
 assert(_.flatten(burd.missingBins([1010, 1060], 0)), [1060, 1065], 'Missing End: lvl 0 raw data');
 assert(_.flatten(burd.missingBins([1010, 1060], 1)), [1060, 1070], 'Missing End: lvl 1 missing bins');
 
@@ -145,7 +145,7 @@ var bard = binnedData().addRawData([
                                    {ms: 1055, val: 20},
 ]);
 
-assert(_.pluck(bard.getDateRange('average', 1, [0, 2000]), 'ms'), [1010, 1040, 1050], 'Missing At Start And Middle: lvl 1 bins');
+assert(_.pluck(bard.getDateRange(['average'], 1, [0, 2000]), 'ms'), [1010, 1040, 1050], 'Missing At Start And Middle: lvl 1 bins');
 assert(_.flatten(bard.missingBins([1000, 1050], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Start And Middle: lvl 1 missing bins');
 assert(_.flatten(bard.missingBins([1001, 1046], 1)), [1000, 1010, 1020, 1030, 1030, 1040], 'Missing At Start And Middle: lvl 1 missing bins with a non5mod range');
 
