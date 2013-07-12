@@ -507,7 +507,7 @@ binnedData = function () {
             if (bData[keys[i]] && bData[keys[i]].levels && bData[keys[i]].levels[lvl]) {
                 var ext = d3.extent(bData[keys[i]].levels[lvl], function (d) { return d.ms; });
                 lows.push(ext[0]);
-                lows.push(ext[1]);
+                highs.push(ext[1]);
             }
         }
 
@@ -524,7 +524,6 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            console.log("rebinning");
             rebin(range, lvl);
         }
 
