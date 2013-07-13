@@ -97,9 +97,7 @@ function combineWithoutDuplicates(arr1, arr2) {
 
     return arr1.concat(uniques);
 }
-// PRIVATE FUNCTION }}}
 
-// {{{ PUBLIC METHODS
 makeQuery = function(a, b, letter) {
     var dtr = dt(a); // date to request
     var dtr2 = dt(b); // second date to request
@@ -123,9 +121,16 @@ makeQuery = function(a, b, letter) {
                ':' + pad(dtr2.getSeconds() + 1) + '"';
     var queryTail = '';
 
-    return queryHead + query1 + queryMid + query2 + queryTail;
-}
+    var table = "SPB_SHM_" + dtr.getFullYear() + "MM" + pad(dtr.getMonth() + 1);
 
+    return {
+        query: queryHead + query1 + queryMid + query2 + queryTail,
+        table: table
+    };
+}
+// PRIVATE FUNCTION }}}
+
+// {{{ PUBLIC METHODS
 dateStringToMilliseconds = function (dateStr) {
   return d3.time.format("%a %b %d %Y %H:%M:%S")
     .parse(dateStr.substring(0, 24))
@@ -179,12 +184,12 @@ sendDatabaseQuery = function(query, doWithResult) {
     host     : 'shm1.ee.umanitoba.ca',
     user     : 'mattwoelk',
     password : fs.readFileSync(__dirname + '/ps').toString().trim(),
-    database : 'SPB_SHM_2012MM01',
+    database : query.table,
   });
 
-  mysqlconnection.query(query, function (err, rows, fields) {
+  mysqlconnection.query(query.query, function (err, rows, fields) {
     if (err) { console.log("err: ", err); doWithResult(null); return; }
-    console.log(red+query, blue+rows.length+reset);
+    console.log(red+query.query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
         return { val: d.ESGgirder18 ,
