@@ -377,12 +377,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         // calculate new y scale before we render any d0s
         // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
         // - this will give the option of all charts having the same y axis
-        var minFilter = d3.min(
-            binData.getDateRange('mins', whichLevelToRender, renderRange),
-            function(d) { return d.val; } );
-        var maxFilter = d3.max(
-            binData.getDateRange('maxes', whichLevelToRender, renderRange),
-            function(d) { return d.val; } );
+        var showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, renderRange), function (d) {
+            return d.val;
+        });
 
         // for each key
         // 1. find out whether we should render things
@@ -403,8 +400,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                 didWeRenderAnything = true;
 
                 if (!yAxisLock && !waitingForServer) {
-                    yScale.domain([ minFilter ? minFilter : yScale.domain()[0]
-                                  , maxFilter ? maxFilter : yScale.domain()[1] ]);
+                    yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
+                                  , showing_range[1] ? showing_range[1] : yScale.domain()[1] ]);
                 }
 
                 if (key === 'quartiles') {

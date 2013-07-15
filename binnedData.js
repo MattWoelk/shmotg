@@ -591,7 +591,7 @@ binnedData = function () {
             key = "average";
         }
 
-        var datedRange = my.getDateRange(key, level, ms_range);
+        var datedRange = my.getDateRange([key], level, ms_range);
 
         if (datedRange.length === 0) {
             return false;
@@ -629,7 +629,7 @@ binnedData = function () {
         var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
 
         var normalizedRange = [ fir * Math.pow(2, level) * oneSample, (las + 1) * Math.pow(2, level) * oneSample ];
-        var datedRange = my.getDateRange(key, level, normalizedRange);
+        var datedRange = my.getDateRange([key], level, normalizedRange);
 
         if (datedRange.length === 0) {
             // TODO: for the grey missing data boxes, should this return something different?
@@ -791,7 +791,7 @@ binnedData = function () {
         for (var i = 0; i < theKeys.length; i++) {
             send_req[theKeys[i]] = {};
             send_req[theKeys[i]].levels = [];
-            send_req[theKeys[i]].levels[lvl] = my.getDateRange(theKeys[i], lvl, range);
+            send_req[theKeys[i]].levels[lvl] = my.getDateRange([theKeys[i]], lvl, range);
         }
 
         return send_req;
@@ -813,7 +813,7 @@ binnedData = function () {
 
         result = combineAndSortArraysOfDateValObjects(
                 missingsObjs,
-                my.getDateRange(key, lvl, range)
+                my.getDateRange([key], lvl, range)
                 );
 
         // if we should add in an extra value before each NaN
@@ -832,7 +832,7 @@ binnedData = function () {
         return result;
     }
 
-    my.getDateRange = function (key, lvl, range) {
+    my.getDateRange = function (keys, lvl, range) {
         // give the range of data for this key and level
         // NOT including the highest value in range
         // USE:
@@ -844,14 +844,17 @@ binnedData = function () {
         // where to look for this data:
         var whichBinsToLookIn = getSurroundingBinContainers(range[0], range[1], lvl);
 
-        _.each(whichBinsToLookIn, function (n) {
-            if(!bd[key].levels[lvl]) { return; }
-            var dat = bd[key].levels[lvl][n];
+        for (var k = 0; k < keys.length; k++) {
+            var key = keys[k];
+            _.each(whichBinsToLookIn, function (n) {
+                if(!bd[key].levels[lvl]) { return; }
+                var dat = bd[key].levels[lvl][n];
 
-            result = result.concat(_.filter(dat, function (d, i) {
-                return d.ms <= range[1] && d.ms >= range[0];
-            }));
-        });
+                result = result.concat(_.filter(dat, function (d, i) {
+                    return d.ms <= range[1] && d.ms >= range[0];
+                }));
+            });
+        }
 
         // sort it
         result = result.sort(function (a, b) { return a.ms - b.ms; });
