@@ -288,6 +288,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         q3Ranges        : new Array(),
         quartiles       : new Array(),
         quartilesRanges : new Array(),
+        missing         : new Array(),
+        missingRanges   : new Array(),
     };
 
     // VARIABLES }}}

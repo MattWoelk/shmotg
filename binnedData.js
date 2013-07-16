@@ -847,7 +847,7 @@ binnedData = function () {
         for (var k = 0; k < keys.length; k++) {
             var key = keys[k];
             _.each(whichBinsToLookIn, function (n) {
-                if(!bd[key].levels[lvl]) { return; }
+                if(!bd[key] || !bd[key].levels[lvl]) { return; }
                 var dat = bd[key].levels[lvl][n];
 
                 result = result.concat(_.filter(dat, function (d, i) {
