@@ -16,7 +16,7 @@
 //   .scale(xScale).orient("bottom");
 ///////////////////////////////////////
 
-var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 75;
+var MIN_DISTANCE_BETWEEN_X_AXIS_LABELS = 100;
 
 function dt (num) {
   var newdate = new Date();
