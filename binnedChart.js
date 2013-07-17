@@ -640,7 +640,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                     .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
                     .scale(xScale).orient("bottom");
 
-            //d3.selectAll(".tick text").attr("opacity", function (d, i) { console.log(d); return i % 4 * 0.25; });
+            //d3.selectAll("text").attr("fill", "#F0F");
             // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
 
             if (!xAxisContainer) { xAxisContainer = chart.append("g"); }

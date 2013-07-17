@@ -5,6 +5,10 @@ body {
     font-size: 20px;
 }
 
+text {
+    fill: #4D4D4D;
+}
+
 a, input, button {
     -ms-touch-action: none !important;
 }
@@ -20,7 +24,7 @@ path, line {
 
 .axis path, .axis line {
     fill: none;
-    stroke: #000;
+    stroke: #4D4D4D;
     shape-rendering: crispEdges;
 }
 
@@ -32,6 +36,8 @@ path, line {
 .y.axis line {
     stroke: #999;
     stroke-dasharray: 3, 3;
+    opacity: 0.5;
+    shape-rendering: crispEdges;
 }
 
 #chart_container {
