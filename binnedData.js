@@ -14,6 +14,7 @@ binnedData = function () {
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         rawData : {
             color: '#000',
+            dash: '0',
             opacity: 0.5,
             levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
                         // with one key for each range of object, up to a maximum size
@@ -22,37 +23,50 @@ binnedData = function () {
         },
         average : {
             color : '#C00',
+            dash: '0',
             opacity: 1,
             func   : function (a, b) { return (a+b)/2; },
             levels: [],
         },
         maxes : {
             color : '#000FB5',
+            dash: '0',
             opacity: 1,
             func   : function (a, b) { return d3.max([a,b]); },
             levels: [],
         },
         mins : {
             color : '#00B515',
+            dash: '0',
             opacity: 1,
             func   : function (a, b) { return d3.min([a,b]); },
             levels: [],
         },
         q1 : {
             color : '#800',
+            dash: '0',
             opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
             levels: [],
         },
         q3 : {
             color : '#800',
+            dash: '0',
             opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
             levels: [],
         },
         quartiles : {
             color : '#800',
+            dash: '0',
             opacity: 0.3,
+            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+            levels: [],
+        },
+        missing : {
+            color : '#C00',
+            dash: '4',
+            opacity: 1,
             //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
             levels: [],
         },
@@ -98,6 +112,11 @@ binnedData = function () {
                     // If the next one is the same,
                     // move on to the next arr2 (don't increment)
 
+                    // Though, if one is NaN, then the other should be used.
+                    if (isNaN(arr1[arr1Index].val)) {
+                        arr1[arr1Index].val = arr2[i].val;
+                    }
+
                     //console.log("dont add:", arr1[arr1Index].ms, arr2[i].ms);
                     break;
                 } else {
@@ -111,16 +130,6 @@ binnedData = function () {
         }
 
         return arr1.concat(uniques);
-    }
-
-    // TODO: use this instead of manually doing it everywhere
-    function binSize (lvl) {
-        var oneSample = 1000 / 200; // milliseconds per sample
-        return Math.pow(2, lvl) * oneSample;
-    }
-
-    function binContainerSize (lvl) {
-        return binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
     }
 
     function getMSStartForTimeAtLevel (ms, lvl) {
@@ -227,7 +236,7 @@ binnedData = function () {
         // return all bin container starts at this level between start and end
         // NOT INCLUDING the highest point if it is equal to end
 
-        var binSize = binContainerSize(lvl);
+        var binSize = my.binContainerSize(lvl);
 
         var startRounded = getMSStartForTimeAtLevel(start, lvl);
 
@@ -287,7 +296,7 @@ binnedData = function () {
         // get lvl+1's range of containers for this range
         var upperLevelRange = [ // range until very end
             getMSStartForTimeAtLevel(range[0], lvl+1),
-            getMSStartForTimeAtLevel(range[1], lvl+1) + binContainerSize(lvl+1)
+            getMSStartForTimeAtLevel(range[1], lvl+1) + my.binContainerSize(lvl+1)
         ];
 
         // get lvl range of containers for that range
@@ -330,7 +339,7 @@ binnedData = function () {
         // Use this new combined data instead of bin[key].levels[curLevel].length
         for(var i = 0; i < combo.length; i = i + 2){
             // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
-            var sampleIsAtModularLocation = combo[i].ms % (Math.pow(2, curLevel+1) * 5) === 0;
+            var sampleIsAtModularLocation = atModularLocation(combo[i].ms, curLevel+1);
             var nextSampleExists = combo.length > i + 1;
             var nextSampleIsRightDistanceAway = nextSampleExists ?
                 combo[i+1].ms - combo[i].ms === sampleSize :
@@ -364,6 +373,11 @@ binnedData = function () {
         }
         return bDat;
     };
+
+    function atModularLocation(ms, lvl) {
+        // True if ms is at the beginning of a bin in level lvl.
+        return ms % (Math.pow(2, lvl) * 5) === 0;
+    }
 
     function getTwoLargest (array) {
         var arr = array.slice();
@@ -775,6 +789,10 @@ binnedData = function () {
         return bd[key].color;
     }
 
+    my.getDash = function (key) {
+        return bd[key].dash;
+    }
+
     my.getOpacity = function (key) {
         return bd[key].opacity;
     }
@@ -847,7 +865,7 @@ binnedData = function () {
         for (var k = 0; k < keys.length; k++) {
             var key = keys[k];
             _.each(whichBinsToLookIn, function (n) {
-                if(!bd[key].levels[lvl]) { return; }
+                if(!bd[key] || !bd[key].levels[lvl]) { return; }
                 var dat = bd[key].levels[lvl][n];
 
                 result = result.concat(_.filter(dat, function (d, i) {
@@ -918,8 +936,22 @@ binnedData = function () {
         });
     }
 
+    // TODO: use this instead of manually doing it everywhere
+    my.binSize = function (lvl) {
+        var oneSample = 1000 / 200; // milliseconds per sample
+        return Math.pow(2, lvl) * oneSample;
+    }
+
+    my.binContainerSize = function (lvl) {
+        return my.binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+    }
+
     my.getSurroundingBinContainers = function (r0, r1, lvl) {
         return getSurroundingBinContainers(r0, r1, lvl);
+    }
+
+    my.getSurroundingBins = function (start, end, lvl) {
+        return getSurroundingBins(start, end, lvl);
     }
 
     my.getBinContainerForMSAtLevel = function (ms, lvl) {
@@ -932,6 +964,24 @@ binnedData = function () {
 
     my.bd = function () {
         return bd;
+    }
+
+    my.combineAndSortArraysOfDateValObjects = function(a, b) {
+        return combineAndSortArraysOfDateValObjects(a, b);
+    }
+
+    my.getChildBins = function(ms, lvl) {
+        // TODO: Return an array of two bins of level lvl-1,
+        //       which are the bins which are used to calculate
+        //       the value for the bin at ms.
+        result = [ms];
+        var siz = my.binSize(lvl-1);
+        if (atModularLocation(ms, lvl)) {
+            result.push(ms+siz);
+        } else {
+            result.push(ms-siz);
+        }
+        return result;
     }
 
     my.toString = function () {

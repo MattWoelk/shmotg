@@ -110,15 +110,10 @@ io.sockets.on('connection', function (socket) {
 
         // See if we need to get data from the database (because the level is lower than we have pre-binned)
         if (READ_FROM_MYSQL && req.bin_level < 6) { // TODO: magic
-            // {{{ CREATE REQUEST
-            console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
-
-            //var query = makeQuery(range[0], range[1]);
-            // CREATE REQUEST }}}
-
             // {{{ GET AND SEND REQUEST
-            var tmpData = binnedData(); // TODO TODO: this doesn't need to be a full-blown object...
+            console.log("** LOW LEVEL: GET FROM DATABASE ** lvl:", req.bin_level);
                                         //            just make it readable and throw it on through
+            var tmpData = binnedData(); // TODO TODO: this doesn't need to be a full-blown object...
 
             getDataFromDataBaseInRange(range[0], range[1], function (queryResult) {
                 // Bin the new data

@@ -35,7 +35,7 @@ function transformScale(scal, oldScal, mar) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(keyObject, container, id, fill, stroke, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
+function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
     var sel = container.selectAll("."+name+id)
             .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
 
@@ -57,6 +57,7 @@ function drawElements(keyObject, container, id, fill, stroke, scal, toTransition
             .attr("fill", fill)
             .style("stroke-width", strokeW)
             .attr("d", function (d, i) { return d0s[d.key][d.which]; })
+            .style("stroke-dasharray", strokeDash)
             .style("stroke", stroke);
 
     if (toTransition) {
@@ -97,18 +98,16 @@ var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, inter
 
     var j = 0;
     var keys = bin.getKeys();
-    for (var keyValue in keys){ // for each of 'average', 'max', 'min'
-        var key = keys[keyValue];
+    for (var keyValue in whichLines){ // for each of 'average', 'max', 'min'
+        var key = whichLines[keyValue];
 
-        if (whichLines.indexOf(key) > -1){
-            for (j = 0; j < MAX_NUMBER_OF_BIN_LEVELS; j++) {
-                if (whichLevel === j){
-                    resultArray.push({
-                        key: key,
-                        which: j,
-                        interpolate: interp
-                    });
-                }
+        for (j = 0; j < MAX_NUMBER_OF_BIN_LEVELS; j++) {
+            if (whichLevel === j){
+                resultArray.push({
+                    key: key,
+                    which: j,
+                    interpolate: interp
+                });
             }
         }
     }
@@ -234,7 +233,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
     var width = containerWidth - margin.left - margin.right;
 
     var whichLevelToRender = 0;
-    var whichLinesToRender = ['average', 'average', 'maxes', 'mins'];
+    var whichLinesToRender = ['average', 'maxes', 'mins'];
     var interpolationMethod = ['linear'];
 
     var showTimeContext = true;
@@ -288,6 +287,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         q3Ranges        : new Array(),
         quartiles       : new Array(),
         quartilesRanges : new Array(),
+        missing         : new Array(),
+        missingRanges   : new Array(),
     };
 
     // VARIABLES }}}
@@ -339,11 +340,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
         //{{{ GENERATE d0s. (generate the lines paths)
 
-        // Currently, we are abandoning non-contiguous values as if they don't exist. This may be just fine. :)
-        // Also, when you scroll left, then scroll back right it will have forgotten the part that was on the left. This also may be just fine. :)
-
-        // Choose which d0s need to be generated
-        // based on which keys are active.
+        // Choose which d0s need to be generated based on which keys are active.
         var renderThis = [];
         renderThis = renderThis.concat(whichLinesToRender);
         if (whichLinesToRender.indexOf("quartiles") !== -1) {
@@ -359,8 +356,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
 
         // figure out how much to render:
-        var renderRange = [ xScale.domain()[0] - xdiff,   // render thrice what is necessary.
-            xScale.domain()[1] + xdiff ]; // (xdiff / 2) for twice
+        var renderRange = [ xScale.domain()[0] - xdiff, // render thrice what is necessary.
+            xScale.domain()[1] + xdiff ];               // (xdiff / 2) for twice
 
         // initialize the array if it's the first time for this level and key:
         for (var keyValue in renderThis) {
@@ -425,6 +422,71 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
 
+                } else if (key === 'missing' && interpolationMethod === "step-after") {
+                    // render Missing averages
+
+                    var fil = binData.getDateRangeWithMissingValues(
+                            'average',
+                            whichLevelToRender,
+                            renderRange,
+                            false);
+
+                    // This is more complicated than it needs to be,
+                    // since we only ever combine two values.
+                    var averageOfRange = function (data) {
+                        var result = 0;
+                        var count = 0;
+                        for (var i = 0; i < data.length; i++) {
+                            if (!isNaN(data[i].val)) {
+                                result += data[i].val;
+                                count++;
+                            }
+                        }
+                        if (count === 0) {
+                            return NaN;
+                        } else {
+                            return result / count;
+                        }
+                    };
+
+                    var toBeAdded = [];
+                    var count = 0;
+
+                    var lineFilter = _.map(fil, function (d) {
+                        tmp = {};
+                        tmp.val = d.val;
+                        tmp.ms = d.ms;
+                        if (isNaN(tmp.val)) {
+                            var siz = binData.binSize(whichLevelToRender);
+                            var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                            tmp.val = averageOfRange(binData.getDateRangeWithMissingValues(
+                                'average',
+                                whichLevelToRender - 1,
+                                range));
+                            if (fil[count-1] && !isNaN(fil[count-1].val)) {
+                                toBeAdded.push({val: fil[count-1].val, ms: fil[count-1].ms});
+                            }
+                            if (fil[count+1] && !isNaN(fil[count+1].val)) {
+                                toBeAdded.push({val: fil[count+1].val, ms: fil[count+1].ms});
+                            } else {
+                                toBeAdded.push({val: tmp.val, ms: tmp.ms+siz-1});
+                            }
+                        } else {
+                            // tmp.val = NaN; // display it all
+                        }
+                        count++;
+                        return tmp;
+                    });
+
+                    lineFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
+
+
+                    renderedD0s[key][whichLevelToRender] = d3.svg.line()
+                            .defined(function (d) { return !isNaN(d.val); })
+                            .x(renderFunction)
+                            .y(function (d, i) { return yScale(d.val); })
+                            .interpolate( interpolationMethod )(lineFilter);
                 } else {
                     // render LINES d0s
 
@@ -450,8 +512,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         // If we rendered anything, see if we need more data from the server
         // AKA see if we didn't have enough data to render the entire domain.
         if (didWeRenderAnything && !waitingForServer) {
-            // TODO: this may be happening twice as often as necessary, see server output as well as above similar TODO note
-
             // If we don't have every piece of data in this range, ask for it all.
             if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
                 var req = {
@@ -526,6 +586,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                          sensorType+sensorNumber,
                          function (d) { return binData.getColor(d.key); },
                          function (d) { return "rgba(0,0,0,0)"; },
+                         function (d) { return binData.getDash(d.key); },
                          xScale,
                          transitionNextTime,
                          previousXScale,
@@ -555,6 +616,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                          sensorType+sensorNumber,
                          function (d) { return "rgba(0,0,0,0)"; },
                          function (d) { return binData.getColor(d.key); },
+                         function (d) { return binData.getDash(d.key); },
                          xScale,
                          transitionNextTime,
                          previousXScale,
