@@ -54,10 +54,10 @@ var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
 // {{{ COMMAND LINE INPUT
-if (process.argv[9] === undefined) {
+if (process.argv[8] === undefined) {
     console.log("USAGE:");
-    console.log("  start_year(YYYY) start_month(0-11) start_day(1-31) start_hour(0-23)");
-    console.log("  end_year(YYYY) end_month(0-11) end_day(1-31) end_hour(0-23)");
+    console.log("  start_year(YYYY) start_month(0-11) start_day(1-31)");
+    console.log("  end_year(YYYY) end_month(0-11) end_day(1-31)");
     console.log("  level(6-46)");
     return
 }
@@ -65,22 +65,18 @@ if (process.argv[9] === undefined) {
 var start_year  = process.argv[2];
 var start_month = process.argv[3];
 var start_day   = process.argv[4];
-var start_hour  = process.argv[5];
 
-var end_year  = process.argv[6];
-var end_month = process.argv[7];
-var end_day   = process.argv[8];
-var end_hour  = process.argv[9];
+var end_year  = process.argv[5];
+var end_month = process.argv[6];
+var end_day   = process.argv[7];
 
-var lowestLevel = process.argv[10];
+var lowestLevel = process.argv[8];
 req.bin_level = lowestLevel;
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK
-var lowestLevelToKeep = 6;
-
-var rangeToWalk = [(new Date(start_year, start_month, start_day, start_hour)).getTime(),
-    (new Date(end_year, end_month, end_day, end_hour)).getTime()];
+var rangeToWalk = [(new Date(start_year, start_month, start_day, 0)).getTime(),
+    (new Date(end_year, end_month, end_day, 24)).getTime()];
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
     console.log("we already have that time span");
@@ -161,7 +157,7 @@ var listOfThingsToDo = [];
 
 function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
     var dummykey = "average";
-    for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
+    for (var l = lowestLevel; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
         for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
             for (var ke in binData.getKeys()) { // for each key
                 var k = binData.getKeys()[ke];
