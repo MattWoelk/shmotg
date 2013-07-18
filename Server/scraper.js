@@ -30,18 +30,18 @@ var binData = binnedData();
 // {{{ COMMAND LINE INPUT
 if (process.argv[9] === undefined) {
     console.log("USAGE:");
-    console.log("  start_year(YYYY) start_month(0-11) start_day(1-31) start_hour(0-23)");
-    console.log("  end_year(YYYY) end_month(0-11) end_day(1-31) end_hour(0-23)");
+    console.log("  start_year(YYYY) start_month(1-12) start_day(1-31) start_hour(0-23)");
+    console.log("  end_year(YYYY) end_month(1-12) end_day(1-31) end_hour(0-23)");
     return
 }
 
 var start_year  = parseInt(process.argv[2]);
-var start_month = parseInt(process.argv[3]);
+var start_month = parseInt(process.argv[3])-1;
 var start_day   = parseInt(process.argv[4]);
 var start_hour  = parseInt(process.argv[5]);
 
 var end_year  = parseInt(process.argv[6]);
-var end_month = parseInt(process.argv[7]);
+var end_month = parseInt(process.argv[7])-1;
 var end_day   = parseInt(process.argv[8]);
 var end_hour  = parseInt(process.argv[9]);
 // COMMAND LINE INPUT }}}
