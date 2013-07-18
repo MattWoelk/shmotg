@@ -55,17 +55,17 @@ if (process.argv[9] === undefined) {
     return
 }
 
-var start_year  = process.argv[2];
-var start_month = process.argv[3];
-var start_day   = process.argv[4];
-var start_hour  = process.argv[5];
+var start_year  = parseInt(process.argv[2]);
+var start_month = parseInt(process.argv[3]);
+var start_day   = parseInt(process.argv[4]);
+var start_hour  = parseInt(process.argv[5]);
 
-var end_year  = process.argv[6];
-var end_month = process.argv[7];
-var end_day   = process.argv[8];
-var end_hour  = process.argv[9];
+var end_year  = parseInt(process.argv[6]);
+var end_month = parseInt(process.argv[7]);
+var end_day   = parseInt(process.argv[8]);
+var end_hour  = parseInt(process.argv[9]);
 
-var lowestLevel = process.argv[10];
+var lowestLevel = parseInt(process.argv[10]);
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK

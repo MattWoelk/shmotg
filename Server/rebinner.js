@@ -62,15 +62,15 @@ if (process.argv[8] === undefined) {
     return
 }
 
-var start_year  = process.argv[2];
-var start_month = process.argv[3];
-var start_day   = process.argv[4];
+var start_year  = parseInt(process.argv[2]);
+var start_month = parseInt(process.argv[3]);
+var start_day   = parseInt(process.argv[4]);
 
-var end_year  = process.argv[5];
-var end_month = process.argv[6];
-var end_day   = process.argv[7];
+var end_year  = parseInt(process.argv[5]);
+var end_month = parseInt(process.argv[6]);
+var end_day   = parseInt(process.argv[7]);
 
-var lowestLevel = process.argv[8];
+var lowestLevel = parseInt(process.argv[8]);
 req.bin_level = lowestLevel;
 // COMMAND LINE INPUT }}}
 
