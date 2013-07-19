@@ -1,6 +1,8 @@
 // This goes through the couchdb database
 // and rebins data as requested. (See USAGE);
 
+console.log("rebinner: engaged");
+
 ////////////////////////////////////////////////
 // Rebin at level 13 to best results.         //
 // Do this after scraper has run on all data. //

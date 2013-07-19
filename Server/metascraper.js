@@ -54,8 +54,18 @@ function series(item, func) {
             return series(walkings.shift(), func);
         });
     } else {
-        console.log("DONE!");
-        process.exit(0);
+        console.log("Rebinning now!");
+
+        // Rebin this with the two months around it:
+        callRebinner(
+                [start_year, start_month-1, start_day, end_year, end_month+1, end_day, 13],
+                // Then rebin everything at lvl 20 and up:
+                callRebinner(
+                        [2010, 0, 0, 2013, 0, 0, 20],
+                        function () {
+                            console.log("DONE!");
+                            process.exit(0);
+                        }));
     }
 }
 
@@ -90,5 +100,22 @@ function callScraper (dat, callback) {
         callback();
     });
 }
+
+function callRebinner (dat, callback) {
+    var scr = spawn('node',  ['rebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6]]);
+
+    scr.stdout.setEncoding('utf8');
+    scr.stdout.on('data', function (data) {
+        var str = data.toString()
+        var lines = str.split(/(\r?\n)/g);
+        console.log(lines.join("").replace(/\n/g, ''));
+    });
+
+    scr.on('close', function (code) {
+        console.log('process exit code ' + code);
+        callback();
+    });
+}
+
 
 series(walkings.shift(), callScraper);

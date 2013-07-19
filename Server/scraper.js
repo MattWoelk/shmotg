@@ -1,5 +1,7 @@
 // It is a good idea to run this on no more than 6 hours of data at a time; example:
 // node scraper 2012 0 5 24 2012 0 6 6
+// The scraper runs from the beginning of the start day
+// until the end of the end day
 
 // {{{ SETUP
 require("../binnedData.js");
