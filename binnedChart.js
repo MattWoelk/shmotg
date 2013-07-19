@@ -151,7 +151,7 @@ function goToLevel(scal, msPS) {
     var samplesPerBin = pixelsPerBin / pixelsPerSample;
 
     //now convert to level and floor
-    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var toLevel = Math.log(samplesPerBin) / Math.log(2);
     var toLevel = Math.floor(toLevel);
     var toLevel = d3.max([0, toLevel]);
     var toLevel = d3.min([MAX_NUMBER_OF_BIN_LEVELS - 1, toLevel]);
