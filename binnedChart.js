@@ -437,12 +437,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                 } else if (key === 'missing') {
                     // render Missing averages
 
-                    var boxFil = binData.getDateRangeWithMissingValues(
-                            'average',
-                            whichLevelToRender,
-                            renderRange,
-                            false);
-
                     var fil = binData.getDateRangeWithMissingValues(
                             'average',
                             whichLevelToRender,
@@ -496,6 +490,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                         return tmp;
                     });
 
+
                     lineFilter.sort(function (a, b) { return a.ms - b.ms; });
                     lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
 
@@ -503,21 +498,29 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
                     var toBeAddedMissing = [];
                     var countMissing = 0;
+                    var lineMissingFilter = [];
 
-                    var lineMissingFilter = _.map(fil, function (d) {
-                        tmp = {};
-                        tmp.val = d.val;
-                        tmp.ms = d.ms;
-                        if (isNaN(tmp.val)) {
-                            var siz = binData.binSize(whichLevelToRender);
-                            var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                            toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
-                        } else {
-                            // tmp.val = NaN; // display it all
-                        }
-                        countMissing++;
-                        return tmp;
-                    });
+                    if (fil.length <= 1) {
+                        // we have no data, therefore:
+                        // make a big grey box that fills the entire screen
+                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
+                    } else {
+                        lineMissingFilter = _.map(fil, function (d) {
+                            tmp = {};
+                            tmp.val = d.val;
+                            tmp.ms = d.ms;
+                            if (isNaN(tmp.val)) {
+                                var siz = binData.binSize(whichLevelToRender);
+                                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                            } else {
+                                // tmp.val = NaN; // display it all
+                            }
+                            countMissing++;
+                            return tmp;
+                        });
+                    }
 
                     lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
                     lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
