@@ -132,6 +132,13 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
             }
         }
     }
+
+    if (whichLines.indexOf('missingBox') > -1) {
+        resultArray.push({
+                key: 'missingBox',
+                which: 0,
+                interpolate: interp})
+    }
     return resultArray;
 }
 
@@ -151,7 +158,7 @@ function goToLevel(scal, msPS) {
     var samplesPerBin = pixelsPerBin / pixelsPerSample;
 
     //now convert to level and floor
-    var toLevel = Math.log( samplesPerBin ) / Math.log( 2 );
+    var toLevel = Math.log(samplesPerBin) / Math.log(2);
     var toLevel = Math.floor(toLevel);
     var toLevel = d3.max([0, toLevel]);
     var toLevel = d3.min([MAX_NUMBER_OF_BIN_LEVELS - 1, toLevel]);
@@ -289,6 +296,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         quartilesRanges : new Array(),
         missing         : new Array(),
         missingRanges   : new Array(),
+        missingBox      : new Array(),
+        missingBoxRanges: new Array(),
     };
 
     // VARIABLES }}}
@@ -351,6 +360,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             if (whichLinesToRender.indexOf("q1") === -1) {
                 renderThis = ['q1'].concat(renderThis);
             }
+        }
+        if (whichLinesToRender.indexOf("missing") !== -1) {
+            renderThis = ['missingBox'].concat(renderThis);
         }
 
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
@@ -422,8 +434,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
 
-                } else if (key === 'missing' && interpolationMethod === "step-after") {
+                } else if (key === 'missing') {
                     // render Missing averages
+
+                    var boxFil = binData.getDateRangeWithMissingValues(
+                            'average',
+                            whichLevelToRender,
+                            renderRange,
+                            false);
 
                     var fil = binData.getDateRangeWithMissingValues(
                             'average',
@@ -481,6 +499,35 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                     lineFilter.sort(function (a, b) { return a.ms - b.ms; });
                     lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
 
+                    // TODO: if fil is empty (or all are NaN; whatever happens when we zoom out until nothing is visible), then have one bin which fills the entire screen.
+
+                    var toBeAddedMissing = [];
+                    var countMissing = 0;
+
+                    var lineMissingFilter = _.map(fil, function (d) {
+                        tmp = {};
+                        tmp.val = d.val;
+                        tmp.ms = d.ms;
+                        if (isNaN(tmp.val)) {
+                            var siz = binData.binSize(whichLevelToRender);
+                            var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                            toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                        } else {
+                            // tmp.val = NaN; // display it all
+                        }
+                        countMissing++;
+                        return tmp;
+                    });
+
+                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+
+                    renderedD0s.missingBox[0] = d3.svg.area()
+                            .defined(function (d) { return isNaN(d.val); })
+                            .x(renderFunction)
+                            .y0(function (d, i) { return yScale.range()[0]; }) //.val
+                            .y1(function (d, i) { return yScale.range()[1]; }) //.val
+                            .interpolate( interpolationMethod )(lineMissingFilter);
 
                     renderedD0s[key][whichLevelToRender] = d3.svg.line()
                             .defined(function (d) { return !isNaN(d.val); })
@@ -579,7 +626,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                     .attr("height", height);
 
             //make and render the area
-            var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(whichLinesToRender, whichLevelToRender, interpolationMethod)
+            var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(renderThis, whichLevelToRender, interpolationMethod, true)
 
             drawElements(quartileObjectForKeyFanciness,
                          pathArea,

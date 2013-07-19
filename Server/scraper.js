@@ -1,5 +1,7 @@
 // It is a good idea to run this on no more than 6 hours of data at a time; example:
 // node scraper 2012 0 5 24 2012 0 6 6
+// The scraper runs from the beginning of the start day
+// until the end of the end day
 
 // {{{ SETUP
 require("../binnedData.js");
@@ -30,20 +32,20 @@ var binData = binnedData();
 // {{{ COMMAND LINE INPUT
 if (process.argv[9] === undefined) {
     console.log("USAGE:");
-    console.log("  start_year(YYYY) start_month(0-11) start_day(1-31) start_hour(0-23)");
-    console.log("  end_year(YYYY) end_month(0-11) end_day(1-31) end_hour(0-23)");
+    console.log("  start_year(YYYY) start_month(1-12) start_day(1-31) start_hour(0-23)");
+    console.log("  end_year(YYYY) end_month(1-12) end_day(1-31) end_hour(0-23)");
     return
 }
 
-var start_year  = process.argv[2];
-var start_month = process.argv[3];
-var start_day   = process.argv[4];
-var start_hour  = process.argv[5];
+var start_year  = parseInt(process.argv[2]);
+var start_month = parseInt(process.argv[3])-1;
+var start_day   = parseInt(process.argv[4]);
+var start_hour  = parseInt(process.argv[5]);
 
-var end_year  = process.argv[6];
-var end_month = process.argv[7];
-var end_day   = process.argv[8];
-var end_hour  = process.argv[9];
+var end_year  = parseInt(process.argv[6]);
+var end_month = parseInt(process.argv[7])-1;
+var end_day   = parseInt(process.argv[8]);
+var end_hour  = parseInt(process.argv[9]);
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK

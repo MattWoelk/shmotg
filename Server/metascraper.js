@@ -26,18 +26,18 @@ var binData = binnedData();
 // {{{ COMMAND LINE INPUT
 if (process.argv[7] === undefined) {
     console.log("USAGE:");
-    console.log("  start_year(YYYY) start_month(0-11) start_day(1-31)");
-    console.log("  end_year(YYYY) end_month(0-11) end_day(1-31)");
+    console.log("  start_year(YYYY) start_month(1-12) start_day(1-31)");
+    console.log("  end_year(YYYY) end_month(1-12) end_day(1-31)");
     return
 }
 
-var start_year  = process.argv[2];
-var start_month = process.argv[3];
-var start_day   = process.argv[4];
+var start_year  = parseInt(process.argv[2]);
+var start_month = parseInt(process.argv[3]);
+var start_day   = parseInt(process.argv[4]);
 
-var end_year  = process.argv[5];
-var end_month = process.argv[6];
-var end_day   = process.argv[7];
+var end_year  = parseInt(process.argv[5]);
+var end_month = parseInt(process.argv[6]);
+var end_day   = parseInt(process.argv[7]);
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK
@@ -54,8 +54,18 @@ function series(item, func) {
             return series(walkings.shift(), func);
         });
     } else {
-        console.log("DONE!");
-        process.exit(0);
+        console.log("Rebinning now!");
+
+        // Rebin this with the two months around it:
+        callRebinner(
+                [start_year, start_month-1, start_day, end_year, end_month+1, end_day, 13],
+                // Then rebin everything at lvl 20 and up:
+                callRebinner(
+                        [2010, 0, 0, 2013, 0, 0, 20],
+                        function () {
+                            console.log("DONE!");
+                            process.exit(0);
+                        }));
     }
 }
 
@@ -90,5 +100,22 @@ function callScraper (dat, callback) {
         callback();
     });
 }
+
+function callRebinner (dat, callback) {
+    var scr = spawn('node',  ['rebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6]]);
+
+    scr.stdout.setEncoding('utf8');
+    scr.stdout.on('data', function (data) {
+        var str = data.toString()
+        var lines = str.split(/(\r?\n)/g);
+        console.log(lines.join("").replace(/\n/g, ''));
+    });
+
+    scr.on('close', function (code) {
+        console.log('process exit code ' + code);
+        callback();
+    });
+}
+
 
 series(walkings.shift(), callScraper);
