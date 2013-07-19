@@ -93,8 +93,9 @@ function msToCenturyTickFormat(ti) {
   var customTimeFormat = timeFormat([
      [ d3.time.format("%Y")    , function() { return true; }                 ],
      [ d3.time.format("%b")    , function(d) { return d.getMonth(); }        ],
-     [ d3.time.format("%a %d") , function(d) { return d.getDate() != 1; }    ],
-     [ d3.time.format("%H %p") , function(d) { return d.getHours(); }        ],
+     [ function (d) { return d3.time.format("%a %-d")(d).toLowerCase(); } ,
+                                 function(d) { return d.getDate() != 1; }    ],
+     [ d3.time.format("%H:00") , function(d) { return d.getHours(); }        ],
      [ d3.time.format("%H:%M") , function(d) { return d.getMinutes(); }      ],
      [ d3.time.format("%Ss")   , function(d) { return d.getSeconds(); }      ],
      [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
