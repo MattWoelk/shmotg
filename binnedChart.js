@@ -364,6 +364,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         if (whichLinesToRender.indexOf("missing") !== -1) {
             renderThis = ['missingBox'].concat(renderThis);
         }
+        if (whichLevelToRender === 0) {
+            renderThis = ['average'];
+            // TODO: render it as black.
+        }
 
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
 
@@ -665,7 +669,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                          pathPath,
                          sensorType+sensorNumber,
                          function (d) { return "rgba(0,0,0,0)"; },
-                         function (d) { return binData.getColor(d.key); },
+                         function (d) { if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
                          function (d) { return binData.getDash(d.key); },
                          xScale,
                          transitionNextTime,
