@@ -10,6 +10,8 @@ var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of i
 binnedData = function () {
 
     //{{{ VARIABLES
+    // TODO: get rid of all dash, color, and opacity. These should be in binnedChart.js
+    // TODO: once that's done, get rid of 'levels', so that raw data is the array itself.
     var bd = { // where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         rawData : {
@@ -65,6 +67,13 @@ binnedData = function () {
         },
         missing : {
             color : '#C00',
+            dash: '4',
+            opacity: 1,
+            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+            levels: [],
+        },
+        missingBox : {
+            color : '#F0F0F0',
             dash: '4',
             opacity: 1,
             //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
