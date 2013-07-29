@@ -9,6 +9,84 @@ text {
     fill: #4D4D4D;
 }
 
+.posArea path {
+    stroke: none;
+}
+
+.posPath path {
+    fill: none;
+}
+
+path.average {
+    stroke: #C00;
+}
+
+path.maxes {
+    stroke: #000FB5;
+}
+
+path.mins {
+    stroke: #00B515;
+}
+
+path.q1 {
+    stroke: #800;
+}
+
+path.q3 {
+    stroke: #800;
+}
+
+path.quartiles {
+    fill: #800;
+    fill-opacity: 0.2;
+}
+
+path.missing {
+    stroke: #C00;
+    stroke-dasharray: 4
+}
+
+path.missingBox {
+    fill: #F0F0F0;
+}
+
+@-webkit-keyframes spin {
+    to {
+        stroke-dashoffset: -264;
+    }
+}
+
+@-moz-keyframes spin {
+    to {
+        stroke-dashoffset: -264;
+    }
+}
+
+@keyframes spin {
+    to {
+        stroke-dashoffset: -264;
+    }
+}
+
+path.loadingBox {
+    /*stroke: black;
+    stroke-linecap: square;
+    stroke-width: 4;
+    stroke-dasharray: 0, 0, 50, 190;
+    stroke-dashoffset: 0;
+    stroke-linejoin: square;
+    animation: spin 3.5s infinite linear; */
+    fill: #F8F;
+    /*fill: none;
+    stroke: slategray;
+    stroke-width: 16;
+    stroke-linecap: round;
+    stroke-dasharray: 0, 0, 50, 214;
+    stroke-dashoffset: 0;
+    animation: spin 4s infinite linear;*/
+}
+
 a, input, button {
     -ms-touch-action: none !important;
 }

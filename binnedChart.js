@@ -53,12 +53,8 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
 
     //enter
     sel.enter()/*.append("g").attr("class", name)*/.append("path")
-            .attr("class", name+id)
-            .attr("fill", fill)
-            .style("stroke-width", strokeW)
+            .attr("class", function(d) { return name+id+" "+d.key; })
             .attr("d", function (d, i) { return d0s[d.key][d.which]; })
-            .style("stroke-dasharray", strokeDash)
-            .style("stroke", stroke);
 
     if (toTransition) {
         sel.attr("transform", transformScale(scalOld, renScale, mar))
@@ -684,6 +680,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             //Apply the clipPath
             pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
             pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                    .attr("class", "posArea")
                     .attr("height", height);
 
             //make and render the area
@@ -714,6 +711,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             //Apply the clipPath
             pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
             pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                    .attr("class", "posPath")
                     .attr("height", height);
 
             //Make and render the Positive lines.
