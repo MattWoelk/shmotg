@@ -74,6 +74,13 @@ binnedData = function () {
         },
         missingBox : {
             color : '#F0F0F0',
+            dash: '0',
+            opacity: 1,
+            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+            levels: [],
+        },
+        loadingBox : {
+            color : '#F0F',
             dash: '4',
             opacity: 1,
             //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3

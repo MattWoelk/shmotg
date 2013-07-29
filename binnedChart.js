@@ -139,6 +139,14 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
                 which: 0,
                 interpolate: interp})
     }
+
+    if (whichLines.indexOf('loadingBox') > -1) {
+        resultArray.push({
+                key: 'loadingBox',
+                which: 0,
+                interpolate: interp})
+    }
+
     return resultArray;
 }
 
@@ -298,6 +306,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         missingRanges   : new Array(),
         missingBox      : new Array(),
         missingBoxRanges: new Array(),
+        loadingBox      : new Array(),
+        loadingBoxRanges: new Array(),
     };
 
     // VARIABLES }}}
@@ -368,6 +378,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             renderThis = ['average'];
             // TODO: render it as black.
         }
+        renderThis = ['loadingBox'].concat(renderThis);
 
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
 
@@ -438,6 +449,49 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
 
+                } else if (key === 'loadingBox') {
+                    // render Missing averages
+                    var fil = binData.getDateRangeWithMissingValues(
+                            'average',
+                            whichLevelToRender,
+                            renderRange,
+                            false);
+
+                    var toBeAddedMissing = [];
+                    var countMissing = 0;
+                    var lineMissingFilter = [];
+
+                    if (freshArrivalFromServer) {
+                        console.log("this is the situation");
+                        // we are no longer waiting for the server, so render nothing.
+                        lineMissingFilter.push({val: 1, ms: renderRange[0]});
+                        lineMissingFilter.push({val: 1, ms: renderRange[1]});
+                    } else {
+                        lineMissingFilter = _.map(fil, function (d) {
+                            tmp = {};
+                            tmp.val = d.val;
+                            tmp.ms = d.ms;
+                            if (isNaN(tmp.val)) {
+                                var siz = binData.binSize(whichLevelToRender);
+                                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                            } else {
+                                // tmp.val = NaN; // display it all
+                            }
+                            countMissing++;
+                            return tmp;
+                        });
+                    }
+
+                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+
+                    renderedD0s.loadingBox[0] = d3.svg.area()
+                            .defined(function (d) { return isNaN(d.val); })
+                            .x(renderFunction)
+                            .y0(function (d, i) { return yScale.range()[0]; }) //.val
+                            .y1(function (d, i) { return yScale.range()[0]-15; }) //.val
+                            .interpolate( interpolationMethod )(lineMissingFilter);
                 } else if (key === 'missing') {
                     // render Missing averages
 
