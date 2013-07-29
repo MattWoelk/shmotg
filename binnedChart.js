@@ -136,13 +136,6 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
                 interpolate: interp})
     }
 
-    if (whichLines.indexOf('loadingBox') > -1) {
-        resultArray.push({
-                key: 'loadingBox',
-                which: 0,
-                interpolate: interp})
-    }
-
     return resultArray;
 }
 
@@ -457,11 +450,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                     var countMissing = 0;
                     var lineMissingFilter = [];
 
-                    if (freshArrivalFromServer) {
-                        console.log("this is the situation");
+                    if (true || freshArrivalFromServer) {
                         // we are no longer waiting for the server, so render nothing.
-                        lineMissingFilter.push({val: 1, ms: renderRange[0]});
-                        lineMissingFilter.push({val: 1, ms: renderRange[1]});
+                        //lineMissingFilter.push({val: 1, ms: renderRange[0]});
+                        //lineMissingFilter.push({val: 1, ms: renderRange[1]});
+                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
                     } else {
                         lineMissingFilter = _.map(fil, function (d) {
                             tmp = {};
@@ -482,11 +476,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                     lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
                     lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
 
-                    renderedD0s.loadingBox[0] = d3.svg.area()
+                    renderedD0s.loadingBox[0] = d3.svg.line()
                             .defined(function (d) { return isNaN(d.val); })
                             .x(renderFunction)
-                            .y0(function (d, i) { return yScale.range()[0]; }) //.val
-                            .y1(function (d, i) { return yScale.range()[0]-15; }) //.val
+                            .y(function (d, i) { return yScale.range()[0]; }) //.val
                             .interpolate( interpolationMethod )(lineMissingFilter);
                 } else if (key === 'missing') {
                     // render Missing averages
@@ -716,6 +709,13 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
             //Make and render the Positive lines.
             var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
+            if (renderThis.indexOf('loadingBox') > -1) {
+                dataObjectForKeyFanciness.push({
+                    key: 'loadingBox',
+                    which: 0,
+                    interpolate: interpolationMethod
+                });
+            }
 
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
