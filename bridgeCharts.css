@@ -76,8 +76,8 @@ path.loadingBox {
     stroke-linecap: round;
     stroke-dasharray: 0, 0, 50, 214;
     stroke-dashoffset: 0;
-    animation: spin 4s infinite linear;
     -webkit-animation: spin 4s infinite linear;
+    animation: spin 4s infinite linear;
 }
 
 a, input, button {
