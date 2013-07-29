@@ -450,10 +450,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                     var countMissing = 0;
                     var lineMissingFilter = [];
 
-                    if (true || freshArrivalFromServer) {
+                    if (freshArrivalFromServer) {
                         // we are no longer waiting for the server, so render nothing.
-                        //lineMissingFilter.push({val: 1, ms: renderRange[0]});
-                        //lineMissingFilter.push({val: 1, ms: renderRange[1]});
+                        lineMissingFilter.push({val: 1, ms: renderRange[0]});
+                        lineMissingFilter.push({val: 1, ms: renderRange[1]});
+                    } else if (fil.length <= 1) {
+                        // No data. Fill everything.
                         lineMissingFilter.push({val: NaN, ms: renderRange[0]});
                         lineMissingFilter.push({val: NaN, ms: renderRange[1]});
                     } else {
