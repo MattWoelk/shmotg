@@ -70,21 +70,14 @@ path.missingBox {
 }
 
 path.loadingBox {
-    /*stroke: black;
-    stroke-linecap: square;
-    stroke-width: 4;
-    stroke-dasharray: 0, 0, 50, 190;
-    stroke-dashoffset: 0;
-    stroke-linejoin: square;
-    animation: spin 3.5s infinite linear; */
-    fill: #F8F;
-    /*fill: none;
+    fill: none;
     stroke: slategray;
     stroke-width: 16;
     stroke-linecap: round;
     stroke-dasharray: 0, 0, 50, 214;
     stroke-dashoffset: 0;
-    animation: spin 4s infinite linear;*/
+    animation: spin 4s infinite linear;
+    -webkit-animation: spin 4s infinite linear;
 }
 
 a, input, button {
