@@ -373,11 +373,6 @@ socket.on('req_data', function (data) {
         setLoadingIcon(false);
     }
 
-    if (req.length === 0) {
-        console.log("Server returned empty data.");
-        return;
-    }/* else { console.log("Server returned DATA", req.length); }*/
-
     for (i=0;i<plots.length;i++) {
         if (plots[i].uniqueID() === "" + received.sensorType + received.sensorNumber) {
             plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();

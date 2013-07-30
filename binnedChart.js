@@ -942,20 +942,16 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     my.addDataToBinData = function (datas, level) {
         // add data to binData IN THE CORRECT ORDER
+        waitingForServer = false;
+        freshArrivalFromServer = true;
 
         if (datas.length === 0) {
-            console.log("NO DATA");
-            return my;
-        }
-
-        if (level === 0) {
+            //console.log("NO DATA");
+        } else if (level === 0) {
             binData.addRawData(datas);
         } else {
             binData.addBinnedData(datas, level);
         }
-
-        waitingForServer = false;
-        freshArrivalFromServer = true;
 
         return my;
     }
