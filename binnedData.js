@@ -10,73 +10,44 @@ var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of i
 binnedData = function () {
 
     //{{{ VARIABLES
-    // TODO: get rid of all dash, color, and opacity. These should be in binnedChart.js
-    // TODO: once that's done, get rid of 'levels', so that raw data is the array itself.
     var bd = { // where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         rawData : {
-            color: '#000',
-            dash: '0',
-            opacity: 0.5,
             levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
                         // with one key for each range of object, up to a maximum size
                         // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
                         //           ^-- a "bin container" -----------------------------------------------------^
         },
         average : {
-            color : '#C00',
-            dash: '0',
-            opacity: 1,
             func   : function (a, b) { return (a+b)/2; },
             levels: [],
         },
         maxes : {
-            color : '#000FB5',
-            dash: '0',
-            opacity: 1,
             func   : function (a, b) { return d3.max([a,b]); },
             levels: [],
         },
         mins : {
-            color : '#00B515',
-            dash: '0',
-            opacity: 1,
             func   : function (a, b) { return d3.min([a,b]); },
             levels: [],
         },
         q1 : {
-            color : '#800',
-            dash: '0',
-            opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
             levels: [],
         },
         q3 : {
-            color : '#800',
-            dash: '0',
-            opacity: 1,
             func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
             levels: [],
         },
         quartiles : {
-            color : '#800',
-            dash: '0',
-            opacity: 0.3,
-            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
             levels: [],
         },
         missing : {
-            color : '#C00',
-            dash: '4',
-            opacity: 1,
-            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
             levels: [],
         },
         missingBox : {
-            color : '#F0F0F0',
-            dash: '4',
-            opacity: 1,
-            //func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+            levels: [],
+        },
+        loadingBox : {
             levels: [],
         },
     }; // where everything is stored

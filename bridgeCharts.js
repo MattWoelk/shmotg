@@ -1,3 +1,8 @@
+// {{{ Loading Spinner Icon
+var myLoader = loader({width: 25, height: 25, container: "#loader_container", id: "loader"});
+myLoader();
+/// Loading Spinner Icon }}}
+
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
@@ -99,7 +104,7 @@ function transitionAllNextTime() {
 }
 
 function setLoadingIcon(on) {
-    d3.select("#circularG").style("display", on ? "block" : "none");
+    d3.select("#loader_container").style("display", on ? "block" : "none");
 }
 
 var uniqueID = 0;
@@ -372,11 +377,6 @@ socket.on('req_data', function (data) {
     if (sizeOfQueue() === 0) {
         setLoadingIcon(false);
     }
-
-    if (req.length === 0) {
-        console.log("Server returned empty data.");
-        return;
-    }/* else { console.log("Server returned DATA", req.length); }*/
 
     for (i=0;i<plots.length;i++) {
         if (plots[i].uniqueID() === "" + received.sensorType + received.sensorNumber) {

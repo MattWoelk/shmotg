@@ -53,12 +53,8 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
 
     //enter
     sel.enter()/*.append("g").attr("class", name)*/.append("path")
-            .attr("class", name+id)
-            .attr("fill", fill)
-            .style("stroke-width", strokeW)
+            .attr("class", function(d) { return name+id+" "+d.key; })
             .attr("d", function (d, i) { return d0s[d.key][d.which]; })
-            .style("stroke-dasharray", strokeDash)
-            .style("stroke", stroke);
 
     if (toTransition) {
         sel.attr("transform", transformScale(scalOld, renScale, mar))
@@ -139,6 +135,7 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
                 which: 0,
                 interpolate: interp})
     }
+
     return resultArray;
 }
 
@@ -298,6 +295,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         missingRanges   : new Array(),
         missingBox      : new Array(),
         missingBoxRanges: new Array(),
+        loadingBox      : new Array(),
+        loadingBoxRanges: new Array(),
     };
 
     // VARIABLES }}}
@@ -368,6 +367,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             renderThis = ['average'];
             // TODO: render it as black.
         }
+        renderThis = ['loadingBox'].concat(renderThis);
 
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
 
@@ -438,6 +438,51 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
 
+                } else if (key === 'loadingBox') {
+                    // render Missing averages
+                    var fil = binData.getDateRangeWithMissingValues(
+                            'average',
+                            whichLevelToRender,
+                            renderRange,
+                            false);
+
+                    var toBeAddedMissing = [];
+                    var countMissing = 0;
+                    var lineMissingFilter = [];
+
+                    if (freshArrivalFromServer) {
+                        // we are no longer waiting for the server, so render nothing.
+                        lineMissingFilter.push({val: 1, ms: renderRange[0]});
+                        lineMissingFilter.push({val: 1, ms: renderRange[1]});
+                    } else if (fil.length <= 1) {
+                        // No data. Fill everything.
+                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
+                    } else {
+                        lineMissingFilter = _.map(fil, function (d) {
+                            tmp = {};
+                            tmp.val = d.val;
+                            tmp.ms = d.ms;
+                            if (isNaN(tmp.val)) {
+                                var siz = binData.binSize(whichLevelToRender);
+                                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                            } else {
+                                // tmp.val = NaN; // display it all
+                            }
+                            countMissing++;
+                            return tmp;
+                        });
+                    }
+
+                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+
+                    renderedD0s.loadingBox[0] = d3.svg.line()
+                            .defined(function (d) { return isNaN(d.val); })
+                            .x(renderFunction)
+                            .y(function (d, i) { return yScale.range()[0]; }) //.val
+                            .interpolate( interpolationMethod )(lineMissingFilter);
                 } else if (key === 'missing') {
                     // render Missing averages
 
@@ -630,6 +675,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             //Apply the clipPath
             pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
             pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                    .attr("class", "posArea")
                     .attr("height", height);
 
             //make and render the area
@@ -660,10 +706,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             //Apply the clipPath
             pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
             pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                    .attr("class", "posPath")
                     .attr("height", height);
 
             //Make and render the Positive lines.
             var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
+            if (renderThis.indexOf('loadingBox') > -1) {
+                dataObjectForKeyFanciness.push({
+                    key: 'loadingBox',
+                    which: 0,
+                    interpolate: interpolationMethod
+                });
+            }
 
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
@@ -888,20 +942,16 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     my.addDataToBinData = function (datas, level) {
         // add data to binData IN THE CORRECT ORDER
+        waitingForServer = false;
+        freshArrivalFromServer = true;
 
         if (datas.length === 0) {
-            console.log("NO DATA");
-            return my;
-        }
-
-        if (level === 0) {
+            //console.log("NO DATA");
+        } else if (level === 0) {
             binData.addRawData(datas);
         } else {
             binData.addBinnedData(datas, level);
         }
-
-        waitingForServer = false;
-        freshArrivalFromServer = true;
 
         return my;
     }

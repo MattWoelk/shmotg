@@ -13,6 +13,7 @@
 // xAxis = d3.svg.axis()
 //   .tickFormat(msToCenturyTickFormat)
 //   .tickValues(msToCenturyTickValues(xScale, width))
+//   .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
 //   .scale(xScale).orient("bottom");
 ///////////////////////////////////////
 
