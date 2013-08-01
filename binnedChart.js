@@ -642,7 +642,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             if (!yAxisLock) {
                 yAxis = d3.svg.axis()
                         .scale(yScale)
-                        .ticks(6)
+                        .ticks(5)
                         .tickSubdivide(true)
                         .tickSize(width, 0, 0) // major, minor, end
                         .orient("left");
