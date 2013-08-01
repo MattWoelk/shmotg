@@ -1,0 +1,9 @@
+.slider_outlines {
+    stroke-width: 2;
+    stroke: #4D4D4D;
+    fill: none;
+}
+
+.slide_region {
+    background-color: #F0F;
+}
