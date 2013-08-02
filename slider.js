@@ -103,7 +103,7 @@ function slider(config) {
             .on("mousedown", ondown)
             .on("click", onclick)
             .on("mousewheel", onscroll)
-            .attr("class", "slider_outlines");
+            .attr("class", "slider_boxes");
         slide_enter.append("text")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
@@ -206,6 +206,8 @@ function slider(config) {
             var finalX = curTrans[0];
             var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
             dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+
+            highlightSliderElement();
         }
 
         function dragHandle(usethis) {
@@ -215,10 +217,24 @@ function slider(config) {
             var finalX = curTrans[0];
             var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
             dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+
+            highlightSliderElement();
         }
 
         // DRAGGING }}}
 
+        function highlightSliderElement() {
+            // TODO: calculate which slider element is being pointed to
+            var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
+            var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
+            var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
+            console.log(beingPointedTo);
+            d3.selectAll(".slider_boxes")
+                .classed("highlighted", function (d, i) { return i == beingPointedTo; });
+            // TODO: highlight the element to which the handle is pointing
+        }
+
+        highlightSliderElement();
     };
 }
 

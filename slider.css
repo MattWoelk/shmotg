@@ -4,15 +4,14 @@
     fill: none;
 }
 
-.slide_region {
-    background-color: #F0F;
-}
-
-.slide_region * {
+.slider_boxes {
     fill: #FFF;
-    /*stroke: #4D4D4D;*/
     stroke: none;
     cursor: pointer;
+}
+
+.slider_boxes.highlighted {
+    fill: #DDD;
 }
 
 .slide_region text {
@@ -26,7 +25,7 @@
 }
 
 .slide_region .mousedown {
-    fill: #CCC;
+    fill: #FFF;
 }
 
 .handle {
