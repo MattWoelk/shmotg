@@ -18,7 +18,7 @@ function slider(config) {
 
         var boxSize        = d('boxSize',         30);
         var width          = d('width',           50);
-        var height         = d('height',          150);
+        var height         = d('height',          140);
         var numberOfLevels = d('numberOfLevels',  12);
         var id             = d('id',              "slider");
         var container      = d('container',       "body");
@@ -46,10 +46,9 @@ function slider(config) {
             .attr("width", boxSize)
             .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
             .attr("height", height);
-
-        // TODO: pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
         // CLIPPING }}}
 
+        // {{{ SLIDER
         var slide_region = svg.append("g")
             .attr("clip-path", "url(#clip" + id + ")")
             .append("g") // another 'g' so that the clip doesn't move with the slide_region
@@ -67,19 +66,53 @@ function slider(config) {
                 .interpolate("linear")(dat);
         }
 
+        // {{{ EVENTS
+        var onhover = function() {
+            d3.select(this).classed("hover", true);
+            d3.select(this).classed("mousedown", false);
+        }
+
+        var onoff = function() {
+            d3.select(this).classed("hover", false);
+            d3.select(this).classed("mousedown", false);
+        }
+
+        var ondown = function() {
+            d3.select(this).classed("hover", false);
+            d3.select(this).classed("mousedown", true);
+        }
+
+        var onscroll = function() {
+            dragSlider(d3.event.wheelDeltaY / 5);
+        }
+
+        var onclick = function() {
+            d3.select(this).classed("hover", false);
+            d3.select(this).classed("mousedown", false);
+            // TODO: set as selected and trigger stuff
+            console.log("CLICK");
+        }
+        // EVENTS }}}
+
         slide_dat_applied = slide_region.selectAll("path")
             .data(d3.range(numberOfLevels))
         slide_enter = slide_dat_applied.enter()
         slide_enter.append("path")
             .attr("d", drawBox)
+            .on("mouseover", onhover)
+            .on("mouseout", onoff)
+            .on("mousedown", ondown)
+            .on("click", onclick)
+            .on("mousewheel", onscroll)
             .attr("class", "slider_outlines");
         slide_enter.append("text")
+            .attr("text-anchor", "middle")
+            .attr("alignment-baseline", "middle")
             .attr("x", function (d) { return width/2; })
             .attr("y", function (d, i) { return (i+1)*boxSize - (boxSize/2); })
             .text(function (d, i) { return i; })
-            .attr("text-anchor", "middle")
-            .attr("alignment-baseline", "middle")
             .attr("class", "slider_text");
+        // SLIDER }}}
 
         // {{{ DRAGGING
         var drag = d3.behavior.drag()
@@ -88,11 +121,12 @@ function slider(config) {
 
         slide_region.call(drag);
 
-        function dragSlider() {
+        function dragSlider(usethis) {
+            var adjustment = usethis ? usethis : d3.event.dy;
             var dragTarget = d3.select("#slide_region" + id);
             var curTrans = d3.transform(dragTarget.attr("transform")).translate;
             var finalX = curTrans[0];
-            var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + d3.event.dy));
+            var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
             dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
         }
         // DRAGGING }}}
@@ -131,6 +165,9 @@ function slider(config) {
             .attr("d", line(line_right_data))
             .attr("class", "slider_outlines");
         // SURROUNDING LINES }}}
+
+        // {{{ HANDLE
+        // HANDLE }}}
 
     };
 }

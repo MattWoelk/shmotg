@@ -13,3 +13,15 @@
     stroke: #4D4D4D;
     cursor: pointer;
 }
+
+.slide_region text {
+    pointer-events: none;
+}
+
+.slide_region .hover {
+    fill: #EEE;
+}
+
+.slide_region .mousedown {
+    fill: #CCC;
+}
