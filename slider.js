@@ -168,7 +168,7 @@ function slider(container_in, id_in) {
             return d3.svg.line()
                 .x(function (d) { return d.x; })
                 .y(function (d) { return d.y; })
-                .interpolate("linear")(dat) + "Z";
+                .interpolate("linear")(dat);
         }
 
         var drawDragLines = function (d, i) {
