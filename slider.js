@@ -61,10 +61,10 @@ function slider(config) {
             .interpolate("linear");
 
         var drawBox = function (d, i) {
-            dat = [ {x: side_margin,          y: i*boxSize},
-                    {x: width - side_margin,  y: i*boxSize},
-                    {x: width - side_margin,  y: (i+1)*boxSize},
-                    {x: side_margin,          y: (i+1)*boxSize} ];
+            dat = [ {x: width - side_margin,  y: i*boxSize},
+                    {x: side_margin,          y: i*boxSize},
+                    {x: side_margin,          y: (i+1)*boxSize},
+                    {x: width - side_margin,  y: (i+1)*boxSize} ];
             return d3.svg.line()
                 .x(function (d) { return d.x; })
                 .y(function (d) { return d.y; })
