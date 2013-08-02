@@ -20,7 +20,7 @@ function slider(config) {
         }
 
         var boxSize        = d('boxSize',         30);
-        var width          = d('width',           105);
+        var width          = d('width',           90);
         var height         = d('height',          140);
         var numberOfLevels = d('numberOfLevels',  12);
         var id             = d('id',              "slider");
@@ -54,9 +54,10 @@ function slider(config) {
             d3.select(this).classed("mousedown", false);
         }
 
-        var ondown = function() {
+        var ondown = function(e) {
             d3.select(this).classed("hover", false);
             d3.select(this).classed("mousedown", true);
+            e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
         }
 
         var onscroll = function() {
