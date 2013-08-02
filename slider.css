@@ -25,3 +25,10 @@
 .slide_region .mousedown {
     fill: #CCC;
 }
+
+.handle {
+    fill: #DDD;
+    stroke: #4D4D4D;
+    stroke-width: 3;
+    cursor: pointer;
+}
