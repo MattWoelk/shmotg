@@ -58,7 +58,9 @@ function slider(config) {
         var ondown = function(e) {
             d3.select(this).classed("hover", false);
             d3.select(this).classed("mousedown", true);
-            e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
+            if (e.preventDefault) {
+                e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
+            }
         }
 
         var onscroll = function() {
@@ -171,6 +173,15 @@ function slider(config) {
                 .interpolate("linear")(dat) + "Z";
         }
 
+        var drawDragLines = function (d, i) {
+            dat = [ {x: (1/3)*boxSize, y: ((i+2)/6)*boxSize},
+                    {x: (2/3)*boxSize, y: ((i+2)/6)*boxSize} ];
+            return d3.svg.line()
+                .x(function (d) { return d.x; })
+                .y(function (d) { return d.y; })
+                .interpolate("linear")(dat);
+        }
+
         var handleClip = handle_region.append("clipPath")
             .attr("id", "clip-handle" + id)
             .append("path")
@@ -185,6 +196,12 @@ function slider(config) {
             .attr("id", "handle" + id)
             .attr("clip-path", "url(#clip-handle" + id + ")")
             .attr("class", "handle");
+
+        handle_region.append("g").attr("id", "dragLines" + id).selectAll("path").data([0, 1, 2])
+            .enter().append("path")
+            .attr("d", drawDragLines)
+            .attr("class", "dragLines")
+            .attr("transform", "translate(" + (side_margin + boxSize + handle_distance) + "," + 0 + ")")
         // HANDLE }}}
 
         // {{{ DRAGGING
@@ -223,18 +240,18 @@ function slider(config) {
 
         // DRAGGING }}}
 
+        // {{{ HIGHLIGHT SELECTED
         function highlightSliderElement() {
-            // TODO: calculate which slider element is being pointed to
             var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
             var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
             var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
-            console.log(beingPointedTo);
             d3.selectAll(".slider_boxes")
                 .classed("highlighted", function (d, i) { return i == beingPointedTo; });
-            // TODO: highlight the element to which the handle is pointing
         }
 
         highlightSliderElement();
+        // HIGHLIGHT SELECTED}}}
+
     };
 }
 

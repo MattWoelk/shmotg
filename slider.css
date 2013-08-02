@@ -34,3 +34,10 @@
     stroke-width: 5;
     cursor: pointer;
 }
+
+.dragLines {
+    fill: none;
+    stroke: #4D4D4D;
+    stroke-width: 1;
+    pointer-events: none;
+}
