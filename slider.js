@@ -106,23 +106,6 @@ function slider(config) {
             .attr("class", "slider_text");
         // SLIDER }}}
 
-        // {{{ DRAGGING
-        var drag = d3.behavior.drag()
-            .origin(Object)
-            .on("drag", dragSlider);
-
-        slide_region.call(drag);
-
-        function dragSlider(usethis) {
-            var adjustment = usethis ? usethis : d3.event.dy;
-            var dragTarget = d3.select("#slide_region" + id);
-            var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-            var finalX = curTrans[0];
-            var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
-            dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
-        }
-        // DRAGGING }}}
-
         // {{{ SURROUNDING LINES
         var line_top_data = [ {x: 0,     y: 0},
                               {x: boxSize*2, y: 0} ];
@@ -164,8 +147,8 @@ function slider(config) {
             .attr("class", "handle_region")
 
         // TODO: make top and bottom dynamic
-        var pointer_top = boxSize/2;
-        var pointer_bottom = boxSize/2;
+        var pointer_top = Math.max(0, boxSize/2);
+        var pointer_bottom = Math.min(height, boxSize/2);
         var handle_distance = boxSize/2;
 
         var drawHandle = function () {
@@ -189,6 +172,38 @@ function slider(config) {
             //.on("click", onclick)
             .attr("class", "handle");
         // HANDLE }}}
+
+        // {{{ DRAGGING
+        var dragS = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragSlider);
+
+        var dragH = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragHandle);
+
+        slide_region.call(dragS);
+        handle_region.call(dragH);
+
+        function dragSlider(usethis) {
+            var adjustment = usethis ? usethis : d3.event.dy;
+            var dragTarget = d3.select("#slide_region" + id);
+            var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+            var finalX = curTrans[0];
+            var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
+            dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+        }
+
+        function dragHandle(usethis) {
+            var adjustment = usethis ? usethis : d3.event.dy;
+            var dragTarget = d3.select("#handle_region" + id);
+            var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+            var finalX = curTrans[0];
+            var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
+            dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+        }
+
+        // DRAGGING }}}
 
     };
 }

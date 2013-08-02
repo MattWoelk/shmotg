@@ -9,12 +9,15 @@
 }
 
 .slide_region * {
-    fill: #DDD;
-    stroke: #4D4D4D;
+    fill: #FFF;
+    /*stroke: #4D4D4D;*/
+    stroke: none;
     cursor: pointer;
 }
 
 .slide_region text {
+    fill: #4D4D4D;
+    stroke: #4D4D4D;
     pointer-events: none;
 }
 
@@ -27,8 +30,8 @@
 }
 
 .handle {
-    fill: #DDD;
+    fill: #FFF;
     stroke: #4D4D4D;
-    stroke-width: 3;
+    stroke-width: 2;
     cursor: pointer;
 }
