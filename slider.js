@@ -29,6 +29,7 @@ function slider(config) {
 
         // {{{ VARIABLES
         var side_margin = boxSize / 2;
+        side_margin = 0; // looks nicer without the extra lines
 
         var svg = d3.select(container).append("svg")
             .attr("id", id)
@@ -82,10 +83,10 @@ function slider(config) {
             .attr("class", "slide_region")
 
         var drawBox = function (d, i) {
-            dat = [ {x: boxSize*2 - side_margin,  y: i*boxSize},
-                    {x: side_margin,          y: i*boxSize},
-                    {x: side_margin,          y: (i+1)*boxSize},
-                    {x: boxSize*2 - side_margin,  y: (i+1)*boxSize} ];
+            dat = [ {x: side_margin + boxSize,  y: i*boxSize},
+                    {x: side_margin,            y: i*boxSize},
+                    {x: side_margin,            y: (i+1)*boxSize},
+                    {x: side_margin + boxSize,  y: (i+1)*boxSize} ];
             return d3.svg.line()
                 .x(function (d) { return d.x; })
                 .y(function (d) { return d.y; })
@@ -106,7 +107,7 @@ function slider(config) {
         slide_enter.append("text")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
-            .attr("x", function (d) { return boxSize; })
+            .attr("x", function (d) { return side_margin + (boxSize / 2.0); })
             .attr("y", function (d, i) { return (i+1)*boxSize - (boxSize/2); })
             .text(function (d, i) { return i; })
             .attr("class", "slider_text");
@@ -114,16 +115,16 @@ function slider(config) {
 
         // {{{ SURROUNDING LINES
         var line_top_data = [ {x: 0,     y: 0},
-                              {x: boxSize*2, y: 0} ];
+                              {x: boxSize + (2*side_margin), y: 0} ];
 
         var line_bottom_data = [ {x: 0,     y: height},
-                                 {x: boxSize*2, y: height} ];
+                                 {x: boxSize + (2*side_margin), y: height} ];
 
         var line_left_data = [ {x: side_margin, y: 0},
                                {x: side_margin, y: height}];
 
-        var line_right_data = [ {x: boxSize*2 - side_margin, y: 0},
-                                {x: boxSize*2 - side_margin, y: height}];
+        var line_right_data = [ {x: boxSize + side_margin, y: 0},
+                                {x: boxSize + side_margin, y: height}];
 
         var line = d3.svg.line()
             .x(function(d) { return d.x; })
@@ -158,12 +159,12 @@ function slider(config) {
         var handle_distance = boxSize/2;
 
         var drawHandle = function () {
-            dat = [ {x: boxSize*2 - side_margin, y: pointer_top},
-                    {x: boxSize*2 - side_margin + handle_distance, y: 0},
-                    {x: boxSize*2 - side_margin + handle_distance + boxSize, y: 0},
-                    {x: boxSize*2 - side_margin + handle_distance + boxSize, y: 0+boxSize},
-                    {x: boxSize*2 - side_margin + handle_distance, y: 0+boxSize},
-                    {x: boxSize*2 - side_margin, y: pointer_bottom} ];
+            dat = [ {x: boxSize + side_margin, y: pointer_top},
+                    {x: boxSize + side_margin + handle_distance, y: 0},
+                    {x: boxSize + side_margin + handle_distance + boxSize, y: 0},
+                    {x: boxSize + side_margin + handle_distance + boxSize, y: 0+boxSize},
+                    {x: boxSize + side_margin + handle_distance, y: 0+boxSize},
+                    {x: boxSize + side_margin, y: pointer_bottom} ];
             return d3.svg.line()
                 .x(function (d) { return d.x; })
                 .y(function (d) { return d.y; })
