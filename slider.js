@@ -25,6 +25,8 @@ function slider(config) {
         var numberOfLevels = d('numberOfLevels',  12);
         var id             = d('id',              "slider");
         var container      = d('container',       "body");
+
+        var changeCallBack = d('changeCallBack', function () {});
         // Set Defaults }}}
 
         // {{{ VARIABLES
