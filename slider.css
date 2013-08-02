@@ -10,10 +10,6 @@
     cursor: pointer;
 }
 
-.slider_boxes.highlighted {
-    fill: #DDD;
-}
-
 .slide_region text {
     fill: #4D4D4D;
     stroke: #4D4D4D;
@@ -26,6 +22,10 @@
 
 .slide_region .mousedown {
     fill: #FFF;
+}
+
+.slider_boxes.highlighted {
+    fill: #DDD;
 }
 
 .handle {
