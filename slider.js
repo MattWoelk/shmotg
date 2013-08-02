@@ -3,6 +3,11 @@
 * mySlider();
 */
 
+// TODO:
+// - The height of the boxes should change depending on
+//   how many we want to be visible at a time, which is
+//   based on how many levels we want available to choose
+
 function slider(config) {
     return function() {
         // {{{ Set Defaults
