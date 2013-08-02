@@ -18,7 +18,7 @@ function slider(config) {
         var boxSize        = d('boxSize',         30);
         var width          = d('width',           50);
         var height         = d('height',          150);
-        var numberOfLevels = d('numberOfLevels',  35);
+        var numberOfLevels = d('numberOfLevels',  12);
         var id             = d('id',              "slider");
         var container      = d('container',       "body");
         // Set Defaults }}}
@@ -39,6 +39,67 @@ function slider(config) {
             .attr("width", width)
             .attr("height", height);
         // VARIABLES }}}
+
+        // {{{ CLIPPING
+        var defclip = svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect")
+            .attr("width", boxSize)
+            .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
+            .attr("height", height);
+
+        // TODO: pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+        // CLIPPING }}}
+
+        var slide_region = svg.append("g")
+            .attr("clip-path", "url(#clip" + id + ")")
+            .append("g") // another 'g' so that the clip doesn't move with the slide_region
+            .attr("id", "slide_region" + id)
+            .attr("class", "slide_region")
+
+        var stagnant = d3.svg.line()
+            .x(function(d) { return d.x + 20; })
+            .y(function(d) { return d.y + 5; })
+            .interpolate("linear");
+
+        var drawBox = function (d, i) {
+            dat = [ {x: side_margin,          y: i*boxSize},
+                    {x: width - side_margin,  y: i*boxSize},
+                    {x: width - side_margin,  y: (i+1)*boxSize},
+                    {x: side_margin,          y: (i+1)*boxSize} ];
+            return d3.svg.line()
+                .x(function (d) { return d.x; })
+                .y(function (d) { return d.y; })
+                .interpolate("linear")(dat);
+        }
+
+        slide_dat_applied = slide_region.selectAll("path")
+            .data(d3.range(numberOfLevels))
+        slide_enter = slide_dat_applied.enter()
+        slide_enter.append("path")
+            .attr("d", drawBox)
+            .attr("class", "slider_outlines");
+        slide_enter.append("text")
+            .attr("x", function (d) { return d.x + (boxSize/2); })
+            .attr("y", function (d) { return d.y + (boxSize/2); })
+            .attr("d", drawBox)
+            .attr("class", "slider_outlines");
+        //slide_enter.append("circle")
+        //    .attr("cx", width/2)
+        //    .attr("cy", function (d,i) { return i*boxSize; })
+        //    .attr("r", boxSize/2)
+
+        var drag = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragSlider);
+
+        slide_region.call(drag);
+
+        function dragSlider() {
+            var dragTarget = d3.select("#slide_region" + id);
+            var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+            var finalX = curTrans[0];
+            var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + d3.event.dy));
+            dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+        }
 
         // {{{ TOP AND BOTTOM LINES
         var line_top_data = [ {x: 0,     y: 0},
@@ -74,59 +135,6 @@ function slider(config) {
             .attr("d", line(line_right_data))
             .attr("class", "slider_outlines");
         // TOP AND BOTTOM LINES }}}
-
-        // {{{ CLIPPING
-        var defclip = svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect")
-            .attr("width", boxSize)
-            .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
-            .attr("height", height);
-
-        // TODO: pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-        // CLIPPING }}}
-
-        var slide_region = svg.append("g")
-            .attr("clip-path", "url(#clip" + id + ")")
-            .append("g") // another 'g' so that the clip doesn't move with the slide_region
-            .attr("id", "slide_region" + id)
-            .attr("class", "slide_region")
-
-        var stagnant = d3.svg.line()
-            .x(function(d) { return d.x; })
-            .y(function(d) { return d.y; })
-            .interpolate("linear");
-
-        slide_dat_applied = slide_region.selectAll("path")
-            .data(d3.range(12))
-        slide_enter = slide_dat_applied.enter()
-        slide_enter.append("circle")
-            .attr("cx", width/2)
-            .attr("cy", function (d,i) { return i*boxSize; })
-            .attr("r", boxSize/2)
-        //slide_enter.append("circle")
-        //    .attr("cx", width/2 - 5)
-        //    .attr("cy", function (d,i) { return i*boxSize; })
-        //    .attr("r", boxSize/2)
-            //.enter().append("path")
-            //    .attr("d", line({x: side_margin, y: boxSize}, {x: width - side_margin, y: boxSize}));
-            //.attr("d", function (d, i) { return line({x: side_margin, y: boxSize*i}, {x: width - side_margin, y: boxSize*i}); });
-
-        var drag = d3.behavior.drag()
-            .origin(Object)
-            .on("drag", dragmove);
-
-        slide_region.call(drag);
-
-        function dragmove() {
-            //var dragTarget = d3.select(this);
-            var dragTarget = d3.select("#slide_region" + id);
-            var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-            dragTarget.attr("transform", "translate(" + curTrans[0] + "," + (curTrans[1] + d3.event.dy) + ")")
-        }
-
-        //slide_region.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom))
-        // TODO: chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
-
-        // d3.range(12); // integers from 0 through 12
 
     };
 }
