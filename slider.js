@@ -7,6 +7,9 @@
 // - The height of the boxes should change depending on
 //   how many we want to be visible at a time, which is
 //   based on how many levels we want available to choose
+// - Use each object as its own clipping region so that
+//   object outlines never are larger than the object
+//   itself.
 // TODO }}}
 
 function slider(config) {
@@ -57,6 +60,8 @@ function slider(config) {
         }
 
         var onscroll = function() {
+            d3.select(this).classed("hover", false);
+            d3.select(this).classed("mousedown", false);
             dragSlider(d3.event.wheelDeltaY / 5);
         }
 
@@ -161,8 +166,13 @@ function slider(config) {
             return d3.svg.line()
                 .x(function (d) { return d.x; })
                 .y(function (d) { return d.y; })
-                .interpolate("linear")(dat);
+                .interpolate("linear")(dat) + "Z";
         }
+
+        var handleClip = handle_region.append("clipPath")
+            .attr("id", "clip-handle" + id)
+            .append("path")
+            .attr("d", drawHandle)
 
         var handle = handle_region.append("path")
             .attr("d", drawHandle)
@@ -170,6 +180,8 @@ function slider(config) {
             //.on("mouseout", onoff)
             //.on("mousedown", ondown)
             //.on("click", onclick)
+            .attr("id", "handle" + id)
+            .attr("clip-path", "url(#clip-handle" + id + ")")
             .attr("class", "handle");
         // HANDLE }}}
 
