@@ -12,23 +12,19 @@
 //   itself.
 // TODO }}}
 
-function slider(config) {
-    return function() {
-        // {{{ Set Defaults
-        var d = function(first, second) {
-            return config[first] ? config[first] : second;
-        }
+function slider(container_in, id_in) {
+    // {{{ Set Defaults
+    var boxSize        = 30;
+    var width          = 90;
+    var height         = 140;
+    var numberOfLevels = 12;
+    var id             = id_in ? id_in : "slider";
+    var container      = container_in ? container_in : "body";
 
-        var boxSize        = d('boxSize',         30);
-        var width          = d('width',           90);
-        var height         = d('height',          140);
-        var numberOfLevels = d('numberOfLevels',  12);
-        var id             = d('id',              "slider");
-        var container      = d('container',       "body");
+    var changeCallBack = function () {};
+    // Set Defaults }}}
 
-        var changeCallBack = d('changeCallBack', function () {});
-        // Set Defaults }}}
-
+    var my = function () {
         // {{{ VARIABLES
         var side_margin = boxSize / 2;
         side_margin = 0; // looks nicer without the extra lines
@@ -253,8 +249,42 @@ function slider(config) {
 
         highlightSliderElement();
         // HIGHLIGHT SELECTED}}}
-
     };
+
+    // {{{ GETTERS AND SETTERS
+    my.width = function (value) {
+        if (!arguments.length) return width;
+        width = value;
+        return my;
+    }
+
+    my.height = function (value) {
+        if (!arguments.length) return height;
+        height = value;
+        return my;
+    }
+
+    my.boxSize = function (value) {
+        if (!arguments.length) return boxSize;
+        boxSize = value;
+        return my;
+    }
+
+    my.numberOfLevels = function (value) {
+        if (!arguments.length) return numberOfLevels;
+        numberOfLevels = value;
+        return my;
+    }
+
+    my.changeCallBack = function (value) {
+        if (!arguments.length) return changeCallBack;
+        changeCallBack = value;
+        return my;
+    }
+
+    // GETTERS AND SETTERS }}}
+
+    return my;
 }
 
 /* vim: set foldmethod=marker: */
