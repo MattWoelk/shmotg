@@ -11,4 +11,5 @@
 .slide_region * {
     fill: #DDD;
     stroke: #4D4D4D;
+    cursor: pointer;
 }

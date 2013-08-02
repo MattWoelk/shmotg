@@ -3,10 +3,11 @@
 * mySlider();
 */
 
-// TODO:
+// {{{ TODO:
 // - The height of the boxes should change depending on
 //   how many we want to be visible at a time, which is
 //   based on how many levels we want available to choose
+// TODO }}}
 
 function slider(config) {
     return function() {
@@ -55,11 +56,6 @@ function slider(config) {
             .attr("id", "slide_region" + id)
             .attr("class", "slide_region")
 
-        var stagnant = d3.svg.line()
-            .x(function(d) { return d.x + 20; })
-            .y(function(d) { return d.y + 5; })
-            .interpolate("linear");
-
         var drawBox = function (d, i) {
             dat = [ {x: width - side_margin,  y: i*boxSize},
                     {x: side_margin,          y: i*boxSize},
@@ -78,15 +74,14 @@ function slider(config) {
             .attr("d", drawBox)
             .attr("class", "slider_outlines");
         slide_enter.append("text")
-            .attr("x", function (d) { return d.x + (boxSize/2); })
-            .attr("y", function (d) { return d.y + (boxSize/2); })
-            .attr("d", drawBox)
-            .attr("class", "slider_outlines");
-        //slide_enter.append("circle")
-        //    .attr("cx", width/2)
-        //    .attr("cy", function (d,i) { return i*boxSize; })
-        //    .attr("r", boxSize/2)
+            .attr("x", function (d) { return width/2; })
+            .attr("y", function (d, i) { return (i+1)*boxSize - (boxSize/2); })
+            .text(function (d, i) { return i; })
+            .attr("text-anchor", "middle")
+            .attr("alignment-baseline", "middle")
+            .attr("class", "slider_text");
 
+        // {{{ DRAGGING
         var drag = d3.behavior.drag()
             .origin(Object)
             .on("drag", dragSlider);
@@ -100,8 +95,9 @@ function slider(config) {
             var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + d3.event.dy));
             dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
         }
+        // DRAGGING }}}
 
-        // {{{ TOP AND BOTTOM LINES
+        // {{{ SURROUNDING LINES
         var line_top_data = [ {x: 0,     y: 0},
                               {x: width, y: 0} ];
 
@@ -134,7 +130,7 @@ function slider(config) {
         var line_right = svg.append("path")
             .attr("d", line(line_right_data))
             .attr("class", "slider_outlines");
-        // TOP AND BOTTOM LINES }}}
+        // SURROUNDING LINES }}}
 
     };
 }
