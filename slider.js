@@ -7,9 +7,6 @@
 // - The height of the boxes should change depending on
 //   how many we want to be visible at a time, which is
 //   based on how many levels we want available to choose
-// - Use each object as its own clipping region so that
-//   object outlines never are larger than the object
-//   itself.
 // TODO }}}
 
 function slider(container_in, id_in) {
@@ -59,9 +56,16 @@ function slider(container_in, id_in) {
             if (e.preventDefault) {
                 e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
             }
+            e.returnValue = false;
         }
 
-        var onscroll = function() {
+        var onscroll = function(e) {
+            console.log(e);
+            if (e.preventDefault) {
+                console.log("PREVENTING");
+                e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
+            }
+            e.returnValue = false;
             d3.select(this).classed("hover", false);
             d3.select(this).classed("mousedown", false);
             dragSlider(d3.event.wheelDeltaY / 5);
