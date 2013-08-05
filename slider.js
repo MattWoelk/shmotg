@@ -276,6 +276,12 @@ function slider(container_in, id_in) {
         return my;
     }
 
+    my.container = function (value) {
+        if (!arguments.length) return container;
+        container = value;
+        return my;
+    }
+
     my.changeCallBack = function (value) {
         if (!arguments.length) return changeCallBack;
         changeCallBack = value;

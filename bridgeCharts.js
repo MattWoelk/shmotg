@@ -3,6 +3,16 @@ var myLoader = loader({width: 25, height: 25, container: "#loader_container", id
 myLoader();
 /// Loading Spinner Icon }}}
 
+// {{{ SLIDER
+var sliderContainerName = "#slider_container";
+var mySlider = slider()
+    .height(200)
+    .width(80)
+    .boxSize(30)
+    .container(sliderContainerName)
+    .numberOfLevels(28)();
+// SLIDER }}}
+
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
@@ -45,7 +55,7 @@ var plots = []; //an array of all plots
 var msPS = 5; // frequency of data samples
 
 // TODO: sync this with the one in bridgeChart.js
-var margin = {top: 20, right: 10, bottom: 25, left: 40};
+var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
 
 var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");

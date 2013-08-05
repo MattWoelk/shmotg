@@ -5,6 +5,10 @@ body {
     font-size: 20px;
 }
 
+#undercharts {
+    margin-left: 80px;
+}
+
 text {
     fill: #4D4D4D;
 }
@@ -120,8 +124,13 @@ path, line {
     overflow: none;
 }
 
+#slider_container {
+    z-index: 1;
+}
+
 #zoomSVG {
     position: absolute;
+    z-index: 0;
     top: 0;
     left: 0;
 }
