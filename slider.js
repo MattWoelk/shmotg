@@ -26,8 +26,7 @@ function slider(container_in, id_in) {
         var side_margin = boxSize / 2;
         side_margin = 0; // looks nicer without the extra lines
 
-        var svg = d3.select(container).append("svg")
-            .attr("id", id)
+        var svg = d3.select("#"+id)
             .attr("width", width)
             .attr("height", height);
         // VARIABLES }}}

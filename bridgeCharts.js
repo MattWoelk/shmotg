@@ -3,16 +3,6 @@ var myLoader = loader({width: 25, height: 25, container: "#loader_container", id
 myLoader();
 /// Loading Spinner Icon }}}
 
-// {{{ SLIDER
-var sliderContainerName = "#slider_container";
-var mySlider = slider()
-    .height(200)
-    .width(80)
-    .boxSize(30)
-    .container(sliderContainerName)
-    .numberOfLevels(28)();
-// SLIDER }}}
-
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
@@ -67,6 +57,21 @@ var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, 
 var yScale = d3.scale.linear();
 
 // VARIABLES }}}
+
+// {{{ SLIDER
+var sliderContainerName = "#slider_container";
+var mySlider = slider()
+    .height(200)
+    .width(80)
+    .boxSize(30)
+    .container(sliderContainerName)
+    //.changeCallBack(function (i) {
+    //    plots.forEach(function (plt) {
+    //        plt.whichLevelToRender(i).update();
+    //    });
+    //})
+    .numberOfLevels(28)();
+// SLIDER }}}
 
 //{{{ HELPER FUNCTIONS
 

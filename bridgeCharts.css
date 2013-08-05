@@ -5,10 +5,6 @@ body {
     font-size: 20px;
 }
 
-#undercharts {
-    margin-left: 80px;
-}
-
 text {
     fill: #4D4D4D;
 }
@@ -180,16 +176,16 @@ box-shadow:inset 0px 0px 0.2em #000;
     }
 
     #controls ul {
-        float: left;
+        /*float: left;*/
         list-style: none;
         padding: 0.5em 0.5em 0.5em 0.5em;
         margin: 0;
-        border-left: dashed grey;
-        border-top: dashed grey;
+        /*border-left: dashed grey;*/
+        /*border-top: dashed grey;*/
     }
 
     #controls ul:not(:first-child) {
-        border-left: dashed grey;
+        /*border-left: dashed grey;*/
         border-top: dashed grey;
     }
 
