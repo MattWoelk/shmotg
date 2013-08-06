@@ -148,16 +148,16 @@ box-shadow:inset 0px 0px 0.2em #000;
 }*/
 
     #controls {
-        -moz-transition: max-width 0.3s ease-in, max-height 0.3s step-end;
-        -webkit-transition: max-width 0.3s ease-in, max-height 0.3s step-end;
-        transition: max-width 0.3s ease-in, max-height 0.3s step-end;
+        -moz-transition: max-width 0.3s ease-in,     max-height 0.3s step-end, border-width 0.3s step-end;
+        -webkit-transition: max-width 0.3s ease-in,  max-height 0.3s step-end, border-width 0.3s step-end;
+        transition: max-width 0.3s ease-in,          max-height 0.3s step-end, border-width 0.3s step-end;
 
         overflow: hidden;
         max-height: 0em;
         max-width: 0em;
         background: #f6f6f6;
         border: solid;
-        border-width: 1px;
+        border-width: 0px;
         border-radius: 0em 1em 1em 0em;
         /*box-shadow: inset 0px 0px 0.4em #000;*/
     }
