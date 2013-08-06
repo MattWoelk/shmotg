@@ -148,12 +148,12 @@ box-shadow:inset 0px 0px 0.2em #000;
 }*/
 
     #controls {
-        -moz-transition: max-height 0.5s ease-out;
-        -webkit-transition: max-height 0.5s ease-out;
-        transition: max-height 0.5s ease-out; /* this is a bit of a hack */
+        -moz-transition: max-width 0.3s ease-out;
+        -webkit-transition: max-width 0.3s ease-out;
+        transition: max-width 0.3s ease-out; /* this is a bit of a hack */
 
         overflow: hidden;
-        max-height: 0;
+        max-width: 0;
         background: #f6f6f6;
         border: solid;
         border-width: 0px;
@@ -162,12 +162,12 @@ box-shadow:inset 0px 0px 0.2em #000;
     }
 
     #isexpanded:checked ~ #controls {
-        -moz-transition: max-height 0.5s ease-in;
-        -webkit-transition: max-height 0.5s ease-in;
-        transition: max-height 0.5s ease-in; /* this is a bit of a hack */
+        -moz-transition: max-width 0.3s ease-in;
+        -webkit-transition: max-width 0.3s ease-in;
+        transition: max-width 0.3s ease-in; /* this is a bit of a hack */
 
         overflow: hidden;
-        max-height: 35em; /* this is a bit of a hack */
+        max-width: 10em; /* this is a bit of a hack */
         background: #f6f6f6;
         border: solid;
         border-width: 0px;
@@ -178,6 +178,7 @@ box-shadow:inset 0px 0px 0.2em #000;
     #controls ul {
         /*float: left;*/
         list-style: none;
+        width: 10em;
         padding: 0.5em 0.5em 0.5em 0.15em;
         margin: 0;
         /*border-left: dashed grey;*/
