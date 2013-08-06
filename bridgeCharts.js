@@ -61,6 +61,7 @@ var yScale = d3.scale.linear();
 // {{{ SLIDER
 var sliderContainerName = "#slider_container";
 var curLevel = 0;
+var curPos = 0;
 var mySlider = slider()
     .height(200)
     .width(80)
@@ -72,6 +73,11 @@ var mySlider = slider()
                 plt.whichLevelToRender(i).update();
             });
             curLevel = i;
+        }
+        if (curPos !== pos) {
+            // TODO: adjust the x scale
+            zoomto(-pos*10);
+            curPos = pos;
         }
     })
     .numberOfLevels(28)();
@@ -193,6 +199,53 @@ function changeLines () {
     plots.forEach(function (plt) {
         plt.setSelectedLines()/*.reRenderTheNextTime(true)*/.update();
     });
+}
+
+function zoomto(val) {
+    console.log("ZOOMTO", val);
+    changeZoom(
+        function (a, b) { return a - (b/val); },
+        function (a, b) { return a + (b/val); }
+    );
+}
+
+function scaleWithSlider(val, func1, func2) {
+    var xdist = val*4;
+
+    // for later ratio adjustment
+    var oldScaleVal = getScaleValue(xScale);
+    var oldZoomScale = zoom.scale();
+
+    // create an updated scale which the new domain
+    var tmpScale = d3.scale.linear().range(xScale.range());
+    tmpScale.domain([
+                    func1(xScale.domain()[0], xdist),
+                    func2(xScale.domain()[1], xdist)
+    ]);
+
+    // update the scale if it's within the extents
+    var doWeScale = scaleWithinExtents(tmpScale);
+    if (doWeScale) {
+        xScale = tmpScale;
+    }
+
+    // reset the x scale so zooming still works
+    zoom.x(xScale);
+
+    // since the zoom scale resets to 1 when we
+    // reset its xscale, we need to change its
+    // extents to match the change in ratio
+    var newScaleVal = getScaleValue(xScale);
+    var ratio = (oldScaleVal / newScaleVal ) / oldZoomScale;
+    zoomExtentsForScale[0] *= ratio;
+    zoomExtentsForScale[1] *= ratio;
+    zoom.scaleExtent(zoomExtentsForScale);
+
+    // update
+    if (doWeScale) {
+        transitionAllNextTime();
+    }
+    zoomAll();
 }
 
 // func1 is the function which modifies the domain start in terms of the old domain start, and xdist
