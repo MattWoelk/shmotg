@@ -148,12 +148,9 @@ box-shadow:inset 0px 0px 0.2em #000;
 }*/
 
     #controls {
-        -moz-transition: max-height 0.3s step-end 1s;
-        -webkit-transition: max-height 0.3s step-end 1s;
-        transition: max-height 0.3s step-end 1s;
-        -moz-transition: max-width 0.3s ease-in;
-        -webkit-transition: max-width 0.3s ease-in;
-        transition: max-width 0.3s ease-in;
+        -moz-transition: max-width 0.3s ease-in, max-height 0.3s step-end;
+        -webkit-transition: max-width 0.3s ease-in, max-height 0.3s step-end;
+        transition: max-width 0.3s ease-in, max-height 0.3s step-end;
 
         overflow: hidden;
         max-height: 0em;
@@ -166,9 +163,6 @@ box-shadow:inset 0px 0px 0.2em #000;
     }
 
     #isexpanded:checked ~ #controls {
-        -moz-transition: max-height 0.3s step-start;
-        -webkit-transition: max-height 0.3s step-start;
-        transition: max-height 0.3s step-start;
         -moz-transition: max-width 0.3s ease-in;
         -webkit-transition: max-width 0.3s ease-in;
         transition: max-width 0.3s ease-in;
