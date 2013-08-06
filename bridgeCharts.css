@@ -154,7 +154,7 @@ box-shadow:inset 0px 0px 0.2em #000;
 
         overflow: hidden;
         max-height: 0;
-        background-color: #eee;
+        background: #f6f6f6;
         border: solid;
         border-width: 0px;
         border-radius: 1em;
@@ -168,7 +168,7 @@ box-shadow:inset 0px 0px 0.2em #000;
 
         overflow: hidden;
         max-height: 35em; /* this is a bit of a hack */
-        background: #eee;
+        background: #f6f6f6;
         border: solid;
         border-width: 0px;
         border-radius: 1em;
@@ -178,7 +178,7 @@ box-shadow:inset 0px 0px 0.2em #000;
     #controls ul {
         /*float: left;*/
         list-style: none;
-        padding: 0.5em 0.5em 0.5em 0.5em;
+        padding: 0.5em 0.5em 0.5em 0.15em;
         margin: 0;
         /*border-left: dashed grey;*/
         /*border-top: dashed grey;*/
