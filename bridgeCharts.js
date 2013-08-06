@@ -123,7 +123,7 @@ function transitionAllNextTime() {
 }
 
 function setLoadingIcon(on) {
-    d3.select("#loader_container").style("display", on ? "block" : "none");
+    d3.select("#loader_container").style("opacity", on ? 1 : 0);
 }
 
 var uniqueID = 0;

@@ -25,9 +25,6 @@ window.addEventListener('load', function() {
 </head><!--}}}-->
 
 <body>
-<!-- Loading Animation {{{-->
-<div id="loader_container"></div>
-<!--}}}-->
 
 <!--{{{ SHOWHIDE JAVASCRIPT-->
 <script>
@@ -53,6 +50,10 @@ function showhide() {
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
     <input type="checkbox" id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
     <label for="isexpanded"></label>
+
+    <!-- Loading Animation {{{-->
+    <div id="loader_container"></div>
+    <!--}}}-->
 
     <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
     <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>

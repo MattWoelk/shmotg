@@ -357,9 +357,7 @@ input[type="radio"] + label {
 
 /* {{{ Loading Spinner Icon */
 #loader_container {
-    display: none;
-    position: absolute;
-    left: 85px;
+    display: inline;
 }
 /* Loading Spinner Icon }}}*/
 
