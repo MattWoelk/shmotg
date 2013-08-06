@@ -71,15 +71,6 @@ function showhide() {
                 <li><input type="checkbox" checked id="missing"   value="missing"/>  <label for="missing"></label><label for="missing">Missing</label></li>
             </ul>
 
-            <ul id="render-depth">
-                <!-- Idea: instead of all this, we could have more bullets which would be options for how many pixels per bin. It would automatically update still, but you'd have some control over when and how much this way. -->
-                Maximum Bin<br />Render Size:
-                <br />
-                <label><input type="range" min="10" max="200" id="renderdepth" value="40" style="width:200px"/></label>
-                <br />
-                Displaying Level <span id="current_level">0</span>
-            </ul>
-
             <ul id="render-method">
                 <li><input type="radio" checked id="stp_rad" name="render-method" value="step-after"/><label for="stp_rad"></label><label for="stp_rad">Step</label></li>
                 <li><input type="radio"         id="lin_rad"  name="render-method" value="linear"/><label for="lin_rad"></label><label for="lin_rad">Linear</label></li>

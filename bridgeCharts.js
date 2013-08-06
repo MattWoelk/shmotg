@@ -19,7 +19,7 @@ window.addEventListener(
 );
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
-document.getElementById("render-depth").addEventListener("change", changeLines, false);
+//document.getElementById("render-depth").addEventListener("change", changeLines, false);
 //  an alternative so that it waits for you to lift up your mouse/finger:
 //document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
 //document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
