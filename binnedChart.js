@@ -909,7 +909,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
         var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
         my.whichLinesToRender(a);
 
-        my.whichLevelToRender(goToLevel(xScale, milliSecondsPerSample));
+        //my.whichLevelToRender(goToLevel(xScale, milliSecondsPerSample));
 
         var b = document.querySelector("#render-method input:checked").value;
         if (b !== interpolationMethod) {

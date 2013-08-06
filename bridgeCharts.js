@@ -60,16 +60,20 @@ var yScale = d3.scale.linear();
 
 // {{{ SLIDER
 var sliderContainerName = "#slider_container";
+var curLevel = 0;
 var mySlider = slider()
     .height(200)
     .width(80)
     .boxSize(30)
     .container(sliderContainerName)
-    //.changeCallBack(function (i) {
-    //    plots.forEach(function (plt) {
-    //        plt.whichLevelToRender(i).update();
-    //    });
-    //})
+    .changeCallBack(function (pos, i) {
+        if (curLevel !== i) {
+            plots.forEach(function (plt) {
+                plt.whichLevelToRender(i).update();
+            });
+            curLevel = i;
+        }
+    })
     .numberOfLevels(28)();
 // SLIDER }}}
 

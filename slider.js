@@ -217,6 +217,12 @@ function slider(container_in, id_in) {
         slide_region.call(dragS);
         handle_region.call(dragH);
 
+        function currentScrollPosition () {
+            var dragTarget = d3.select("#slide_region" + id);
+            var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+            return curTrans[1];
+        }
+
         function dragSlider(usethis) {
             var adjustment = usethis ? usethis : d3.event.dy;
             var dragTarget = d3.select("#slide_region" + id);
@@ -246,6 +252,7 @@ function slider(container_in, id_in) {
             var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
             var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
             var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
+            changeCallBack(currentScrollPosition(), beingPointedTo);
             d3.selectAll(".slider_boxes")
                 .classed("highlighted", function (d, i) { return i == beingPointedTo; });
         }
@@ -288,6 +295,12 @@ function slider(container_in, id_in) {
     my.changeCallBack = function (value) {
         if (!arguments.length) return changeCallBack;
         changeCallBack = value;
+        return my;
+    }
+
+    my.scrollPosition = function (value) {
+        if (!arguments.length) return scrollPosition;
+        scrollPosition = value;
         return my;
     }
 
