@@ -81,7 +81,7 @@ var mySlider = slider()
             curPos = pos;
         }
     })
-    .numberOfLevels(28)();
+    .numberOfLevels(33)();
 // SLIDER }}}
 
 //{{{ HELPER FUNCTIONS

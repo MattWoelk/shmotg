@@ -17,6 +17,7 @@ function slider(container_in, id_in) {
     var numberOfLevels = 12;
     var id             = id_in ? id_in : "slider";
     var container      = container_in ? container_in : "body";
+    var defaultYValue  = boxSize*2;
 
     var changeCallBack = function () {};
     // Set Defaults }}}
@@ -155,6 +156,7 @@ function slider(container_in, id_in) {
         var handle_region = svg.append("g")
             .attr("id", "handle_region" + id)
             .attr("class", "handle_region")
+            .attr("transform", "translate(0," + defaultYValue + ")")
 
         // TODO: make top and bottom dynamic
         var pointer_top = Math.max(0, boxSize/2);
