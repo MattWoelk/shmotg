@@ -19,7 +19,7 @@ window.addEventListener(
 );
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
-document.getElementById("render-depth").addEventListener("change", changeLines, false);
+//document.getElementById("render-depth").addEventListener("change", changeLines, false);
 //  an alternative so that it waits for you to lift up your mouse/finger:
 //document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
 //document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
@@ -45,7 +45,7 @@ var plots = []; //an array of all plots
 var msPS = 5; // frequency of data samples
 
 // TODO: sync this with the one in bridgeChart.js
-var margin = {top: 20, right: 10, bottom: 25, left: 40};
+var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
 
 var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
@@ -57,6 +57,32 @@ var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, 
 var yScale = d3.scale.linear();
 
 // VARIABLES }}}
+
+// {{{ SLIDER
+var sliderContainerName = "#slider_container";
+var curLevel = 0;
+var curPos = 0;
+var mySlider = slider()
+    .height(200)
+    .width(80)
+    .boxSize(30)
+    .container(sliderContainerName)
+    .changeCallBack(function (pos, i) {
+        if (curLevel !== i) {
+            plots.forEach(function (plt) {
+                plt.whichLevelToRender(i).update();
+            });
+            curLevel = i;
+        }
+        var boxSize = 30; // KEEP SYNC'D WITH slider.js
+        var scaleFactor = Math.pow(2, pos/boxSize);
+        if (curPos !== pos) {
+            rescaleTo(scaleFactor);
+            curPos = pos;
+        }
+    })
+    .numberOfLevels(28)();
+// SLIDER }}}
 
 //{{{ HELPER FUNCTIONS
 
@@ -104,7 +130,7 @@ function transitionAllNextTime() {
 }
 
 function setLoadingIcon(on) {
-    d3.select("#loader_container").style("display", on ? "block" : "none");
+    d3.select("#loader_container").style("opacity", on ? 1 : 0);
 }
 
 var uniqueID = 0;
@@ -174,6 +200,48 @@ function changeLines () {
     plots.forEach(function (plt) {
         plt.setSelectedLines()/*.reRenderTheNextTime(true)*/.update();
     });
+}
+
+function rescaleTo(val) {
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
+
+    var oldScaleVal = getScaleValue(xScale);
+    var oldZoomScale = zoom.scale();
+
+    // We want the new scale value to be val
+    var newdist = (xScale.range()[1] - xScale.range()[0]) / val;
+
+    // Calculate where the domain needs to move, and move it
+    var displacement = (newdist - xdist) / 2;
+    var tmpScale = d3.scale.linear().range(xScale.range());
+    tmpScale.domain([
+        xScale.domain()[0] - displacement,
+        xScale.domain()[1] + displacement
+    ]);
+
+    // update the scale if it's within the extents
+    var doWeScale = scaleWithinExtents(tmpScale);
+    if (doWeScale) {
+        xScale = tmpScale;
+    }
+
+    // reset the x scale so zooming still works
+    zoom.x(xScale);
+
+    // since the zoom scale resets to 1 when we
+    // reset its xscale, we need to change its
+    // extents to match the change in ratio
+    var newScaleVal = getScaleValue(xScale);
+    var ratio = (oldScaleVal / newScaleVal ) / oldZoomScale;
+    zoomExtentsForScale[0] *= ratio;
+    zoomExtentsForScale[1] *= ratio;
+    zoom.scaleExtent(zoomExtentsForScale);
+
+    // update
+    if (doWeScale) {
+        //transitionAllNextTime();
+    }
+    zoomAll();
 }
 
 // func1 is the function which modifies the domain start in terms of the old domain start, and xdist

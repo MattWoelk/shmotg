@@ -86,7 +86,7 @@ a, input, button {
 
 #chart {
     font: 10px sans-serif;
-    overflow: none;
+    overflow: hidden;
 }
 
 path, line {
@@ -113,15 +113,20 @@ path, line {
 
 #chart_container {
     position: relative;
-    overflow: none;
+    overflow: hidden;
 }
 
 #charts {
-    overflow: none;
+    overflow: hidden;
+}
+
+#slider_container {
+    z-index: 1;
 }
 
 #zoomSVG {
     position: absolute;
+    z-index: 0;
     top: 0;
     left: 0;
 }
@@ -143,45 +148,51 @@ box-shadow:inset 0px 0px 0.2em #000;
 }*/
 
     #controls {
-        -moz-transition: max-height 0.5s ease-out;
-        -webkit-transition: max-height 0.5s ease-out;
-        transition: max-height 0.5s ease-out; /* this is a bit of a hack */
+        -moz-transition: max-width 0.3s ease-in,     max-height 0.3s step-end, border-width 0.3s step-end;
+        -webkit-transition: max-width 0.3s ease-in,  max-height 0.3s step-end, border-width 0.3s step-end;
+        transition: max-width 0.3s ease-in,          max-height 0.3s step-end, border-width 0.3s step-end;
 
         overflow: hidden;
-        max-height: 0;
-        background-color: #eee;
+        max-height: 0em;
+        max-width: 0em;
+        background: #f6f6f6;
         border: solid;
         border-width: 0px;
-        border-radius: 1em;
-        box-shadow: inset 0px 0px 0.4em #000;
+        border-radius: 0em 1em 1em 0em;
+        /*box-shadow: inset 0px 0px 0.4em #000;*/
     }
 
     #isexpanded:checked ~ #controls {
-        -moz-transition: max-height 0.5s ease-in;
-        -webkit-transition: max-height 0.5s ease-in;
-        transition: max-height 0.5s ease-in; /* this is a bit of a hack */
+        -moz-transition: max-width 0.3s ease-in;
+        -webkit-transition: max-width 0.3s ease-in;
+        transition: max-width 0.3s ease-in;
+
 
         overflow: hidden;
         max-height: 35em; /* this is a bit of a hack */
-        background: #eee;
+        max-width: 9.5em;
+        background: #f6f6f6;
         border: solid;
-        border-width: 0px;
-        border-radius: 1em;
-        box-shadow: inset 0px 0px 0.4em #000;
+        border-width: 2px 2px 2px 0px;
+        border-radius: 0em 1em 1em 0em;
+        /*box-shadow: inset 0px 0px 0.4em #000;*/
     }
 
     #controls ul {
-        float: left;
+        /*float: left;*/
         list-style: none;
-        padding: 0.5em 0.5em 0.5em 0.5em;
+        padding: 0.5em 0.5em 0.5em 0.15em;
         margin: 0;
-        border-left: dashed grey;
-        border-top: dashed grey;
+        width: 12em;
+        /*border-left: dashed grey;*/
+        /*border-top: dashed grey;*/
     }
 
     #controls ul:not(:first-child) {
-        border-left: dashed grey;
-        border-top: dashed grey;
+        /*border-left: dashed grey;*/
+        border-top-width: 2px;
+        border-top-color: grey;
+        border-top-style: dashed;
     }
 
 /*{{{ GIANT SLIDER ON MOBILE */
@@ -346,9 +357,7 @@ input[type="radio"] + label {
 
 /* {{{ Loading Spinner Icon */
 #loader_container {
-    display: none;
-    position: absolute;
-    left: 5px;
+    display: inline;
 }
 /* Loading Spinner Icon }}}*/
 

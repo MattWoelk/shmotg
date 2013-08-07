@@ -1,0 +1,43 @@
+.slider_outlines {
+    stroke-width: 2;
+    stroke: #4D4D4D;
+    fill: none;
+}
+
+.slider_boxes {
+    fill: #FFF;
+    stroke: none;
+    cursor: pointer;
+}
+
+.slide_region text {
+    fill: #4D4D4D;
+    stroke: #4D4D4D;
+    pointer-events: none;
+}
+
+.slide_region .hover {
+    fill: #EEE;
+}
+
+.slide_region .mousedown {
+    fill: #FFF;
+}
+
+.slider_boxes.highlighted {
+    fill: #DDD;
+}
+
+.handle {
+    fill: #FFF;
+    stroke: #4D4D4D;
+    stroke-width: 5;
+    cursor: pointer;
+}
+
+.dragLines {
+    fill: none;
+    stroke: #4D4D4D;
+    stroke-width: 1;
+    pointer-events: none;
+}
