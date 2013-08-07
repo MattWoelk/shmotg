@@ -74,9 +74,10 @@ var mySlider = slider()
             });
             curLevel = i;
         }
+        var boxSize = 30; // KEEP SYNC'D WITH slider.js
+        var scaleFactor = Math.pow(2, pos/boxSize);
         if (curPos !== pos) {
-            // TODO: adjust the x scale
-            zoomto(-pos*10);
+            rescaleTo(scaleFactor);
             curPos = pos;
         }
     })
@@ -201,26 +202,21 @@ function changeLines () {
     });
 }
 
-function zoomto(val) {
-    console.log("ZOOMTO", val);
-    changeZoom(
-        function (a, b) { return a - (b/val); },
-        function (a, b) { return a + (b/val); }
-    );
-}
+function rescaleTo(val) {
+    var xdist = xScale.domain()[1] - xScale.domain()[0];
 
-function scaleWithSlider(val, func1, func2) {
-    var xdist = val*4;
-
-    // for later ratio adjustment
     var oldScaleVal = getScaleValue(xScale);
     var oldZoomScale = zoom.scale();
 
-    // create an updated scale which the new domain
+    // We want the new scale value to be val
+    var newdist = (xScale.range()[1] - xScale.range()[0]) / val;
+
+    // Calculate where the domain needs to move, and move it
+    var displacement = (newdist - xdist) / 2;
     var tmpScale = d3.scale.linear().range(xScale.range());
     tmpScale.domain([
-                    func1(xScale.domain()[0], xdist),
-                    func2(xScale.domain()[1], xdist)
+        xScale.domain()[0] - displacement,
+        xScale.domain()[1] + displacement
     ]);
 
     // update the scale if it's within the extents
@@ -243,7 +239,7 @@ function scaleWithSlider(val, func1, func2) {
 
     // update
     if (doWeScale) {
-        transitionAllNextTime();
+        //transitionAllNextTime();
     }
     zoomAll();
 }
