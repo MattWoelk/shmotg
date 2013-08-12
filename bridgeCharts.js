@@ -62,21 +62,21 @@ var yScale = d3.scale.linear();
 var sliderContainerName = "#slider_container";
 var curLevel = 0;
 var curPos = 0;
+var boxSize = 30;
 var mySlider = slider()
     .height(200)
     .width(80)
-    .boxSize(30)
-    .changeCallBack(function (pos, i) {
+    .boxSize(boxSize)
+    .changeCallBack(function (pos, i, cameFromZoom) {
         if (curLevel !== i) {
             plots.forEach(function (plt) {
                 plt.whichLevelToRender(i).update();
             });
             curLevel = i;
         }
-        var boxSize = 30; // KEEP SYNC'D WITH slider.js
         var scaleFactor = Math.pow(2, pos/boxSize);
         if (curPos !== pos) {
-            rescaleTo(scaleFactor);
+            rescaleTo(scaleFactor, cameFromZoom);
             curPos = pos;
         }
     })
@@ -186,14 +186,20 @@ function initPlot(data, first, sendReq) {
 var updateZoom = function () { return 0; };
 
 function zoomAll() {
+    // adjust slider
+    var scal = getScaleValue(xScale);
+    var newPos = boxSize * (Math.log(scal) / Math.log(2));
+    mySlider.scrollPosition(newPos).update(true);
+
+    // set plot scales
     plots.forEach(function (plt) {
         plt.xScale(xScale.copy()).update();
     });
 }
 
 var zoom = d3.behavior.zoom()
-.scaleExtent(zoomExtentsForScale)
-.on("zoom", zoomAll);
+    .scaleExtent(zoomExtentsForScale)
+    .on("zoom", zoomAll);
 
 
 function changeLines () {
@@ -202,17 +208,17 @@ function changeLines () {
     });
 }
 
-function rescaleTo(val) {
+function rescaleTo(val, doNotReZoom) {
     var xdist = xScale.domain()[1] - xScale.domain()[0];
 
     var oldScaleVal = getScaleValue(xScale);
     var oldZoomScale = zoom.scale();
 
     // We want the new scale value to be val
-    var newdist = (xScale.range()[1] - xScale.range()[0]) / val;
+    var newDist = (xScale.range()[1] - xScale.range()[0]) / val;
 
     // Calculate where the domain needs to move, and move it
-    var displacement = (newdist - xdist) / 2;
+    var displacement = (newDist - xdist) / 2;
     var tmpScale = d3.scale.linear().range(xScale.range());
     tmpScale.domain([
         xScale.domain()[0] - displacement,
@@ -241,7 +247,9 @@ function rescaleTo(val) {
     if (doWeScale) {
         //transitionAllNextTime();
     }
-    zoomAll();
+    if (!doNotReZoom) {
+        zoomAll();
+    }
 }
 
 // func1 is the function which modifies the domain start in terms of the old domain start, and xdist
