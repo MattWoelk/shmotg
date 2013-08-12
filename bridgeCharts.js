@@ -76,7 +76,9 @@ var mySlider = slider()
         }
         var scaleFactor = Math.pow(2, pos/boxSize);
         if (curPos !== pos) {
-            rescaleTo(scaleFactor, cameFromZoom);
+            if (!cameFromZoom) {
+                rescaleTo(scaleFactor);
+            }
             curPos = pos;
         }
     })
@@ -208,7 +210,7 @@ function changeLines () {
     });
 }
 
-function rescaleTo(val, doNotReZoom) {
+function rescaleTo(val) {
     var xdist = xScale.domain()[1] - xScale.domain()[0];
 
     var oldScaleVal = getScaleValue(xScale);
@@ -247,9 +249,7 @@ function rescaleTo(val, doNotReZoom) {
     if (doWeScale) {
         //transitionAllNextTime();
     }
-    if (!doNotReZoom) {
-        zoomAll();
-    }
+    zoomAll();
 }
 
 // func1 is the function which modifies the domain start in terms of the old domain start, and xdist
