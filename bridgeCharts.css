@@ -5,6 +5,7 @@ body {
     font-size: 20px;
 }
 
+/* {{{ CHART */
 text {
     fill: #4D4D4D;
 }
@@ -49,39 +50,6 @@ path.missing {
 
 path.missingBox {
     fill: #F0F0F0;
-}
-
-@-webkit-keyframes spin {
-    to {
-        stroke-dashoffset: -264;
-    }
-}
-
-@-moz-keyframes spin {
-    to {
-        stroke-dashoffset: -264;
-    }
-}
-
-@keyframes spin {
-    to {
-        stroke-dashoffset: -264;
-    }
-}
-
-path.loadingBox {
-    fill: none;
-    stroke: slategray;
-    stroke-width: 16;
-    stroke-linecap: round;
-    stroke-dasharray: 0, 0, 50, 214;
-    stroke-dashoffset: 0;
-    -webkit-animation: spin 4s infinite linear;
-    animation: spin 4s infinite linear;
-}
-
-a, input, button {
-    -ms-touch-action: none !important;
 }
 
 #chart {
@@ -136,6 +104,13 @@ path, line {
     border-width: 1px;
     cursor: col-resize;
 }
+/* CHART }}} */
+
+/* {{{ CONTROLS */
+
+a, input, button {
+    -ms-touch-action: none !important;
+}
 
 #expand-btn {
     /*padding: 0 0.25em 0 0.25em;*/
@@ -147,53 +122,54 @@ path, line {
 box-shadow:inset 0px 0px 0.2em #000;
 }*/
 
-    #controls {
-        -moz-transition: max-width 0.3s ease-in,     max-height 0.3s step-end, border-width 0.3s step-end;
-        -webkit-transition: max-width 0.3s ease-in,  max-height 0.3s step-end, border-width 0.3s step-end;
-        transition: max-width 0.3s ease-in,          max-height 0.3s step-end, border-width 0.3s step-end;
+#controls {
+    -moz-transition: max-width 0.3s ease-in,     max-height 0.3s step-end, border-width 0.3s step-end;
+    -webkit-transition: max-width 0.3s ease-in,  max-height 0.3s step-end, border-width 0.3s step-end;
+    transition: max-width 0.3s ease-in,          max-height 0.3s step-end, border-width 0.3s step-end;
 
-        overflow: hidden;
-        max-height: 0em;
-        max-width: 0em;
-        background: #f6f6f6;
-        border: solid;
-        border-width: 0px;
-        border-radius: 0em 1em 1em 0em;
-        /*box-shadow: inset 0px 0px 0.4em #000;*/
-    }
+    overflow: hidden;
+    max-height: 0em;
+    max-width: 0em;
+    background: #f6f6f6;
+    border: solid;
+    border-width: 0px;
+    border-radius: 0em 1em 1em 0em;
+    /*box-shadow: inset 0px 0px 0.4em #000;*/
+}
 
-    #isexpanded:checked ~ #controls {
-        -moz-transition: max-width 0.3s ease-in;
-        -webkit-transition: max-width 0.3s ease-in;
-        transition: max-width 0.3s ease-in;
+#isexpanded:checked ~ #controls {
+    -moz-transition: max-width 0.3s ease-in;
+    -webkit-transition: max-width 0.3s ease-in;
+    transition: max-width 0.3s ease-in;
 
 
-        overflow: hidden;
-        max-height: 35em; /* this is a bit of a hack */
-        max-width: 9.5em;
-        background: #f6f6f6;
-        border: solid;
-        border-width: 2px 2px 2px 0px;
-        border-radius: 0em 1em 1em 0em;
-        /*box-shadow: inset 0px 0px 0.4em #000;*/
-    }
+    overflow: hidden;
+    max-height: 35em; /* this is a bit of a hack */
+    max-width: 9.5em;
+    background: #f6f6f6;
+    border: solid;
+    border-width: 2px 2px 2px 0px;
+    border-radius: 0em 1em 1em 0em;
+    /*box-shadow: inset 0px 0px 0.4em #000;*/
+}
 
-    #controls ul {
-        /*float: left;*/
-        list-style: none;
-        padding: 0.5em 0.5em 0.5em 0.15em;
-        margin: 0;
-        width: 12em;
-        /*border-left: dashed grey;*/
-        /*border-top: dashed grey;*/
-    }
+#controls ul {
+    /*float: left;*/
+    list-style: none;
+    padding: 0.5em 0.5em 0.5em 0.15em;
+    margin: 0;
+    width: 12em;
+    /*border-left: dashed grey;*/
+    /*border-top: dashed grey;*/
+}
 
-    #controls ul:not(:first-child) {
-        /*border-left: dashed grey;*/
-        border-top-width: 2px;
-        border-top-color: grey;
-        border-top-style: dashed;
-    }
+#controls ul:not(:first-child) {
+    /*border-left: dashed grey;*/
+    border-top-width: 2px;
+    border-top-color: grey;
+    border-top-style: dashed;
+}
+/* CONTROLS }}} */
 
 /*{{{ GIANT SLIDER ON MOBILE */
 input[type='range'] {
@@ -360,5 +336,36 @@ input[type="radio"] + label {
     display: inline;
 }
 /* Loading Spinner Icon }}}*/
+
+/* {{{ LOADING LINES */
+@-webkit-keyframes spin {
+    to {
+        stroke-dashoffset: -264;
+    }
+}
+
+@-moz-keyframes spin {
+    to {
+        stroke-dashoffset: -264;
+    }
+}
+
+@keyframes spin {
+    to {
+        stroke-dashoffset: -264;
+    }
+}
+
+path.loadingBox {
+    fill: none;
+    stroke: slategray;
+    stroke-width: 16;
+    stroke-linecap: round;
+    stroke-dasharray: 0, 0, 50, 214;
+    stroke-dashoffset: 0;
+    -webkit-animation: spin 4s infinite linear;
+    animation: spin 4s infinite linear;
+}
+/* LOADING LINES }}} */
 
 /* vim: set foldmethod=marker: */
