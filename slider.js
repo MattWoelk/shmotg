@@ -11,7 +11,7 @@
 
 (function () {
 
-slider = function (g) {
+slider = function () {
     // {{{ Set Defaults
     var boxSize        = 30;
     var width          = 90;
@@ -78,8 +78,9 @@ slider = function (g) {
     }
     // EVENTS }}}
 
-    function my(g) {
-    slctn = g; // Saving the selection so that my.update() works.
+    function my (g) {
+        slctn = g; // Saving the selection so that my.update() works.
+
         g.each(function(d, i) {
             var g = d3.select(this);
 
@@ -91,9 +92,9 @@ slider = function (g) {
 
             // {{{ CLIPPING
             defclip = defclip ? defclip : svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect")
-            .attr("width", boxSize)
-            .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
-            .attr("height", height);
+                .attr("width", boxSize)
+                .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
+                .attr("height", height);
             // CLIPPING }}}
 
             // {{{ SLIDER
