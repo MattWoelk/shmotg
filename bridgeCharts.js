@@ -173,6 +173,7 @@ function initPlot(data, first, sendReq) {
 
     // Redefine this function now that we have data for it to work from
     updateZoom = function () {
+        zoomAll();
         xScale = plot.xScale();
         yScale = plot.yScale();
         zoom.x(xScale);
