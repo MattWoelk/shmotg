@@ -18,7 +18,6 @@ slider = function () {
     var height         = 140;
     var numberOfLevels = 12;
     var id             = "_id";
-    var defaultYValue  = boxSize*2;
     var side_margin    = 0;
 
     var changeCallBack = function () {};
@@ -30,6 +29,8 @@ slider = function () {
     var line;
     var handleClip;
     var handle;
+
+    var scrollPosition = boxSize*2;
 
     var surrounding_lines;
     var line_bottom;
@@ -85,13 +86,15 @@ slider = function () {
             var g = d3.select(this);
 
             // {{{ VARIABLES
-            svg = svg ? svg : g.append("svg")
+            svg = svg ? svg : g.append("svg");
+            svg
                 .attr("width", width)
                 .attr("height", height);
             // VARIABLES }}}
 
             // {{{ CLIPPING
-            defclip = defclip ? defclip : svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect")
+            defclip = defclip ? defclip : svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect");
+            defclip
                 .attr("width", boxSize)
                 .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
                 .attr("height", height);
@@ -101,7 +104,8 @@ slider = function () {
             slide_region = slide_region ? slide_region : svg.append("g")
                 .attr("id", "slide_container" + id)
                 .attr("clip-path", "url(#clip" + id + ")")
-                .append("g") // another 'g' so that the clip doesn't move with the slide_region
+                .append("g"); // another 'g' so that the clip doesn't move with the slide_region
+            slide_region
                 .attr("id", "slide_region" + id)
                 .attr("class", "slide_region")
 
@@ -139,7 +143,8 @@ slider = function () {
             // SLIDER }}}
 
             // {{{ SURROUNDING LINES
-            surrounding_lines = surrounding_lines ? surrounding_lines : svg.append("g")
+            surrounding_lines = surrounding_lines ? surrounding_lines : svg.append("g");
+            surrounding_lines
                 .attr("id", "surrounding_lines" + id);
 
             var line_top_data = [ {x: 0,     y: 0},
@@ -159,28 +164,33 @@ slider = function () {
                 .y(function(d) { return d.y; })
                 .interpolate("linear");
 
-            line_top = line_top ? line_top : surrounding_lines.append("path")
+            line_top = line_top ? line_top : surrounding_lines.append("path");
+            line_top
                 .attr("d", line(line_top_data))
                 .attr("class", "slider_outlines");
 
-            line_bottom = line_bottom ? line_bottom : surrounding_lines.append("path")
+            line_bottom = line_bottom ? line_bottom : surrounding_lines.append("path");
+            line_bottom
                 .attr("d", line(line_bottom_data))
                 .attr("class", "slider_outlines");
 
-            line_left = line_left ? line_left : surrounding_lines.append("path")
+            line_left = line_left ? line_left : surrounding_lines.append("path");
+            line_left
                 .attr("d", line(line_left_data))
                 .attr("class", "slider_outlines");
 
-            line_right = line_right ? line_right : surrounding_lines.append("path")
+            line_right = line_right ? line_right : surrounding_lines.append("path");
+            line_right
                 .attr("d", line(line_right_data))
                 .attr("class", "slider_outlines");
             // SURROUNDING LINES }}}
 
             // {{{ HANDLE
             handle_region = handle_region ? handle_region : svg.append("g")
+            handle_region
                 .attr("id", "handle_region" + id)
                 .attr("class", "handle_region")
-                .attr("transform", "translate(0," + defaultYValue + ")")
+                .attr("transform", "translate(0," + scrollPosition + ")")
 
             // TODO: make top and bottom dynamic
             var pointer_top = Math.max(0, boxSize/2);
@@ -209,12 +219,14 @@ slider = function () {
                     .interpolate("linear")(dat);
             }
 
-            handleClip = handleClip ? handleClip : handle_region.append("clipPath")
+            handleClip = handleClip ? handleClip : handle_region.append("clipPath");
+            handleClip
                 .attr("id", "clip-handle" + id)
                 .append("path")
                 .attr("d", drawHandle)
 
-            handle = handle ? handle : handle_region.append("path")
+            handle = handle ? handle : handle_region.append("path");
+            handle
                 .attr("d", drawHandle)
                 //.on("mouseover", onhover)
                 //.on("mouseout", onoff)
@@ -322,7 +334,7 @@ slider = function () {
 
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
-        scrollPosition = value;
+        scrollPosition = d3.max([0, d3.min([height-boxSize, value])]);
         return my;
     }
 
