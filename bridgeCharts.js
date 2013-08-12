@@ -66,7 +66,6 @@ var mySlider = slider()
     .height(200)
     .width(80)
     .boxSize(30)
-    .container(sliderContainerName)
     .changeCallBack(function (pos, i) {
         if (curLevel !== i) {
             plots.forEach(function (plt) {
@@ -81,7 +80,8 @@ var mySlider = slider()
             curPos = pos;
         }
     })
-    .numberOfLevels(33)();
+    .numberOfLevels(33);
+d3.select(sliderContainerName).call(mySlider);
 // SLIDER }}}
 
 //{{{ HELPER FUNCTIONS
