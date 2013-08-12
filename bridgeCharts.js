@@ -1,6 +1,6 @@
 // {{{ Loading Spinner Icon
-var myLoader = loader({width: 25, height: 25, container: "#loader_container", id: "loader"});
-myLoader();
+var myLoader = loader().width(25).height(25);
+d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
 
 //{{{ ZOOMING AND CHANGING
