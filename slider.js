@@ -11,13 +11,13 @@
 
 (function () {
 
-slider = function (g, id_in) {
+slider = function (g) {
     // {{{ Set Defaults
     var boxSize        = 30;
     var width          = 90;
     var height         = 140;
     var numberOfLevels = 12;
-    var id             = "slid";
+    var id             = "_id";
     var defaultYValue  = boxSize*2;
     var side_margin    = 0;
 
@@ -31,6 +31,7 @@ slider = function (g, id_in) {
     var handleClip;
     var handle;
 
+    var surrounding_lines;
     var line_bottom;
     var line_left;
     var line_right;
@@ -79,7 +80,6 @@ slider = function (g, id_in) {
 
     function my(g) {
     slctn = g; // Saving the selection so that my.update() works.
-    console.log("OH MY");
         g.each(function(d, i) {
             var g = d3.select(this);
 
@@ -98,9 +98,10 @@ slider = function (g, id_in) {
 
             // {{{ SLIDER
             slide_region = slide_region ? slide_region : svg.append("g")
-                .attr("id", "slide_region" + id)
+                .attr("id", "slide_container" + id)
                 .attr("clip-path", "url(#clip" + id + ")")
                 .append("g") // another 'g' so that the clip doesn't move with the slide_region
+                .attr("id", "slide_region" + id)
                 .attr("class", "slide_region")
 
             var drawBox = function (d, i) {
@@ -114,10 +115,9 @@ slider = function (g, id_in) {
                     .interpolate("linear")(dat);
             }
 
-            console.log("HOW MANY TIMES");
-            slide_dat_applied = slide_region.selectAll("path")
+            slide_dat_applied = slide_region.selectAll("g")
                 .data(d3.range(numberOfLevels));
-            slide_enter = slide_dat_applied.enter()
+            slide_enter = slide_dat_applied.enter().append("g");
             slide_enter.append("path")
                 .attr("d", drawBox)
                 .on("mouseover", onhover)
@@ -125,10 +125,8 @@ slider = function (g, id_in) {
                 .on("mousedown", ondown)
                 .on("click", onclick)
                 .on("mousewheel", onscroll)
-                .attr("class", function (d, i) { console.log("adding", i); return "slider_boxes"; });
-            slide_dat_text = slide_region.selectAll("text")
-                .data(d3.range(numberOfLevels));
-            slide_dat_text.enter().append("text")
+                .attr("class", "slider_boxes");
+            slide_enter.append("text")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "middle")
                 .attr("x", function (d) { return side_margin + (boxSize / 2.0); })
@@ -137,11 +135,12 @@ slider = function (g, id_in) {
                 .attr("class", "slider_text");
             slide_dat_applied.exit()
                 .remove();
-            slide_dat_text.exit()
-                .remove();
             // SLIDER }}}
 
             // {{{ SURROUNDING LINES
+            surrounding_lines = surrounding_lines ? surrounding_lines : svg.append("g")
+                .attr("id", "surrounding_lines" + id);
+
             var line_top_data = [ {x: 0,     y: 0},
                                   {x: boxSize + (2*side_margin), y: 0} ];
 
@@ -159,19 +158,19 @@ slider = function (g, id_in) {
                 .y(function(d) { return d.y; })
                 .interpolate("linear");
 
-            line_top = line_top ? line_top : svg.append("path")
+            line_top = line_top ? line_top : surrounding_lines.append("path")
                 .attr("d", line(line_top_data))
                 .attr("class", "slider_outlines");
 
-            line_bottom = line_bottom ? line_bottom : svg.append("path")
+            line_bottom = line_bottom ? line_bottom : surrounding_lines.append("path")
                 .attr("d", line(line_bottom_data))
                 .attr("class", "slider_outlines");
 
-            line_left = line_left ? line_left : svg.append("path")
+            line_left = line_left ? line_left : surrounding_lines.append("path")
                 .attr("d", line(line_left_data))
                 .attr("class", "slider_outlines");
 
-            line_right = line_right ? line_right : svg.append("path")
+            line_right = line_right ? line_right : surrounding_lines.append("path")
                 .attr("d", line(line_right_data))
                 .attr("class", "slider_outlines");
             // SURROUNDING LINES }}}
