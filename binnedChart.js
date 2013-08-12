@@ -47,7 +47,7 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
            .attr("transform", transformScale(scal, renScale, mar));
     } else {
         sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
-           .attr("d", function (d, i) { return d0s[d.key][d.which]; }) // TODO: remove this ??
+           .attr("d", function (d, i) { return d0s[d.key][d.which] ? d0s[d.key][d.which] : "M -1000 -1000 L -1000 -1000"; }) // if the d0 is empty, replace it with a very distant dot (to prevent errors)
            .attr("transform", transformScale(scal, renScale, mar));
     }
 

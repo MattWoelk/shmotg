@@ -10,8 +10,8 @@
 <script src="./loader.js"></script>
 <script>
 
-var myLoader = loader({width: 960, height: 500, container: "#loader_container", id: "loader"});
-myLoader();
+var myLoader = loader().width(500).height(500);
+d3.select("#loader_container").call(myLoader);
 
 </script>
 
