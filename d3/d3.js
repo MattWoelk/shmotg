@@ -1153,7 +1153,7 @@ d3 = function() {
     };
     return d3.rebind(drag, event, "on");
   };
-  d3.behavior.zoom = function() { // TODO: use this format to make a reusable, reconfigurable chart.
+  d3.behavior.zoom = function() { // TODO: use this section to make zooming awesome in all ways.
     var translate = [ 0, 0 ], translate0, scale = 1, scaleExtent = d3_behavior_zoomInfinity, mousedown = "mousedown.zoom", mousemove = "mousemove.zoom", mouseup = "mouseup.zoom", touchstart = "touchstart.zoom", touchmove = "touchmove.zoom", touchend = "touchend.zoom", touchtime, event = d3_eventDispatch(zoom, "zoom"), x0, x1, y0, y1;
     function zoom() {
       this.on(mousedown, mousedowned).on(d3_behavior_zoomWheel + ".zoom", mousewheeled).on(mousemove, mousewheelreset).on("dblclick.zoom", dblclicked).on(touchstart, touchstarted);
