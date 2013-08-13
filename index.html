@@ -26,24 +26,6 @@ window.addEventListener('load', function() {
 
 <body>
 
-<!--{{{ SHOWHIDE JAVASCRIPT-->
-<script>
-function showhide() {
-    var element1 = document.getElementById("di1");
-    var element2 = document.getElementById("di2");
-    if (element1.style.display == "none") {
-        setAllYAxisLocks(false);
-        element1.style.display = "inline";
-        element2.style.display = "none";
-    } else {
-        setAllYAxisLocks(true);
-        element1.style.display = "none";
-        element2.style.display = "inline";
-    }
-}
-</script>
-<!-- SHOWHIDE JAVASCRIPT }}}-->
-
 <div id="slider_container" style="position:fixed; top: 45px">
 </div>
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
@@ -53,9 +35,6 @@ function showhide() {
     <!-- Loading Animation {{{-->
     <div id="loader_container"></div>
     <!--}}}-->
-
-    <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
-    <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
 
     </br> <!-- to keep the controls on the next line -->
 
