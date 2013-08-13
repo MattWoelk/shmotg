@@ -171,17 +171,6 @@ box-shadow:inset 0px 0px 0.2em #000;
 }
 /* CONTROLS }}} */
 
-/*{{{ GIANT SLIDER ON MOBILE */
-input[type='range'] {
-    height:30px;
-}
-
-input[type='range']::-webkit-slider-thumb {
-    height:30px;
-    width:30px;
-}
-/* GIANT SLIDER ON MOBILE }}}*/
-
 /*{{{ Custom Checkboxes*/
 label {
     cursor: pointer;
