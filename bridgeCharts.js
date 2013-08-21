@@ -192,10 +192,7 @@ function zoomAll() {
     // adjust slider
     var scal = getScaleValue(xScale);
     var newPos = boxSize * (Math.log(scal) / Math.log(2));
-
-    if(false) { // update the slider based on the zoom level.
-        mySlider.scrollPosition(newPos).update(true);
-    }
+    mySlider.scrollPosition(newPos).update(true);
 
     // set plot scales
     plots.forEach(function (plt) {
