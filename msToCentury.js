@@ -168,13 +168,15 @@ function msToCenturySubTickValues(scal, wid) {
 
   var whichToGet = d3.range(1, numToInterpolate);
 
+  var spaceBetweenMajorTicks = ro[0]*ro[1];
+
   for (var b = 0; b < whichToGet.length; b++) {
-    res.push(rng[0] - whichToGet[b]*((rng[1]-rng[0]) / numToInterpolate));
+    res.push(rng[0] - whichToGet[b]*(spaceBetweenMajorTicks / numToInterpolate));
   }
 
-  for (var i in rng) {
+  for (var i = 0; i < rng.length; i++) {
     for (var b = 0; b < whichToGet.length; b++) {
-      res.push(rng[i] + whichToGet[b]*((rng[1]-rng[0]) / numToInterpolate));
+      res.push(rng[i] + whichToGet[b]*(spaceBetweenMajorTicks / numToInterpolate));
     }
   }
 
@@ -256,7 +258,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
           //   and remove ones which are too close
           //   together near the ends of the months
           if ((day - 1) % increment == 0 && monthDays + 1 - day >= increment ) {
-            return new Date(year, month, day);
+            return (new Date(year, month, day)).getTime();
           } else {
             return [];
           }
