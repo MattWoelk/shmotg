@@ -247,7 +247,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     var defclip;
     var xAxisContainer;
+    var xAxisMinorContainer;
     var xAxis;
+    var xAxisMinor;
     var yAxisContainer;
     var yAxis;
     var xScale;
@@ -742,10 +744,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             //{{{ AXES
             // Draw Axes using msToCentury.js format and values
             xAxis = d3.svg.axis()
-                    .tickSize(6, 3, 3) //major, minor, end
+                    //DEPRECATED.tickSize(6, 3, 3) //major, minor, end
                     .tickFormat(msToCenturyTickFormat)
                     .tickValues(msToCenturyTickValues(xScale, width))
-                    .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
+                    //.tickSubdivide(msToCenturyTickSubDivide(xScale, width))
+                    .scale(xScale).orient("bottom");
+
+            xAxisMinor = d3.svg.axis()
+                    .tickFormat(msToCenturyTickFormat)
+                    .tickValues(msToCenturySubTickValues(xScale, width))
                     .scale(xScale).orient("bottom");
 
             //d3.selectAll("text").attr("fill", "#F0F");
@@ -754,11 +761,16 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
             xAxisContainer.attr("class", "x axis")
                           .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+            if (!xAxisMinorContainer) { xAxisMinorContainer = chart.append("g"); }
+            xAxisMinorContainer.attr("class", "x axis minor")
+                          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
             //.attr("transform", "translate(" + margin.left + "," + height + ")");
             if (transitionNextTime) {
                 xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+                xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
             } else {
                 xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
+                xAxisMinorContainer/*.transition().duration(transitionDuration)*/.call(xAxisMinor);
             }
 
             if (!yAxisContainer) { yAxisContainer = chart.append("g"); }

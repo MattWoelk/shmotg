@@ -79,6 +79,10 @@ path, line {
     shape-rendering: crispEdges;
 }
 
+.x.axis.minor text {
+    display: none;
+}
+
 #chart_container {
     position: relative;
     overflow: hidden;
