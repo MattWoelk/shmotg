@@ -161,8 +161,7 @@ function initPlot(data, first, sendReq) {
     d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
 
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-           .attr("height", getTotalChartHeight())
-           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+           .attr("height", getTotalChartHeight());
 
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
             .attr("height", getTotalChartHeight() - margin.top)
