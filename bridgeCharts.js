@@ -136,13 +136,13 @@ function setLoadingIcon(on) {
 }
 
 var uniqueID = 0;
-function initPlot(data, first, sendReq) {
+function initPlot(data, first, sendReq, oneSample) {
     if (first) {
-        var plot = binnedLineChart(data, sendReq, "girder", 18);
+        var plot = binnedLineChart(data, sendReq, "girder", 18, oneSample);
         plot.xScale(xScale.copy());
         var pl = d3.select("#charts").append("svg").attr("id", "girder"+18).call(plot);
     } else {
-        var plot = binnedLineChart(data, function () {}, "girder", uniqueID);
+        var plot = binnedLineChart(data, function () {}, "girder", uniqueID, oneSample);
         plot.xScale(xScale.copy());
         var pl = d3.select("#charts").append("svg").attr("id", "chart"+uniqueID).call(plot);
     }
@@ -333,158 +333,171 @@ function scrollright() {
 }
 
 // HELPER FUNCTIONS }}}
-
-//{{{ SERVER COMMUNICATIONS
-
-var socket = io.connect('130.179.231.28:8080/');
-var firstTime = true;
-
-//socket.on('connect_failed', function () {
-//  console.log("connect_failed :(");
+//
+////{{{ SERVER COMMUNICATIONS
+//
+//var socket = io.connect('130.179.231.28:8080/');
+//var firstTime = true;
+//
+////socket.on('connect_failed', function () {
+////  console.log("connect_failed :(");
+////});
+////
+////socket.on('connecting', function () {
+////  console.log("connecting :!");
+////});
+////
+////socket.on('connect', function () {
+////  console.log("connected !!");
+////});
+////
+////socket.on('disconnect', function () {
+////  console.log("disconnected !!");
+////});
+//
+//
+//socket.on('news', function (data) {
+//    // only do this once, so that plots don't get overlapped whenever the server restarts.
+//    if (!firstTime) {
+//        return;
+//    }
+//    // SPB is 200Hz
+//
+//    firstTime = false;
+//
+//    // deleting all example plots -->
+//    _.times(plots.length, function (i) {
+//        delete plots[i];
+//    });
+//    svg = document.getElementById("charts");
+//    while (svg.lastChild) {
+//        svg.removeChild(svg.lastChild);
+//    }
+//    plots = []; // delete the previous plots
+//    // <-- done deleting all example plots
+//
+//    var json = JSON.parse(data);
+//    socket.emit('ack', "Message received!");
+//
+//    //initPlot(json);
+//    initPlot(json, true, sendRequestToServer);
+//
+//    //initPlot(_.map(json, function (d) {
+//    //  return { val: Math.random() * 5 + d.val,
+//    //           ms: d.ms };
+//    //}), false);
 //});
 //
-//socket.on('connecting', function () {
-//  console.log("connecting :!");
+//sizeOfQueue = function() {
+//    var size = 0, key;
+//    for (key in serverQueue) {
+//        if (serverQueue.hasOwnProperty(key)) size++;
+//    }
+//    return size;
+//};
+//
+//removeFromQueue = function (key) {
+//    delete serverQueue[key];
+//}
+//
+//// things which we are waiting for the server to send to us
+//var serverQueue = {};
+//
+//function addToServerQueue(ob) {
+//    serverQueue[ob.id] = ob.req;
+//};
+//
+//var uniqueRequestID = 0;
+//var timeOfLastRequest = 0;
+//var listOfRequestsMade = [];
+//
+//function sendRequestToServer(req) {
+//    // turn on loading icon
+//    setLoadingIcon(true);
+//
+//    var now = new Date();
+//    if(_.findWhere(listOfRequestsMade, {ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
+//        // never request the same thing twice
+//        //console.log("already requested");
+//        setLoadingIcon(false);
+//        return false;
+//    }
+//
+//    listOfRequestsMade.push(req);
+//
+//    //console.log("requesting");
+//
+//    // wrap the req with a unique id
+//    var sendReq = {
+//        id: uniqueRequestID,
+//        req: req };
+//
+//    uniqueRequestID = uniqueRequestID + 1;
+//
+//    // add the request to the queue
+//    addToServerQueue(sendReq);
+//
+//    timeOfLastRequest = now;
+//
+//    socket.emit('req', JSON.stringify(sendReq));
+//    return true;
+//}
+//
+//socket.on('req_data', function (data) {
+//    var received = JSON.parse(data);
+//    // remove request from server queue
+//    removeFromQueue(received.id);
+//    var req = received.req;
+//
+//    // deactivate loading icon
+//    if (sizeOfQueue() === 0) {
+//        setLoadingIcon(false);
+//    }
+//
+//    for (i=0;i<plots.length;i++) {
+//        if (plots[i].uniqueID() === "" + received.sensorType + received.sensorNumber) {
+//            plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
+//        }
+//    }
 //});
 //
-//socket.on('connect', function () {
-//  console.log("connected !!");
-//});
+//// SERVER COMMUNICATIONS }}}
 //
-//socket.on('disconnect', function () {
-//  console.log("disconnected !!");
-//});
-
-
-socket.on('news', function (data) {
-    // only do this once, so that plots don't get overlapped whenever the server restarts.
-    if (!firstTime) {
-        return;
-    }
-    // SPB is 200Hz
-
-    firstTime = false;
-
-    // deleting all example plots -->
-    _.times(plots.length, function (i) {
-        delete plots[i];
-    });
-    svg = document.getElementById("charts");
-    while (svg.lastChild) {
-        svg.removeChild(svg.lastChild);
-    }
-    plots = []; // delete the previous plots
-    // <-- done deleting all example plots
-
-    var json = JSON.parse(data);
-    socket.emit('ack', "Message received!");
-
-    //initPlot(json);
-    initPlot(json, true, sendRequestToServer);
-
-    //initPlot(_.map(json, function (d) {
-    //  return { val: Math.random() * 5 + d.val,
-    //           ms: d.ms };
-    //}), false);
-});
-
-sizeOfQueue = function() {
-    var size = 0, key;
-    for (key in serverQueue) {
-        if (serverQueue.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
-
-removeFromQueue = function (key) {
-    delete serverQueue[key];
-}
-
-// things which we are waiting for the server to send to us
-var serverQueue = {};
-
-function addToServerQueue(ob) {
-    serverQueue[ob.id] = ob.req;
-};
-
-var uniqueRequestID = 0;
-var timeOfLastRequest = 0;
-var listOfRequestsMade = [];
-
-function sendRequestToServer(req) {
-    // turn on loading icon
-    setLoadingIcon(true);
-
-    var now = new Date();
-    if(_.findWhere(listOfRequestsMade, {ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
-        // never request the same thing twice
-        //console.log("already requested");
-        setLoadingIcon(false);
-        return false;
-    }
-
-    listOfRequestsMade.push(req);
-
-    //console.log("requesting");
-
-    // wrap the req with a unique id
-    var sendReq = {
-        id: uniqueRequestID,
-        req: req };
-
-    uniqueRequestID = uniqueRequestID + 1;
-
-    // add the request to the queue
-    addToServerQueue(sendReq);
-
-    timeOfLastRequest = now;
-
-    socket.emit('req', JSON.stringify(sendReq));
-    return true;
-}
-
-socket.on('req_data', function (data) {
-    var received = JSON.parse(data);
-    // remove request from server queue
-    removeFromQueue(received.id);
-    var req = received.req;
-
-    // deactivate loading icon
-    if (sizeOfQueue() === 0) {
-        setLoadingIcon(false);
-    }
-
-    for (i=0;i<plots.length;i++) {
-        if (plots[i].uniqueID() === "" + received.sensorType + received.sensorNumber) {
-            plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
-        }
-    }
-});
-
-// SERVER COMMUNICATIONS }}}
-
 //{{{ OFFLINE DEMO
 
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 1500);
+setTimeout(rundemo, 100);
 //rundemo();
 
 function rundemo() {
-    d3.json("Server/esg_time.js", function (error, data) {
-        if (error || plots.length > 0) {
+    //d3.json("Server/esg_time.js", function (error, data) {
+    //    if (error || plots.length > 0) {
+    //        return;
+    //    }
+    //    setLoadingIcon(true); // loading icon indicates that we can't connect to the server
+    //    var json = data.map(function (d) {
+    //        return {val: d.ESGgirder18, ms: d.ms};
+    //    });
+
+    //    initPlot(json, true);
+
+    //    //console.log(plots[0].bd().bd());
+    //});
+
+    d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
+        var dat = new Date(d.Year, d.Month, d.Day, d.Time[0]+""+d.Time[1]);
+        return {val: 50, ms: dat.getTime()};
+    }, function (error, rows) {
+        if (error) {
+            console.log("error");
             return;
         }
-        setLoadingIcon(true); // loading icon indicates that we can't connect to the server
-        var json = data.map(function (d) {
-            return {val: d.ESGgirder18, ms: d.ms};
-        });
 
-        initPlot(json, true);
-
-        //console.log(plots[0].bd().bd());
-    });
+        console.log(rows);
+        initPlot(rows, true, function(){}, 1000*60*60);
+    })
 }
 
 // OFFLINE DEMO }}}

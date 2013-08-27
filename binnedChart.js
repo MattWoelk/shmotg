@@ -215,7 +215,7 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample) {
 
     //{{{ VARIABLES
 
@@ -278,6 +278,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     // Where all data is stored, but NOT rendered d0's
     var binData = binnedData();
+    binData.oneSample(oneSample);
+
 
     // Where all the rendered d0s are stored.
     var renderedD0s = {

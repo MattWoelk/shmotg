@@ -916,6 +916,12 @@ binnedData = function () {
         return Math.pow(2, lvl) * oneSample;
     }
 
+    my.oneSample = function (value) {
+        if (!arguments.length) return oneSample;
+        oneSample = value;
+        return my;
+    }
+
     my.binContainerSize = function (lvl) {
         return my.binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
     }
