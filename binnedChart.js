@@ -7,6 +7,10 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 // {{{ HELPER FUNCTIONS
 
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 var isWithinRange = function (r1, r2) {
     // see if r1 is within r2
     return r1[0] >= r2[0] && r1[1] <= r2[1];
@@ -206,7 +210,7 @@ var getTimeContextString = function (scal, show) {
     }
 
     result = parseDate(dt(d0));
-    return [ result ];
+    return result;
 }
 
 // HELPER FUNCTIONS }}}
@@ -793,7 +797,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
             // Draw Time Context
             var timeContextSelection = timeContextContainer.selectAll("text")
-                    .data(getTimeContextString(xScale, showTimeContext));
+                    .data([sensorType.capitalize() + " " + sensorNumber + " - " + getTimeContextString(xScale, showTimeContext)]);
 
             // enter
             timeContextSelection.enter().append("text");
