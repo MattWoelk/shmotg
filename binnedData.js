@@ -10,6 +10,8 @@ var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of i
 binnedData = function () {
 
     //{{{ VARIABLES
+    var oneSample = 1000 / 200; // milliseconds per sample
+
     var bd = { // where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         rawData : {
@@ -59,6 +61,10 @@ binnedData = function () {
     // testing this function. It works.
     //console.log(combineWithoutDuplicates([{ms: 1}, {ms: 2}, {ms: 3, lvl: 5}, {ms: 4}],
     //                                     [{ms: 1}, {ms: 1}, {ms: 3}, {ms: 5}]));
+
+    function sampleSize(lvl) {
+        return Math.pow(2, lvl) * oneSample;
+    }
 
     function combineWithoutDuplicates(arr1, arr2) {
         // ASSUMPTION: arr1 and arr2 are both sorted
@@ -116,10 +122,8 @@ binnedData = function () {
         // TODO: calculate the starting ms of the bin container
         // [at this level] in which this ms would fit.
 
-        var oneSample = 1000 / 200; // milliseconds per sample
-        var sampleSize = Math.pow(2, lvl) * oneSample;
 
-        var sizeOfTheBinContainerInMS = sampleSize * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+        var sizeOfTheBinContainerInMS = sampleSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
 
         return Math.floor(ms / ( sizeOfTheBinContainerInMS )) * sizeOfTheBinContainerInMS;
     }
@@ -204,7 +208,6 @@ binnedData = function () {
         // return all bin starts at this level between start and end
         // NOT INCLUDING the highest point if it is equal to end
 
-        var oneSample = 1000 / 200; // milliseconds per sample
         var binSize = Math.pow(2, lvl) * oneSample;
 
         var startRounded = getMSStartForTimeAtLevel(start, lvl);
@@ -303,9 +306,6 @@ binnedData = function () {
             return bDat;
         }
 
-        var oneSample = 1000 / 200; // milliseconds per sample
-        var sampleSize = Math.pow(2, curLevel) * oneSample;
-
         // Combine all data which is within range_to_rebin
         var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
 
@@ -322,7 +322,7 @@ binnedData = function () {
             var sampleIsAtModularLocation = atModularLocation(combo[i].ms, curLevel+1);
             var nextSampleExists = combo.length > i + 1;
             var nextSampleIsRightDistanceAway = nextSampleExists ?
-                combo[i+1].ms - combo[i].ms === sampleSize :
+                combo[i+1].ms - combo[i].ms === sampleSize(curLevel) :
                 true;
 
             if (!sampleIsAtModularLocation || !nextSampleExists || !nextSampleIsRightDistanceAway) {
@@ -592,15 +592,13 @@ binnedData = function () {
         }
 
         var firstSample = datedRange[0].ms;
-        var oneSample = 1000 / 200; // milliseconds per sample
-        var sampleSize = Math.pow(2, level) * oneSample;
 
-        if (firstSample > ms_range[0] + sampleSize) {
+        if (firstSample > ms_range[0] + sampleSize(level)) {
             return false;
         }
 
         var actualRange = ms_range[1] - firstSample;
-        var numberWeShouldHave = Math.floor(actualRange / sampleSize);
+        var numberWeShouldHave = Math.floor(actualRange / sampleSize(level));
 
         var numberWeHave = datedRange.length;
 
@@ -618,7 +616,6 @@ binnedData = function () {
             key = "average";
         }
 
-        var oneSample = 1000 / 200; // milliseconds per sample TODO: magic ?
         var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
         var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
 
@@ -631,9 +628,7 @@ binnedData = function () {
             return [ms_range];
         }
 
-        var sampleSize = Math.pow(2, level) * oneSample; // TODO: replace with function which does this for us.
-
-        var neededBins = _.range(normalizedRange[0], normalizedRange[1], sampleSize);
+        var neededBins = _.range(normalizedRange[0], normalizedRange[1], sampleSize(level));
         neededBins.forEach(function (d) {
             d = d * Math.pow(2, level) * oneSample;
         });
@@ -646,7 +641,7 @@ binnedData = function () {
         var missingRanges = [];
 
         _.each(missingSamples, function (d,i) {
-            missingRanges.push([d, d + sampleSize]);
+            missingRanges.push([d, d + sampleSize(level)]);
             // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
         });
 
@@ -918,7 +913,6 @@ binnedData = function () {
 
     // TODO: use this instead of manually doing it everywhere
     my.binSize = function (lvl) {
-        var oneSample = 1000 / 200; // milliseconds per sample
         return Math.pow(2, lvl) * oneSample;
     }
 
