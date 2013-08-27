@@ -133,7 +133,7 @@ slider = function () {
                 .attr("class", "slider_boxes");
             slide_enter.append("text")
                 .attr("text-anchor", "middle")
-                .attr("alignment-baseline", "middle")
+                .attr("dominant-baseline", "middle")
                 .attr("x", function (d) { return side_margin + (boxSize / 2.0); })
                 .attr("y", function (d, i) { return (i+1)*boxSize - (boxSize/2); })
                 .text(function (d, i) { return i; })
