@@ -149,6 +149,45 @@ function msToCenturyTickValues(scal, wid) {
   return result;
 }
 
+function msToCenturySubTickValues(scal, wid) {
+  var dom = scal.domain();
+
+  var lvl = findLevel(dom, wid);
+
+  // This should never occur if the zoom limits are correct
+  if (lvl === -1) {
+    return [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14];
+  }
+
+  var ro = rounding_scales[lvl];
+  var rng = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1], wid);
+
+  var res = []
+
+  var numToInterpolate = msToCenturyTickSubDivide(scal, wid);
+
+  var whichToGet = d3.range(1, numToInterpolate);
+
+  var spaceBetweenMajorTicks = ro[0]*ro[1];
+
+  for (var b = 0; b < whichToGet.length; b++) {
+    res.push(rng[0] - whichToGet[b]*(spaceBetweenMajorTicks / numToInterpolate));
+  }
+
+  for (var i = 0; i < rng.length; i++) {
+    for (var b = 0; b < whichToGet.length; b++) {
+      res.push(rng[i] + whichToGet[b]*(spaceBetweenMajorTicks / numToInterpolate));
+    }
+  }
+
+  // filter this for only what is actually on-screen.
+  var result = _.filter(res, function (num) {
+    return num < dom[1] && num > dom[0];
+  });
+
+  return result;
+}
+
 function msToCenturyTickSubDivide(scal, wid) {
   var dom = scal.domain();
 
@@ -158,7 +197,7 @@ function msToCenturyTickSubDivide(scal, wid) {
   var baseSize = rounding_scales[lvl][1];
   var tickSpace = rounding_ticks[baseSize];
 
-  return ((baseSize / tickSpace) - 1);
+  return (baseSize / tickSpace);
 }
 
 function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, wid) {
@@ -219,7 +258,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
           //   and remove ones which are too close
           //   together near the ends of the months
           if ((day - 1) % increment == 0 && monthDays + 1 - day >= increment ) {
-            return new Date(year, month, day);
+            return (new Date(year, month, day)).getTime();
           } else {
             return [];
           }

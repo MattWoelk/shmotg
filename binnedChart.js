@@ -7,6 +7,10 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 // {{{ HELPER FUNCTIONS
 
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 var isWithinRange = function (r1, r2) {
     // see if r1 is within r2
     return r1[0] >= r2[0] && r1[1] <= r2[1];
@@ -206,12 +210,12 @@ var getTimeContextString = function (scal, show) {
     }
 
     result = parseDate(dt(d0));
-    return [ result ];
+    return result;
 }
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample) {
 
     //{{{ VARIABLES
 
@@ -247,7 +251,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     var defclip;
     var xAxisContainer;
+    var xAxisMinorContainer;
     var xAxis;
+    var xAxisMinor;
     var yAxisContainer;
     var yAxis;
     var xScale;
@@ -272,6 +278,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
     // Where all data is stored, but NOT rendered d0's
     var binData = binnedData();
+    if (oneSample) {
+        binData.oneSample(oneSample);
+    }
+
 
     // Where all the rendered d0s are stored.
     var renderedD0s = {
@@ -742,10 +752,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             //{{{ AXES
             // Draw Axes using msToCentury.js format and values
             xAxis = d3.svg.axis()
-                    .tickSize(6, 3, 3) //major, minor, end
+                    //DEPRECATED.tickSize(6, 3, 3) //major, minor, end
                     .tickFormat(msToCenturyTickFormat)
                     .tickValues(msToCenturyTickValues(xScale, width))
-                    .tickSubdivide(msToCenturyTickSubDivide(xScale, width))
+                    //.tickSubdivide(msToCenturyTickSubDivide(xScale, width))
+                    .scale(xScale).orient("bottom");
+
+            xAxisMinor = d3.svg.axis()
+                    .tickFormat(msToCenturyTickFormat)
+                    .tickValues(msToCenturySubTickValues(xScale, width))
                     .scale(xScale).orient("bottom");
 
             //d3.selectAll("text").attr("fill", "#F0F");
@@ -754,11 +769,16 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
             if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
             xAxisContainer.attr("class", "x axis")
                           .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+            if (!xAxisMinorContainer) { xAxisMinorContainer = chart.append("g"); }
+            xAxisMinorContainer.attr("class", "x axis minor")
+                          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
             //.attr("transform", "translate(" + margin.left + "," + height + ")");
             if (transitionNextTime) {
                 xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+                xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
             } else {
                 xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
+                xAxisMinorContainer/*.transition().duration(transitionDuration)*/.call(xAxisMinor);
             }
 
             if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
@@ -781,7 +801,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
 
             // Draw Time Context
             var timeContextSelection = timeContextContainer.selectAll("text")
-                    .data(getTimeContextString(xScale, showTimeContext));
+                    .data([sensorType.capitalize() + " " + sensorNumber + " - " + getTimeContextString(xScale, showTimeContext)]);
 
             // enter
             timeContextSelection.enter().append("text");
@@ -834,7 +854,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN) {
     my.whichLevelToRender = function (value) {
         if (!arguments.length) return whichLevelToRender;
         if (whichLevelToRender !== value) my.reRenderTheNextTime(true);
-        whichLevelToRender = value;
+        whichLevelToRender = value - Math.floor(Math.log(oneSample/5) / Math.log(2)); // set the level proportionately to the sample size.
         return my;
     };
 

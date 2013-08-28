@@ -79,6 +79,10 @@ path, line {
     shape-rendering: crispEdges;
 }
 
+.x.axis.minor text {
+    display: none;
+}
+
 #chart_container {
     position: relative;
     overflow: hidden;
@@ -170,17 +174,6 @@ box-shadow:inset 0px 0px 0.2em #000;
     border-top-style: dashed;
 }
 /* CONTROLS }}} */
-
-/*{{{ GIANT SLIDER ON MOBILE */
-input[type='range'] {
-    height:30px;
-}
-
-input[type='range']::-webkit-slider-thumb {
-    height:30px;
-    width:30px;
-}
-/* GIANT SLIDER ON MOBILE }}}*/
 
 /*{{{ Custom Checkboxes*/
 label {

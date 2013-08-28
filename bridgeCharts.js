@@ -135,16 +135,16 @@ function setLoadingIcon(on) {
     d3.select("#loader_container").style("opacity", on ? 1 : 0);
 }
 
-var uniqueID = 0;
-function initPlot(data, first, sendReq) {
+function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
+    var plot;
     if (first) {
-        var plot = binnedLineChart(data, sendReq, "girder", 18);
+        plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", "girder"+18).call(plot);
+        var pl = d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
     } else {
-        var plot = binnedLineChart(data, function () {}, "girder", uniqueID);
+        plot = binnedLineChart(data, function () {}, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", "chart"+uniqueID).call(plot);
+        var pl = d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
     }
 
 
@@ -161,8 +161,7 @@ function initPlot(data, first, sendReq) {
     d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
 
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-           .attr("height", getTotalChartHeight())
-           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+           .attr("height", getTotalChartHeight());
 
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
             .attr("height", getTotalChartHeight() - margin.top)
@@ -181,7 +180,7 @@ function initPlot(data, first, sendReq) {
     };
 
     updateZoom();
-    uniqueID = uniqueID + 1;
+    return plot;
 }
 
 // this will be changed once 'news' is sent from the server
@@ -367,9 +366,9 @@ socket.on('news', function (data) {
     firstTime = false;
 
     // deleting all example plots -->
-    _.times(plots.length, function (i) {
-        delete plots[i];
-    });
+    //_.times(plots.length, function (i) {
+    //    delete plots[i];
+    //});
     svg = document.getElementById("charts");
     while (svg.lastChild) {
         svg.removeChild(svg.lastChild);
@@ -381,7 +380,8 @@ socket.on('news', function (data) {
     socket.emit('ack', "Message received!");
 
     //initPlot(json);
-    initPlot(json, true, sendRequestToServer);
+    initPlot(json, true, sendRequestToServer, 5, "girder", 18);
+    initPlot(json, true, sendRequestToServer, 5, "girder", 20);
 
     //initPlot(_.map(json, function (d) {
     //  return { val: Math.random() * 5 + d.val,
@@ -469,7 +469,7 @@ socket.on('req_data', function (data) {
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 1500);
+setTimeout(rundemo, 1000);
 //rundemo();
 
 function rundemo() {
@@ -482,9 +482,47 @@ function rundemo() {
             return {val: d.ESGgirder18, ms: d.ms};
         });
 
-        initPlot(json, true);
+        initPlot(json, true, function(){}, 5, "girder", 18);
 
         //console.log(plots[0].bd().bd());
+    });
+
+    d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
+        var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+        return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
+    }, function (error, rows) {
+        if (error) {
+            console.log("error");
+            return;
+        }
+
+        var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1);
+
+	var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
+	                  "weather/eng-hourly-03012012-03312012.csv",
+	                  "weather/eng-hourly-04012012-04302012.csv",
+	                  "weather/eng-hourly-08012011-08312011.csv",
+	                  "weather/eng-hourly-09012011-09302011.csv",
+	                  "weather/eng-hourly-10012011-10312011.csv",
+	                  "weather/eng-hourly-11012011-11302011.csv",
+	                  "weather/eng-hourly-12012011-12312011.csv" ];
+	for(var x = 0; x < filenames.length; x++){
+	    addWeatherData(filenames[x], plt);
+	}
+
+	function addWeatherData(filename, plt) {
+            d3.csv(filename, function (d, i) {
+                var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+                return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
+            }, function (error, rows) {
+                if (error) {
+                    console.log("error");
+                    return;
+                }
+
+                plt.addDataToBinData(rows, 0);
+            });
+	}
     });
 }
 
