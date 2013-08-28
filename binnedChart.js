@@ -854,7 +854,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     my.whichLevelToRender = function (value) {
         if (!arguments.length) return whichLevelToRender;
         if (whichLevelToRender !== value) my.reRenderTheNextTime(true);
-        whichLevelToRender = value;
+        whichLevelToRender = value - Math.floor(Math.log(oneSample/5) / Math.log(2)); // set the level proportionately to the sample size.
         return my;
     };
 

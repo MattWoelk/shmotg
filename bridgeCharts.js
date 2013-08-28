@@ -488,7 +488,7 @@ function rundemo() {
 
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
         var dat = new Date(d.Year, d.Month, d.Day, d.Time[0]+""+d.Time[1]);
-        return {val: i, ms: dat.getTime()};
+        return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
     }, function (error, rows) {
         if (error) {
             console.log("error");
