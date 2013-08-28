@@ -136,12 +136,13 @@ function setLoadingIcon(on) {
 }
 
 function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
+    var plot;
     if (first) {
-        var plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
+        plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
         var pl = d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
     } else {
-        var plot = binnedLineChart(data, function () {}, sensorType, sensorNumber, oneSample);
+        plot = binnedLineChart(data, function () {}, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
         var pl = d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
     }
@@ -179,6 +180,7 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
     };
 
     updateZoom();
+    return plot;
 }
 
 // this will be changed once 'news' is sent from the server
@@ -466,7 +468,7 @@ socket.on('req_data', function (data) {
 // A demonstration with example data in case the server is down:
 // wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
 // TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 100);
+setTimeout(rundemo, 1000);
 //rundemo();
 
 function rundemo() {
@@ -485,7 +487,7 @@ function rundemo() {
     });
 
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
-        var dat = new Date(d.Year, d.Month, d.Day, d.Time[0]+""+d.Time[1]);
+        var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
         return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
     }, function (error, rows) {
         if (error) {
@@ -493,7 +495,33 @@ function rundemo() {
             return;
         }
 
-        initPlot(rows, true, function(){}, 1000*60*60, "weather", 1);
+        var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1);
+
+	var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
+	                  "weather/eng-hourly-03012012-03312012.csv",
+	                  "weather/eng-hourly-04012012-04302012.csv",
+	                  "weather/eng-hourly-08012011-08312011.csv",
+	                  "weather/eng-hourly-09012011-09302011.csv",
+	                  "weather/eng-hourly-10012011-10312011.csv",
+	                  "weather/eng-hourly-11012011-11302011.csv",
+	                  "weather/eng-hourly-12012011-12312011.csv" ];
+	for(var x = 0; x < filenames.length; x++){
+	    addWeatherData(filenames[x], plt);
+	}
+
+	function addWeatherData(filename, plt) {
+            d3.csv(filename, function (d, i) {
+                var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+                return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
+            }, function (error, rows) {
+                if (error) {
+                    console.log("error");
+                    return;
+                }
+
+                plt.addDataToBinData(rows, 0);
+            });
+	}
     });
 }
 
