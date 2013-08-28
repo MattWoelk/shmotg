@@ -356,7 +356,7 @@ binnedData = function () {
 
     function atModularLocation(ms, lvl) {
         // True if ms is at the beginning of a bin in level lvl.
-        return ms % (Math.pow(2, lvl) * 5) === 0;
+        return ms % (Math.pow(2, lvl) * oneSample) === 0;
     }
 
     function getTwoLargest (array) {
