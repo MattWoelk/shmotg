@@ -497,7 +497,7 @@ function rundemo() {
 
         console.log(rows);
         initPlot(rows, true, function(){}, 1000*60*60);
-    })
+    });
 }
 
 // OFFLINE DEMO }}}
