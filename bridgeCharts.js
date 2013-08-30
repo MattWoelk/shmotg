@@ -25,13 +25,6 @@ document.getElementById("render-lines").addEventListener("change", changeLines, 
 //document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
-// The zoom limits for the plot
-var zoomExtents = setExtents();
-
-// The changing zoom extents from the perspective
-// of the mouse scrolling function.
-var zoomExtentsForScale = [zoomExtents[0], zoomExtents[1]];
-
 d3.select("#zoomin").on("click", zoomin);
 d3.select("#zoomout").on("click", zoomout);
 d3.select("#scrollleft").on("click", scrollleft);
@@ -87,13 +80,6 @@ d3.select(sliderContainerName).call(mySlider);
 // SLIDER }}}
 
 //{{{ HELPER FUNCTIONS
-
-function setExtents() {
-    // TODO: magic: make this relative to width
-    //var wid = document.getElementById("chartContainer").offsetWidth; // TODO: use this in the following equation.
-    // [ how far zoomed-out , how far zoomed-in ]
-    return [Math.pow(2, -30), Math.pow(2,4)];
-}
 
 var getTotalChartHeight = function () {
     var total = 0;
@@ -200,7 +186,6 @@ function zoomAll() {
 }
 
 var zoom = d3.behavior.zoom()
-    .scaleExtent(zoomExtentsForScale)
     .on("zoom", zoomAll);
 
 
@@ -227,81 +212,17 @@ function rescaleTo(val) {
         xScale.domain()[1] + displacement
     ]);
 
-    // update the scale if it's within the extents
-    var doWeScale = scaleWithinExtents(tmpScale);
-    if (doWeScale) {
-        xScale = tmpScale;
-    }
+    xScale = tmpScale;
 
     // reset the x scale so zooming still works
     zoom.x(xScale);
 
-    // since the zoom scale resets to 1 when we
-    // reset its xscale, we need to change its
-    // extents to match the change in ratio
-    var newScaleVal = getScaleValue(xScale);
-    var ratio = (oldScaleVal / newScaleVal ) / oldZoomScale;
-    zoomExtentsForScale[0] *= ratio;
-    zoomExtentsForScale[1] *= ratio;
-    zoom.scaleExtent(zoomExtentsForScale);
-
-    // update
-    if (doWeScale) {
-        //transitionAllNextTime();
-    }
-    zoomAll();
-}
-
-// func1 is the function which modifies the domain start in terms of the old domain start, and xdist
-// func2 is the function which modifies the domain end in terms of the old domain end, and xdist
-function changeZoom(func1, func2) {
-    var xdist = xScale.domain()[1] - xScale.domain()[0];
-
-    // for later ratio adjustment
-    var oldScaleVal = getScaleValue(xScale);
-    var oldZoomScale = zoom.scale();
-
-    // create an updated scale which the new domain
-    var tmpScale = d3.scale.linear().range(xScale.range());
-    tmpScale.domain([
-                    func1(xScale.domain()[0], xdist),
-                    func2(xScale.domain()[1], xdist)
-    ]);
-
-    // update the scale if it's within the extents
-    var doWeScale = scaleWithinExtents(tmpScale);
-    if (doWeScale) {
-        xScale = tmpScale;
-    }
-
-    // reset the x scale so zooming still works
-    zoom.x(xScale);
-
-    // since the zoom scale resets to 1 when we
-    // reset its xscale, we need to change its
-    // extents to match the change in ratio
-    var newScaleVal = getScaleValue(xScale);
-    var ratio = (oldScaleVal / newScaleVal ) / oldZoomScale;
-    zoomExtentsForScale[0] *= ratio;
-    zoomExtentsForScale[1] *= ratio;
-    zoom.scaleExtent(zoomExtentsForScale);
-
-    // update
-    if (doWeScale) {
-        transitionAllNextTime();
-    }
     zoomAll();
 }
 
 function getScaleValue(scal) {
     // gives a result which has units pixels / samples
     return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
-}
-
-function scaleWithinExtents (value) {
-    // return true if value's scale value is within zoom extents
-    return (getScaleValue(value) < zoomExtents[1] &&
-            getScaleValue(value) > zoomExtents[0] );
 }
 
 function zoomin() {
