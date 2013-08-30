@@ -62,6 +62,7 @@ var mySlider = slider()
     .boxSize(boxSize)
     .changeCallBack(function (pos, i, cameFromZoom) {
         if (curLevel !== i) {
+            console.log("not i");
             plots.forEach(function (plt) {
                 plt.whichLevelToRender(i).update();
             });
@@ -69,7 +70,9 @@ var mySlider = slider()
         }
         var scaleFactor = Math.pow(2, pos/boxSize);
         if (curPos !== pos) {
+            console.log("1");
             if (!cameFromZoom) {
+                console.log("2");
                 rescaleTo(scaleFactor);
             }
             curPos = pos;
@@ -77,7 +80,6 @@ var mySlider = slider()
     })
     .numberOfLevels(33);
 d3.select(sliderContainerName).call(mySlider);
-mySlider.update();
 // SLIDER }}}
 
 //{{{ HELPER FUNCTIONS
@@ -471,5 +473,8 @@ function rundemo() {
 }
 
 // OFFLINE DEMO }}}
+
+// set up the slider.
+rescaleTo(Math.pow(2, mySlider.handlePosition() / boxSize));
 
 /* vim: set foldmethod=marker: */
