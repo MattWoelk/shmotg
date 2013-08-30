@@ -77,6 +77,7 @@ var mySlider = slider()
     })
     .numberOfLevels(33);
 d3.select(sliderContainerName).call(mySlider);
+mySlider.update();
 // SLIDER }}}
 
 //{{{ HELPER FUNCTIONS
@@ -183,6 +184,7 @@ function zoomAll() {
         // apply horizontal motion to the x scale, but not the scal
         var tmpScale = oldXScale.copy();
         var oldDom = oldXScale.domain();
+        // TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
         var offset = xScale.domain()[0] - oldDom[0];
         tmpScale.domain([oldDom[0] + offset, oldDom[1] + offset]);
 
