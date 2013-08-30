@@ -220,6 +220,7 @@ function changeLines () {
 }
 
 function rescaleTo(val) {
+    console.log("rescale");
     var xdist = xScale.domain()[1] - xScale.domain()[0];
 
     var oldScaleVal = getScaleValue(xScale);
@@ -242,7 +243,7 @@ function rescaleTo(val) {
     // reset the x scale so zooming still works
     zoom.x(xScale);
 
-    //zoomAll();
+    zoomAll();
 }
 
 function getScaleValue(scal) {
