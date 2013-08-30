@@ -212,6 +212,7 @@ function rescaleTo(val) {
         xScale.domain()[1] + displacement
     ]);
 
+    // update the scale if it's within the extents
     xScale = tmpScale;
 
     // reset the x scale so zooming still works
@@ -419,31 +420,31 @@ function rundemo() {
 
         var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1);
 
-	var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
-	                  "weather/eng-hourly-03012012-03312012.csv",
-	                  "weather/eng-hourly-04012012-04302012.csv",
-	                  "weather/eng-hourly-08012011-08312011.csv",
-	                  "weather/eng-hourly-09012011-09302011.csv",
-	                  "weather/eng-hourly-10012011-10312011.csv",
-	                  "weather/eng-hourly-11012011-11302011.csv",
-	                  "weather/eng-hourly-12012011-12312011.csv" ];
-	for(var x = 0; x < filenames.length; x++){
-	    addWeatherData(filenames[x], plt);
-	}
+        var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
+                          "weather/eng-hourly-03012012-03312012.csv",
+                          "weather/eng-hourly-04012012-04302012.csv",
+                          "weather/eng-hourly-08012011-08312011.csv",
+                          "weather/eng-hourly-09012011-09302011.csv",
+                          "weather/eng-hourly-10012011-10312011.csv",
+                          "weather/eng-hourly-11012011-11302011.csv",
+                          "weather/eng-hourly-12012011-12312011.csv" ];
+        for(var x = 0; x < filenames.length; x++){
+            addWeatherData(filenames[x], plt);
+        }
 
-	function addWeatherData(filename, plt) {
-            d3.csv(filename, function (d, i) {
-                var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-                return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
-            }, function (error, rows) {
-                if (error) {
-                    console.log("error");
-                    return;
-                }
+        function addWeatherData(filename, plt) {
+                d3.csv(filename, function (d, i) {
+                    var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+                    return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
+                }, function (error, rows) {
+                    if (error) {
+                        console.log("error");
+                        return;
+                    }
 
-                plt.addDataToBinData(rows, 0);
-            });
-	}
+                    plt.addDataToBinData(rows, 0);
+                });
+        }
     });
 }
 
