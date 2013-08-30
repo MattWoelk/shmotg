@@ -181,24 +181,20 @@ function zoomAll() {
 
     if (mySlider.pastExtents(newPos)) {
         // apply horizontal motion to the x scale, but not the scal
-        console.log(oldXScale.domain());
         var tmpScale = oldXScale.copy();
         var oldDom = oldXScale.domain();
         var offset = xScale.domain()[0] - oldDom[0];
         tmpScale.domain([oldDom[0] + offset, oldDom[1] + offset]);
-        console.log("1");
 
         //plots.forEach(function (plt) {
             //plt.xScale(tmpScale.copy()).update();
         //});
         xScale = tmpScale.copy();
-        console.log(xScale.domain());
 
         //TODO: apply xScale to zoom.
         zoom.x(xScale);
     } else {
         mySlider.scrollPosition(newPos).update(true);
-        console.log("2");
 
         // set plot scales
         plots.forEach(function (plt) {
@@ -220,7 +216,6 @@ function changeLines () {
 }
 
 function rescaleTo(val) {
-    console.log("rescale");
     var xdist = xScale.domain()[1] - xScale.domain()[0];
 
     var oldScaleVal = getScaleValue(xScale);
