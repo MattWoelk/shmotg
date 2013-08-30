@@ -337,6 +337,18 @@ slider = function () {
         return my;
     }
 
+    my.pastExtents = function (val) {
+        // return true if we are out of bounds
+        if (val < height - boxSize*numberOfLevels) {
+            return true;
+        } else if (val > 0) {
+            return true;
+        } else {
+            return false;
+        }
+        var scrl = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
+    }
+
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
         scrollPosition = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);

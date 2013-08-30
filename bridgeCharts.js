@@ -172,17 +172,41 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
 // this will be changed once 'news' is sent from the server
 // for now it's just a dummy
 var updateZoom = function () { return 0; };
+var oldXScale = d3.scale.linear();
 
 function zoomAll() {
     // adjust slider
     var scal = getScaleValue(xScale);
     var newPos = boxSize * (Math.log(scal) / Math.log(2));
-    mySlider.scrollPosition(newPos).update(true);
 
-    // set plot scales
-    plots.forEach(function (plt) {
-        plt.xScale(xScale.copy()).update();
-    });
+    if (mySlider.pastExtents(newPos)) {
+        // apply horizontal motion to the x scale, but not the scal
+        console.log(oldXScale.domain());
+        var tmpScale = oldXScale.copy();
+        var oldDom = oldXScale.domain();
+        var offset = xScale.domain()[0] - oldDom[0];
+        tmpScale.domain([oldDom[0] + offset, oldDom[1] + offset]);
+        console.log("1");
+
+        //plots.forEach(function (plt) {
+            //plt.xScale(tmpScale.copy()).update();
+        //});
+        xScale = tmpScale.copy();
+        console.log(xScale.domain());
+
+        //TODO: apply xScale to zoom.
+        zoom.x(xScale);
+    } else {
+        mySlider.scrollPosition(newPos).update(true);
+        console.log("2");
+
+        // set plot scales
+        plots.forEach(function (plt) {
+            plt.xScale(xScale.copy()).update();
+        });
+    }
+
+    oldXScale = xScale.copy();
 }
 
 var zoom = d3.behavior.zoom()
@@ -218,7 +242,7 @@ function rescaleTo(val) {
     // reset the x scale so zooming still works
     zoom.x(xScale);
 
-    zoomAll();
+    //zoomAll();
 }
 
 function getScaleValue(scal) {
