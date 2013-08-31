@@ -62,7 +62,6 @@ var mySlider = slider()
     .boxSize(boxSize)
     .changeCallBack(function (pos, i, cameFromZoom) {
         if (curLevel !== i) {
-            console.log("not i");
             plots.forEach(function (plt) {
                 plt.whichLevelToRender(i).update();
             });
@@ -70,9 +69,7 @@ var mySlider = slider()
         }
         var scaleFactor = Math.pow(2, pos/boxSize);
         if (curPos !== pos) {
-            console.log("1");
             if (!cameFromZoom) {
-                console.log("2");
                 rescaleTo(scaleFactor);
             }
             curPos = pos;
@@ -190,9 +187,9 @@ function zoomAll() {
         var offset = xScale.domain()[0] - oldDom[0];
         tmpScale.domain([oldDom[0] + offset, oldDom[1] + offset]);
 
-        //plots.forEach(function (plt) {
-            //plt.xScale(tmpScale.copy()).update();
-        //});
+        plots.forEach(function (plt) {
+            plt.xScale(tmpScale.copy()).update();
+        });
         xScale = tmpScale.copy();
 
         //TODO: apply xScale to zoom.
