@@ -83,7 +83,6 @@ slider = function () {
 
     // {{{ HELPER FUNCTIONS
     function highlightSliderElement() {
-        console.log("HIGH");
         var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
         var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
         var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);

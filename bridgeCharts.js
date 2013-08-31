@@ -184,8 +184,13 @@ function zoomAll() {
         var tmpScale = oldXScale.copy();
         var oldDom = oldXScale.domain();
         // TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
-        var offset = xScale.domain()[0] - oldDom[0];
-        tmpScale.domain([oldDom[0] + offset, oldDom[1] + offset]);
+        var curDom = xScale.domain();
+        var newMidPoint = (curDom[1] + curDom[0]) / 2;
+        var oldDist = (oldDom[1] - oldDom[0]) / 2;
+
+        var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
+        console.log(oldDist, newMidPoint);
+        tmpScale.domain(newDom);
 
         plots.forEach(function (plt) {
             plt.xScale(tmpScale.copy()).update();
