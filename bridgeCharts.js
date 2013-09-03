@@ -189,7 +189,6 @@ function zoomAll() {
         var oldDist = (oldDom[1] - oldDom[0]) / 2;
 
         var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
-        console.log(oldDist, newMidPoint);
         tmpScale.domain(newDom);
 
         plots.forEach(function (plt) {
@@ -365,10 +364,13 @@ function sendRequestToServer(req) {
     setLoadingIcon(true);
 
     var now = new Date();
-    if(_.findWhere(listOfRequestsMade, {ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
+    // TODO: figure out whether this is what's blocking both sensors from requesting at the same time.
+    if(_.findWhere(listOfRequestsMade, {sensorNumber: req.sensorNumber, sensorType: req.sensorType, ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
         // never request the same thing twice
-        //console.log("already requested");
-        setLoadingIcon(false);
+
+        if (sizeOfQueue() === 0) {
+            setLoadingIcon(false);
+        }
         return false;
     }
 
