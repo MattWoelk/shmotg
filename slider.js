@@ -30,13 +30,15 @@ slider = function () {
     var handleClip;
     var handle;
 
-    var handlePosition = boxSize*2;
+    var handlePosition = 0;//boxSize*2;
 
     var surrounding_lines;
     var line_bottom;
     var line_left;
     var line_right;
     var line_top;
+
+    var avoidChangeCallBack; // TODO: make this not required.
     // Set Defaults }}}
 
     // {{{ EVENTS
@@ -79,8 +81,56 @@ slider = function () {
     }
     // EVENTS }}}
 
-    function my (g, avoidChangeCallBack) {
+    // {{{ HELPER FUNCTIONS
+    function highlightSliderElement() {
+        var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
+        var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
+        var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
+        changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
+        d3.selectAll(".slider_boxes")
+            .classed("highlighted", function (d, i) { return i == beingPointedTo; });
+    }
+
+    function currentHandlePosition () {
+        var dragTarget = d3.select("#handle_region" + id);
+        var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+        return curTrans[1];
+    }
+
+    function currentScrollPosition () {
+        var dragTarget = d3.select("#slide_region" + id);
+        var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+        return curTrans[1];
+    }
+
+    function dragSlider(usethis) {
+        var adjustment = usethis ? usethis : d3.event.dy;
+        var dragTarget = d3.select("#slide_region" + id);
+        var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+        var finalX = curTrans[0];
+        var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
+        dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+
+        highlightSliderElement();
+    }
+
+    function dragHandle(usethis) {
+        var adjustment = usethis ? usethis : d3.event.dy;
+        var dragTarget = d3.select("#handle_region" + id);
+        var curTrans = d3.transform(dragTarget.attr("transform")).translate;
+        var finalX = curTrans[0];
+        var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
+        dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+
+        highlightSliderElement();
+    }
+
+    // HELPER FUNCTIONS }}}
+
+
+    function my (g, av) {
         slctn = g; // Saving the selection so that my.update() works.
+        avoidChangeCallBack = av;
 
         g.each(function(d, i) {
             var g = d3.select(this);
@@ -254,54 +304,10 @@ slider = function () {
             slide_region.call(dragS);
             handle_region.call(dragH);
 
-            function currentHandlePosition () {
-                var dragTarget = d3.select("#handle_region" + id);
-                var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-                return curTrans[1];
-            }
-
-            function currentScrollPosition () {
-                var dragTarget = d3.select("#slide_region" + id);
-                var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-                return curTrans[1];
-            }
-
-            function dragSlider(usethis) {
-                var adjustment = usethis ? usethis : d3.event.dy;
-                var dragTarget = d3.select("#slide_region" + id);
-                var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-                var finalX = curTrans[0];
-                var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
-                dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
-
-                highlightSliderElement();
-            }
-
-            function dragHandle(usethis) {
-                var adjustment = usethis ? usethis : d3.event.dy;
-                var dragTarget = d3.select("#handle_region" + id);
-                var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-                var finalX = curTrans[0];
-                var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
-                dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
-
-                highlightSliderElement();
-            }
 
             // DRAGGING }}}
 
-            // {{{ HIGHLIGHT SELECTED
-            function highlightSliderElement() {
-                var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
-                var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
-                var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
-                changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
-                d3.selectAll(".slider_boxes")
-                    .classed("highlighted", function (d, i) { return i == beingPointedTo; });
-            }
-
             highlightSliderElement();
-            // HIGHLIGHT SELECTED}}}
         });
         d3.timer.flush();
     };
@@ -337,6 +343,18 @@ slider = function () {
         return my;
     }
 
+    my.pastExtents = function (val) {
+        // return true if we are out of bounds
+        if (val < height - boxSize*numberOfLevels) {
+            return true;
+        } else if (val > 0) {
+            return true;
+        } else {
+            return false;
+        }
+        var scrl = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
+    }
+
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
         scrollPosition = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
@@ -345,6 +363,14 @@ slider = function () {
         var finalX = curTrans[0];
         dragTarget.attr("transform", "translate(" + curTrans[0] + "," + scrollPosition + ")")
         return my;
+    }
+
+    my.handlePosition = function () {
+        return handlePosition;
+    }
+
+    my.highlightSliderElement = function () {
+        highlightSliderElement();
     }
 
     my.update = function (avoidChangeCallBack) {
