@@ -965,12 +965,20 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         waitingForServer = false;
         freshArrivalFromServer = true;
 
-        if (datas.length === 0) {
+        if (level === 0) {
+            var filteredDatas = _.filter(datas, function(d) {
+                return !isNaN(d.val);
+            })
+        } else {
+            filteredDatas = datas;
+        }
+
+        if (filteredDatas.length === 0) {
             //console.log("NO DATA");
         } else if (level === 0) {
-            binData.addRawData(datas);
+            binData.addRawData(filteredDatas);
         } else {
-            binData.addBinnedData(datas, level);
+            binData.addBinnedData(filteredDatas, level);
         }
 
         return my;
