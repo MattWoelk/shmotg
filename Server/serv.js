@@ -115,7 +115,7 @@ io.sockets.on('connection', function (socket) {
                                         //            just make it readable and throw it on through
             var tmpData = binnedData(); // TODO TODO: this doesn't need to be a full-blown object...
 
-            getDataFromDataBaseInRange(range[0], range[1], function (queryResult) {
+            getDataFromDataBaseInRange(range[0], range[1], req.sensorNumber, req.sensorType, function (queryResult) {
                 // Bin the new data
                 console.log("- data received...");
                 try {

@@ -98,14 +98,17 @@ function combineWithoutDuplicates(arr1, arr2) {
     return arr1.concat(uniques);
 }
 
-makeQuery = function(a, b, letter) {
+makeQuery = function(a, b, letter, sensorNumber, sensorType) {
     var dtr = dt(a); // date to request
     var dtr2 = dt(b); // second date to request
+
+    // TODO: implement sensorType
 
     var let = letter ? letter : 'A';
 
     // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-    var queryHead = 'SELECT ESGgirder18, SampleIndex, Time FROM SPBRTData_0' + let + ' WHERE Time BETWEEN';
+    // TODO: this is only working for girder 18 !!
+    var queryHead = 'SELECT ESGgirder' + sensorNumber + ', SampleIndex, Time FROM SPBRTData_0' + let + ' WHERE Time BETWEEN';
     var query1 = ' "' + dtr.getFullYear() +
                '-' + pad(dtr.getMonth() + 1) +
                '-' + pad(dtr.getDate()) +
@@ -125,7 +128,9 @@ makeQuery = function(a, b, letter) {
 
     return {
         query: queryHead + query1 + queryMid + query2 + queryTail,
-        table: table
+        table: table,
+        sensorNumber: sensorNumber,
+        sensorType: sensorType,
     };
 }
 // PRIVATE FUNCTION }}}
@@ -148,14 +153,14 @@ dateAndSampleIndexStringToMilliseconds = function (dateStr, sampleIndex) {
   return dateStringToMilliseconds(dateStr) + samplesToMilliseconds(sampleIndex);
 }
 
-getDataFromDataBaseInRange = function (ms0, ms1, callback) {
+getDataFromDataBaseInRange = function (ms0, ms1, sensorNumber, sensorType, callback) {
     // TODO: if ms0 and ms=1 span months, query one for each month
     //       (will only ever be two months, otherwise it would
     //       take forever)
-    vals = ['A','B','C','D','E','F'];
-    queries = [];
+    var vals = ['A','B','C','D','E','F'];
+    var queries = [];
     for (var i = 0, l = vals.length; i < l; i ++) {
-        queries.push(makeQuery(ms0, ms1, vals[i]));
+        queries.push(makeQuery(ms0, ms1, vals[i], sensorNumber, sensorType));
     }
 
     result = [];
@@ -192,7 +197,8 @@ sendDatabaseQuery = function(query, doWithResult) {
     console.log(red+query.query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
-        return { val: d.ESGgirder18 ,
+        //console.log("asdf: " + query.sensorNumber);
+        return { val: d['ESGgirder' + query.sensorNumber],
                  ms: dateAndSampleIndexStringToMilliseconds(
                  d.Time + "",
                  d.SampleIndex)
