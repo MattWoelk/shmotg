@@ -182,14 +182,14 @@ function zoomAll() {
     if (mySlider.pastExtents(newPos)) {
         // apply horizontal motion to the x scale, but not the scal
         var tmpScale = oldXScale.copy();
-        var oldDom = oldXScale.domain();
-        // TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
-        var curDom = xScale.domain();
-        var newMidPoint = (curDom[1] + curDom[0]) / 2;
-        var oldDist = (oldDom[1] - oldDom[0]) / 2;
+        //var oldDom = oldXScale.domain();
+        //// TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
+        //var curDom = xScale.domain();
+        //var newMidPoint = (curDom[1] + curDom[0]) / 2;
+        //var oldDist = (oldDom[1] - oldDom[0]) / 2;
 
-        var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
-        tmpScale.domain(newDom);
+        //var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
+        //tmpScale.domain(newDom);
 
         plots.forEach(function (plt) {
             plt.xScale(tmpScale.copy()).update();
@@ -329,6 +329,7 @@ socket.on('news', function (data) {
     //initPlot(json);
     initPlot(json, true, sendRequestToServer, 5, "girder", 18);
     initPlot(json, true, sendRequestToServer, 5, "girder", 20);
+    initPlot(json, true, sendRequestToServer, 5, "girder", 22);
 
     //initPlot(_.map(json, function (d) {
     //  return { val: Math.random() * 5 + d.val,
@@ -439,7 +440,7 @@ function rundemo() {
 
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
         var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-        return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
+        return {val: parseFloat(d.Temp), ms: dat.getTime()};
     }, function (error, rows) {
         if (error) {
             console.log("error");
@@ -463,7 +464,7 @@ function rundemo() {
         function addWeatherData(filename, plt) {
                 d3.csv(filename, function (d, i) {
                     var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-                    return {val: parseFloat(d.Temp) + 50, ms: dat.getTime()};
+                    return {val: parseFloat(d.Temp), ms: dat.getTime()};
                 }, function (error, rows) {
                     if (error) {
                         console.log("error");

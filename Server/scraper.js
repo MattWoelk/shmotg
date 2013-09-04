@@ -19,7 +19,6 @@ reset = '\033[0m';
 // {{{ GLOBAL VARIABLES
 var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
 var SENSOR_TYPE = "girder";
-var GIRDER_NUMBER = 18;
 
 var STEP_SIZE = 600000; // 10000 is 2400 samples each time
                       // 60000 is 1 minute each time
@@ -30,10 +29,11 @@ var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
 // {{{ COMMAND LINE INPUT
-if (process.argv[9] === undefined) {
+if (process.argv[10] === undefined) {
     console.log("USAGE:");
     console.log("  start_year(YYYY) start_month(1-12) start_day(1-31) start_hour(0-23)");
     console.log("  end_year(YYYY) end_month(1-12) end_day(1-31) end_hour(0-23)");
+    console.log("  sensorNumber");
     return
 }
 
@@ -46,6 +46,7 @@ var end_year  = parseInt(process.argv[6]);
 var end_month = parseInt(process.argv[7])-1;
 var end_day   = parseInt(process.argv[8]);
 var end_hour  = parseInt(process.argv[9]);
+var sensorNumber  = parseInt(process.argv[10]);
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK
@@ -71,7 +72,7 @@ function async_function_example(arg, callback) {
 
 //Heavy inspiration from: http://book.mixu.net/ch7.html
 function sendQuerySync(item, callback) {
-    getDataFromDataBaseInRange(item, item + STEP_SIZE, function (queryResult) {
+    getDataFromDataBaseInRange(item, item + STEP_SIZE, sensorNumber, "girder", function (queryResult) {
         // Bin the new data
         console.log("- data received. binning data...");
         if(queryResult == null) {
@@ -137,7 +138,7 @@ function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
                 var dat = binData.bd()[k].levels[l][c];
                 var strt = binData.getBinContainerForMSAtLevel(dat[0].ms, l);
 
-                listOfThingsToDo.push([SENSOR_TYPE, GIRDER_NUMBER, k, l, strt, dat]);
+                listOfThingsToDo.push([SENSOR_TYPE, sensorNumber, k, l, strt, dat]);
             }
         }
     }

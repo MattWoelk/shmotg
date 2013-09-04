@@ -39,7 +39,6 @@ function dt (num) {
 // {{{ GLOBAL VARIABLES
 var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
 var SENSOR_TYPE = "girder";
-var GIRDER_NUMBER = 18;
 
 var STEP_SIZE = 600000; // 10000 is 2400 samples each time
                       // 60000 is 1 minute each time
@@ -56,11 +55,11 @@ var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
 // {{{ COMMAND LINE INPUT
-if (process.argv[8] === undefined) {
+if (process.argv[9] === undefined) {
     console.log("USAGE:");
     console.log("  start_year(YYYY) start_month(1-12) start_day(1-31)");
     console.log("  end_year(YYYY) end_month(1-12) end_day(1-31)");
-    console.log("  level(6-46)");
+    console.log("  level(6-46) sensorNumber");
     return
 }
 
@@ -73,6 +72,7 @@ var end_month = parseInt(process.argv[6])-1;
 var end_day   = parseInt(process.argv[7]);
 
 var lowestLevel = parseInt(process.argv[8]);
+var sensorNumber = parseInt(process.argv[9]);
 req.bin_level = lowestLevel;
 // COMMAND LINE INPUT }}}
 
@@ -169,7 +169,7 @@ function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
                 var dat = binData.bd()[k].levels[l][c];
                 var strt = binData.getBinContainerForMSAtLevel(dat[0].ms, l);
 
-                listOfThingsToDo.push([SENSOR_TYPE, GIRDER_NUMBER, k, l, strt, dat]);
+                listOfThingsToDo.push([SENSOR_TYPE, sensorNumber, k, l, strt, dat]);
             }
         }
     }
