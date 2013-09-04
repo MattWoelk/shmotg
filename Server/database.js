@@ -107,7 +107,6 @@ makeQuery = function(a, b, letter, sensorNumber, sensorType) {
     var let = letter ? letter : 'A';
 
     // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-    // TODO: this is only working for girder 18 !!
     var queryHead = 'SELECT ESGgirder' + sensorNumber + ', SampleIndex, Time FROM SPBRTData_0' + let + ' WHERE Time BETWEEN';
     var query1 = ' "' + dtr.getFullYear() +
                '-' + pad(dtr.getMonth() + 1) +
@@ -163,7 +162,7 @@ getDataFromDataBaseInRange = function (ms0, ms1, sensorNumber, sensorType, callb
         queries.push(makeQuery(ms0, ms1, vals[i], sensorNumber, sensorType));
     }
 
-    result = [];
+    var result = [];
 
     // Get all queries in series,
     // then callback with the combination of them all

@@ -12,8 +12,6 @@ function daysInMonth(yr, mo) {
 
 // {{{ GLOBAL VARIABLES
 var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
-var SENSOR_TYPE = "girder";
-var GIRDER_NUMBER = 18;
 
 var STEP_SIZE = 600000; // 10000 is 2400 samples each time
                       // 60000 is 1 minute each time
