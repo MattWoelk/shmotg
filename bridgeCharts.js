@@ -182,14 +182,14 @@ function zoomAll() {
     if (mySlider.pastExtents(newPos)) {
         // apply horizontal motion to the x scale, but not the scal
         var tmpScale = oldXScale.copy();
-        var oldDom = oldXScale.domain();
-        // TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
-        var curDom = xScale.domain();
-        var newMidPoint = (curDom[1] + curDom[0]) / 2;
-        var oldDist = (oldDom[1] - oldDom[0]) / 2;
+        //var oldDom = oldXScale.domain();
+        //// TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
+        //var curDom = xScale.domain();
+        //var newMidPoint = (curDom[1] + curDom[0]) / 2;
+        //var oldDist = (oldDom[1] - oldDom[0]) / 2;
 
-        var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
-        tmpScale.domain(newDom);
+        //var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
+        //tmpScale.domain(newDom);
 
         plots.forEach(function (plt) {
             plt.xScale(tmpScale.copy()).update();
