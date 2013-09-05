@@ -328,7 +328,7 @@ socket.on('news', function (data) {
 
     //initPlot(json);
     initPlot(json, true, sendRequestToServer, 5, "girder", 18);
-    initPlot(json, true, sendRequestToServer, 5, "girder", 20);
+    //initPlot(json, true, sendRequestToServer, 5, "girder", 20);
     initPlot(json, true, sendRequestToServer, 5, "girder", 22);
 
     //initPlot(_.map(json, function (d) {
