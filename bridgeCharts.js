@@ -96,6 +96,7 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
+var plus_button;
 var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
     var offset = showingEdits && plots[0] ? plots[0].height() : 0;
@@ -112,21 +113,34 @@ var redraw = function () {
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     //{{{ DRAW EDIT ELEMENTS
-    var edit_elements = d3.select("#edit_elements");
-    var h = plots[0] ? plots[0].height() : 195;
-    edit_elements.selectAll("image").data(plots.concat("extra")).enter().append("image")
-        .attr("xlink:href", function (d, i) { if (i === plots.length) { return "./img/add.svg"; } else { return "./img/remove.svg"; }})
-        .attr("y", function(d,i) { return i*(h) + 45; })
-        .attr("x", 130)
-        .attr("width", 130)
-        .attr("height", 130)
+    imagePerChart("#edit_addremove", true, "./img/remove.svg", 130);
+    imagePerChart("#edit_up", true, "./img/up.svg", 130*2);
+    imagePerChart("#edit_down", true, "./img/down.svg", 130*3);
 
-    edit_elements.selectAll("image")
-        .attr("xlink:href", function (d, i) { if (i === plots.length) { return "./img/add.svg"; } else { return "./img/remove.svg"; }})
-        .attr("y", function(d,i) { return i*(h) + 45; })
-        .attr("x", 130)
-        .attr("width", 130)
-        .attr("height", 130)
+    // TODO: add in the plus button.
+    var h = plots[0] ? plots[0].height() : 195;
+    plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
+    plus_button
+            .attr("xlink:href", "./img/add.svg")
+            .attr("y", getTotalChartHeight() + 45)
+            .attr("x", 130)
+            .attr("width", 130)
+            .attr("height", 130)
+
+    function imagePerChart(id, extra, imgurl, xoffset) {
+        var addrem = d3.select(id);
+        var h = plots[0] ? plots[0].height() : 195;
+
+        var add_dat = addrem.selectAll("image").data(plots);
+        add_dat.enter().append("image")
+            .attr("xlink:href", imgurl)
+            .attr("y", function(d,i) { return i*(h) + 45; })
+            .attr("x", xoffset)
+            .attr("width", 130)
+            .attr("height", 130)
+
+        add_dat.exit().remove();
+    }
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
