@@ -3,6 +3,19 @@ var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
 
+d3.select("#edit").on("click", toggleEditables);
+
+function toggleEditables() {
+    var active = document.getElementById("edit").checked;
+    if (active) {
+        d3.select("#edit_elements").attr("display", "block");
+    } else {
+        d3.select("#edit_elements").attr("display", "none");
+    }
+}
+toggleEditables();
+
+
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
