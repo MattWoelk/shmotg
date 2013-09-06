@@ -107,6 +107,15 @@ var redraw = function () {
             .attr("height", getTotalChartHeight())
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
+    //{{{ DRAW EDIT ELEMENTS
+    var edit_elements = d3.select("#edit_elements");
+
+    edit_elements.selectAll("circle").data(plots).enter().append("circle")
+        .attr("cy", function(d,i) { return i*plots[i].height() + (plots[i].height()/2); })
+        .attr("cx", 200)
+        .attr("r", 54)
+    // DRAW EDIT ELEMENTS }}}
+
     //update the zoom for the new plot size
     updateZoom();
 }
