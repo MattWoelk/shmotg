@@ -352,13 +352,12 @@ socket.on('news', function (data) {
     plots = []; // delete the previous plots
     // <-- done deleting all example plots
 
-    var json = JSON.parse(data);
     socket.emit('ack', "Message received!");
 
     //initPlot(json);
-    initPlot(json, true, sendRequestToServer, 5, "girder", 18);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 18);
     //initPlot(json, true, sendRequestToServer, 5, "girder", 20);
-    initPlot(json, true, sendRequestToServer, 5, "girder", 22);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 22);
 
     //initPlot(_.map(json, function (d) {
     //  return { val: Math.random() * 5 + d.val,
