@@ -3,18 +3,6 @@ var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
 
-d3.select("#edit").on("click", toggleEditables);
-
-function toggleEditables() {
-    var active = document.getElementById("edit").checked;
-    if (active) {
-        d3.select("#edit_elements").attr("display", "block");
-    } else {
-        d3.select("#edit_elements").attr("display", "none");
-    }
-}
-toggleEditables();
-
 
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
@@ -109,8 +97,8 @@ var setAllYAxisLocks = function (toLock) {
 }
 
 var redraw = function () {
-    var showingEdits = true;
-    var offset = showingEdits ? plots[0].height() : 0;
+    var showingEdits = document.getElementById("edit").checked;
+    var offset = showingEdits && plots[0] ? plots[0].height() : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -125,16 +113,17 @@ var redraw = function () {
 
     //{{{ DRAW EDIT ELEMENTS
     var edit_elements = d3.select("#edit_elements");
+    var h = plots[0] ? plots[0].height() : 195;
     edit_elements.selectAll("image").data(plots.concat("extra")).enter().append("image")
         .attr("xlink:href", function (d, i) { if (i === plots.length) { return "./img/add.svg"; } else { return "./img/remove.svg"; }})
-        .attr("y", function(d,i) { return i*(plots[0].height()) + 45; })
+        .attr("y", function(d,i) { return i*(h) + 45; })
         .attr("x", 130)
         .attr("width", 130)
         .attr("height", 130)
 
     edit_elements.selectAll("image")
         .attr("xlink:href", function (d, i) { if (i === plots.length) { return "./img/add.svg"; } else { return "./img/remove.svg"; }})
-        .attr("y", function(d,i) { return i*(plots[0].height()) + 45; })
+        .attr("y", function(d,i) { return i*(h) + 45; })
         .attr("x", 130)
         .attr("width", 130)
         .attr("height", 130)
@@ -507,5 +496,21 @@ function rundemo() {
 
 // set up the slider.
 rescaleTo(Math.pow(2, mySlider.handlePosition() / boxSize));
+
+
+// {{{ EDITABLES
+d3.select("#edit").on("click", toggleEditables);
+
+function toggleEditables() {
+    var active = document.getElementById("edit").checked;
+    if (active) {
+        d3.select("#edit_elements").attr("display", "block");
+    } else {
+        d3.select("#edit_elements").attr("display", "none");
+    }
+    redraw();
+}
+toggleEditables();
+// EDITABLES }}}
 
 /* vim: set foldmethod=marker: */
