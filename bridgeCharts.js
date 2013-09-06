@@ -96,24 +96,35 @@ var setAllYAxisLocks = function (toLock) {
 }
 
 var redraw = function () {
+    var showingEdits = true;
+    var offset = showingEdits ? plots[0].height() : 0;
+
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     });
 
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-           .attr("height", getTotalChartHeight());
+           .attr("height", getTotalChartHeight() + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("height", getTotalChartHeight())
+            .attr("height", getTotalChartHeight() + offset)
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     //{{{ DRAW EDIT ELEMENTS
     var edit_elements = d3.select("#edit_elements");
+    edit_elements.selectAll("image").data(plots.concat("extra")).enter().append("image")
+        .attr("xlink:href", function (d, i) { if (i === plots.length) { return "./img/add.svg"; } else { return "./img/remove.svg"; }})
+        .attr("y", function(d,i) { return i*(plots[0].height()) + 45; })
+        .attr("x", 130)
+        .attr("width", 130)
+        .attr("height", 130)
 
-    edit_elements.selectAll("circle").data(plots).enter().append("circle")
-        .attr("cy", function(d,i) { return i*plots[i].height() + (plots[i].height()/2); })
-        .attr("cx", 200)
-        .attr("r", 54)
+    edit_elements.selectAll("image")
+        .attr("xlink:href", function (d, i) { if (i === plots.length) { return "./img/add.svg"; } else { return "./img/remove.svg"; }})
+        .attr("y", function(d,i) { return i*(plots[0].height()) + 45; })
+        .attr("x", 130)
+        .attr("width", 130)
+        .attr("height", 130)
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
@@ -154,13 +165,6 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
     redraw();
 
     d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
-
-    zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-           .attr("height", getTotalChartHeight());
-
-    zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("height", getTotalChartHeight() - margin.top)
-            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     zoomRect.attr("fill", "rgba(0,0,0,0)")
             .call(zoom);
