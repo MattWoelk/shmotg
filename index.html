@@ -44,21 +44,12 @@ function showhide() {
 </script>
 <!-- SHOWHIDE JAVASCRIPT }}}-->
 
-<div id="slider_container" style="position:fixed; top: 45px">
-</div>
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
-    <input type="checkbox" id="isexpanded" /> <!-- hidden checkbox to store state. :) -->
-    <label for="isexpanded"></label>
-
-    <!-- Loading Animation {{{-->
-    <div id="loader_container"></div>
-    <!--}}}-->
-
     <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
     <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
-
-    </br> <!-- to keep the controls on the next line -->
-
+    <div id="loader_container"></div>
+    </br>
+    <input type="checkbox" id="isexpanded" /><label for="isexpanded"></label><label for="isexpanded">Lines</label>
     <div id="controls">
         <form>
             <ul id="render-lines">
@@ -79,6 +70,18 @@ function showhide() {
             </ul>
         </form>
     </div>
+    </br>
+    <input type="checkbox" id="edit" value="edit"/><label for="edit"></label><label for="edit">Edit</label>
+
+    <div>
+        <div id="slider_container">
+        </div>
+    </div>
+
+
+
+    </br> <!-- to keep the controls on the next line -->
+
 </div>
 <div id="chartContainer" style="overflow:none; width:100%; overflow:none; float:left;">
     <div id="charts"></div>
