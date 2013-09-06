@@ -331,6 +331,7 @@ var firstTime = true;
 //  console.log("disconnected !!");
 //});
 
+offlinedata();
 
 socket.on('news', function (data) {
     // only do this once, so that plots don't get overlapped whenever the server restarts.
@@ -340,17 +341,6 @@ socket.on('news', function (data) {
     // SPB is 200Hz
 
     firstTime = false;
-
-    // deleting all example plots -->
-    //_.times(plots.length, function (i) {
-    //    delete plots[i];
-    //});
-    svg = document.getElementById("charts");
-    while (svg.lastChild) {
-        svg.removeChild(svg.lastChild);
-    }
-    plots = []; // delete the previous plots
-    // <-- done deleting all example plots
 
     socket.emit('ack', "Message received!");
 
@@ -405,8 +395,6 @@ function sendRequestToServer(req) {
 
     listOfRequestsMade.push(req);
 
-    //console.log("requesting");
-
     // wrap the req with a unique id
     var sendReq = {
         id: uniqueRequestID,
@@ -443,29 +431,10 @@ socket.on('req_data', function (data) {
 
 // SERVER COMMUNICATIONS }}}
 
-//{{{ OFFLINE DEMO
+//{{{ OFFLINE DATA
 
-// A demonstration with example data in case the server is down:
-// wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
-// TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 1000);
-//rundemo();
 
-function rundemo() {
-    d3.json("Server/esg_time.js", function (error, data) {
-        if (error || plots.length > 0) {
-            return;
-        }
-        setLoadingIcon(true); // loading icon indicates that we can't connect to the server
-        var json = data.map(function (d) {
-            return {val: d.ESGgirder18, ms: d.ms};
-        });
-
-        initPlot(json, true, function(){}, 5, "girder", 18);
-
-        //console.log(plots[0].bd().bd());
-    });
-
+function offlinedata() {
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
         var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
         return {val: parseFloat(d.Temp), ms: dat.getTime()};
@@ -505,7 +474,7 @@ function rundemo() {
     });
 }
 
-// OFFLINE DEMO }}}
+// OFFLINE DATA }}}
 
 // set up the slider.
 rescaleTo(Math.pow(2, mySlider.handlePosition() / boxSize));
