@@ -101,6 +101,8 @@ var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
     var offset = showingEdits && plots[0] ? plots[0].height() : 0;
 
+    // TODO: use mapping instead of whatever this is.
+
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     });
@@ -113,9 +115,13 @@ var redraw = function () {
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     //{{{ DRAW EDIT ELEMENTS
-    imagePerChart("#edit_addremove", true, "./img/remove.svg", 130);
-    imagePerChart("#edit_up", true, "./img/up.svg", 130*2);
-    imagePerChart("#edit_down", true, "./img/down.svg", 130*3);
+    var xsize = 70;
+    var xspace = 20;
+    var xbuffer = 130;
+
+    imagePerChart("#edit_addremove", true, "./img/remove.svg", 0);
+    imagePerChart("#edit_up", true, "./img/up.svg", xsize + xspace);
+    imagePerChart("#edit_down", true, "./img/down.svg", (xsize + xspace)*2);
 
     // TODO: add in the plus button.
     var h = plots[0] ? plots[0].height() : 195;
@@ -123,9 +129,9 @@ var redraw = function () {
     plus_button
             .attr("xlink:href", "./img/add.svg")
             .attr("y", getTotalChartHeight() + 45)
-            .attr("x", 130)
-            .attr("width", 130)
-            .attr("height", 130)
+            .attr("x", xbuffer)
+            .attr("width", xsize)
+            .attr("height", xsize)
 
     function imagePerChart(id, extra, imgurl, xoffset) {
         var addrem = d3.select(id);
@@ -134,10 +140,11 @@ var redraw = function () {
         var add_dat = addrem.selectAll("image").data(plots);
         add_dat.enter().append("image")
             .attr("xlink:href", imgurl)
-            .attr("y", function(d,i) { return i*(h) + 45; })
-            .attr("x", xoffset)
-            .attr("width", 130)
-            .attr("height", 130)
+            .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
+            .attr("x", xbuffer + xoffset)
+            .attr("width", xsize)
+            .attr("height", xsize)
+            .on("click", function(d, i){ console.log("SUB", i, plots.length); plots.splice(i, 1); console.log(plots.length); })
 
         add_dat.exit().remove();
     }
