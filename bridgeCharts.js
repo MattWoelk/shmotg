@@ -103,6 +103,33 @@ var redraw = function () {
 
     // TODO: use mapping instead of whatever this is.
 
+    var plotSVGs = d3.select("#charts").selectAll("svg").data(d3.range(plots.length));
+    var counter = 0;
+
+    console.log("plotSVGs", plotSVGs);
+    console.log("plotSVGs.enter()", plotSVGs.enter());
+    console.log("data", d3.select("#charts").data(function (d) { console.log("dat", d); }));
+
+    // ENTER
+    //console.log("plots", plots);
+    plotSVGs.enter().append("svg").attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });//.call(plots[0]);
+    //d3.select("#charts").selectAll("svg").each(function(d, i){ plots[i]([this]); console.log("slctn", d, i, this); })
+    for(var i = 0; i < plotSVGs.length; i++) {
+        console.log("  ", i, plotSVGs[0][i]);
+    }
+    //plotSVGs.enter().append("svg").call(plots[0]);
+    //console.log(plotSVGs);
+
+    // UPDATE
+    //plotSVGs.attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });
+
+    // EXIT
+    plotSVGs.exit().remove();
+
+        //plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
+        //plot
+        //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
+
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     });
@@ -144,7 +171,7 @@ var redraw = function () {
             .attr("x", xbuffer + xoffset)
             .attr("width", xsize)
             .attr("height", xsize)
-            .on("click", function(d, i){ console.log("SUB", i, plots.length); plots.splice(i, 1); console.log(plots.length); })
+            .on("click", function(d, i){ console.log("SUB", i, plots.length); plots.splice(i, 1); console.log("len", plots.length); })
 
         add_dat.exit().remove();
     }
@@ -169,18 +196,18 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
     if (first) {
         plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
+        //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
     } else {
-        plot = binnedLineChart(data, function () {}, sensorType, sensorNumber, oneSample);
+        plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
+        //d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
     }
 
 
     if (first) {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(true).milliSecondsPerSample(msPS).update();
+        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
     } else {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(false).milliSecondsPerSample(msPS).update();
+        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(false).milliSecondsPerSample(msPS);//.update();
     }
 
     plots.push(plot);
