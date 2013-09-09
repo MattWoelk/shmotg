@@ -944,6 +944,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.sensorType = function (value) {
+        if (!arguments.length) return sensorType;
+        sensorType = value;
+        return my;
+    }
+
+    my.sensorNumber = function (value) {
+        if (!arguments.length) return sensorNumber;
+        sensorNumber = value;
+        return my;
+    }
+
     my.yAxisLock = function (value) {
         if (!arguments.length) return yAxisLock;
         if (yAxisLock == true && value == false) {
