@@ -344,7 +344,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
         //{{{ SELECTION AND SCALES
 
-        console.log("selection", selection);
         slctn = selection; // Saving the selection so that my.update() works.
 
         width = containerWidth - margin.left - margin.right;

@@ -100,27 +100,26 @@ var plus_button;
 var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
 
-    var plotSVGs = d3.select("#charts").selectAll("svg").data(d3.range(plots.length));
+    var plotSVGs = d3.select("#charts").selectAll("svg").data(d3.range(plots.length), function (d) { console.log(plots[d].uniqueID()); return plots[d].uniqueID(); });
 
     // weird hackery to reselect elements and call their specific plot
     // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
-    var calltheplot = function(d) {
-        var all = d[0];
+    var plotsCaller = function(d) {
+        var allPlots = d[0];
 
-        for(var i = 0; i < all.length; i++) {
-            var sl = d3.select(all[i]);
-            sl.call(plots[i]);
+        for(var i = 0; i < allPlots.length; i++) {
+            d3.select(allPlots[i]).call(plots[i]);
         }
     }
 
     // ENTER
-    plotSVGs.enter().append("svg").attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });//.call(plots[0]);
+    plotSVGs.enter().append("svg").attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });
 
     // EXIT
     plotSVGs.exit().remove();
 
     // UPDATE
-    plotSVGs.call(calltheplot);
+    plotSVGs.call(plotsCaller);
 
     var offset = showingEdits && plots[0] ? plots[0].height() : 0;
 
