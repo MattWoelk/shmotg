@@ -45,6 +45,7 @@ var msPS = 5; // frequency of data samples
 
 // TODO: sync this with the one in bridgeChart.js
 var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
+var plotHeightDefault = 150;
 
 var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
@@ -150,7 +151,7 @@ var redraw = function () {
     // UPDATE
     plotSVGs.call(plotsCaller);
 
-    var offset = showingEdits && plots[0] ? plots[0].height() : 0;
+    var offset = plotHeightDefault;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -229,9 +230,9 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
 
 
     if (first) {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
+        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
     } else {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(false).milliSecondsPerSample(msPS);//.update();
+        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(false).milliSecondsPerSample(msPS);//.update();
     }
 
     plots.push(plot);
