@@ -99,36 +99,30 @@ var setAllYAxisLocks = function (toLock) {
 var plus_button;
 var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
-    var offset = showingEdits && plots[0] ? plots[0].height() : 0;
-
-    // TODO: use mapping instead of whatever this is.
 
     var plotSVGs = d3.select("#charts").selectAll("svg").data(d3.range(plots.length));
-    var counter = 0;
 
-    console.log("plotSVGs", plotSVGs);
-    console.log("plotSVGs.enter()", plotSVGs.enter());
-    console.log("data", d3.select("#charts").data(function (d) { console.log("dat", d); }));
+    // weird hackery to reselect elements and call their specific plot
+    // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
+    var calltheplot = function(d) {
+        var all = d[0];
+
+        for(var i = 0; i < all.length; i++) {
+            var sl = d3.select(all[i]);
+            sl.call(plots[i]);
+        }
+    }
 
     // ENTER
-    //console.log("plots", plots);
     plotSVGs.enter().append("svg").attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });//.call(plots[0]);
-    //d3.select("#charts").selectAll("svg").each(function(d, i){ plots[i]([this]); console.log("slctn", d, i, this); })
-    for(var i = 0; i < plotSVGs.length; i++) {
-        console.log("  ", i, plotSVGs[0][i]);
-    }
-    //plotSVGs.enter().append("svg").call(plots[0]);
-    //console.log(plotSVGs);
-
-    // UPDATE
-    //plotSVGs.attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });
 
     // EXIT
     plotSVGs.exit().remove();
 
-        //plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
-        //plot
-        //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
+    // UPDATE
+    plotSVGs.call(calltheplot);
+
+    var offset = showingEdits && plots[0] ? plots[0].height() : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
