@@ -1,3 +1,8 @@
+function swapItems(array, a, b){
+    array[a] = array.splice(b, 1, array[a])[0];
+    return array;
+}
+
 // {{{ Loading Spinner Icon
 var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
@@ -100,7 +105,7 @@ var plus_button;
 var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
 
-    var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { console.log(d.uniqueID()); return d.uniqueID(); });
+    var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
     // weird hackery to reselect elements and call their specific plot
     // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
@@ -110,6 +115,30 @@ var redraw = function () {
         for(var i = 0; i < allPlots.length; i++) {
             d3.select(allPlots[i]).call(plots[i]);
         }
+    }
+
+    function swapWithPrevItem(i) {
+        if (i-1 < 0 || i >= plots.length) {
+            return;
+        }
+
+        swapItems(plots, i, i-1); // swap in plots
+
+        var parent = document.getElementById("charts");
+        var charts = parent.childNodes;
+        parent.insertBefore(charts[i], charts[i-1]); // swap in DOM
+    }
+
+    function swapWithNextItem(i) {
+        if (i < 0 || i+1 >= plots.length) {
+            return;
+        }
+
+        swapItems(plots, i, i+1); // swap in plots
+
+        var parent = document.getElementById("charts");
+        var charts = parent.childNodes;
+        parent.insertBefore(charts[i+1], charts[i]); // swap in DOM
     }
 
     // ENTER
@@ -139,9 +168,9 @@ var redraw = function () {
     var xspace = 20;
     var xbuffer = 130;
 
-    imagePerChart("#edit_addremove", true, "./img/remove.svg", 0);
-    imagePerChart("#edit_up", true, "./img/up.svg", xsize + xspace);
-    imagePerChart("#edit_down", true, "./img/down.svg", (xsize + xspace)*2);
+    imagePerChart("#edit_addremove", true, "./img/remove.svg", 0, function(d, i){ plots.splice(i, 1); redraw(); });
+    imagePerChart("#edit_up", true, "./img/up.svg", xsize + xspace, function(d, i) { swapWithPrevItem(i); redraw(); });
+    imagePerChart("#edit_down", true, "./img/down.svg", (xsize + xspace)*2, function(d, i) { swapWithNextItem(i); redraw(); });
 
     // TODO: add in the plus button.
     var h = plots[0] ? plots[0].height() : 195;
@@ -152,8 +181,9 @@ var redraw = function () {
             .attr("x", xbuffer)
             .attr("width", xsize)
             .attr("height", xsize)
+            .attr("cursor", "pointer")
 
-    function imagePerChart(id, extra, imgurl, xoffset) {
+    function imagePerChart(id, extra, imgurl, xoffset, onclick) {
         var addrem = d3.select(id);
         var h = plots[0] ? plots[0].height() : 195;
 
@@ -164,7 +194,8 @@ var redraw = function () {
             .attr("x", xbuffer + xoffset)
             .attr("width", xsize)
             .attr("height", xsize)
-            .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
+            .attr("cursor", "pointer")
+            .on("click", onclick)
 
         add_dat.exit().remove();
     }
