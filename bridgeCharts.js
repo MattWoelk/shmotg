@@ -100,7 +100,7 @@ var plus_button;
 var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
 
-    var plotSVGs = d3.select("#charts").selectAll("svg").data(d3.range(plots.length), function (d) { console.log(plots[d].uniqueID()); return plots[d].uniqueID(); });
+    var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { console.log(d.uniqueID()); return d.uniqueID(); });
 
     // weird hackery to reselect elements and call their specific plot
     // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
@@ -113,7 +113,7 @@ var redraw = function () {
     }
 
     // ENTER
-    plotSVGs.enter().append("svg").attr("id", function(d) { return plots[d].sensorType() + plots[d].sensorNumber(); });
+    plotSVGs.enter().append("svg").attr("id", function(d, i) { return d.sensorType() + d.sensorNumber(); });
 
     // EXIT
     plotSVGs.exit().remove();
@@ -164,7 +164,7 @@ var redraw = function () {
             .attr("x", xbuffer + xoffset)
             .attr("width", xsize)
             .attr("height", xsize)
-            .on("click", function(d, i){ console.log("SUB", i, plots.length); plots.splice(i, 1); console.log("len", plots.length); })
+            .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
 
         add_dat.exit().remove();
     }
