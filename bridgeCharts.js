@@ -187,6 +187,7 @@ var redraw = function () {
     function imagePerChart(id, extra, imgurl, xoffset, onclick) {
         var addrem = d3.select(id);
         var h = plots[0] ? plots[0].height() : 195;
+        var last = plots.length-1;
 
         var add_dat = addrem.selectAll("image").data(plots);
         add_dat.enter().append("image")
@@ -196,6 +197,7 @@ var redraw = function () {
             .attr("width", xsize)
             .attr("height", xsize)
             .attr("cursor", "pointer")
+            .attr("display", function (d, i) { console.log(last); return ((i === 0 && id === "#edit_up") || (i === last && id === "#edit_down")) ? "none" : "block"; })
             .on("click", onclick)
 
         add_dat.exit().remove();
