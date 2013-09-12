@@ -169,12 +169,11 @@ var redraw = function () {
     var xspace = 20;
     var xbuffer = 130;
 
-    imagePerChart("#edit_addremove", true, "./img/remove.svg", 0, function(d, i){ plots.splice(i, 1); redraw(); });
-    imagePerChart("#edit_up", true, "./img/up.svg", xsize + xspace, function(d, i) { swapWithPrevItem(i); redraw(); });
-    imagePerChart("#edit_down", true, "./img/down.svg", (xsize + xspace)*2, function(d, i) { swapWithNextItem(i); redraw(); });
+    imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
+    imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
 
     // TODO: add in the plus button.
-    var h = plots[0] ? plots[0].height() : 195;
+    var h = plots[0] ? plots[0].height() : plotHeightDefault;
     plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
     plus_button
             .attr("xlink:href", "./img/add.svg")
@@ -184,20 +183,21 @@ var redraw = function () {
             .attr("height", xsize)
             .attr("cursor", "pointer")
 
-    function imagePerChart(id, extra, imgurl, xoffset, onclick) {
+    function imagePerChart(size, id, oneless, imgurl, xoffset, yoffset, onclick) {
         var addrem = d3.select(id);
-        var h = plots[0] ? plots[0].height() : 195;
+        var h = plots[0] ? plots[0].height() : plotHeightDefault;
         var last = plots.length-1;
 
-        var add_dat = addrem.selectAll("image").data(plots);
+        var dat = oneless ? plots.slice(0, plots.length - 1) : plots;
+
+        var add_dat = addrem.selectAll("image").data(dat);
         add_dat.enter().append("image")
             .attr("xlink:href", imgurl)
-            .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
+            .attr("y", function(d,i) { return yoffset + i*(h) + ((h - size) / 2); })
             .attr("x", xbuffer + xoffset)
-            .attr("width", xsize)
-            .attr("height", xsize)
+            .attr("width", size)
+            .attr("height", size)
             .attr("cursor", "pointer")
-            .attr("display", function (d, i) { console.log(last); return ((i === 0 && id === "#edit_up") || (i === last && id === "#edit_down")) ? "none" : "block"; })
             .on("click", onclick)
 
         add_dat.exit().remove();
