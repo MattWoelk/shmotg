@@ -214,6 +214,16 @@ input[type="radio"] + label {
     cursor: pointer;
 }
 
+input[type="checkbox"] + label{
+    background: url(./img/black0.svg) left center no-repeat;
+    background-size: contain;
+}
+
+input[type="checkbox"]:checked + label{
+    background: url(./img/black1.svg) left center no-repeat;
+    background-size: contain;
+}
+
 #isexpanded + label{
     background: url(./img/black0.svg) left center no-repeat;
     background-size: contain;

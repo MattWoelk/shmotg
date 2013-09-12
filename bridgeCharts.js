@@ -207,9 +207,16 @@ var redraw = function () {
     function displayAddSensorOverlay() {
         //TODO
         var sensorsToDisplay = ["temp", 18, 20, 22];
-        var ul = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
+        var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
             .append("li")
-            .text(function(d) { console.log("yes"); return d; })
+        ulEnter.append("input")
+            .attr("id", function(d){ return d; })
+            .attr("type", "checkbox")
+        ulEnter.append("label")
+            .attr("for", function(d){ return d; })
+        ulEnter.append("label")
+            .attr("for", function(d){ return d; })
+            .text(function(d) { return d; })
     }
     // DRAW EDIT ELEMENTS }}}
 
