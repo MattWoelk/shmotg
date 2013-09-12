@@ -182,6 +182,7 @@ var redraw = function () {
             .attr("width", xsize)
             .attr("height", xsize)
             .attr("cursor", "pointer")
+            .on("click", displayAddSensorOverlay)
 
     function imagePerChart(size, id, oneless, imgurl, xoffset, yoffset, onclick) {
         var addrem = d3.select(id);
@@ -201,6 +202,14 @@ var redraw = function () {
             .on("click", onclick)
 
         add_dat.exit().remove();
+    }
+
+    function displayAddSensorOverlay() {
+        //TODO
+        var sensorsToDisplay = ["temp", 18, 20, 22];
+        var ul = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
+            .append("li")
+            .text(function(d) { console.log("yes"); return d; })
     }
     // DRAW EDIT ELEMENTS }}}
 
