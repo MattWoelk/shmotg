@@ -26,80 +26,20 @@ window.addEventListener('load', function() {
 
 <body>
 
-<!--{{{ SHOWHIDE JAVASCRIPT-->
-<script>
-function showhide() {
-    var element1 = document.getElementById("di1");
-    var element2 = document.getElementById("di2");
-    if (element1.style.display == "none") {
-        setAllYAxisLocks(false);
-        element1.style.display = "inline";
-        element2.style.display = "none";
-    } else {
-        setAllYAxisLocks(true);
-        element1.style.display = "none";
-        element2.style.display = "inline";
-    }
-}
-</script>
-<!-- SHOWHIDE JAVASCRIPT }}}-->
-
-<div id="undercharts" style="position:fixed; top:0px; z-index:9;">
-    <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
-    <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
-    <div id="loader_container"></div>
-    </br>
-    <input type="checkbox" id="isexpanded" /><label for="isexpanded"></label><label for="isexpanded">Lines</label>
-    <div id="controls">
-        <form>
-            <ul id="render-lines">
-                <li><input type="checkbox" checked id="maxes"     value="maxes"/>    <label for="maxes"></label><label for="maxes">Maximums</label></li>
-                <li><input type="checkbox"         id="q3"        value="q3"/>       <label for="q3"></label><label for="q3">3rd Quartile</label></li>
-                <li><input type="checkbox" checked id="average"   value="average"/>  <label for="average"></label><label for="average">Averages</label></li>
-                <li><input type="checkbox" checked id="quartiles" value="quartiles"/><label for="quartiles"></label><label for="quartiles">Quartile Area</label></li>
-                <li><input type="checkbox"         id="q1"        value="q1"/>       <label for="q1"></label><label for="q1">1st Quartile</label></li>
-                <li><input type="checkbox" checked id="mins"      value="mins"/>     <label for="mins"></label><label for="mins">Minimums</label></li>
-                <li><input type="checkbox" checked id="missing"   value="missing"/>  <label for="missing"></label><label for="missing">Missing</label></li>
-            </ul>
-
-            <ul id="render-method">
-                <li><input type="radio" checked id="stp_rad" name="render-method" value="step-after"/><label for="stp_rad"></label><label for="stp_rad">Step</label></li>
-                <li><input type="radio"         id="lin_rad"  name="render-method" value="linear"/><label for="lin_rad"></label><label for="lin_rad">Linear</label></li>
-                <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>-->
-                <!--<li><input type="radio"         id="mon_rad" name="render-method" value="monotone"/><label for="mon_rad"></label><label for="mon_rad">Monotone</label></li>-->
-            </ul>
-        </form>
-    </div>
-    </br>
-    <input type="checkbox" id="edit" value="edit"/><label for="edit"></label><label for="edit">Edit</label>
-
-    <div>
-        <div id="slider_container">
-        </div>
-    </div>
-
-
-
-    </br> <!-- to keep the controls on the next line -->
-
-</div>
-<div id="chartContainer"  style="position:fixed;overflow:none; width:100%; float:left;">
-    <div id="charts"></div>
-    <svg id="zoomSVG">
-        <rect id="zoomRect" />
-        <g id="edit_elements">
-            <g id="edit_addremove"></g>
-            <g id="edit_up"></g>
-            <g id="edit_down"></g>
-        </g>
-    </svg>
-    <div id="edit_new">
-        <ul id="edit_new_ul" style="list-style:none; position:absolute; top:0px; left:75px"></ul>
-    </div>
-</div>
-
-
-<!--<button id='fade' onclick='fade()'>fade</button>-->
+<ul>
+    <li>
+        <input type="checkbox" id="c1" name="cc" />
+        <label for="c1"><img src="./img/black0.svg"></img><img src="./img/black1.svg"></img>Check Box 1</label>
+    </li>
+    <li>
+        <input type="checkbox" id="c2" name="cc" />
+        <label for="c2"><img src="./img/black0.svg"></img><img src="./img/black1.svg"></img>Check Box 1</label>
+    </li>
+    <li>
+        <input type="checkbox" id="c3" name="cc" />
+        <label for="c3"><img src="./img/black0.svg"></img><img src="./img/black1.svg"></img>Check Box 1</label>
+    </li>
+</ul>
 
 <!--{{{ PRELOAD IMAGES FOR CUSTOM CHCKBOXES-->
 <img src="./img/blue0.svg" style="display:none">
