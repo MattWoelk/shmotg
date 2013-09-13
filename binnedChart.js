@@ -636,6 +636,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     // if it's too soon, or it failed
                     waitingForServer = false;
                 }
+
+                // TODO: put this above where we do checking, and check if we have the lower level.
+                var req_lower = {};
+                req_lower.sensorNumber = req.sensorNumber;
+                req_lower.sensorType = req.sensorType;
+                req_lower.ms_start = req.ms_start;
+                req_lower.ms_end = req.ms_end;
+                req_lower.bin_level = req.bin_level - 1;
+
+                if (dataReq !== undefined && req_lower.bin_level >= 0) {
+                    dataReq(req_lower);
+                }
             }
         }
 
