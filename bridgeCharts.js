@@ -425,6 +425,7 @@ socket.on('news', function (data) {
     initPlot({}, true, sendRequestToServer, 5, "girder", 18);
     //initPlot(json, true, sendRequestToServer, 5, "girder", 20);
     initPlot({}, true, sendRequestToServer, 5, "girder", 22);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 45);
 
     //initPlot(_.map(json, function (d) {
     //  return { val: Math.random() * 5 + d.val,
