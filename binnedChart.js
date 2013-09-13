@@ -636,18 +636,22 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     // if it's too soon, or it failed
                     waitingForServer = false;
                 }
+            }
+        }
 
-                // TODO: put this above where we do checking, and check if we have the lower level.
-                var req_lower = {};
-                req_lower.sensorNumber = req.sensorNumber;
-                req_lower.sensorType = req.sensorType;
-                req_lower.ms_start = req.ms_start;
-                req_lower.ms_end = req.ms_end;
-                req_lower.bin_level = req.bin_level - 1;
+        // Get a level lower if we need it.
+        if (!binData.haveDataInRange(renderRange, whichLevelToRender-1)) {
+            var req = {
+                sensorNumber: sensorNumber,
+                sensorType: sensorType,
+                ms_start: renderRange[0],
+                ms_end: renderRange[1],
+                bin_level: whichLevelToRender-1,
+            }
 
-                if (dataReq !== undefined && req_lower.bin_level >= 0) {
-                    dataReq(req_lower);
-                }
+            // TODO: check redrawing code. We do not want this data to come and tell the chart to redraw itself if we're not even looking at that level.
+            if (dataReq !== undefined && req.bin_level >= 0) {
+                dataReq(req);
             }
         }
 
