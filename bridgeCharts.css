@@ -226,15 +226,6 @@ input[type="radio"]:checked + label img:nth-child(2) {
     display: inline-block;
 }
 
-input[type="radio"] + label {
-    padding: 0 0 0 1em;
-    margin: 0 .3em 0 0;
-    width: 1em;
-    height: 1em;
-    clear: none;
-    cursor: pointer;
-}
-
 /*}}}*/
 
 /* {{{ Loading Spinner Icon */
