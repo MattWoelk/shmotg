@@ -29,24 +29,13 @@ window.addEventListener('load', function() {
 <!--{{{ SHOWHIDE JAVASCRIPT-->
 <script>
 function showhide() {
-    var element1 = document.getElementById("di1");
-    var element2 = document.getElementById("di2");
-    if (element1.style.display == "none") {
-        setAllYAxisLocks(false);
-        element1.style.display = "inline";
-        element2.style.display = "none";
-    } else {
-        setAllYAxisLocks(true);
-        element1.style.display = "none";
-        element2.style.display = "inline";
-    }
+    setAllYAxisLocks(document.getElementById("lockhide").checked);
 }
 </script>
 <!-- SHOWHIDE JAVASCRIPT }}}-->
 
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
-    <a onclick="showhide();"><img id="di1" src="img/iconmonstr-lock-11-icon.svg" style="width:30px; display:inline; cursor:pointer"></img></a>
-    <a onclick="showhide();"><img id="di2" src="img/iconmonstr-lock-3-icon.svg" style="width:30px; display:none; cursor:pointer"></img></a>
+    <input type="checkbox" id="lockhide" onchange="showhide();" /><label for="lockhide"><img style="width:30px; height:30px" src="./img/iconmonstr-lock-11-icon.svg"><img style="width:30px; height:30px" src="./img/iconmonstr-lock-3-icon.svg"></label>
     <div id="loader_container"></div>
     </br>
     <input type="checkbox" id="isexpanded" /><label for="isexpanded"><img src="./img/black0.svg"><img src="./img/black1.svg">Lines</label>
