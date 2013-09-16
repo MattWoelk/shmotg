@@ -207,28 +207,54 @@ var redraw = function () {
         d3.select("#edit_new").style("display", "inline"); // show overlay
 
         var currently_displayed = _.map(plots, function (d) {
-            return d.sensorType() + " " + d.sensorNumber();
+            return d.sensorType() + "_" + d.sensorNumber();
         });
-        var sensorsToDisplay = ["temperature 1", "girder 18", "girder 20", "girder 22", "girder 45"];
+        var sensorsToDisplay = ["temperature_1", "girder_18", "girder_20", "girder_22", "girder_45"];
         var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
             .append("li")
         ulEnter.append("input")
             .attr("id", function(d){ return "sensor_choose_" + d; })
             .attr("type", "checkbox")
             .attr("checked", function (d) { return _.contains(currently_displayed, d) ? true : null; }) // TODO: set checked if already showing. null or True are what should be set here.
+            .on("change", function(){ updatePlotsList(); }) // TODO: trigger redraw or similar. Modify plots first, because that's where we're storing what is showing.
         var label = ulEnter.append("label")
             .attr("for", function(d){ return "sensor_choose_" + d; })
-            .on("onchange", function(){console.log("CHAN")})
-            .text(function(d) { return d; });
         label.append("img")
             .attr("src", "./img/black0.svg");
         label.append("img")
             .attr("src", "./img/black1.svg");
+        label.append("text")
+            .text(function(d) { return d; });
     }
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
     updateZoom();
+}
+
+function updatePlotsList() {
+    // Update plots list based on which items are checked when adding a sensor plot.
+    var showings = [].map.call(document.querySelectorAll("#edit_new_ul li input:checked"), function (checkbox) { return checkbox.id;} );
+    showings = _.map(showings, function(d) {
+        // TODO: extract sensorType and sensorNumber from the strings
+        //return d.substring("sensor_choose_".length).split("_");
+        return d.substring("sensor_choose_".length);
+    });
+
+    var alreadyShowing = _.map(plots, function (d) {
+        return d.sensorType() + "_" + d.sensorNumber();
+    });
+
+    var toBeDeleted = _.difference(alreadyShowing, showings);
+    console.log("toBeDeleted", toBeDeleted);
+
+    var toBeAdded = _.difference(showings, alreadyShowing);
+    console.log("toBeAdded", toBeAdded);
+
+    // TODO: delete the charts from plot which are not in showings
+    // TODO: add the charts from showings which are not yet in plots
+
+    redraw();
 }
 
 function transitionAllNextTime() {
