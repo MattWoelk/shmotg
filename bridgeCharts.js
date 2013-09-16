@@ -260,12 +260,16 @@ function updatePlotsList() {
         plots.splice(index, 1)
     });
 
-
     var toBeAdded = _.difference(showings, alreadyShowing);
     console.log("toBeAdded", toBeAdded);
-
-    // TODO: delete the charts from plot which are not in showings
-    // TODO: add the charts from showings which are not yet in plots
+    _.each(toBeAdded, function (d) {
+        var tmp = d.split("_");
+        var sensorType = tmp[0];
+        var sensorNumber = parseInt(tmp[1]);
+        console.log("add", sensorType, sensorNumber)
+        var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
+        initPlot(data, true, sendRequestToServer, 5, sensorType, sensorNumber);
+    });
 
     redraw();
 }
