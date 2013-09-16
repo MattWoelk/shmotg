@@ -274,7 +274,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var transitionNextTime = false;
     var reRenderTheNextTime = true;
     var waitingForServer = false;
-    var freshArrivalFromServer = false;
 
     // Where all data is stored, but NOT rendered d0's
     var binData = binnedData();
@@ -460,12 +459,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     var countMissing = 0;
                     var lineMissingFilter = [];
 
-                    if (freshArrivalFromServer) {
-                        // we are no longer waiting for the server, so render nothing.
-                        lineMissingFilter.push({val: 1, ms: renderRange[0]});
-                        lineMissingFilter.push({val: 1, ms: renderRange[1]});
-                    } else if (fil.length <= 1) {
-                        // No data. Fill everything.
+                    if (fil.length <= 1) {
+                        // No data. Fill everything. (Everything is missing.)
                         lineMissingFilter.push({val: NaN, ms: renderRange[0]});
                         lineMissingFilter.push({val: NaN, ms: renderRange[1]});
                     } else {
@@ -640,7 +635,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         }
 
         reRenderTheNextTime = false;
-        freshArrivalFromServer = false;
 
         // GENERATE ALL d0s. (generate the lines paths) }}}
 
@@ -912,6 +906,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     my.update = function (reRender) {
         my.setSelectedLines();
+        //console.log(slctn);
         my(slctn);
     };
 
@@ -944,6 +939,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.sensorType = function (value) {
+        if (!arguments.length) return sensorType;
+        sensorType = value;
+        return my;
+    }
+
+    my.sensorNumber = function (value) {
+        if (!arguments.length) return sensorNumber;
+        sensorNumber = value;
+        return my;
+    }
+
     my.yAxisLock = function (value) {
         if (!arguments.length) return yAxisLock;
         if (yAxisLock == true && value == false) {
@@ -963,7 +970,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     my.addDataToBinData = function (datas, level) {
         // add data to binData IN THE CORRECT ORDER
         waitingForServer = false;
-        freshArrivalFromServer = true;
 
         if (level === 0) {
             var filteredDatas = _.filter(datas, function(d) {

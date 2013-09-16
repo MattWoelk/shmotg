@@ -1,7 +1,13 @@
+function swapItems(array, a, b){
+    array[a] = array.splice(b, 1, array[a])[0];
+    return array;
+}
+
 // {{{ Loading Spinner Icon
 var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
+
 
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
@@ -39,6 +45,7 @@ var msPS = 5; // frequency of data samples
 
 // TODO: sync this with the one in bridgeChart.js
 var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
+var plotHeightDefault = 150;
 
 var zoomSVG = d3.select("#zoomSVG");
 var zoomRect = d3.select("#zoomRect");
@@ -95,17 +102,123 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
+var plus_button;
 var redraw = function () {
+    var showingEdits = document.getElementById("edit").checked;
+
+    var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
+
+    // weird hackery to reselect elements and call their specific plot
+    // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
+    var plotsCaller = function(d) {
+        var allPlots = d[0];
+
+        for(var i = 0; i < allPlots.length; i++) {
+            d3.select(allPlots[i]).call(plots[i]);
+        }
+    }
+
+    function swapWithPrevItem(i) {
+        if (i-1 < 0 || i >= plots.length) {
+            return;
+        }
+
+        swapItems(plots, i, i-1); // swap in plots
+
+        var parent = document.getElementById("charts");
+        var charts = parent.childNodes;
+        parent.insertBefore(charts[i], charts[i-1]); // swap in DOM
+    }
+
+    function swapWithNextItem(i) {
+        if (i < 0 || i+1 >= plots.length) {
+            return;
+        }
+
+        swapItems(plots, i, i+1); // swap in plots
+
+        var parent = document.getElementById("charts");
+        var charts = parent.childNodes;
+        parent.insertBefore(charts[i+1], charts[i]); // swap in DOM
+    }
+
+    // ENTER
+    plotSVGs.enter().append("svg").attr("id", function(d, i) { return d.sensorType() + d.sensorNumber(); });
+
+    // EXIT
+    plotSVGs.exit().remove();
+
+    // UPDATE
+    plotSVGs.call(plotsCaller);
+
+    var offset = plotHeightDefault;
+
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     });
 
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-           .attr("height", getTotalChartHeight());
+           .attr("height", getTotalChartHeight() + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("height", getTotalChartHeight())
+            .attr("height", getTotalChartHeight() + offset)
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+    //{{{ DRAW EDIT ELEMENTS
+    var xsize = 70;
+    var xspace = 20;
+    var xbuffer = 130;
+
+    imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
+    imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
+
+    // TODO: add in the plus button.
+    var h = plots[0] ? plots[0].height() : plotHeightDefault;
+    plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
+    plus_button
+            .attr("xlink:href", "./img/add.svg")
+            .attr("y", getTotalChartHeight() + 45)
+            .attr("x", xbuffer)
+            .attr("width", xsize)
+            .attr("height", xsize)
+            .attr("cursor", "pointer")
+            .on("click", displayAddSensorOverlay)
+
+    function imagePerChart(size, id, oneless, imgurl, xoffset, yoffset, onclick) {
+        var addrem = d3.select(id);
+        var h = plots[0] ? plots[0].height() : plotHeightDefault;
+        var last = plots.length-1;
+
+        var dat = oneless ? plots.slice(0, plots.length - 1) : plots;
+
+        var add_dat = addrem.selectAll("image").data(dat);
+        add_dat.enter().append("image")
+            .attr("xlink:href", imgurl)
+            .attr("y", function(d,i) { return yoffset + i*(h) + ((h - size) / 2); })
+            .attr("x", xbuffer + xoffset)
+            .attr("width", size)
+            .attr("height", size)
+            .attr("cursor", "pointer")
+            .on("click", onclick)
+
+        add_dat.exit().remove();
+    }
+
+    function displayAddSensorOverlay() {
+        //TODO
+        var sensorsToDisplay = ["temp", 18, 20, 22];
+        var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
+            .append("li")
+        ulEnter.append("input")
+            .attr("id", function(d){ return d; })
+            .attr("type", "checkbox")
+        ulEnter.append("label")
+            .attr("for", function(d){ return d; })
+        ulEnter.append("label")
+            .attr("for", function(d){ return d; })
+            .text(function(d) { return d; })
+    }
+    // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
     updateZoom();
@@ -119,6 +232,7 @@ function transitionAllNextTime() {
 
 function setLoadingIcon(on) {
     d3.select("#loader_container").style("opacity", on ? 1 : 0);
+    d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
 function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
@@ -126,18 +240,18 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
     if (first) {
         plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
+        //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
     } else {
-        plot = binnedLineChart(data, function () {}, sensorType, sensorNumber, oneSample);
+        plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample);
         plot.xScale(xScale.copy());
-        var pl = d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
+        //d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
     }
 
 
     if (first) {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(true).milliSecondsPerSample(msPS).update();
+        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
     } else {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(150).showTimeContext(false).milliSecondsPerSample(msPS).update();
+        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(false).milliSecondsPerSample(msPS);//.update();
     }
 
     plots.push(plot);
@@ -145,13 +259,6 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
     redraw();
 
     d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
-
-    zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
-           .attr("height", getTotalChartHeight());
-
-    zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("height", getTotalChartHeight() - margin.top)
-            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     zoomRect.attr("fill", "rgba(0,0,0,0)")
             .call(zoom);
@@ -302,6 +409,7 @@ var firstTime = true;
 //  console.log("disconnected !!");
 //});
 
+offlinedata();
 
 socket.on('news', function (data) {
     // only do this once, so that plots don't get overlapped whenever the server restarts.
@@ -312,24 +420,13 @@ socket.on('news', function (data) {
 
     firstTime = false;
 
-    // deleting all example plots -->
-    //_.times(plots.length, function (i) {
-    //    delete plots[i];
-    //});
-    svg = document.getElementById("charts");
-    while (svg.lastChild) {
-        svg.removeChild(svg.lastChild);
-    }
-    plots = []; // delete the previous plots
-    // <-- done deleting all example plots
-
-    var json = JSON.parse(data);
     socket.emit('ack', "Message received!");
 
     //initPlot(json);
-    initPlot(json, true, sendRequestToServer, 5, "girder", 18);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 18);
     //initPlot(json, true, sendRequestToServer, 5, "girder", 20);
-    initPlot(json, true, sendRequestToServer, 5, "girder", 22);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 22);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 45);
 
     //initPlot(_.map(json, function (d) {
     //  return { val: Math.random() * 5 + d.val,
@@ -377,8 +474,6 @@ function sendRequestToServer(req) {
 
     listOfRequestsMade.push(req);
 
-    //console.log("requesting");
-
     // wrap the req with a unique id
     var sendReq = {
         id: uniqueRequestID,
@@ -415,29 +510,10 @@ socket.on('req_data', function (data) {
 
 // SERVER COMMUNICATIONS }}}
 
-//{{{ OFFLINE DEMO
+//{{{ OFFLINE DATA
 
-// A demonstration with example data in case the server is down:
-// wait 2 seconds to give the server a chance to send the data (to avoid the demo popping up and then disappearing)
-// TODO: make this based on the server communication, instead of a time to wait.
-setTimeout(rundemo, 1000);
-//rundemo();
 
-function rundemo() {
-    d3.json("Server/esg_time.js", function (error, data) {
-        if (error || plots.length > 0) {
-            return;
-        }
-        setLoadingIcon(true); // loading icon indicates that we can't connect to the server
-        var json = data.map(function (d) {
-            return {val: d.ESGgirder18, ms: d.ms};
-        });
-
-        initPlot(json, true, function(){}, 5, "girder", 18);
-
-        //console.log(plots[0].bd().bd());
-    });
-
+function offlinedata() {
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
         var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
         return {val: parseFloat(d.Temp), ms: dat.getTime()};
@@ -477,9 +553,25 @@ function rundemo() {
     });
 }
 
-// OFFLINE DEMO }}}
+// OFFLINE DATA }}}
 
 // set up the slider.
 rescaleTo(Math.pow(2, mySlider.handlePosition() / boxSize));
+
+
+// {{{ EDITABLES
+d3.select("#edit").on("click", toggleEditables);
+
+function toggleEditables() {
+    var active = document.getElementById("edit").checked;
+    if (active) {
+        d3.select("#edit_elements").attr("display", "block");
+    } else {
+        d3.select("#edit_elements").attr("display", "none");
+    }
+    redraw();
+}
+toggleEditables();
+// EDITABLES }}}
 
 /* vim: set foldmethod=marker: */

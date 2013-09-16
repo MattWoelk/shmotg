@@ -131,6 +131,7 @@ box-shadow:inset 0px 0px 0.2em #000;
     -webkit-transition: max-width 0.3s ease-in,  max-height 0.3s step-end, border-width 0.3s step-end;
     transition: max-width 0.3s ease-in,          max-height 0.3s step-end, border-width 0.3s step-end;
 
+    position: absolute;
     overflow: hidden;
     max-height: 0em;
     max-width: 0em;
@@ -147,6 +148,7 @@ box-shadow:inset 0px 0px 0.2em #000;
     transition: max-width 0.3s ease-in;
 
 
+    position: absolute;
     overflow: hidden;
     max-height: 35em; /* this is a bit of a hack */
     max-width: 9.5em;
@@ -176,31 +178,52 @@ box-shadow:inset 0px 0px 0.2em #000;
 /* CONTROLS }}} */
 
 /*{{{ Custom Checkboxes*/
+ul {
+    list-style: none;
+}
+
 label {
     cursor: pointer;
 }
 
 input[type="checkbox"] {
-    width: 0em; /* grow with the text */
-    height: 0em;
-    opacity: 0;
-    float: left;
+    display: none;
 }
 
 input[type="radio"] {
-    width: 0em;
-    height: 0em;
-    opacity: 0;
-    float: left;
+    display: none;
 }
 
-input[type="checkbox"] + label{
-    padding: 0 0 0 1em;
-    margin: 0 .3em 0 0;
-    width: 1em;
-    height: 1em;
-    clear: none;
-    cursor: pointer;
+input[type="checkbox"] + label img:nth-child(1) {
+    display: inline-block;
+}
+
+input[type="checkbox"]:checked + label img:nth-child(1) {
+    display: none;
+}
+
+input[type="checkbox"] + label img:nth-child(2) {
+    display: none;
+}
+
+input[type="checkbox"]:checked + label img:nth-child(2) {
+    display: inline-block;
+}
+
+input[type="radio"] + label img:nth-child(1) {
+    display: inline-block;
+}
+
+input[type="radio"]:checked + label img:nth-child(1) {
+    display: none;
+}
+
+input[type="radio"] + label img:nth-child(2) {
+    display: none;
+}
+
+input[type="radio"]:checked + label img:nth-child(2) {
+    display: inline-block;
 }
 
 input[type="radio"] + label {
@@ -210,116 +233,6 @@ input[type="radio"] + label {
     height: 1em;
     clear: none;
     cursor: pointer;
-}
-
-#isexpanded + label{
-    background: url(./img/black0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#isexpanded:checked + label{
-    background: url(./img/black1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#q1 + label{
-    background: url(./img/red_dark0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#q1:checked + label{
-    background: url(./img/red_dark1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#q3 + label{
-    background: url(./img/red_dark0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#q3:checked + label{
-    background: url(./img/red_dark1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#mins + label{
-    background: url(./img/green0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#mins:checked + label{
-    background: url(./img/green1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#missing + label{
-    background: url(./img/black0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#missing:checked + label{
-    background: url(./img/black1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#maxes + label{
-    background: url(./img/blue0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#maxes:checked + label{
-    background: url(./img/blue1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#average + label{
-    background: url(./img/red_dark0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#average:checked + label{
-    background: url(./img/red_dark1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#quartiles + label{
-    background: url(./img/red_light0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#quartiles:checked + label{
-    background: url(./img/red_light1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#stp_rad + label{
-    background: url(./img/circ0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#stp_rad:checked + label{
-    background: url(./img/circ1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#mon_rad + label{
-    background: url(./img/circ0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#mon_rad:checked + label{
-    background: url(./img/circ1.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#lin_rad + label{
-    background: url(./img/circ0.svg) left center no-repeat;
-    background-size: contain;
-}
-
-#lin_rad:checked + label{
-    background: url(./img/circ1.svg) left center no-repeat;
-    background-size: contain;
 }
 
 /*}}}*/
