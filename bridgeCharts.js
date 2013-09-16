@@ -247,6 +247,19 @@ function updatePlotsList() {
 
     var toBeDeleted = _.difference(alreadyShowing, showings);
     console.log("toBeDeleted", toBeDeleted);
+    _.each(toBeDeleted, function (d) {
+        var tmp = d.split("_");
+        var sensorType = tmp[0];
+        var sensorNumber = parseInt(tmp[1]);
+        //TODO: find where the value is in plots, and delete it.
+        var val = _.find(plots, function (plt) {
+            return plt.sensorType() === sensorType && plt.sensorNumber() === sensorNumber;
+        });
+        var index = _.indexOf(plots, val);
+
+        plots.splice(index, 1)
+    });
+
 
     var toBeAdded = _.difference(showings, alreadyShowing);
     console.log("toBeAdded", toBeAdded);
