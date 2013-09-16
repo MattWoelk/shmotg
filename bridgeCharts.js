@@ -204,16 +204,18 @@ var redraw = function () {
     }
 
     function displayAddSensorOverlay() {
-        //TODO These should be checkboxes showing each sensor only once.
-        d3.select("#edit_new").style("display", "inline");
-        console.log("disp");
-        var sensorsToDisplay = ["temp", 18, 20, 22];
+        d3.select("#edit_new").style("display", "inline"); // show overlay
+
+        var currently_displayed = _.map(plots, function (d) {
+            return d.sensorType() + " " + d.sensorNumber();
+        });
+        var sensorsToDisplay = ["temperature 1", "girder 18", "girder 20", "girder 22", "girder 45"];
         var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
             .append("li")
         ulEnter.append("input")
             .attr("id", function(d){ return "sensor_choose_" + d; })
             .attr("type", "checkbox")
-            // TODO: set checked if already showing
+            .attr("checked", function (d) { return _.contains(currently_displayed, d) ? true : null; }) // TODO: set checked if already showing. null or True are what should be set here.
         var label = ulEnter.append("label")
             .attr("for", function(d){ return "sensor_choose_" + d; })
             .on("onchange", function(){console.log("CHAN")})
