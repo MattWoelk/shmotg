@@ -172,7 +172,6 @@ var redraw = function () {
     imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
     imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
 
-    // TODO: add in the plus button.
     var h = plots[0] ? plots[0].height() : plotHeightDefault;
     plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
     plus_button
@@ -205,18 +204,24 @@ var redraw = function () {
     }
 
     function displayAddSensorOverlay() {
-        //TODO
+        //TODO These should be checkboxes showing each sensor only once.
+        d3.select("#edit_new").style("display", "inline");
+        console.log("disp");
         var sensorsToDisplay = ["temp", 18, 20, 22];
         var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
             .append("li")
         ulEnter.append("input")
-            .attr("id", function(d){ return d; })
+            .attr("id", function(d){ return "sensor_choose_" + d; })
             .attr("type", "checkbox")
-        ulEnter.append("label")
-            .attr("for", function(d){ return d; })
-        ulEnter.append("label")
-            .attr("for", function(d){ return d; })
-            .text(function(d) { return d; })
+            // TODO: set checked if already showing
+        var label = ulEnter.append("label")
+            .attr("for", function(d){ return "sensor_choose_" + d; })
+            .on("onchange", function(){console.log("CHAN")})
+            .text(function(d) { return d; });
+        label.append("img")
+            .attr("src", "./img/black0.svg");
+        label.append("img")
+            .attr("src", "./img/black1.svg");
     }
     // DRAW EDIT ELEMENTS }}}
 

@@ -177,6 +177,18 @@ box-shadow:inset 0px 0px 0.2em #000;
 }
 /* CONTROLS }}} */
 
+/* {{{ OVERLAY*/
+#edit_new {
+    display: none;
+}
+
+#edit_new_ul {
+    background-color: rgba(220,220,220, 0.75);
+    width: 100%;
+    height: 100%;
+}
+/* OVERLAY }}} */
+
 /*{{{ Custom Checkboxes*/
 ul {
     list-style: none;
