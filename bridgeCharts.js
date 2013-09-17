@@ -170,6 +170,11 @@ var redraw = function () {
     imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
     imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
 
+    // TODO: chart container is too big normally.
+    // TODO: expand chart container when add buttons are present.
+    // TODO: one add button with label for each optional girder.
+    // TODO: get rid of all overlay things.
+
     var h = plots[0] ? plots[0].height() : plotHeightDefault;
     plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
     plus_button
