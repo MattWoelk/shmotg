@@ -169,7 +169,7 @@ var redraw = function () {
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
            .attr("height", getTotalChartHeight() + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("height", getTotalChartHeight() + offset)
+            .attr("height", getTotalChartHeight())
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     //{{{ DRAW EDIT ELEMENTS
@@ -229,7 +229,6 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // TODO: get rid of all overlay things.
-    // TODO: zoomSVG should not extend past the lowest plot
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
