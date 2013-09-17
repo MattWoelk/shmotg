@@ -102,7 +102,7 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
-var plus_button;
+//var plus_button;
 var redraw = function () {
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
@@ -149,7 +149,16 @@ var redraw = function () {
     // UPDATE
     plotSVGs.call(plotsCaller);
 
-    var offset = plotHeightDefault;
+    // Get list of available-but-not-on-display sensors
+    var sensorsAvailable = ["temperature_1", "girder_18", "girder_20", "girder_22", "girder_45"];
+    var sensorsShown = _.map(plots, function (d) {
+        return d.sensorType() + "_" + d.sensorNumber();
+    });
+    var toBeAdded = _.difference(sensorsAvailable, sensorsShown);
+
+    // Expand chart container when add buttons are present.
+    var showingEdits = document.getElementById("edit").checked;
+    var offset = showingEdits ? toBeAdded.length*plotHeightDefault : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -167,120 +176,65 @@ var redraw = function () {
     var xspace = 20;
     var xbuffer = 130;
 
-    imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
-    imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
-
-    // TODO: chart container is too big normally.
-    // TODO: expand chart container when add buttons are present.
-    // TODO: one add button with label for each optional girder.
-    // TODO: get rid of all overlay things.
-
+    // TODO: rename edit_addremove, edit_up and edit_down
+    //imagePerChart(xsize, "#edit_addremove", plots, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
     var h = plots[0] ? plots[0].height() : plotHeightDefault;
-    plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
-    plus_button
-            .attr("xlink:href", "./img/add.svg")
-            .attr("y", getTotalChartHeight() + 45)
-            .attr("x", xbuffer)
-            .attr("width", xsize)
-            .attr("height", xsize)
-            .attr("cursor", "pointer")
-            .on("click", displayAddSensorOverlay)
 
-    function imagePerChart(size, id, oneless, imgurl, xoffset, yoffset, onclick) {
-        var addrem = d3.select(id);
-        var h = plots[0] ? plots[0].height() : plotHeightDefault;
-        var last = plots.length-1;
+    // Show remove buttons
+    var add_dat = d3.select("#edit_addremove").selectAll("image").data(plots);
+    add_dat.enter().append("image")
+        .attr("xlink:href", "./img/remove.svg")
+        .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
+        .attr("x", xbuffer)
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
+    add_dat.exit().remove();
 
-        var dat = oneless ? plots.slice(0, plots.length - 1) : plots;
+    // Show swap buttons
+    var add_dat = d3.select("#edit_up").selectAll("image").data(plots.slice(0, plots.length-1));
+    add_dat.enter().append("image")
+        .attr("xlink:href", "./img/updown.svg")
+        .attr("y", function(d,i) { return (plotHeightDefault/2 + 20) + i*(h) + ((h - 90) / 2); })
+        .attr("x", xbuffer + 90 + xspace)
+        .attr("width", 90)
+        .attr("height", 90)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
+    add_dat.exit().remove();
 
-        var add_dat = addrem.selectAll("image").data(dat);
-        add_dat.enter().append("image")
-            .attr("xlink:href", imgurl)
-            .attr("y", function(d,i) { return yoffset + i*(h) + ((h - size) / 2); })
-            .attr("x", xbuffer + xoffset)
-            .attr("width", size)
-            .attr("height", size)
-            .attr("cursor", "pointer")
-            .on("click", onclick)
+    // Show add buttons
+    // TODO: one add button with label for each optional girder.
+    var add_dat = d3.select("#edit_down").selectAll("image").data(toBeAdded);
+    var tot = plots.length * plotHeightDefault;
+    add_dat.enter().append("image")
+    add_dat
+        .attr("xlink:href", "./img/add.svg")
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*h + ((h - xsize) / 2); return tot + i*(h) + ((h - xsize) / 2); })
+        .attr("x", xbuffer)
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i) { addPlot(d); })
+    // TODO: add text for each one.
+    add_dat.exit().remove();
 
-        add_dat.exit().remove();
-    }
-
-    function showOverlay(toShow) {
-        if (toShow) {
-            d3.select("#edit_new").style("display", "inline"); // show overlay
-        } else {
-            d3.select("#edit_new").style("display", "none");
-        }
-    }
-
-    function displayAddSensorOverlay() {
-        showOverlay(true);
-
-        var currently_displayed = _.map(plots, function (d) {
-            return d.sensorType() + "_" + d.sensorNumber();
-        });
-        var sensorsToDisplay = ["temperature_1", "girder_18", "girder_20", "girder_22", "girder_45"];
-        var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
-            .append("li")
-        ulEnter.append("input")
-            .attr("id", function(d){ return "sensor_choose_" + d; })
-            .attr("type", "checkbox")
-            .attr("checked", function (d) { return _.contains(currently_displayed, d) ? true : null; }) // TODO: set checked if already showing. null or True are what should be set here.
-            .on("change", function(){ showOverlay(false); updatePlotsList(); }) // TODO: trigger redraw or similar. Modify plots first, because that's where we're storing what is showing.
-        var label = ulEnter.append("label")
-            .attr("for", function(d){ return "sensor_choose_" + d; })
-        label.append("img")
-            .attr("src", "./img/black0.svg");
-        label.append("img")
-            .attr("src", "./img/black1.svg");
-        label.append("text")
-            .text(function(d) { return d; });
-    }
+    // TODO: get rid of all overlay things.
+    // TODO: zoomSVG should not extend past the lowest plot
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
     updateZoom();
 }
 
-function updatePlotsList() {
-    // Update plots list based on which items are checked when adding a sensor plot.
-    var showings = [].map.call(document.querySelectorAll("#edit_new_ul li input:checked"), function (checkbox) { return checkbox.id;} );
-    showings = _.map(showings, function(d) {
-        // TODO: extract sensorType and sensorNumber from the strings
-        //return d.substring("sensor_choose_".length).split("_");
-        return d.substring("sensor_choose_".length);
-    });
-
-    var alreadyShowing = _.map(plots, function (d) {
-        return d.sensorType() + "_" + d.sensorNumber();
-    });
-
-    var toBeDeleted = _.difference(alreadyShowing, showings);
-    console.log("toBeDeleted", toBeDeleted);
-    _.each(toBeDeleted, function (d) {
-        var tmp = d.split("_");
-        var sensorType = tmp[0];
-        var sensorNumber = parseInt(tmp[1]);
-        //TODO: find where the value is in plots, and delete it.
-        var val = _.find(plots, function (plt) {
-            return plt.sensorType() === sensorType && plt.sensorNumber() === sensorNumber;
-        });
-        var index = _.indexOf(plots, val);
-
-        plots.splice(index, 1)
-    });
-
-    var toBeAdded = _.difference(showings, alreadyShowing);
-    console.log("toBeAdded", toBeAdded);
-    _.each(toBeAdded, function (d) {
-        var tmp = d.split("_");
-        var sensorType = tmp[0];
-        var sensorNumber = parseInt(tmp[1]);
-        console.log("add", sensorType, sensorNumber)
-        var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
-        initPlot(data, true, sendRequestToServer, 5, sensorType, sensorNumber);
-    });
+function addPlot(id) {
+    var tmp = id.split("_");
+    var sensorType = tmp[0];
+    var sensorNumber = parseInt(tmp[1]);
+    var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
+    var interval = 5; // TODO: put special case here for temperature data.
+    initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber);
 
     redraw();
 }
