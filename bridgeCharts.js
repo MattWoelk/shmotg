@@ -205,9 +205,7 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show add buttons
-    // TODO: one add button with label for each optional girder.
     var add_dat = d3.select("#edit_down").selectAll("image").data(toBeAdded);
-    console.log(getTotalChartHeight());
     add_dat.enter().append("image")
     add_dat
         .attr("xlink:href", "./img/add.svg")
@@ -217,7 +215,17 @@ var redraw = function () {
         .attr("height", xsize)
         .attr("cursor", "pointer")
         .on("click", function(d, i) { addPlot(d); })
-    // TODO: add text for each one.
+    add_dat.exit().remove();
+
+    // Show add text
+    var add_dat = d3.select("#edit_down").selectAll("text").data(toBeAdded);
+    add_dat.enter().append("text")
+    add_dat
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2) + (h/4); })
+        .attr("x", xbuffer + xsize)
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .text(function (d) { return d; })
     add_dat.exit().remove();
 
     // TODO: get rid of all overlay things.
