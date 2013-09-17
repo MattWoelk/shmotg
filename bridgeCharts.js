@@ -56,6 +56,8 @@ var zoomRect = d3.select("#zoomRect");
 var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
+var duration = 500; //duration of UI transitions
+
 // VARIABLES }}}
 
 // {{{ SLIDER
@@ -167,10 +169,12 @@ var redraw = function () {
 
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
+            .transition().duration(duration)
            .attr("height", getTotalChartHeight() + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
+            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+            .transition().duration(duration)
             .attr("height", getTotalChartHeight())
-            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     //{{{ DRAW EDIT ELEMENTS
     var xsize = 70;
