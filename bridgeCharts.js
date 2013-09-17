@@ -104,8 +104,6 @@ var setAllYAxisLocks = function (toLock) {
 
 var plus_button;
 var redraw = function () {
-    var showingEdits = document.getElementById("edit").checked;
-
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
     // weird hackery to reselect elements and call their specific plot
