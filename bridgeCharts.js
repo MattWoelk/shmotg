@@ -203,8 +203,16 @@ var redraw = function () {
         add_dat.exit().remove();
     }
 
+    function showOverlay(toShow) {
+        if (toShow) {
+            d3.select("#edit_new").style("display", "inline"); // show overlay
+        } else {
+            d3.select("#edit_new").style("display", "none");
+        }
+    }
+
     function displayAddSensorOverlay() {
-        d3.select("#edit_new").style("display", "inline"); // show overlay
+        showOverlay(true);
 
         var currently_displayed = _.map(plots, function (d) {
             return d.sensorType() + "_" + d.sensorNumber();
@@ -216,7 +224,7 @@ var redraw = function () {
             .attr("id", function(d){ return "sensor_choose_" + d; })
             .attr("type", "checkbox")
             .attr("checked", function (d) { return _.contains(currently_displayed, d) ? true : null; }) // TODO: set checked if already showing. null or True are what should be set here.
-            .on("change", function(){ updatePlotsList(); }) // TODO: trigger redraw or similar. Modify plots first, because that's where we're storing what is showing.
+            .on("change", function(){ showOverlay(false); updatePlotsList(); }) // TODO: trigger redraw or similar. Modify plots first, because that's where we're storing what is showing.
         var label = ulEnter.append("label")
             .attr("for", function(d){ return "sensor_choose_" + d; })
         label.append("img")
