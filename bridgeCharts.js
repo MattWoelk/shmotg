@@ -157,8 +157,9 @@ var redraw = function () {
     var toBeAdded = _.difference(sensorsAvailable, sensorsShown);
 
     // Expand chart container when add buttons are present.
+    var h = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
     var showingEdits = document.getElementById("edit").checked;
-    var offset = showingEdits ? toBeAdded.length*plotHeightDefault : 0;
+    var offset = showingEdits ? toBeAdded.length*h : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -178,7 +179,6 @@ var redraw = function () {
 
     // TODO: rename edit_addremove, edit_up and edit_down
     //imagePerChart(xsize, "#edit_addremove", plots, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
-    var h = plots[0] ? plots[0].height() : plotHeightDefault;
 
     // Show remove buttons
     var add_dat = d3.select("#edit_addremove").selectAll("image").data(plots);
@@ -196,7 +196,7 @@ var redraw = function () {
     var add_dat = d3.select("#edit_up").selectAll("image").data(plots.slice(0, plots.length-1));
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/updown.svg")
-        .attr("y", function(d,i) { return (plotHeightDefault/2 + 20) + i*(h) + ((h - 90) / 2); })
+        .attr("y", function(d,i) { return (h/2 + 20) + i*(h) + ((h - 90) / 2); })
         .attr("x", xbuffer + 90 + xspace)
         .attr("width", 90)
         .attr("height", 90)
@@ -207,11 +207,11 @@ var redraw = function () {
     // Show add buttons
     // TODO: one add button with label for each optional girder.
     var add_dat = d3.select("#edit_down").selectAll("image").data(toBeAdded);
-    var tot = plots.length * plotHeightDefault;
+    console.log(getTotalChartHeight());
     add_dat.enter().append("image")
     add_dat
         .attr("xlink:href", "./img/add.svg")
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*h + ((h - xsize) / 2); return tot + i*(h) + ((h - xsize) / 2); })
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2); })
         .attr("x", xbuffer)
         .attr("width", xsize)
         .attr("height", xsize)
