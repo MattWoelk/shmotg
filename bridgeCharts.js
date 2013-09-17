@@ -56,6 +56,8 @@ var zoomRect = d3.select("#zoomRect");
 var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
+var duration = 500; //duration of UI transitions
+
 // VARIABLES }}}
 
 // {{{ SLIDER
@@ -102,10 +104,8 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
-var plus_button;
+//var plus_button;
 var redraw = function () {
-    var showingEdits = document.getElementById("edit").checked;
-
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
     // weird hackery to reselect elements and call their specific plot
@@ -151,7 +151,17 @@ var redraw = function () {
     // UPDATE
     plotSVGs.call(plotsCaller);
 
-    var offset = plotHeightDefault;
+    // Get list of available-but-not-on-display sensors
+    var sensorsAvailable = ["temperature_1", "girder_18", "girder_20", "girder_22", "girder_45"];
+    var sensorsShown = _.map(plots, function (d) {
+        return d.sensorType() + "_" + d.sensorNumber();
+    });
+    var toBeAdded = _.difference(sensorsAvailable, sensorsShown);
+
+    // Expand chart container when add buttons are present.
+    var h = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
+    var showingEdits = document.getElementById("edit").checked;
+    var offset = showingEdits ? toBeAdded.length*h : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -159,69 +169,85 @@ var redraw = function () {
 
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
+            .transition().duration(duration)
            .attr("height", getTotalChartHeight() + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("height", getTotalChartHeight() + offset)
-            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+            .transition().duration(duration)
+            .attr("height", getTotalChartHeight())
 
     //{{{ DRAW EDIT ELEMENTS
     var xsize = 70;
     var xspace = 20;
     var xbuffer = 130;
 
-    imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
-    imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
+    // TODO: rename edit_addremove, edit_up and edit_down
+    //imagePerChart(xsize, "#edit_addremove", plots, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
 
-    // TODO: add in the plus button.
-    var h = plots[0] ? plots[0].height() : plotHeightDefault;
-    plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
-    plus_button
-            .attr("xlink:href", "./img/add.svg")
-            .attr("y", getTotalChartHeight() + 45)
-            .attr("x", xbuffer)
-            .attr("width", xsize)
-            .attr("height", xsize)
-            .attr("cursor", "pointer")
-            .on("click", displayAddSensorOverlay)
+    // Show remove buttons
+    var add_dat = d3.select("#edit_addremove").selectAll("image").data(plots);
+    add_dat.enter().append("image")
+        .attr("xlink:href", "./img/remove.svg")
+        .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
+        .attr("x", xbuffer)
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
+    add_dat.exit().remove();
 
-    function imagePerChart(size, id, oneless, imgurl, xoffset, yoffset, onclick) {
-        var addrem = d3.select(id);
-        var h = plots[0] ? plots[0].height() : plotHeightDefault;
-        var last = plots.length-1;
+    // Show swap buttons
+    var add_dat = d3.select("#edit_up").selectAll("image").data(plots.slice(0, plots.length-1));
+    add_dat.enter().append("image")
+        .attr("xlink:href", "./img/updown.svg")
+        .attr("y", function(d,i) { return (h/2 + 20) + i*(h) + ((h - 90) / 2); })
+        .attr("x", xbuffer + 90 + xspace)
+        .attr("width", 90)
+        .attr("height", 90)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
+    add_dat.exit().remove();
 
-        var dat = oneless ? plots.slice(0, plots.length - 1) : plots;
+    // Show add buttons
+    var add_dat = d3.select("#edit_down").selectAll("image").data(toBeAdded);
+    add_dat.enter().append("image")
+    add_dat
+        .attr("xlink:href", "./img/add.svg")
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2); })
+        .attr("x", xbuffer)
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i) { addPlot(d); })
+    add_dat.exit().remove();
 
-        var add_dat = addrem.selectAll("image").data(dat);
-        add_dat.enter().append("image")
-            .attr("xlink:href", imgurl)
-            .attr("y", function(d,i) { return yoffset + i*(h) + ((h - size) / 2); })
-            .attr("x", xbuffer + xoffset)
-            .attr("width", size)
-            .attr("height", size)
-            .attr("cursor", "pointer")
-            .on("click", onclick)
+    // Show add text
+    var add_dat = d3.select("#edit_down").selectAll("text").data(toBeAdded);
+    add_dat.enter().append("text")
+    add_dat
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2) + (h/4); })
+        .attr("x", xbuffer + xsize)
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .text(function (d) { return d; })
+    add_dat.exit().remove();
 
-        add_dat.exit().remove();
-    }
-
-    function displayAddSensorOverlay() {
-        //TODO
-        var sensorsToDisplay = ["temp", 18, 20, 22];
-        var ulEnter = d3.select("#edit_new_ul").selectAll("li").data(sensorsToDisplay).enter()
-            .append("li")
-        ulEnter.append("input")
-            .attr("id", function(d){ return d; })
-            .attr("type", "checkbox")
-        ulEnter.append("label")
-            .attr("for", function(d){ return d; })
-        ulEnter.append("label")
-            .attr("for", function(d){ return d; })
-            .text(function(d) { return d; })
-    }
+    // TODO: get rid of all overlay things.
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
     updateZoom();
+}
+
+function addPlot(id) {
+    var tmp = id.split("_");
+    var sensorType = tmp[0];
+    var sensorNumber = parseInt(tmp[1]);
+    var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
+    var interval = 5; // TODO: put special case here for temperature data.
+    initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber);
+
+    redraw();
 }
 
 function transitionAllNextTime() {
