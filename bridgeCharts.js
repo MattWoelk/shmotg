@@ -169,8 +169,8 @@ var redraw = function () {
     var xspace = 20;
     var xbuffer = 130;
 
-    imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
-    imagePerChart(90, "#edit_up", true, "./img/updown.svg", xsize + xspace, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
+    //imagePerChart(xsize, "#edit_addremove", false, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
+    imagePerChart(90, "#edit_up", true, "./img/updown.svg", 0, (plotHeightDefault/2 + 20), function(d, i) { swapWithPrevItem(i+1); redraw(); });
 
     var h = plots[0] ? plots[0].height() : plotHeightDefault;
     plus_button = plus_button ? plus_button : d3.select("#edit_elements").append("image")
