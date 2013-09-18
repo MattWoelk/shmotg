@@ -246,12 +246,6 @@ function addPlot(id) {
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
     initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
-
-    //redraw();
-
-    // Set all plots to show the current level.
-    // TODO: doesn't fix the problem of asking for raw data when it loads.
-    setAllPlotLevels();
 }
 
 function setAllPlotLevels() {
