@@ -235,7 +235,7 @@ function addPlot(id) {
     var sensorNumber = parseInt(tmp[1]);
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
-    initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
+    initPlot(data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
 }
 
 function setAllPlotLevels() {
@@ -255,21 +255,12 @@ function setLoadingIcon(on) {
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
-function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber, level) {
+function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level) {
     var plot;
-    if (first) {
-        plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level);
-        plot.xScale(xScale.copy());
-    } else {
-        plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample, level);
-        plot.xScale(xScale.copy());
-    }
+    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level);
+    plot.xScale(xScale.copy());
 
-    if (first) {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
-    } else {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(false).milliSecondsPerSample(msPS);//.update();
-    }
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
 
     plots.push(plot);
 
@@ -427,9 +418,9 @@ socket.on('news', function (data) {
 
     socket.emit('ack', "Message received!");
 
-    initPlot({}, true, sendRequestToServer, 5, "girder", 18, curLevel);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 22, curLevel);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 45, curLevel);
+    initPlot({}, sendRequestToServer, 5, "girder", 18, curLevel);
+    initPlot({}, sendRequestToServer, 5, "girder", 22, curLevel);
+    initPlot({}, sendRequestToServer, 5, "girder", 45, curLevel);
 });
 
 sizeOfQueue = function() {
@@ -516,7 +507,7 @@ function offlinedata() {
             return;
         }
 
-        var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1, curLevel);
+        var plt = initPlot(rows, function(){}, 1000*60*60, "temperature", 1, curLevel);
 
         var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
                           "weather/eng-hourly-03012012-03312012.csv",
