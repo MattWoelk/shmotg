@@ -85,7 +85,7 @@ slider = function () {
     function highlightSliderElement() {
         var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
         var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
-        var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
+        var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize); // level being pointed to
         changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
         d3.selectAll(".slider_boxes")
             .classed("highlighted", function (d, i) { return i == beingPointedTo; });

@@ -247,7 +247,17 @@ function addPlot(id) {
     var interval = 5; // TODO: put special case here for temperature data.
     initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber);
 
-    redraw();
+    //redraw();
+
+    // Set all plots to show the current level.
+    // TODO: doesn't fix the problem of asking for raw data when it loads.
+    setAllPlotLevels();
+}
+
+function setAllPlotLevels() {
+    plots.forEach(function (plt) {
+        plt.whichLevelToRender(curLevel).update();
+    });
 }
 
 function transitionAllNextTime() {
