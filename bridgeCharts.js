@@ -181,11 +181,8 @@ var redraw = function () {
     var xspace = 20;
     var xbuffer = 130;
 
-    // TODO: rename edit_addremove, edit_up and edit_down
-    //imagePerChart(xsize, "#edit_addremove", plots, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
-
     // Show remove buttons
-    var add_dat = d3.select("#edit_addremove").selectAll("image").data(plots);
+    var add_dat = d3.select("#edit_remove").selectAll("image").data(plots);
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/remove.svg")
         .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
@@ -197,7 +194,7 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show swap buttons
-    var add_dat = d3.select("#edit_up").selectAll("image").data(plots.slice(0, plots.length-1));
+    var add_dat = d3.select("#edit_swap").selectAll("image").data(plots.slice(0, plots.length-1));
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/updown.svg")
         .attr("y", function(d,i) { return (h/2 + 20) + i*(h) + ((h - 90) / 2); })
@@ -209,7 +206,7 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show add buttons
-    var add_dat = d3.select("#edit_down").selectAll("image").data(toBeAdded);
+    var add_dat = d3.select("#edit_add").selectAll("image").data(toBeAdded);
     add_dat.enter().append("image")
     add_dat
         .attr("xlink:href", "./img/add.svg")
@@ -222,7 +219,7 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show add text
-    var add_dat = d3.select("#edit_down").selectAll("text").data(toBeAdded);
+    var add_dat = d3.select("#edit_add").selectAll("text").data(toBeAdded);
     add_dat.enter().append("text")
     add_dat
         .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2) + (h/4); })
@@ -317,23 +314,13 @@ function zoomAll() {
     var newPos = boxSize * (Math.log(scal) / Math.log(2));
 
     if (mySlider.pastExtents(newPos)) {
-        // apply horizontal motion to the x scale, but not the scal
         var tmpScale = oldXScale.copy();
-        //var oldDom = oldXScale.domain();
-        //// TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
-        //var curDom = xScale.domain();
-        //var newMidPoint = (curDom[1] + curDom[0]) / 2;
-        //var oldDist = (oldDom[1] - oldDom[0]) / 2;
-
-        //var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
-        //tmpScale.domain(newDom);
 
         plots.forEach(function (plt) {
             plt.xScale(tmpScale.copy()).update();
         });
         xScale = tmpScale.copy();
 
-        //TODO: apply xScale to zoom.
         zoom.x(xScale);
     } else {
         mySlider.scrollPosition(newPos).update(true);
@@ -492,7 +479,6 @@ function sendRequestToServer(req) {
     setLoadingIcon(true);
 
     var now = new Date();
-    // TODO: figure out whether this is what's blocking both sensors from requesting at the same time.
     if(_.findWhere(listOfRequestsMade, {sensorNumber: req.sensorNumber, sensorType: req.sensorType, ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
         // never request the same thing twice
 
