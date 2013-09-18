@@ -1,13 +1,7 @@
-function swapItems(array, a, b){
-    array[a] = array.splice(b, 1, array[a])[0];
-    return array;
-}
-
 // {{{ Loading Spinner Icon
 var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
-
 
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
@@ -25,10 +19,6 @@ window.addEventListener(
 );
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
-//document.getElementById("render-depth").addEventListener("change", changeLines, false);
-//  an alternative so that it waits for you to lift up your mouse/finger:
-//document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
-//document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
 d3.select("#zoomin").on("click", zoomin);
@@ -47,8 +37,8 @@ var msPS = 5; // frequency of data samples
 var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
 var plotHeightDefault = 150;
 
-var zoomSVG = d3.select("#zoomSVG");
-var zoomRect = d3.select("#zoomRect");
+var zoomSVG = d3.select("#zoomSVG"); // holds zoomRect
+var zoomRect = d3.select("#zoomRect"); // overlay which takes scroll/zoom input
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
@@ -90,6 +80,11 @@ d3.select(sliderContainerName).call(mySlider);
 
 //{{{ HELPER FUNCTIONS
 
+function swapItems(array, a, b){
+    array[a] = array.splice(b, 1, array[a])[0];
+    return array;
+}
+
 var getTotalChartHeight = function () {
     var total = 0;
     _.each(plots, function (d, i) {
@@ -104,11 +99,10 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
-//var plus_button;
 var redraw = function () {
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
-    // weird hackery to reselect elements and call their specific plot
+    // Weird hackery to reselect elements and call their specific plot
     // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
     var plotsCaller = function(d) {
         var allPlots = d[0];
@@ -159,9 +153,9 @@ var redraw = function () {
     var toBeAdded = _.difference(sensorsAvailable, sensorsShown);
 
     // Expand chart container when add buttons are present.
-    var h = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
+    var plotHeight = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
     var showingEdits = document.getElementById("edit").checked;
-    var offset = showingEdits ? toBeAdded.length*h : 0;
+    var offset = showingEdits ? toBeAdded.length*plotHeight : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -185,7 +179,7 @@ var redraw = function () {
     var add_dat = d3.select("#edit_remove").selectAll("image").data(plots);
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/remove.svg")
-        .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
+        .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
         .attr("x", xbuffer)
         .attr("width", xsize)
         .attr("height", xsize)
@@ -197,7 +191,7 @@ var redraw = function () {
     var add_dat = d3.select("#edit_swap").selectAll("image").data(plots.slice(0, plots.length-1));
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/updown.svg")
-        .attr("y", function(d,i) { return (h/2 + 20) + i*(h) + ((h - 90) / 2); })
+        .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
         .attr("x", xbuffer + 90 + xspace)
         .attr("width", 90)
         .attr("height", 90)
@@ -210,7 +204,7 @@ var redraw = function () {
     add_dat.enter().append("image")
     add_dat
         .attr("xlink:href", "./img/add.svg")
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2); })
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2); })
         .attr("x", xbuffer)
         .attr("width", xsize)
         .attr("height", xsize)
@@ -222,14 +216,13 @@ var redraw = function () {
     var add_dat = d3.select("#edit_add").selectAll("text").data(toBeAdded);
     add_dat.enter().append("text")
     add_dat
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2) + (h/4); })
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2) + (plotHeight/4); })
         .attr("x", xbuffer + xsize)
         .attr("width", xsize)
         .attr("height", xsize)
         .text(function (d) { return d; })
     add_dat.exit().remove();
 
-    // TODO: get rid of all overlay things.
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
@@ -267,13 +260,10 @@ function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber, lev
     if (first) {
         plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level);
         plot.xScale(xScale.copy());
-        //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
     } else {
         plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample, level);
         plot.xScale(xScale.copy());
-        //d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
     }
-
 
     if (first) {
         plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
@@ -433,22 +423,13 @@ socket.on('news', function (data) {
     if (!firstTime) {
         return;
     }
-    // SPB is 200Hz
-
     firstTime = false;
 
     socket.emit('ack', "Message received!");
 
-    //initPlot(json);
     initPlot({}, true, sendRequestToServer, 5, "girder", 18, curLevel);
-    //initPlot(json, true, sendRequestToServer, 5, "girder", 20, curLevel);
     initPlot({}, true, sendRequestToServer, 5, "girder", 22, curLevel);
     initPlot({}, true, sendRequestToServer, 5, "girder", 45, curLevel);
-
-    //initPlot(_.map(json, function (d) {
-    //  return { val: Math.random() * 5 + d.val,
-    //           ms: d.ms };
-    //}), false);
 });
 
 sizeOfQueue = function() {
@@ -471,14 +452,12 @@ function addToServerQueue(ob) {
 };
 
 var uniqueRequestID = 0;
-var timeOfLastRequest = 0;
 var listOfRequestsMade = [];
 
 function sendRequestToServer(req) {
     // turn on loading icon
     setLoadingIcon(true);
 
-    var now = new Date();
     if(_.findWhere(listOfRequestsMade, {sensorNumber: req.sensorNumber, sensorType: req.sensorType, ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
         // never request the same thing twice
 
@@ -493,14 +472,13 @@ function sendRequestToServer(req) {
     // wrap the req with a unique id
     var sendReq = {
         id: uniqueRequestID,
-        req: req };
+        req: req
+    };
 
     uniqueRequestID = uniqueRequestID + 1;
 
     // add the request to the queue
     addToServerQueue(sendReq);
-
-    timeOfLastRequest = now;
 
     socket.emit('req', JSON.stringify(sendReq));
     return true;
@@ -527,7 +505,6 @@ socket.on('req_data', function (data) {
 // SERVER COMMUNICATIONS }}}
 
 //{{{ OFFLINE DATA
-
 
 function offlinedata() {
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
