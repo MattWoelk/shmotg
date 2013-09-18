@@ -245,7 +245,7 @@ function addPlot(id) {
     var sensorNumber = parseInt(tmp[1]);
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
-    initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber);
+    initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
 
     //redraw();
 
@@ -271,14 +271,14 @@ function setLoadingIcon(on) {
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
-function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
+function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber, level) {
     var plot;
     if (first) {
-        plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
+        plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level);
         plot.xScale(xScale.copy());
         //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
     } else {
-        plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample);
+        plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample, level);
         plot.xScale(xScale.copy());
         //d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
     }
@@ -459,10 +459,10 @@ socket.on('news', function (data) {
     socket.emit('ack', "Message received!");
 
     //initPlot(json);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 18);
-    //initPlot(json, true, sendRequestToServer, 5, "girder", 20);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 22);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 45);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 18, curLevel);
+    //initPlot(json, true, sendRequestToServer, 5, "girder", 20, curLevel);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 22, curLevel);
+    initPlot({}, true, sendRequestToServer, 5, "girder", 45, curLevel);
 
     //initPlot(_.map(json, function (d) {
     //  return { val: Math.random() * 5 + d.val,
@@ -559,7 +559,7 @@ function offlinedata() {
             return;
         }
 
-        var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1);
+        var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1, curLevel);
 
         var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
                           "weather/eng-hourly-03012012-03312012.csv",

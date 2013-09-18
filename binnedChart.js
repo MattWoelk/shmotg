@@ -215,7 +215,7 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level) {
 
     //{{{ VARIABLES
 
@@ -240,7 +240,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var containerWidth = document.getElementById("chartContainer").offsetWidth;
     var width = containerWidth - margin.left - margin.right;
 
-    var whichLevelToRender = 0;
+    var whichLevelToRender = level ? level : 0;
     var whichLinesToRender = ['average', 'maxes', 'mins'];
     var interpolationMethod = ['linear'];
 
