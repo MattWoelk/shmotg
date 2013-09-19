@@ -185,13 +185,13 @@ var redraw = function () {
     var xbuffer = 130;
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
-    // Show remove buttons
+    // Show add/remove buttons
     var add_dat = d3.select("#edit_remove").selectAll("image").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("image")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i){ if (_.contains(plots, d)) { plots.splice(i, 1); redraw(); } else { addPlot(d.sensorType(), d.sensorNumber()); }})
+        .on("click", function(d, i){ if (_.contains(plots, d)) { var index = plots.indexOf(d); plots.splice(index, 1); redraw(); } else { addPlot(d.sensorType(), d.sensorNumber()); }})
     add_dat.transition().duration(duration)
         .attr("x", width - xsize)
         .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
@@ -212,24 +212,11 @@ var redraw = function () {
         .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
     add_dat.exit().remove();
 
-//    // Show add buttons
-//    var add_dat = d3.select("#edit_add").selectAll("image").data(toBeAdded);
-//    add_dat.enter().append("image")
-//        .attr("xlink:href", "./img/add.svg")
-//        .attr("width", xsize)
-//        .attr("height", xsize)
-//        .attr("cursor", "pointer")
-//        .on("click", function(d, i) { addPlot(d); })
-//    add_dat.transition().duration(duration)
-//        .attr("x", width - xsize)
-//        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2); })
-//    add_dat.exit().remove();
-
-    // Show add text
-    var add_dat = d3.select("#edit_add").selectAll("text").data(toBeAdded);
+    // Show add button text
+    var add_dat = d3.select("#edit_add").selectAll("text").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("text")
         .attr("class", "sensor_title_add")
-        .text(function (d) { return d; })
+        .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
     add_dat.transition().duration(duration)
         .attr("x", width - (2*xsize))
         .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + (plotHeight/4); })
