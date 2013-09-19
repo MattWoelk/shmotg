@@ -151,6 +151,15 @@ var redraw = function () {
         return d.sensorType() + "_" + d.sensorNumber();
     });
     var toBeAdded = _.difference(sensorsAvailable, sensorsShown);
+    var sensorsAvailableObjects = _.map(toBeAdded, function (id) {
+        var tmp = id.split("_");
+        var sensorType = tmp[0];
+        var sensorNumber = parseInt(tmp[1]);
+        var result = {};
+        result.sensorNumber = function() { return sensorNumber; };
+        result.sensorType = function() { return sensorType; };
+        return result;
+    });
 
     // Expand chart container when add buttons are present.
     var plotHeight = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
@@ -175,19 +184,19 @@ var redraw = function () {
     var xspace = 20;
     var xbuffer = 130;
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
-    console.log("width", width);
 
     // Show remove buttons
-    var add_dat = d3.select("#edit_remove").selectAll("image").data(plots);
+    var add_dat = d3.select("#edit_remove").selectAll("image").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("image")
-        .attr("xlink:href", "./img/remove.svg")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
-    add_dat
+        .on("click", function(d, i){ if (_.contains(plots, d)) { plots.splice(i, 1); redraw(); } else { addPlot(d.sensorType(), d.sensorNumber()); }})
+    add_dat.transition().duration(duration)
         .attr("x", width - xsize)
         .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
+    add_dat.transition().delay(duration).duration(0)
+        .attr("xlink:href", function (d) { if (_.contains(plots, d)) { return "./img/remove.svg"} return "./img/add.svg";})
     add_dat.exit().remove();
 
     // Show swap buttons
@@ -203,18 +212,18 @@ var redraw = function () {
         .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
     add_dat.exit().remove();
 
-    // Show add buttons
-    var add_dat = d3.select("#edit_add").selectAll("image").data(toBeAdded);
-    add_dat.enter().append("image")
-        .attr("xlink:href", "./img/add.svg")
-        .attr("width", xsize)
-        .attr("height", xsize)
-        .attr("cursor", "pointer")
-        .on("click", function(d, i) { addPlot(d); })
-    add_dat.transition().duration(duration)
-        .attr("x", width - xsize)
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2); })
-    add_dat.exit().remove();
+//    // Show add buttons
+//    var add_dat = d3.select("#edit_add").selectAll("image").data(toBeAdded);
+//    add_dat.enter().append("image")
+//        .attr("xlink:href", "./img/add.svg")
+//        .attr("width", xsize)
+//        .attr("height", xsize)
+//        .attr("cursor", "pointer")
+//        .on("click", function(d, i) { addPlot(d); })
+//    add_dat.transition().duration(duration)
+//        .attr("x", width - xsize)
+//        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2); })
+//    add_dat.exit().remove();
 
     // Show add text
     var add_dat = d3.select("#edit_add").selectAll("text").data(toBeAdded);
@@ -232,10 +241,7 @@ var redraw = function () {
     updateZoom();
 }
 
-function addPlot(id) {
-    var tmp = id.split("_");
-    var sensorType = tmp[0];
-    var sensorNumber = parseInt(tmp[1]);
+function addPlot(sensorType, sensorNumber) {
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
     initPlot(data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
