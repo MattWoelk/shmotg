@@ -187,30 +187,32 @@ var redraw = function () {
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
     // Show add/remove buttons
-    var add_dat = d3.select("#edit_remove").selectAll("image").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
-    add_dat.enter().append("image")
+    var add_dat = d3.select("#edit_remove").selectAll("img").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    add_dat.enter().append("img")
+        .style("position", "absolute")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
         .on("click", function(d, i){ if (_.contains(plots, d)) { var index = plots.indexOf(d); plots.splice(index, 1); redraw(); } else { addPlot(d.sensorType(), d.sensorNumber()); }})
     add_dat.transition().duration(duration)
-        .attr("x", width - xsize)
-        .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
+        .style("left", (width - xsize) + "px")
+        .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; })
         .transition().duration(0)
-        .attr("xlink:href", function (d) { if (_.contains(plots, d)) { return "./img/remove.svg"} return "./img/add.svg";})
+        .attr("src", function (d) { if (_.contains(plots, d)) { return "./img/remove.svg"} return "./img/add.svg";})
     add_dat.exit().remove();
 
     // Show swap buttons
-    var add_dat = d3.select("#edit_swap").selectAll("image").data(plots.slice(0, plots.length-1));
-    add_dat.enter().append("image")
-        .attr("xlink:href", "./img/updown.svg")
+    var add_dat = d3.select("#edit_swap").selectAll("img").data(plots.slice(0, plots.length-1));
+    add_dat.enter().append("img")
+        .style("position", "absolute")
+        .attr("src", "./img/updown.svg")
         .attr("width", 90)
         .attr("height", 90)
         .attr("cursor", "pointer")
         .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
     add_dat
-        .attr("x", xbuffer)
-        .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
+        .style("left", xbuffer + "px")
+        .style("top", function(d,i) { return ((plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
     add_dat.exit().remove();
 
     // Show add button text
@@ -221,7 +223,7 @@ var redraw = function () {
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
     add_dat.transition().duration(duration)
         .attr("x", width - (2*xsize))
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + (plotHeight/4); })
+        .attr("y", function(d,i) { return (getTotalChartHeight() + i*(plotHeight) + (plotHeight/4)); })
     add_dat.exit().remove();
 
     // DRAW EDIT ELEMENTS }}}
@@ -547,9 +549,13 @@ d3.select("#edit").on("click", toggleEditables);
 function toggleEditables() {
     var active = document.getElementById("edit").checked;
     if (active) {
-        d3.select("#edit_elements").attr("display", "block");
+        d3.select("#edit_remove").style("display", "block");
+        d3.select("#edit_add").style("display", "block");
+        d3.select("#edit_swap").style("display", "block");
     } else {
-        d3.select("#edit_elements").attr("display", "none");
+        d3.select("#edit_remove").style("display", "none");
+        d3.select("#edit_add").style("display", "none");
+        d3.select("#edit_swap").style("display", "none");
     }
     redraw();
 }
