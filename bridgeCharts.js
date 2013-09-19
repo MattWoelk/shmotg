@@ -174,52 +174,56 @@ var redraw = function () {
     var xsize = 70;
     var xspace = 20;
     var xbuffer = 130;
+    var width = document.getElementById("chartContainer").offsetWidth - margin.right;
+    console.log("width", width);
 
     // Show remove buttons
     var add_dat = d3.select("#edit_remove").selectAll("image").data(plots);
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/remove.svg")
-        .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
-        .attr("x", xbuffer)
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
         .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
+    add_dat
+        .attr("x", width - xsize)
+        .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
     add_dat.exit().remove();
 
     // Show swap buttons
     var add_dat = d3.select("#edit_swap").selectAll("image").data(plots.slice(0, plots.length-1));
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/updown.svg")
-        .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
-        .attr("x", xbuffer + 90 + xspace)
         .attr("width", 90)
         .attr("height", 90)
         .attr("cursor", "pointer")
         .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
+    add_dat
+        .attr("x", xbuffer)
+        .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
     add_dat.exit().remove();
 
     // Show add buttons
     var add_dat = d3.select("#edit_add").selectAll("image").data(toBeAdded);
     add_dat.enter().append("image")
-    add_dat
         .attr("xlink:href", "./img/add.svg")
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2); })
-        .attr("x", xbuffer)
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
         .on("click", function(d, i) { addPlot(d); })
+    add_dat.transition().duration(duration)
+        .attr("x", width - xsize)
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2); })
     add_dat.exit().remove();
 
     // Show add text
     var add_dat = d3.select("#edit_add").selectAll("text").data(toBeAdded);
     add_dat.enter().append("text")
-    add_dat
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2) + (plotHeight/4); })
-        .attr("x", xbuffer + xsize)
         .attr("class", "sensor_title_add")
         .text(function (d) { return d; })
+    add_dat.transition().duration(duration)
+        .attr("x", width - (2*xsize))
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + (plotHeight/4); })
     add_dat.exit().remove();
 
     // DRAW EDIT ELEMENTS }}}
