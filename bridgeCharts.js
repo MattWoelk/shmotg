@@ -1,13 +1,7 @@
-function swapItems(array, a, b){
-    array[a] = array.splice(b, 1, array[a])[0];
-    return array;
-}
-
 // {{{ Loading Spinner Icon
 var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
-
 
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
@@ -25,10 +19,6 @@ window.addEventListener(
 );
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
-//document.getElementById("render-depth").addEventListener("change", changeLines, false);
-//  an alternative so that it waits for you to lift up your mouse/finger:
-//document.getElementById("render-depth").addEventListener("mouseup", changeLines, false);
-//document.getElementById("render-depth").addEventListener("touchend", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
 d3.select("#zoomin").on("click", zoomin);
@@ -47,8 +37,8 @@ var msPS = 5; // frequency of data samples
 var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
 var plotHeightDefault = 150;
 
-var zoomSVG = d3.select("#zoomSVG");
-var zoomRect = d3.select("#zoomRect");
+var zoomSVG = d3.select("#zoomSVG"); // holds zoomRect
+var zoomRect = d3.select("#zoomRect"); // overlay which takes scroll/zoom input
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
@@ -90,6 +80,11 @@ d3.select(sliderContainerName).call(mySlider);
 
 //{{{ HELPER FUNCTIONS
 
+function swapItems(array, a, b){
+    array[a] = array.splice(b, 1, array[a])[0];
+    return array;
+}
+
 var getTotalChartHeight = function () {
     var total = 0;
     _.each(plots, function (d, i) {
@@ -104,11 +99,10 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
-//var plus_button;
 var redraw = function () {
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
-    // weird hackery to reselect elements and call their specific plot
+    // Weird hackery to reselect elements and call their specific plot
     // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
     var plotsCaller = function(d) {
         var allPlots = d[0];
@@ -157,11 +151,20 @@ var redraw = function () {
         return d.sensorType() + "_" + d.sensorNumber();
     });
     var toBeAdded = _.difference(sensorsAvailable, sensorsShown);
+    var sensorsAvailableObjects = _.map(toBeAdded, function (id) {
+        var tmp = id.split("_");
+        var sensorType = tmp[0];
+        var sensorNumber = parseInt(tmp[1]);
+        var result = {};
+        result.sensorNumber = function() { return sensorNumber; };
+        result.sensorType = function() { return sensorType; };
+        return result;
+    });
 
     // Expand chart container when add buttons are present.
-    var h = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
+    var plotHeight = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
     var showingEdits = document.getElementById("edit").checked;
-    var offset = showingEdits ? toBeAdded.length*h : 0;
+    var offset = showingEdits ? toBeAdded.length*plotHeight : 0;
 
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
@@ -180,74 +183,61 @@ var redraw = function () {
     var xsize = 70;
     var xspace = 20;
     var xbuffer = 130;
+    var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
-    // TODO: rename edit_addremove, edit_up and edit_down
-    //imagePerChart(xsize, "#edit_addremove", plots, "./img/remove.svg", 0, 0, function(d, i){ plots.splice(i, 1); redraw(); });
-
-    // Show remove buttons
-    var add_dat = d3.select("#edit_addremove").selectAll("image").data(plots);
+    // Show add/remove buttons
+    var add_dat = d3.select("#edit_remove").selectAll("image").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("image")
-        .attr("xlink:href", "./img/remove.svg")
-        .attr("y", function(d,i) { return i*(h) + ((h - xsize) / 2); })
-        .attr("x", xbuffer)
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i){ plots.splice(i, 1); redraw(); })
+        .on("click", function(d, i){ if (_.contains(plots, d)) { var index = plots.indexOf(d); plots.splice(index, 1); redraw(); } else { addPlot(d.sensorType(), d.sensorNumber()); }})
+    add_dat.transition().duration(duration)
+        .attr("x", width - xsize)
+        .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
+        .transition().duration(0)
+        .attr("xlink:href", function (d) { if (_.contains(plots, d)) { return "./img/remove.svg"} return "./img/add.svg";})
     add_dat.exit().remove();
 
     // Show swap buttons
-    var add_dat = d3.select("#edit_up").selectAll("image").data(plots.slice(0, plots.length-1));
+    var add_dat = d3.select("#edit_swap").selectAll("image").data(plots.slice(0, plots.length-1));
     add_dat.enter().append("image")
         .attr("xlink:href", "./img/updown.svg")
-        .attr("y", function(d,i) { return (h/2 + 20) + i*(h) + ((h - 90) / 2); })
-        .attr("x", xbuffer + 90 + xspace)
         .attr("width", 90)
         .attr("height", 90)
         .attr("cursor", "pointer")
         .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
-    add_dat.exit().remove();
-
-    // Show add buttons
-    var add_dat = d3.select("#edit_down").selectAll("image").data(toBeAdded);
-    add_dat.enter().append("image")
     add_dat
-        .attr("xlink:href", "./img/add.svg")
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2); })
         .attr("x", xbuffer)
-        .attr("width", xsize)
-        .attr("height", xsize)
-        .attr("cursor", "pointer")
-        .on("click", function(d, i) { addPlot(d); })
+        .attr("y", function(d,i) { return (plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2); })
     add_dat.exit().remove();
 
-    // Show add text
-    var add_dat = d3.select("#edit_down").selectAll("text").data(toBeAdded);
+    // Show add button text
+    var add_dat = d3.select("#edit_add").selectAll("text").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("text")
-    add_dat
-        .attr("y", function(d,i) { return getTotalChartHeight() + i*(h) + ((h - xsize) / 2) + (h/4); })
-        .attr("x", xbuffer + xsize)
-        .attr("width", xsize)
-        .attr("height", xsize)
-        .text(function (d) { return d; })
+        .attr("class", "sensor_title_add")
+        .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
+    add_dat.transition().duration(duration)
+        .attr("x", width - (2*xsize))
+        .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + (plotHeight/4); })
     add_dat.exit().remove();
 
-    // TODO: get rid of all overlay things.
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
     updateZoom();
 }
 
-function addPlot(id) {
-    var tmp = id.split("_");
-    var sensorType = tmp[0];
-    var sensorNumber = parseInt(tmp[1]);
+function addPlot(sensorType, sensorNumber) {
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
-    initPlot(data, true, sendRequestToServer, interval, sensorType, sensorNumber);
+    initPlot(data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
+}
 
-    redraw();
+function setAllPlotLevels() {
+    plots.forEach(function (plt) {
+        plt.whichLevelToRender(curLevel).update();
+    });
 }
 
 function transitionAllNextTime() {
@@ -261,24 +251,12 @@ function setLoadingIcon(on) {
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
-function initPlot(data, first, sendReq, oneSample, sensorType, sensorNumber) {
+function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level) {
     var plot;
-    if (first) {
-        plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample);
-        plot.xScale(xScale.copy());
-        //d3.select("#charts").append("svg").attr("id", sensorType+sensorNumber).call(plot);
-    } else {
-        plot = binnedLineChart(data, function (){}, sensorType, sensorNumber, oneSample);
-        plot.xScale(xScale.copy());
-        //d3.select("#charts").append("svg").attr("id", "chart"+sensorNumber).call(plot);
-    }
+    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level);
+    plot.xScale(xScale.copy());
 
-
-    if (first) {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
-    } else {
-        plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(false).milliSecondsPerSample(msPS);//.update();
-    }
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
 
     plots.push(plot);
 
@@ -313,23 +291,13 @@ function zoomAll() {
     var newPos = boxSize * (Math.log(scal) / Math.log(2));
 
     if (mySlider.pastExtents(newPos)) {
-        // apply horizontal motion to the x scale, but not the scal
         var tmpScale = oldXScale.copy();
-        //var oldDom = oldXScale.domain();
-        //// TODO: This is not perfect! zooming in too far will slowly scroll things around when zooming back out.
-        //var curDom = xScale.domain();
-        //var newMidPoint = (curDom[1] + curDom[0]) / 2;
-        //var oldDist = (oldDom[1] - oldDom[0]) / 2;
-
-        //var newDom = [newMidPoint - oldDist, newMidPoint + oldDist];
-        //tmpScale.domain(newDom);
 
         plots.forEach(function (plt) {
             plt.xScale(tmpScale.copy()).update();
         });
         xScale = tmpScale.copy();
 
-        //TODO: apply xScale to zoom.
         zoom.x(xScale);
     } else {
         mySlider.scrollPosition(newPos).update(true);
@@ -442,22 +410,13 @@ socket.on('news', function (data) {
     if (!firstTime) {
         return;
     }
-    // SPB is 200Hz
-
     firstTime = false;
 
     socket.emit('ack', "Message received!");
 
-    //initPlot(json);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 18);
-    //initPlot(json, true, sendRequestToServer, 5, "girder", 20);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 22);
-    initPlot({}, true, sendRequestToServer, 5, "girder", 45);
-
-    //initPlot(_.map(json, function (d) {
-    //  return { val: Math.random() * 5 + d.val,
-    //           ms: d.ms };
-    //}), false);
+    initPlot({}, sendRequestToServer, 5, "girder", 18, curLevel);
+    initPlot({}, sendRequestToServer, 5, "girder", 22, curLevel);
+    initPlot({}, sendRequestToServer, 5, "girder", 45, curLevel);
 });
 
 sizeOfQueue = function() {
@@ -480,15 +439,12 @@ function addToServerQueue(ob) {
 };
 
 var uniqueRequestID = 0;
-var timeOfLastRequest = 0;
 var listOfRequestsMade = [];
 
 function sendRequestToServer(req) {
     // turn on loading icon
     setLoadingIcon(true);
 
-    var now = new Date();
-    // TODO: figure out whether this is what's blocking both sensors from requesting at the same time.
     if(_.findWhere(listOfRequestsMade, {sensorNumber: req.sensorNumber, sensorType: req.sensorType, ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
         // never request the same thing twice
 
@@ -503,14 +459,13 @@ function sendRequestToServer(req) {
     // wrap the req with a unique id
     var sendReq = {
         id: uniqueRequestID,
-        req: req };
+        req: req
+    };
 
     uniqueRequestID = uniqueRequestID + 1;
 
     // add the request to the queue
     addToServerQueue(sendReq);
-
-    timeOfLastRequest = now;
 
     socket.emit('req', JSON.stringify(sendReq));
     return true;
@@ -538,7 +493,6 @@ socket.on('req_data', function (data) {
 
 //{{{ OFFLINE DATA
 
-
 function offlinedata() {
     d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
         var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
@@ -549,7 +503,7 @@ function offlinedata() {
             return;
         }
 
-        var plt = initPlot(rows, true, function(){}, 1000*60*60, "temperature", 1);
+        var plt = initPlot(rows, function(){}, 1000*60*60, "temperature", 1, curLevel);
 
         var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
                           "weather/eng-hourly-03012012-03312012.csv",
