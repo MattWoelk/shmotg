@@ -231,7 +231,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     //       - can't do, because we're changing top depending
     //         on if we're showing time context
     //       - unless we make it a new offset variable instead of reusing margin
-    var margin = {top: 10, right: 27, bottom: 25, left: 30 + 80};
+    var margin = {top: 10, right: 27, bottom: 25, left: 30 + 90};
 
     // the height of the chart by itself (not including axes or time context)
     var height = 150 - margin.top - margin.bottom;

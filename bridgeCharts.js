@@ -34,7 +34,7 @@ var plots = []; //an array of all plots
 var msPS = 5; // frequency of data samples
 
 // TODO: sync this with the one in bridgeChart.js
-var margin = {top: 20, right: 10, bottom: 25, left: 30 + 80};
+var margin = {top: 20, right: 10, bottom: 25, left: 30 + 90};
 var plotHeightDefault = 150;
 
 var zoomSVG = d3.select("#zoomSVG"); // holds zoomRect
@@ -54,10 +54,10 @@ var duration = 500; //duration of UI transitions
 var sliderContainerName = "#slider_container";
 var curLevel = 0;
 var curPos = 0;
-var boxSize = 30;
+var boxSize = 34;
 var mySlider = slider()
     .height(200)
-    .width(80)
+    .width(boxSize*2.5)
     .boxSize(boxSize)
     .changeCallBack(function (pos, i, cameFromZoom) {
         if (curLevel !== i) {
