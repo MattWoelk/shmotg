@@ -218,8 +218,7 @@ var redraw = function () {
     add_dat
         .attr("y", function(d,i) { return getTotalChartHeight() + i*(plotHeight) + ((plotHeight - xsize) / 2) + (plotHeight/4); })
         .attr("x", xbuffer + xsize)
-        .attr("width", xsize)
-        .attr("height", xsize)
+        .attr("class", "sensor_title_add")
         .text(function (d) { return d; })
     add_dat.exit().remove();
 

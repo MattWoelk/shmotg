@@ -794,20 +794,30 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
 
             // Draw Time Context
-            var timeContextSelection = timeContextContainer.selectAll("text")
-                    .data([sensorType.capitalize() + " " + sensorNumber + " - " + getTimeContextString(xScale, showTimeContext)]);
+            var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
+                    .data(["⬐ " + getTimeContextString(xScale, showTimeContext)]);
+            var titleContainer = timeContextContainer.selectAll(".sensor_title")
+                    .data([sensorType.capitalize() + " " + sensorNumber]);
 
             // enter
-            timeContextSelection.enter().append("text");
+            timeContextSelection.enter().append("text")
+                .attr("class", "sensor_time_context");
+            titleContainer.enter().append("text")
+                .attr("class", "sensor_title");
 
             // update
             timeContextSelection
                     .text(function (d) { return d; })
-                    .attr("x", margin.left)
+                    .attr("x", margin.left -5)
+                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+            titleContainer
+                    .text(function (d) { return d; })
+                    .attr("x", margin.left + (width))
                     .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
 
             // exit
             timeContextSelection.exit().remove();
+            titleContainer.exit().remove();
 
             // TIME CONTEXT }}}
 
