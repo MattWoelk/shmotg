@@ -195,7 +195,7 @@ var redraw = function () {
     add_dat.transition().duration(duration)
         .attr("x", width - xsize)
         .attr("y", function(d,i) { return i*(plotHeight) + ((plotHeight - xsize) / 2); })
-    add_dat.transition().delay(duration).duration(0)
+        .transition().duration(0)
         .attr("xlink:href", function (d) { if (_.contains(plots, d)) { return "./img/remove.svg"} return "./img/add.svg";})
     add_dat.exit().remove();
 
