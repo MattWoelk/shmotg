@@ -282,4 +282,10 @@ path.loadingBox {
 }
 /* LOADING LINES }}} */
 
+/* {{{ EDITABLES */
+#edit_add text {
+    text-anchor: end;
+}
+/* EDITABLES }}} */
+
 /* vim: set foldmethod=marker: */

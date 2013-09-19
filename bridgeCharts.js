@@ -187,18 +187,33 @@ var redraw = function () {
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
     // Show add/remove buttons
-    var add_dat = d3.select("#edit_remove").selectAll("img").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
-    add_dat.enter().append("img")
+    var add_dat = d3.select("#edit_remove").selectAll("g").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    var add_dat_enter = add_dat.enter().append("g")
+        .style("position", "absolute")
+    add_dat_enter.append("img")
         .style("position", "absolute")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i){ if (_.contains(plots, d)) { var index = plots.indexOf(d); plots.splice(index, 1); redraw(); } else { addPlot(d.sensorType(), d.sensorNumber()); }})
+        .attr("src", "./img/remove.svg")
+        .on("click", function(d, i){ var index = plots.indexOf(d); plots.splice(index, 1); redraw(); })
+    add_dat_enter.append("img")
+        .style("position", "absolute")
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .attr("class", "edit_on_top")
+        .attr("src", "./img/add.svg")
+        .on("click", function(d, i){ addPlot(d.sensorType(), d.sensorNumber()); })
+
+    add_dat.select(".edit_on_top").transition().duration(duration)
+        .style("display", "block")
+        .style("opacity", function (d) { if (_.contains(plots, d)) { return 0; } else { return 1; }})
+        .transition().duration(0).style("display", function (d) { if(_.contains(plots, d)) { return "none"; } else { return "block"; }})
     add_dat.transition().duration(duration)
         .style("left", (width - xsize) + "px")
         .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; })
-        .transition().duration(0)
-        .attr("src", function (d) { if (_.contains(plots, d)) { return "./img/remove.svg"} return "./img/add.svg";})
+
     add_dat.exit().remove();
 
     // Show swap buttons
@@ -213,6 +228,7 @@ var redraw = function () {
     add_dat
         .style("left", xbuffer + "px")
         .style("top", function(d,i) { return ((plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
+    add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
     add_dat.exit().remove();
 
     // Show add button text
@@ -221,10 +237,11 @@ var redraw = function () {
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
+        .style("opacity", 1)
     add_dat.transition().duration(duration)
-        .attr("x", width - (2*xsize))
+        .attr("x", width - 15)
         .attr("y", function(d,i) { return (getTotalChartHeight() + i*(plotHeight) + (plotHeight/4)); })
-    add_dat.exit().remove();
+    add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
 
     // DRAW EDIT ELEMENTS }}}
 
