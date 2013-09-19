@@ -166,6 +166,7 @@ var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
     var offset = showingEdits ? toBeAdded.length*plotHeight : 0;
 
+    // TODO: when add buttons show up and one scroll bar appears, both scroll bars appear.
     plots.forEach(function (plt) {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     });
@@ -216,6 +217,7 @@ var redraw = function () {
     var add_dat = d3.select("#edit_add").selectAll("text").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("text")
         .attr("class", "sensor_title_add")
+        .attr("cursor", "default")
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
     add_dat.transition().duration(duration)
         .attr("x", width - (2*xsize))
