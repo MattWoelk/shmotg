@@ -286,6 +286,11 @@ path.loadingBox {
 #edit_add text {
     text-anchor: end;
 }
+
+.inactive_charts {
+    fill: #000;
+    opacity: 0.15;
+}
 /* EDITABLES }}} */
 
 /* vim: set foldmethod=marker: */

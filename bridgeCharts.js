@@ -569,10 +569,12 @@ function toggleEditables() {
         d3.select("#edit_remove").style("display", "block");
         d3.select("#edit_add").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
+        d3.select("#zoomRect").classed("inactive_charts", true);
     } else {
         d3.select("#edit_remove").style("display", "none");
         d3.select("#edit_add").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
+        d3.select("#zoomRect").classed("inactive_charts", false);
     }
     redraw();
 }
