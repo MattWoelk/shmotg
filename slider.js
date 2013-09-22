@@ -179,7 +179,7 @@ slider = function () {
                 .on("mouseout", onoff)
                 .on("mousedown", ondown)
                 .on("click", onclick)
-                .on("mousewheel", onscroll)
+                //.on("mousewheel", onscroll)
                 .attr("class", "slider_boxes");
             slide_enter.append("text")
                 .attr("text-anchor", "middle")

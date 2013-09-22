@@ -21,10 +21,10 @@ window.addEventListener(
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
 
-d3.select("#zoomin").on("click", zoomin);
-d3.select("#zoomout").on("click", zoomout);
-d3.select("#scrollleft").on("click", scrollleft);
-d3.select("#scrollright").on("click", scrollright);
+//d3.select("#zoomin").on("click", zoomin);
+//d3.select("#zoomout").on("click", zoomout);
+//d3.select("#scrollleft").on("click", scrollleft);
+//d3.select("#scrollright").on("click", scrollright);
 
 // ZOOMING AND CHANGING }}}
 
