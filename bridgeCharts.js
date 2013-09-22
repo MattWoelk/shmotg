@@ -39,6 +39,7 @@ var plotHeightDefault = 150;
 
 var zoomSVG = d3.select("#zoomSVG"); // holds zoomRect
 var zoomRect = d3.select("#zoomRect"); // overlay which takes scroll/zoom input
+var zoomRectGreyOut = d3.select("#zoomRectGreyOut"); // overlay which disables zooming when edit buttons are shown.
 
 // these are the overall scales which are modified by zooming
 // they should be set as the default for new plots
@@ -171,14 +172,21 @@ var redraw = function () {
         plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     });
 
+    var offset_fix = 8;
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
             .transition().duration(duration)
            .attr("height", getTotalChartHeight() + offset);
-    zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right)
-            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-            .transition().duration(duration)
-            .attr("height", getTotalChartHeight())
+    zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
+            .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
+            .transition().duration(duration) // TODO: can we get rid of this?
+            .attr("height", getTotalChartHeight()-offset_fix)
+    zoomRectGreyOut.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
+            .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
+            .transition().duration(duration) // TODO: can we get rid of this?
+            .attr("height", getTotalChartHeight()-offset_fix)
+            .style("opacity", 0.15)
+            .style("fill", "#000")
 
     //{{{ DRAW EDIT ELEMENTS
     var xsize = 70;
@@ -569,12 +577,12 @@ function toggleEditables() {
         d3.select("#edit_remove").style("display", "block");
         d3.select("#edit_add").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
-        d3.select("#zoomRect").classed("inactive_charts", true);
+        d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
         d3.select("#edit_remove").style("display", "none");
         d3.select("#edit_add").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
-        d3.select("#zoomRect").classed("inactive_charts", false);
+        d3.select("#zoomRectGreyOut").style("display", "none");
     }
     redraw();
 }
