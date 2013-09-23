@@ -517,7 +517,6 @@ socket.on('req_data', function (data) {
     var received = JSON.parse(data);
     // remove request from server queue
     removeFromQueue(received.id);
-    var req = received.req;
 
     // deactivate loading icon
     if (sizeOfQueue() === 0) {
@@ -525,9 +524,7 @@ socket.on('req_data', function (data) {
     }
 
     for (i=0;i<plots.length;i++) {
-        if (plots[i].uniqueID() === "" + received.sensorType + received.sensorNumber) {
-            plots[i].addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
-        }
+        plots[i].incomingRequestedData(received);
     }
 });
 

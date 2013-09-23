@@ -219,7 +219,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     //{{{ VARIABLES
 
-    var dataReq = dataRequester;
+    var dataReq = dataRequester; // TODO: multiChart
     var strokeWidth = 1;
     var sensorType = sensorT;
     var sensorNumber = sensorN;
@@ -975,6 +975,13 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     my.binData = function () { // TODO: just for testing
         return binData;
+    }
+
+    my.incomingRequestedData = function (received) {
+        var req = received.req;
+        if (my.uniqueID() === "" + received.sensorType + received.sensorNumber) {
+            my.addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
+        }
     }
 
     my.addDataToBinData = function (datas, level) {
