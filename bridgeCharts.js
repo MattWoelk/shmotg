@@ -179,11 +179,9 @@ var redraw = function () {
            .attr("height", getTotalChartHeight() + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .transition().duration(duration) // TODO: can we get rid of this?
             .attr("height", getTotalChartHeight()-offset_fix)
     zoomRectGreyOut.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .transition().duration(duration) // TODO: can we get rid of this?
             .attr("height", getTotalChartHeight()-offset_fix)
             .style("opacity", 0.15)
             .style("fill", "#000")
