@@ -249,6 +249,21 @@ var redraw = function () {
         .attr("y", function(d,i) { return (getTotalChartHeight() + i*(plotHeight) + (plotHeight/4)); })
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
 
+    // Show combine with multiplication buttons
+    var add_dat = d3.select("#edit_mult").selectAll("img").data(plots.slice(0, plots.length-1));
+    add_dat.enter().append("img")
+        .style("position", "absolute")
+        .attr("src", "./img/mult.svg")
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
+    add_dat
+        .style("left", (xbuffer + 90) + "px")
+        .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
+    add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
+    add_dat.exit().remove();
+
     // DRAW EDIT ELEMENTS }}}
 
     //update the zoom for the new plot size
@@ -575,11 +590,13 @@ function toggleEditables() {
         d3.select("#edit_remove").style("display", "block");
         d3.select("#edit_add").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
+        d3.select("#edit_mult").style("display", "block");
         d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
         d3.select("#edit_remove").style("display", "none");
         d3.select("#edit_add").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
+        d3.select("#edit_mult").style("display", "none");
         d3.select("#zoomRectGreyOut").style("display", "none");
     }
     redraw();
