@@ -81,8 +81,18 @@ d3.select(sliderContainerName).call(mySlider);
 
 //{{{ HELPER FUNCTIONS
 
-function swapItems(array, a, b){
+function swapItems(array, a, b) {
     array[a] = array.splice(b, 1, array[a])[0];
+    return array;
+}
+
+function insertItem(array, a, index) {
+    array.splice(index, 0, a);
+    return array;
+}
+
+function insertItemBeforeItem(array, a, beforeThisItem) {
+    array.splice(array.indexOf(beforeThisItem), 0, a);
     return array;
 }
 
@@ -257,7 +267,7 @@ var redraw = function () {
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
+        .on("click", function(d, i) { addMultiChart(plots[i], plots[i+1]); redraw(); })
     add_dat
         .style("left", (xbuffer + 90) + "px")
         .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
@@ -270,7 +280,20 @@ var redraw = function () {
     updateZoom();
 }
 
-function addPlot(sensorType, sensorNumber) {
+function addMultiChart (parentA, parentB) {
+    var interval = 5;
+    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel);
+    plt.addMultiChartParent(parentA);
+    plt.addMultiChartParent(parentB);
+    parentA.addMultiChartChild(plt);
+    parentB.addMultiChartChild(plt);
+
+    // Insert the new plot (plt) in front of parentA in the plots array
+    insertItemBeforeItem(plots, plots.pop(), parentA); // plots.pop() should be the same as plt
+    console.log(plots);
+}
+
+function addPlot (sensorType, sensorNumber) {
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
     initPlot(data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
@@ -301,6 +324,8 @@ function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level) {
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
 
     plots.push(plot);
+
+    console.log(plots);
 
     redraw();
 
