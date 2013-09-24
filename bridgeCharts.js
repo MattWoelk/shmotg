@@ -110,6 +110,12 @@ var setAllYAxisLocks = function (toLock) {
     });
 }
 
+function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
+    var parent = document.getElementById("charts");
+    var charts = parent.childNodes;
+    parent.insertBefore(charts[newElementIndex], charts[referenceElementIndex]); // swap in DOM
+}
+
 var redraw = function () {
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
 
@@ -130,9 +136,7 @@ var redraw = function () {
 
         swapItems(plots, i, i-1); // swap in plots
 
-        var parent = document.getElementById("charts");
-        var charts = parent.childNodes;
-        parent.insertBefore(charts[i], charts[i-1]); // swap in DOM
+        insertBeforeDOMPlot(i, i-1); // swap in the DOM
     }
 
     function swapWithNextItem(i) {
@@ -142,9 +146,7 @@ var redraw = function () {
 
         swapItems(plots, i, i+1); // swap in plots
 
-        var parent = document.getElementById("charts");
-        var charts = parent.childNodes;
-        parent.insertBefore(charts[i+1], charts[i]); // swap in DOM
+        insertBeforeDOMPlot(i+1, i); // swap in the DOM
     }
 
     // ENTER
@@ -267,7 +269,7 @@ var redraw = function () {
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i) { addMultiChart(plots[i], plots[i+1]); redraw(); })
+        .on("click", function(d, i) { addMultiChart(i, i+1); redraw(); })
     add_dat
         .style("left", (xbuffer + 90) + "px")
         .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
@@ -286,10 +288,13 @@ function removePlot(plt) {
             d.sensorType() === plt.sensorType();
     });
     var index = plots.indexOf(match);
+    if(index === -1) { console.log("PLOT NOT IN PLOTS"); }
     plots.splice(index, 1); redraw();
 }
 
-function addMultiChart (parentA, parentB) {
+function addMultiChart (parentAIndex, parentBIndex) {
+    var parentA = plots[parentAIndex];
+    var parentB = plots[parentBIndex];
     var interval = 5;
     var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel);
     plt.addMultiChartParent(parentA);
@@ -297,9 +302,17 @@ function addMultiChart (parentA, parentB) {
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
 
-    // Insert the new plot (plt) in front of parentA in the plots array
-    insertItemBeforeItem(plots, plots.pop(), parentA); // plots.pop() should be the same as plt
-    console.log(plots);
+    // Insert the new plot where it should be in plots and in the DOM
+    insertBeforeDOMPlot(plots.indexOf(plt), parentAIndex); // modify the DOM
+    putLastItemBeforeIndex(plots, parentAIndex); // modify plots
+
+    // TODO: set both parents as invisible.
+    redraw();
+}
+
+function putLastItemBeforeIndex(array, a) {
+    array.splice(a, 0, array.pop());
+    return array;
 }
 
 function addPlot (sensorType, sensorNumber) {
@@ -333,8 +346,6 @@ function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level) {
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
 
     plots.push(plot);
-
-    console.log(plots);
 
     redraw();
 
