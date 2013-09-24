@@ -131,7 +131,7 @@ var redraw = function () {
         var allPlots = d[0];
 
         for(var i = 0; i < allPlots.length; i++) {
-            d3.select(allPlots[i]).call(plots[i]);
+            d3.select(allPlots[i]).call(plots_filtered()[i]);
         }
     }
 
@@ -197,10 +197,10 @@ var redraw = function () {
            .attr("height", getTotalChartHeight(plots_filtered()) + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .attr("height", getTotalChartHeight(plots_filtered())-offset_fix)
+            .attr("height", Math.max(0, getTotalChartHeight(plots_filtered())-offset_fix))
     zoomRectGreyOut.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .attr("height", getTotalChartHeight(plots_filtered())-offset_fix)
+            .attr("height", Math.max(0, getTotalChartHeight(plots_filtered())-offset_fix))
             .style("opacity", 0.15)
             .style("fill", "#000")
 
@@ -288,14 +288,45 @@ var redraw = function () {
     updateZoom();
 }
 
-function removePlot(plt) {
+function removePlot(p) {
+    printArrayOfPlots(plots_filtered())
+    // Show each of this plot's parents
+    var plt = _.find(plots, function (d) {
+        return p.sensorNumber() === d.sensorNumber() && p.sensorType() === d.sensorType();
+    });
+
+    _.forEach(plt.multiChart_parentBinnedCharts(), function (d) {
+        //d.displayThisChart(true); // TODO: instead of this, just delete it and recreate it.
+        var ty = d.sensorType();
+        var nu = d.sensorNumber();
+        plots.splice(plots.indexOf(d), 1);
+        addPlot(d.sensorType(), d.sensorNumber())
+        //redraw();
+        //console.log(plots_filtered().indexOf(plt), plots_filtered().length - 1);
+        //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
+    });
+
+    // TODO: move the new plots in front of the old plot in the DOM
+    //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
+
+    // Find the chart in the plots array
     var match = _.find(plots, function (d) {
         return d.sensorNumber() === plt.sensorNumber() &&
             d.sensorType() === plt.sensorType();
     });
     var index = plots.indexOf(match);
     if(index === -1) { console.log("PLOT NOT IN PLOTS"); }
+
+    // Remove the chart from the plots array
     plots.splice(index, 1); redraw();
+
+    redraw();
+}
+
+function printArrayOfPlots(array) {
+    console.log(_.map(array, function (d) {
+        return d.sensorType() + "-" + d.sensorNumber();
+    }))
 }
 
 function addMultiChart (parentAIndex, parentBIndex) {
@@ -309,10 +340,12 @@ function addMultiChart (parentAIndex, parentBIndex) {
     parentB.addMultiChartChild(plt);
 
     // Insert the new plot where it should be in plots and in the DOM
-    insertBeforeDOMPlot(plots.indexOf(plt), parentAIndex); // modify the DOM
+    insertBeforeDOMPlot(plots_filtered().indexOf(plt), parentAIndex); // modify the DOM
     putLastItemBeforeIndex(plots, parentAIndex); // modify plots
 
-    // TODO: set both parents as invisible.
+    // Set both parents as invisible.
+    parentA.displayThisChart(false);
+    parentB.displayThisChart(false);
 
     redraw();
 }
