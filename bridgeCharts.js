@@ -96,9 +96,9 @@ function insertItemBeforeItem(array, a, beforeThisItem) {
     return array;
 }
 
-var getTotalChartHeight = function () {
+var getTotalChartHeight = function (plotsArray) {
     var total = 0;
-    _.each(plots, function (d, i) {
+    _.each(plotsArray, function (d, i) {
         total = total + d.height();
     });
     return total;
@@ -116,8 +116,14 @@ function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
     parent.insertBefore(charts[newElementIndex], charts[referenceElementIndex]); // swap in DOM
 }
 
+function plots_filtered() {
+    return _.filter(plots, function (d) {
+        return d.displayThisChart();
+    })
+};
+
 var redraw = function () {
-    var plotSVGs = d3.select("#charts").selectAll("svg").data(plots, function (d, i) { return d.uniqueID(); });
+    var plotSVGs = d3.select("#charts").selectAll("svg").data(plots_filtered(), function (d, i) { return d.uniqueID(); });
 
     // Weird hackery to reselect elements and call their specific plot
     // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
@@ -188,13 +194,13 @@ var redraw = function () {
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomSVG.attr("width", document.getElementById("chartContainer").offsetWidth)
             .transition().duration(duration)
-           .attr("height", getTotalChartHeight() + offset);
+           .attr("height", getTotalChartHeight(plots_filtered()) + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .attr("height", getTotalChartHeight()-offset_fix)
+            .attr("height", getTotalChartHeight(plots_filtered())-offset_fix)
     zoomRectGreyOut.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .attr("height", getTotalChartHeight()-offset_fix)
+            .attr("height", getTotalChartHeight(plots_filtered())-offset_fix)
             .style("opacity", 0.15)
             .style("fill", "#000")
 
@@ -205,7 +211,7 @@ var redraw = function () {
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
     // Show add/remove buttons
-    var add_dat = d3.select("#edit_remove").selectAll("g").data(plots.concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    var add_dat = d3.select("#edit_remove").selectAll("g").data(plots_filtered().concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     var add_dat_enter = add_dat.enter().append("g")
         .style("position", "absolute")
     add_dat_enter.append("img")
@@ -226,8 +232,8 @@ var redraw = function () {
 
     add_dat.select(".edit_on_top").transition().duration(duration)
         .style("display", "block")
-        .style("opacity", function (d) { if (_.contains(plots, d)) { return 0; } else { return 1; }})
-        .transition().duration(0).style("display", function (d) { if(_.contains(plots, d)) { return "none"; } else { return "block"; }})
+        .style("opacity", function (d) { if (_.contains(plots_filtered(), d)) { return 0; } else { return 1; }})
+        .transition().duration(0).style("display", function (d) { if(_.contains(plots_filtered(), d)) { return "none"; } else { return "block"; }})
     add_dat.transition().duration(duration)
         .style("left", (width - xsize) + "px")
         .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; })
@@ -235,7 +241,7 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show swap buttons
-    var add_dat = d3.select("#edit_swap").selectAll("img").data(plots.slice(0, plots.length-1));
+    var add_dat = d3.select("#edit_swap").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
         .attr("src", "./img/updown.svg")
@@ -258,11 +264,11 @@ var redraw = function () {
         .style("opacity", 1)
     add_dat.transition().duration(duration)
         .attr("x", width - 15)
-        .attr("y", function(d,i) { return (getTotalChartHeight() + i*(plotHeight) + (plotHeight/4)); })
+        .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); })
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
 
     // Show combine with multiplication buttons
-    var add_dat = d3.select("#edit_mult").selectAll("img").data(plots.slice(0, plots.length-1));
+    var add_dat = d3.select("#edit_mult").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
         .attr("src", "./img/mult.svg")
@@ -307,6 +313,7 @@ function addMultiChart (parentAIndex, parentBIndex) {
     putLastItemBeforeIndex(plots, parentAIndex); // modify plots
 
     // TODO: set both parents as invisible.
+
     redraw();
 }
 
@@ -349,7 +356,7 @@ function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level) {
 
     redraw();
 
-    d3.select("#charts").attr("height", getTotalChartHeight()).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
+    d3.select("#charts").attr("height", getTotalChartHeight(plots_filtered())).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
 
     zoomRect.attr("fill", "rgba(0,0,0,0)")
             .call(zoom);

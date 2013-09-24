@@ -997,6 +997,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.displayThisChart = function (value) {
+        if (!arguments.length) return displayThisChart;
+        displayThisChart = value;
+        return my;
+    }
+
     my.binData = function () { // TODO: just for testing
         return binData;
     }
