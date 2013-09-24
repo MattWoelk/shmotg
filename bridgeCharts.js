@@ -212,7 +212,7 @@ var redraw = function () {
         .attr("height", xsize)
         .attr("cursor", "pointer")
         .attr("src", "./img/remove.svg")
-        .on("click", function(d, i){ var index = plots.indexOf(d); plots.splice(index, 1); redraw(); })
+        .on("click", function(d){ removePlot(d); })
     add_dat_enter.append("img")
         .style("position", "absolute")
         .attr("width", xsize)
@@ -278,6 +278,15 @@ var redraw = function () {
 
     //update the zoom for the new plot size
     updateZoom();
+}
+
+function removePlot(plt) {
+    var match = _.find(plots, function (d) {
+        return d.sensorNumber() === plt.sensorNumber() &&
+            d.sensorType() === plt.sensorType();
+    });
+    var index = plots.indexOf(match);
+    plots.splice(index, 1); redraw();
 }
 
 function addMultiChart (parentA, parentB) {
