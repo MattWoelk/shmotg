@@ -83,29 +83,29 @@ slider = function () {
 
     // {{{ HELPER FUNCTIONS
     function highlightSliderElement() {
-        var locationOfHandle = d3.transform(d3.select("#handle_region" + id).attr("transform")).translate[1] + (boxSize/2);
-        var locationOfSlider = d3.transform(d3.select("#slide_region" + id).attr("transform")).translate[1];
-        var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize);
+        var locationOfHandle = d3.transform(handle_region.attr("transform")).translate[1] + (boxSize/2);
+        var locationOfSlider = d3.transform(slide_region.attr("transform")).translate[1];
+        var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize); // level being pointed to
         changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
         d3.selectAll(".slider_boxes")
             .classed("highlighted", function (d, i) { return i == beingPointedTo; });
     }
 
     function currentHandlePosition () {
-        var dragTarget = d3.select("#handle_region" + id);
+        var dragTarget = handle_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         return curTrans[1];
     }
 
     function currentScrollPosition () {
-        var dragTarget = d3.select("#slide_region" + id);
+        var dragTarget = slide_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         return curTrans[1];
     }
 
     function dragSlider(usethis) {
         var adjustment = usethis ? usethis : d3.event.dy;
-        var dragTarget = d3.select("#slide_region" + id);
+        var dragTarget = slide_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
         var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
@@ -116,7 +116,7 @@ slider = function () {
 
     function dragHandle(usethis) {
         var adjustment = usethis ? usethis : d3.event.dy;
-        var dragTarget = d3.select("#handle_region" + id);
+        var dragTarget = handle_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
         var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
@@ -179,7 +179,7 @@ slider = function () {
                 .on("mouseout", onoff)
                 .on("mousedown", ondown)
                 .on("click", onclick)
-                .on("mousewheel", onscroll)
+                //.on("mousewheel", onscroll)
                 .attr("class", "slider_boxes");
             slide_enter.append("text")
                 .attr("text-anchor", "middle")

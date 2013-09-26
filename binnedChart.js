@@ -215,11 +215,15 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level) {
 
     //{{{ VARIABLES
 
-    var dataReq = dataRequester;
+    var dataReq = dataRequester; // TODO: multiChart
+    var multiChart_parentBinnedCharts = []; // contains other binnedLineChart objects. TODO: Combine their data with this one's and display the result.
+    var multiChart_childrenCharts = []; // TODO: let these know whenever we get new data
+    var displayThisChart = true; // TODO: get/set this, and do less work when not being displayed
+
     var strokeWidth = 1;
     var sensorType = sensorT;
     var sensorNumber = sensorN;
@@ -231,7 +235,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     //       - can't do, because we're changing top depending
     //         on if we're showing time context
     //       - unless we make it a new offset variable instead of reusing margin
-    var margin = {top: 10, right: 27, bottom: 25, left: 30 + 80};
+    var margin = {top: 10, right: 27, bottom: 25, left: 30 + 90};
 
     // the height of the chart by itself (not including axes or time context)
     var height = 150 - margin.top - margin.bottom;
@@ -240,7 +244,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var containerWidth = document.getElementById("chartContainer").offsetWidth;
     var width = containerWidth - margin.left - margin.right;
 
-    var whichLevelToRender = 0;
+    var whichLevelToRender = level ? level : 0;
     var whichLinesToRender = ['average', 'maxes', 'mins'];
     var interpolationMethod = ['linear'];
 
@@ -274,7 +278,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var transitionNextTime = false;
     var reRenderTheNextTime = true;
     var waitingForServer = false;
-    var freshArrivalFromServer = false;
 
     // Where all data is stored, but NOT rendered d0's
     var binData = binnedData();
@@ -460,12 +463,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     var countMissing = 0;
                     var lineMissingFilter = [];
 
-                    if (freshArrivalFromServer) {
-                        // we are no longer waiting for the server, so render nothing.
-                        lineMissingFilter.push({val: 1, ms: renderRange[0]});
-                        lineMissingFilter.push({val: 1, ms: renderRange[1]});
-                    } else if (fil.length <= 1) {
-                        // No data. Fill everything.
+                    if (fil.length <= 1) {
+                        // No data. Fill everything. (Everything is missing.)
                         lineMissingFilter.push({val: NaN, ms: renderRange[0]});
                         lineMissingFilter.push({val: NaN, ms: renderRange[1]});
                     } else {
@@ -640,7 +639,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         }
 
         reRenderTheNextTime = false;
-        freshArrivalFromServer = false;
 
         // GENERATE ALL d0s. (generate the lines paths) }}}
 
@@ -800,20 +798,30 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
 
             // Draw Time Context
-            var timeContextSelection = timeContextContainer.selectAll("text")
-                    .data([sensorType.capitalize() + " " + sensorNumber + " - " + getTimeContextString(xScale, showTimeContext)]);
+            var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
+                    .data(["⬐ " + getTimeContextString(xScale, showTimeContext)]);
+            var titleContainer = timeContextContainer.selectAll(".sensor_title")
+                    .data([sensorType.capitalize() + " " + sensorNumber]);
 
             // enter
-            timeContextSelection.enter().append("text");
+            timeContextSelection.enter().append("text")
+                .attr("class", "sensor_time_context");
+            titleContainer.enter().append("text")
+                .attr("class", "sensor_title");
 
             // update
             timeContextSelection
                     .text(function (d) { return d; })
-                    .attr("x", margin.left)
+                    .attr("x", margin.left -5)
+                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+            titleContainer
+                    .text(function (d) { return d; })
+                    .attr("x", margin.left + (width))
                     .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
 
             // exit
             timeContextSelection.exit().remove();
+            titleContainer.exit().remove();
 
             // TIME CONTEXT }}}
 
@@ -912,6 +920,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     my.update = function (reRender) {
         my.setSelectedLines();
+        //console.log(slctn);
         my(slctn);
     };
 
@@ -944,6 +953,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.sensorType = function (value) {
+        if (!arguments.length) return sensorType;
+        sensorType = value;
+        return my;
+    }
+
+    my.sensorNumber = function (value) {
+        if (!arguments.length) return sensorNumber;
+        sensorNumber = value;
+        return my;
+    }
+
     my.yAxisLock = function (value) {
         if (!arguments.length) return yAxisLock;
         if (yAxisLock == true && value == false) {
@@ -956,21 +977,62 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.addMultiChartChild = function (child) {
+        multiChart_childrenCharts.push(child);
+    }
+
+    my.addMultiChartParent = function (parent) {
+        multiChart_parentBinnedCharts.push(parent);
+    }
+
+    my.multiChart_parentBinnedCharts = function (value) {
+        if (!arguments.length) return multiChart_parentBinnedCharts;
+        multiChart_parentBinnedCharts = value;
+        return my;
+    }
+
+    my.multiChart_childrenCharts = function (value) {
+        if (!arguments.length) return multiChart_childrenCharts;
+        multiChart_childrenCharts = value;
+        return my;
+    }
+
+    my.displayThisChart = function (value) {
+        if (!arguments.length) return displayThisChart;
+        displayThisChart = value;
+        return my;
+    }
+
     my.binData = function () { // TODO: just for testing
         return binData;
+    }
+
+    my.incomingRequestedData = function (received) {
+        var req = received.req; // TODO: multiChart
+        if (my.uniqueID() === "" + received.sensorType + received.sensorNumber) {
+            my.addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
+        }
+        // TODO: multiChart: notify children that there is updated data.
     }
 
     my.addDataToBinData = function (datas, level) {
         // add data to binData IN THE CORRECT ORDER
         waitingForServer = false;
-        freshArrivalFromServer = true;
 
-        if (datas.length === 0) {
+        if (level === 0) {
+            var filteredDatas = _.filter(datas, function(d) {
+                return !isNaN(d.val);
+            })
+        } else {
+            filteredDatas = datas;
+        }
+
+        if (filteredDatas.length === 0) {
             //console.log("NO DATA");
         } else if (level === 0) {
-            binData.addRawData(datas);
+            binData.addRawData(filteredDatas);
         } else {
-            binData.addBinnedData(datas, level);
+            binData.addBinnedData(filteredDatas, level);
         }
 
         return my;
