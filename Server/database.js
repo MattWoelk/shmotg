@@ -192,7 +192,7 @@ sendDatabaseQuery = function(query, doWithResult) {
   });
 
   mysqlconnection.query(query.query, function (err, rows, fields) {
-    if (err) { console.log("err: ", err); doWithResult(null); return; }
+    if (err) { console.log("err: ", err); doWithResult([]); return; }
     console.log(red+query.query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {
