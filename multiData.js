@@ -13,47 +13,48 @@ multiData = function () {
     var oneSample = 1000 / 200; // milliseconds per sample
     var parentBDs = [];
 
-    var bd = { // where all of the data is stored
-        keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
-        rawData : {
-            levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
-                        // with one key for each range of object, up to a maximum size
-                        // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
-                        //           ^-- a "bin container" -----------------------------------------------------^
-        },
-        average : {
-            func   : function (a, b) { return (a+b)/2; },
-            levels: [],
-        },
-        maxes : {
-            func   : function (a, b) { return d3.max([a,b]); },
-            levels: [],
-        },
-        mins : {
-            func   : function (a, b) { return d3.min([a,b]); },
-            levels: [],
-        },
-        q1 : {
-            func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
-            levels: [],
-        },
-        q3 : {
-            func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
-            levels: [],
-        },
-        quartiles : {
-            levels: [],
-        },
-        missing : {
-            levels: [],
-        },
-        missingBox : {
-            levels: [],
-        },
-        loadingBox : {
-            levels: [],
-        },
-    }; // where everything is stored
+//    var bd = { // where all of the data is stored
+//        keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
+//        rawData : {
+//            levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
+//                        // with one key for each range of object, up to a maximum size
+//                        // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
+//                        //           ^-- a "bin container" -----------------------------------------------------^
+//        },
+//        average : {
+//            func   : function (a, b) { return (a+b)/2; },
+//            levels: [],
+//        },
+//        maxes : {
+//            func   : function (a, b) { return d3.max([a,b]); },
+//            levels: [],
+//        },
+//        mins : {
+//            func   : function (a, b) { return d3.min([a,b]); },
+//            levels: [],
+//        },
+//        q1 : {
+//            func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
+//            levels: [],
+//        },
+//        q3 : {
+//            func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+//            levels: [],
+//        },
+//        quartiles : {
+//            levels: [],
+//        },
+//        missing : {
+//            levels: [],
+//        },
+//        missingBox : {
+//            levels: [],
+//        },
+//        loadingBox : {
+//            levels: [],
+//        },
+//    }; // where everything is stored
+
     // VARIABLES }}}
 
     //{{{ HELPER METHODS
@@ -717,7 +718,7 @@ multiData = function () {
 
     my.getOpacity = function (key) {
         // TODO: YES YES YES
-        return bd[key].opacity;
+        return parentBDs[0].bd()[key].opacity;
     }
 
     my.getAllInRange = function(lvl, range) {
@@ -774,35 +775,58 @@ multiData = function () {
         return result;
     }
 
+    my.multiplyArraysOfDateValObjects = function (arrays) {
+        // TODO: return an array which is each element of a and b multiplied
+
+        // List of all ms values in either a or b
+        var ms_values = [];
+        _.each(arrays, function (arr) {
+            ms_values = _.union(ms_values, _.pluck(arr, "ms"));
+        });
+        ms_values = ms_values.sort(function (a, b) { return a - b; });
+
+        // TODO: go through each one
+        var result = [];
+        _.each(ms_values, function (ms) {
+            var found = [];
+            _.each(arrays, function (arr) {
+                var val = _.find(arr, function (d) { d.ms === ms; });
+                if (val !== undefined) {
+                    found.push(val);
+                } else {
+                    found.push(null);
+                }
+            });
+            if (_.contains(found, null)) {
+                // TODO:   if any is missing, say missing
+            } else {
+                result.push({
+                    ms: ms,
+                    val: _.reduce(found, function (memo, num) {
+                        return memo * num;
+                    }, 1)
+                });
+            }
+        })
+
+        return result;
+    }
+
     my.getDateRange = function (keys, lvl, range) {
-        // TODO: YES YES YES
         // give the range of data for this key and level
         // NOT including the highest value in range
-        // USE:
+        // COMMON USE CASE:
         // filter an array so that we don't render much more
         // than the required amount of line and area
 
-        var result = [];
+        var pdbs = [];
+        // Run getDateRange on each parent
+        _.each(parentBDs, function (pdb) {
+            pdbs.push(pdb.getDateRange(keys, lvl, range));
+        });
 
-        // where to look for this data:
-        var whichBinsToLookIn = getSurroundingBinContainers(range[0], range[1], lvl);
-
-        for (var k = 0; k < keys.length; k++) {
-            var key = keys[k];
-            _.each(whichBinsToLookIn, function (n) {
-                if(!bd[key] || !bd[key].levels[lvl]) { return; }
-                var dat = bd[key].levels[lvl][n];
-
-                result = result.concat(_.filter(dat, function (d, i) {
-                    return d.ms <= range[1] && d.ms >= range[0];
-                }));
-            });
-        }
-
-        // sort it
-        result = result.sort(function (a, b) { return a.ms - b.ms; });
-
-        return result;
+        // Go through each result and combine them.
+        return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
     my.removeAllLevelsBelow = function(LowestLevel) {
@@ -892,7 +916,7 @@ multiData = function () {
 
     my.getKeys = function () {
         // TODO: YES YES YES
-        return bd.keys.slice(0); // give a copy of the array
+        return parentBDs[0].bd().keys.slice(0); // give a copy of the array
     }
 
     my.bd = function () {

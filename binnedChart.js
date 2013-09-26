@@ -981,8 +981,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         multiChart_childrenCharts.push(child);
     }
 
-    my.makeIntoMultiChart = function () {
+    my.makeIntoMultiChart = function (parents) {
         binData = multiData();
+        _.each(parents, function (par) {
+            binData.addParentData(par.bd());
+        })
     }
 
     my.addMultiChartParent = function (parent) {
