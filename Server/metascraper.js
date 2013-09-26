@@ -62,7 +62,7 @@ function series(item, func) {
                 [start_year, start_month, end_year, end_month, 15, sensorNumber],
                 // Then rebin everything at lvl 20 and up:
                 callRebinner(
-                        [2010, 0, 0, 2013, 0, 0, 20, sensorNumber],
+                        [2010, 1, 1, 2013, 1, 1, 20, sensorNumber],
                         function () {
                             console.log("DONE!");
                             process.exit(0);
@@ -71,8 +71,8 @@ function series(item, func) {
 }
 
 for (var y = start_year; y <= end_year; y++) {
-    var m_start = y === start_year ? start_month : 0;
-    var m_end   = y === end_year ? end_month : 11;
+    var m_start = y === start_year ? start_month : 1;
+    var m_end   = y === end_year ? end_month : 12;
     for (var m = m_start; m <= m_end; m++) {
         var num_days = daysInMonth(y, m);
         var d_start = m === m_start ? start_day : 1;
