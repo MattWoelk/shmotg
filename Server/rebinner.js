@@ -47,7 +47,7 @@ var STEP_SIZE = 600000; // 10000 is 2400 samples each time
 
 var req = {
         bin_level: 0, // placeholder
-        sensorNumber: 18,
+        sensorNumber: 18, // placeholder
         sensorType: "girder",
 }
 
@@ -74,6 +74,7 @@ var end_day   = parseInt(process.argv[7]);
 var lowestLevel = parseInt(process.argv[8]);
 var sensorNumber = parseInt(process.argv[9]);
 req.bin_level = lowestLevel;
+req.sensorNumber = sensorNumber;
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK

@@ -58,11 +58,11 @@ function series(item, func) {
         console.log("Rebinning now!");
 
         // Rebin this with the two months around it:
-        callRebinner(
-                [start_year, start_month-1, start_day, end_year, end_month+1, end_day, 13],
+        callMetaRebinner(
+                [start_year, start_month, end_year, end_month, 15, sensorNumber],
                 // Then rebin everything at lvl 20 and up:
                 callRebinner(
-                        [2010, 0, 0, 2013, 0, 0, 20],
+                        [2010, 1, 1, 2013, 1, 1, 20, sensorNumber],
                         function () {
                             console.log("DONE!");
                             process.exit(0);
@@ -71,8 +71,8 @@ function series(item, func) {
 }
 
 for (var y = start_year; y <= end_year; y++) {
-    var m_start = y === start_year ? start_month : 0;
-    var m_end   = y === end_year ? end_month : 11;
+    var m_start = y === start_year ? start_month : 1;
+    var m_end   = y === end_year ? end_month : 12;
     for (var m = m_start; m <= m_end; m++) {
         var num_days = daysInMonth(y, m);
         var d_start = m === m_start ? start_day : 1;
@@ -102,8 +102,24 @@ function callScraper (dat, callback) {
     });
 }
 
+function callMetaRebinner (dat, callback) {
+    var scr = spawn('node',  ['metarebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5]]);
+
+    scr.stdout.setEncoding('utf8');
+    scr.stdout.on('data', function (data) {
+        var str = data.toString()
+        var lines = str.split(/(\r?\n)/g);
+        console.log(lines.join("").replace(/\n/g, ''));
+    });
+
+    scr.on('close', function (code) {
+        console.log('process exit code ' + code);
+        callback();
+    });
+}
+
 function callRebinner (dat, callback) {
-    var scr = spawn('node',  ['rebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6]]);
+    var scr = spawn('node',  ['rebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7]]);
 
     scr.stdout.setEncoding('utf8');
     scr.stdout.on('data', function (data) {

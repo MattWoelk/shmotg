@@ -165,7 +165,12 @@ var redraw = function () {
     plotSVGs.call(plotsCaller);
 
     // Get list of available-but-not-on-display sensors
-    var sensorsAvailable = ["temperature_1", "girder_18", "girder_20", "girder_22", "girder_45"];
+    var sensorsAvailable = ["temperature_1",
+                            "girder_18",
+                            "girder_19",
+                            "girder_20",
+                            "girder_22",
+                            "girder_45"];
     var sensorsShown = _.map(plots, function (d) {
         return d.sensorType() + "_" + d.sensorNumber();
     });
@@ -334,8 +339,7 @@ function addMultiChart (parentAIndex, parentBIndex) {
     var parentB = plots[parentBIndex];
     var interval = 5;
     var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel);
-    plt.addMultiChartParent(parentA);
-    plt.addMultiChartParent(parentB);
+    plt.makeIntoMultiChart([parentA, parentB]);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
 
