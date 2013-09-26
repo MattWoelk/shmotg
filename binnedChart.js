@@ -219,7 +219,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     //{{{ VARIABLES
 
-    var dataReq = dataRequester;
+    var dataReq = dataRequester; // TODO: multiChart
+    var multiChart_parentBinnedCharts = []; // contains other binnedLineChart objects. TODO: Combine their data with this one's and display the result.
+    var multiChart_childrenCharts = []; // TODO: let these know whenever we get new data
+    var displayThisChart = true; // TODO: get/set this, and do less work when not being displayed
+
     var strokeWidth = 1;
     var sensorType = sensorT;
     var sensorNumber = sensorN;
@@ -973,8 +977,42 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.addMultiChartChild = function (child) {
+        multiChart_childrenCharts.push(child);
+    }
+
+    my.addMultiChartParent = function (parent) {
+        multiChart_parentBinnedCharts.push(parent);
+    }
+
+    my.multiChart_parentBinnedCharts = function (value) {
+        if (!arguments.length) return multiChart_parentBinnedCharts;
+        multiChart_parentBinnedCharts = value;
+        return my;
+    }
+
+    my.multiChart_childrenCharts = function (value) {
+        if (!arguments.length) return multiChart_childrenCharts;
+        multiChart_childrenCharts = value;
+        return my;
+    }
+
+    my.displayThisChart = function (value) {
+        if (!arguments.length) return displayThisChart;
+        displayThisChart = value;
+        return my;
+    }
+
     my.binData = function () { // TODO: just for testing
         return binData;
+    }
+
+    my.incomingRequestedData = function (received) {
+        var req = received.req; // TODO: multiChart
+        if (my.uniqueID() === "" + received.sensorType + received.sensorNumber) {
+            my.addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
+        }
+        // TODO: multiChart: notify children that there is updated data.
     }
 
     my.addDataToBinData = function (datas, level) {
