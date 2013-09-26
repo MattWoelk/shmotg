@@ -642,7 +642,6 @@ multiData = function () {
     }
 
     my.getDateRangeWithMissingValues = function (key, lvl, range, extra) {
-        // TODO: yes YES YES YES
         // give the range of data for this key and level
         // NOT including the highest value in range
         // USE:
@@ -657,11 +656,14 @@ multiData = function () {
         });
 
         // Go through each result and combine them.
+        //console.log(pdbs);
+        //console.log(my.multiplyArraysOfDateValObjects(pdbs));
         return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
     my.multiplyArraysOfDateValObjects = function (arrays) {
-        // TODO: return an array which is each element of a and b multiplied
+        // TODO TODO TODO: NOT WORKING YET! RETURNS [] EVERY TIME
+        // Return an array which is each element of a and b multiplied
 
         // List of all ms values in either a or b
         var ms_values = [];
@@ -675,7 +677,7 @@ multiData = function () {
         _.each(ms_values, function (ms) {
             var found = [];
             _.each(arrays, function (arr) {
-                var val = _.find(arr, function (d) { d.ms === ms; });
+                var val = _.find(arr, function (d) { return d.ms === ms; });
                 if (val !== undefined) {
                     found.push(val);
                 } else {
