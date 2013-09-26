@@ -68,7 +68,6 @@ multiData = function () {
     }
 
     function combineWithoutDuplicates(arr1, arr2) {
-        // TODO: YES YES YES
         // ASSUMPTION: arr1 and arr2 are both sorted
         //             arr1 and arr2 are in the format: [{ms: _}, {ms: _}]
         // TODO: arr1 gets precedence. Return an array which has no duplicates in the 'ms' field.
@@ -181,36 +180,7 @@ multiData = function () {
     }
 
     function rebin (range_to_rebin, level_to_rebin) {
-        // TODO: YES YES YES
-        // link raw data to the source
-        for (var keyValue in bd.keys) {
-            var key = bd.keys[keyValue];
-            bd[key].levels[0] = bd.rawData.levels[0];
-        }
-
-        // for each level other than raw data level,
-        //   for each key,
-        //     bin the data from the lower level
-        for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-            for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
-                var key = bd.keys[keyValue];
-
-                // bin and store data from lower bin
-                var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func, range_to_rebin);
-
-                if (newData.length === 0) {
-                    continue; // Nothing to add; move along.
-                }
-
-                // TODO: filter out what is already in the old data, OR add that ability to addData();
-                // Combine what was already there and what was just calculated
-                // - What was already in this bin level gets precedence
-                //   over what is being binned from the lower level
-
-                my.addData(newData, key, j);
-
-            } // for each key
-        } // for each bin level
+        return; // DO NOTHING
     }
 
     function combineFilteredBinContainerInformation (bin, lvl, key, range) {
@@ -322,7 +292,6 @@ multiData = function () {
     };
 
     function combineAndSortArraysOfDateValObjects (arr1, arr2) {
-        // TODO: yes YES YES YES
         // Add the objects from arr2 (array) to arr1 (array)
         //   only if the object from arr2 has a ms value
         //   which no object in arr1 has.
@@ -377,23 +346,7 @@ multiData = function () {
     }
 
     my.addRawData = function (data, dontBin) {
-        // TOYES YES YES
-        // data must be in the following form: (example)
-        // [ {val: value_point, ms: ms_since_epoch},
-        //   {val: value_point, ms: ms_since_epoch},
-        //   {etc...},
-        // ],
-
-        var range = d3.extent(data, function (d) { return d.ms; });
-
-        my.addData(data, 'rawData', 0);
-
-        if(!dontBin) {
-            rebin(range, 0);
-        }
-
-        return my;
-
+        return my; // DO NOTHING
     }
 
     my.replaceRawData = function (data, dontBin) {
@@ -419,54 +372,7 @@ multiData = function () {
     }
 
     my.addBinnedData = function (bData, lvl, dontBin) {
-        // TODO: YES YES YES
-        // only the level lvl will be stored
-        // data must be in the form of the following example:
-        // { average: {
-        //     levels: [
-        //       [{val: value_point, ms: ms_since_epoch},
-        //        {val: value_point, ms: ms_since_epoch},
-        //        {etc...}],
-        //       [etc.]
-        //     ],
-        //   },
-        //   q1: {
-        //     levels: [
-        //       [etc.]
-        //     ],
-        //   },
-        //   etc: {},
-        // }
-
-        var lows = [];
-        var highs = [];
-        var keys = ['average', 'q1', 'q3', 'mins', 'maxes'];
-
-        for (var i = 0; i < keys.length; i++) {
-            if (bData[keys[i]] && bData[keys[i]].levels && bData[keys[i]].levels[lvl]) {
-                var ext = d3.extent(bData[keys[i]].levels[lvl], function (d) { return d.ms; });
-                lows.push(ext[0]);
-                highs.push(ext[1]);
-            }
-        }
-
-        var range = [
-                d3.min(lows),
-                d3.max(highs)
-        ];
-
-        //var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
-
-        for (var k in bd.keys) { // for each of max_val, min_val, etc.
-            var key = bd.keys[k];
-            my.addData(bData[key].levels[lvl], key, lvl);
-        }; // for each of max_val, min_val, etc.
-
-        if(!dontBin) {
-            rebin(range, lvl);
-        }
-
-        return my;
+        return my; // do nothing
     }
 
     my.replaceBinnedData = function(bData, lvl, dontBin) {
@@ -519,7 +425,6 @@ multiData = function () {
 
 
     my.haveDataInRange = function(ms_range, level) {
-        // TODO: YES YES YES
         // Determine the number of samples which we should have in the given range.
 
         // TODO TODO TODO: update for new bin containers
@@ -707,17 +612,14 @@ multiData = function () {
     }
 
     my.getColor = function (key) {
-        // TODO: YES YES YES
-        return bd[key].color;
+        return parentBDs[0].bd()[key].color;
     }
 
     my.getDash = function (key) {
-        // TODO: YES YES YES
-        return bd[key].dash;
+        return parentBDs[0].bd()[key].dash;
     }
 
     my.getOpacity = function (key) {
-        // TODO: YES YES YES
         return parentBDs[0].bd()[key].opacity;
     }
 
@@ -748,31 +650,14 @@ multiData = function () {
         // than the required amount of line and area
         // missing values are NaN's
 
-        var missings = my.missingBins(range, lvl, true);
-
-        missingsObjs = missings.map(function (d) {
-            return {ms: d, val: NaN};
+        var pdbs = [];
+        // Run getDateRange on each parent
+        _.each(parentBDs, function (pdb) {
+            pdbs.push(pdb.getDateRangeWithMissingValues(key, lvl, range, extra));
         });
 
-        result = combineAndSortArraysOfDateValObjects(
-                missingsObjs,
-                my.getDateRange([key], lvl, range)
-                );
-
-        // if we should add in an extra value before each NaN
-        // so that everything looks nice for step-after interpolation
-        if (extra) {
-            var toEnd = result.length;
-            for (var i = 1; i < toEnd; i++) {
-                if (isNaN(result[i].val)) {
-                    result.splice(i, 0, { ms: result[i].ms, val: result[i-1].val });
-                    i++;
-                    toEnd++;
-                }
-            }
-        }
-
-        return result;
+        // Go through each result and combine them.
+        return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
     my.multiplyArraysOfDateValObjects = function (arrays) {
@@ -887,12 +772,10 @@ multiData = function () {
 
     // TODO: use this instead of manually doing it everywhere
     my.binSize = function (lvl) {
-        // TODO: yes YES YES YES
         return Math.pow(2, lvl) * oneSample;
     }
 
     my.oneSample = function (value) {
-        // YES YES YES
         if (!arguments.length) return oneSample;
         oneSample = value;
         return my;
@@ -915,7 +798,6 @@ multiData = function () {
     }
 
     my.getKeys = function () {
-        // TODO: YES YES YES
         return parentBDs[0].bd().keys.slice(0); // give a copy of the array
     }
 
@@ -928,7 +810,6 @@ multiData = function () {
     }
 
     my.getChildBins = function(ms, lvl) {
-        // TODO: yes YES YES YES
         // TODO: Return an array of two bins of level lvl-1,
         //       which are the bins which are used to calculate
         //       the value for the bin at ms.
