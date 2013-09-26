@@ -997,6 +997,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    my.multiChart_getDataFromParents = function() {
+        // TODO: load all binData from parents.
+        // TODO: 1 - iterate through binData (using getters likely)
+        // TODO: 2 - combine that section and add it to our binData object
+        // TODO: INSTEAD: whenever we would get data from OUR binData, instead get it from all of our parents and combine it, rendering the result.
+        //   TODO: this will require a new binnedData object which talks to parents.
+    }
+
     my.displayThisChart = function (value) {
         if (!arguments.length) return displayThisChart;
         displayThisChart = value;

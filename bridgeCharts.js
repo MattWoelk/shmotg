@@ -338,6 +338,7 @@ function addMultiChart (parentAIndex, parentBIndex) {
     plt.addMultiChartParent(parentB);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
+    plt.multiChart_getDataFromParents();
 
     // Insert the new plot where it should be in plots and in the DOM
     insertBeforeDOMPlot(plots_filtered().indexOf(plt), parentAIndex); // modify the DOM
