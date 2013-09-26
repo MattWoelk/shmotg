@@ -662,7 +662,7 @@ multiData = function () {
     }
 
     my.multiplyArraysOfDateValObjects = function (arrays) {
-        // TODO TODO TODO: NOT WORKING YET! RETURNS [] EVERY TIME
+        // TODO TODO TODO: NOT WORKING YET! RETURNS val: NaN EVERY TIME
         // Return an array which is each element of a and b multiplied
 
         // List of all ms values in either a or b
@@ -672,14 +672,15 @@ multiData = function () {
         });
         ms_values = ms_values.sort(function (a, b) { return a - b; });
 
-        // TODO: go through each one
         var result = [];
+
+        // Go through each one
         _.each(ms_values, function (ms) {
             var found = [];
             _.each(arrays, function (arr) {
                 var val = _.find(arr, function (d) { return d.ms === ms; });
                 if (val !== undefined) {
-                    found.push(val);
+                    found.push(val.val);
                 } else {
                     found.push(null);
                 }
