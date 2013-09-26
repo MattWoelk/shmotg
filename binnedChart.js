@@ -981,8 +981,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         multiChart_childrenCharts.push(child);
     }
 
+    my.makeIntoMultiChart = function () {
+        binData = multiData();
+    }
+
     my.addMultiChartParent = function (parent) {
+        // MUST run my.makeIntoMultiChart ONCE IN TOTAL before this will work.
         multiChart_parentBinnedCharts.push(parent);
+        binData.addParentData(parent.bd());
     }
 
     my.multiChart_parentBinnedCharts = function (value) {
@@ -995,14 +1001,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (!arguments.length) return multiChart_childrenCharts;
         multiChart_childrenCharts = value;
         return my;
-    }
-
-    my.multiChart_getDataFromParents = function() {
-        // TODO: load all binData from parents.
-        // TODO: 1 - iterate through binData (using getters likely)
-        // TODO: 2 - combine that section and add it to our binData object
-        // TODO: INSTEAD: whenever we would get data from OUR binData, instead get it from all of our parents and combine it, rendering the result.
-        //   TODO: this will require a new binnedData object which talks to parents.
     }
 
     my.displayThisChart = function (value) {
@@ -1046,7 +1044,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
-    // TODO: this is just for testing
     my.bd = function () {
         return binData;
     }

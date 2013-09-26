@@ -334,11 +334,11 @@ function addMultiChart (parentAIndex, parentBIndex) {
     var parentB = plots[parentBIndex];
     var interval = 5;
     var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel);
+    plt.makeIntoMultiChart();
     plt.addMultiChartParent(parentA);
     plt.addMultiChartParent(parentB);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
-    plt.multiChart_getDataFromParents();
 
     // Insert the new plot where it should be in plots and in the DOM
     insertBeforeDOMPlot(plots_filtered().indexOf(plt), parentAIndex); // modify the DOM
