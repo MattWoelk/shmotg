@@ -986,6 +986,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         _.each(parents, function (par) {
             my.addMultiChartParent(par);
         })
+        my.reRenderTheNextTime(true).update();
     }
 
     my.addMultiChartParent = function (parent) {

@@ -670,7 +670,6 @@ multiData = function () {
         _.each(parentBDs, function (pbds) {
             lowest_of_all = Math.min(lowest_of_all, pbds.getMinValOfAllKeys(lvl));
         });
-        console.log(lowest_of_all);
         return lowest_of_all;
     }
 
