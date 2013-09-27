@@ -655,15 +655,33 @@ multiData = function () {
             pdbs.push(pdb.getDateRangeWithMissingValues(key, lvl, range, extra));
         });
 
+        // get lowest value of all keys for this level in all parents
+        // to be used as the offset for multiplyArraysOfDateValObjects
+        lowest_of_all = my.lowestOfAllParentsInLevel(lvl);
+
         // Go through each result and combine them.
         //console.log(pdbs);
         //console.log(my.multiplyArraysOfDateValObjects(pdbs));
-        return my.multiplyArraysOfDateValObjects(pdbs);
+        return my.multiplyArraysOfDateValObjects(pdbs, Math.abs(lowest_of_all) + 1);
     }
 
-    my.multiplyArraysOfDateValObjects = function (arrays) {
-        // TODO TODO TODO: NOT WORKING YET! RETURNS val: NaN EVERY TIME
+    my.lowestOfAllParentsInLevel = function (lvl) {
+        var lowest_of_all = 999999;
+        _.each(parentBDs, function (pbds) {
+            lowest_of_all = Math.min(lowest_of_all, pbds.getMinValOfAllKeys(lvl));
+        });
+        return lowest_of_all;
+    }
+
+    my.multiplyArraysOfDateValObjects = function (arrays, offset) {
         // Return an array which is each element of a and b multiplied
+        // BUT first normalizes the data so no value is lower than 1.
+
+        //console.log("offset", offset);
+        if (!offset) {
+            offset = 0;
+        }
+
 
         // List of all ms values in either a or b
         var ms_values = [];
@@ -679,19 +697,19 @@ multiData = function () {
             var found = [];
             _.each(arrays, function (arr) {
                 var val = _.find(arr, function (d) { return d.ms === ms; });
-                if (val !== undefined) {
+                if (val !== undefined && val.ms !== NaN) {
                     found.push(val.val);
                 } else {
                     found.push(null);
                 }
             });
             if (_.contains(found, null)) {
-                // TODO:   if any is missing, say missing
+                // do not add to result.
             } else {
                 result.push({
                     ms: ms,
                     val: _.reduce(found, function (memo, num) {
-                        return memo * num;
+                        return memo * (num + offset);
                     }, 1)
                 });
             }
@@ -713,8 +731,12 @@ multiData = function () {
             pdbs.push(pdb.getDateRange(keys, lvl, range));
         });
 
+        // get lowest value of all keys for this level in all parents
+        // to be used as the offset for multiplyArraysOfDateValObjects
+        lowest_of_all = my.lowestOfAllParentsInLevel(lvl);
+
         // Go through each result and combine them.
-        return my.multiplyArraysOfDateValObjects(pdbs);
+        return my.multiplyArraysOfDateValObjects(pdbs, Math.abs(lowest_of_all) + 1);
     }
 
     my.removeAllLevelsBelow = function(LowestLevel) {

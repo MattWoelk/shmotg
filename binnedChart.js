@@ -986,6 +986,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         _.each(parents, function (par) {
             my.addMultiChartParent(par);
         })
+        my.reRenderTheNextTime(true).update();
     }
 
     my.addMultiChartParent = function (parent) {
@@ -1021,7 +1022,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (my.uniqueID() === "" + received.sensorType + received.sensorNumber) {
             my.addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
         }
-        // TODO: multiChart: notify children that there is updated data.
+
+        // Notify children that there is updated data.
+        _.each(multiChart_childrenCharts, function (child) {
+            //child.reRenderTheNextTime(true).update();
+        })
     }
 
     my.addDataToBinData = function (datas, level) {
