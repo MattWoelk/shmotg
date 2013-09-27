@@ -693,6 +693,25 @@ binnedData = function () {
     //    return currentMissingBinStarts;
     //}
 
+    my.getMinValOfAllKeys = function (lvl) {
+        var result = 999999;
+        _.each(bd.keys, function (k) {
+            result = Math.min(result, my.getMinValOfKey(lvl, k));
+        });
+        return result;
+    }
+
+    my.getMinValOfKey = function (lvl, key) {
+        var lowestValue = 999999;
+
+        for (k in bd[key].levels[lvl]) {
+            lowestValue = Math.min(d3.min(bd[key].levels[lvl][k], function (d) { return d.val; }),
+                                   lowestValue);
+        }
+
+        return lowestValue;
+    }
+
     my.getMin = function (lvl) {
         var lowestValue = 999999;
 
