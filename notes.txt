@@ -1,1 +1,16 @@
 It takes about 1 day to bin a month's worth of data.
+
+
+
+WEB WORKERS:
+The following methods call rebin:
+
+o - addRawData
+x - replaceRawData
+o - addBinnedData
+x - replaceBinnedData
+x - rebinAll
+
+o's are both called by incomingRequestedData
+addRawData is called before my() is defined.
+x's are not called by the client.
