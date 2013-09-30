@@ -51,6 +51,7 @@ path.quartiles {
 
 path.posPathcloudcover1 {
     fill: url(#cloudgradient);
+    stroke: none;
 }
 
 path.missing {
