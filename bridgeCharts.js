@@ -543,7 +543,7 @@ socket.on('news', function (data) {
 
     socket.emit('ack', "Message received!");
 
-    initPlot({}, sendRequestToServer, 5, "girder", 45, curLevel);
+    initPlot({}, sendRequestToServer, 5, "girder", 22, curLevel);
 });
 
 sizeOfQueue = function() {
