@@ -545,8 +545,6 @@ socket.on('news', function (data) {
 
     socket.emit('ack', "Message received!");
 
-    initPlot({}, sendRequestToServer, 5, "girder", 18, curLevel);
-    initPlot({}, sendRequestToServer, 5, "girder", 22, curLevel);
     initPlot({}, sendRequestToServer, 5, "girder", 45, curLevel);
 });
 
