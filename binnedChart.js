@@ -215,7 +215,7 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level, cc) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level, cc, hideY) {
 
     //{{{ VARIABLES
 
@@ -249,6 +249,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var interpolationMethod = ['linear'];
 
     var showTimeContext = true;
+    var hideYAxisLabels = hideY;
 
     var transitionDuration = 500;
     var easingMethod = 'cubic-in-out';
@@ -719,7 +720,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             if (!yAxisLock) {
                 yAxis = d3.svg.axis()
                         .scale(yScale)
-                        .ticks(5)
+                        .ticks(hideYAxisLabels ? 0 : 5)
                         .tickSubdivide(true)
                         .tickSize(width, 0, 0) // major, minor, end
                         .orient("left");

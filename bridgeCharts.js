@@ -338,14 +338,14 @@ function addMultiChart (parentAIndex, parentBIndex) {
     var parentA = plots[parentAIndex];
     var parentB = plots[parentBIndex];
     var interval = 5;
-    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel);
+    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel, true);
     plt.makeIntoMultiChart([parentA, parentB]);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
 
     // Insert the new plot where it should be in plots and in the DOM
     insertBeforeDOMPlot(plots_filtered().indexOf(plt), parentAIndex); // modify the DOM
-    putLastItemBeforeIndex(plots, parentAIndex); // modify plots
+    putLastItemBeforeIndex(plots, parentAIndex); // modify plots TODO: is this even necessary ??
 
     // Set both parents as invisible.
     parentA.displayThisChart(false);
@@ -382,9 +382,9 @@ function setLoadingIcon(on) {
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
-function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover) {
+function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover, hideYAxisLabels) {
     var plot;
-    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, cloudcover);
+    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, cloudcover, hideYAxisLabels);
     plot.xScale(xScale.copy());
 
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
@@ -623,7 +623,7 @@ setTimeout(function() { offlinedata(); }, 200);
 
 function offlinedata() {
     var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
-    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel, true);
+    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel, true, true);
 
     var filenames = [ "weather/eng-hourly-01012012-01312012.csv",
                       "weather/eng-hourly-02012012-02292012.csv",
