@@ -501,8 +501,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             renderRange,
                             false);
 
-                    // This is more complicated than it needs to be,
-                    // since we only ever combine two values.
                     var averageOfRange = function (data) {
                         var result = 0;
                         var count = 0;
@@ -604,12 +602,20 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             renderRange,
                             interpolationMethod === "step-after");
 
-                    renderedD0s[key][whichLevelToRender] = d3.svg.line()
-                            .defined(function (d) { return !isNaN(d.val); })
-                            .x(renderFunction)
-                            .y(function (d, i) { return yScale(d.val); })
-                            .interpolate( interpolationMethod )(lineFilter);
-
+                    if (0) {
+                        // TODO: render a big box, then make and send a linearGradient to be used to set the colors
+                        renderedD0s[key][whichLevelToRender] = d3.svg.area()
+                        .defined(function (d) { return !isNaN(d.val); })
+                        .x(renderFunction)
+                        .y(function (d, i) { return yScale(d.val); })
+                        .interpolate( interpolationMethod )(lineFilter);
+                    } else {
+                        renderedD0s[key][whichLevelToRender] = d3.svg.line()
+                        .defined(function (d) { return !isNaN(d.val); })
+                        .x(renderFunction)
+                        .y(function (d, i) { return yScale(d.val); })
+                        .interpolate( interpolationMethod )(lineFilter);
+                    }
                 } // if quartiles else lines
 
                 // update the Ranges of rendered data
@@ -657,6 +663,30 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             }
 
             chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
+
+            var createColorGradient = function() {
+                var grad;
+                return function (id, data) {
+                    grad = grad ? grad : chart.append("linearGradient");
+                    grad.attr("id", id)
+                        .attr("gradientUnits", "userSpaceOnUse")
+                        .attr("x1", xScale.range()[0]).attr("y1", 0)
+                        .attr("x2", xScale.range()[1]).attr("y2", 0)
+                        .selectAll("stop")
+                            .data([
+                                {offset: "0%", color: "black"},
+                                {offset: "50%", color: "black"},
+                                {offset: "50%", color: "red"},
+                                {offset: "100%", color: "red"}
+                            ])
+                            .enter().append("stop")
+                                .attr("offset", function(d) { return d.offset; })
+                                .attr("stop-color", function(d) { return d.color; });
+                    return id;
+                }
+            }();
+            createColorGradient("cloudgradient", []);
+
 
             //Set it's container's dimensions
             selection.attr("width", width);

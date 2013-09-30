@@ -46,6 +46,7 @@ path.q3 {
 
 path.quartiles {
     fill: #800;
+    fill: url(#cloudgradient);
     fill-opacity: 0.2;
 }
 
