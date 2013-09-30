@@ -622,43 +622,51 @@ socket.on('req_data', function (data) {
 //{{{ OFFLINE DATA
 
 function offlinedata() {
-    d3.csv("weather/eng-hourly-01012012-01312012.csv", function (d, i) {
-        var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-        return {val: parseFloat(d.Temp), ms: dat.getTime()};
-    }, function (error, rows) {
-        if (error) {
-            console.log("error");
-            return;
-        }
+    var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
+    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
 
-        var plt = initPlot(rows, function(){}, 1000*60*60, "temperature", 1, curLevel);
+    var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
+                      "weather/eng-hourly-03012012-03312012.csv",
+                      "weather/eng-hourly-01012012-01312012.csv",
+                      "weather/eng-hourly-04012012-04302012.csv",
+                      "weather/eng-hourly-08012011-08312011.csv",
+                      "weather/eng-hourly-09012011-09302011.csv",
+                      "weather/eng-hourly-10012011-10312011.csv",
+                      "weather/eng-hourly-11012011-11302011.csv",
+                      "weather/eng-hourly-12012011-12312011.csv" ];
+    for(var x = 0; x < filenames.length; x++){
+        addWeatherData(filenames[x], plt);
+        addCloudCoverData(filenames[x], plt2);
+    }
 
-        var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
-                          "weather/eng-hourly-03012012-03312012.csv",
-                          "weather/eng-hourly-04012012-04302012.csv",
-                          "weather/eng-hourly-08012011-08312011.csv",
-                          "weather/eng-hourly-09012011-09302011.csv",
-                          "weather/eng-hourly-10012011-10312011.csv",
-                          "weather/eng-hourly-11012011-11302011.csv",
-                          "weather/eng-hourly-12012011-12312011.csv" ];
-        for(var x = 0; x < filenames.length; x++){
-            addWeatherData(filenames[x], plt);
-        }
+    function addWeatherData (filename, plt) {
+        d3.csv(filename, function (d, i) {
+            var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+            return {val: parseFloat(d.Temp), ms: dat.getTime()};
+        }, function (error, rows) {
+            if (error) {
+                console.log("error");
+                return;
+            }
 
-        function addWeatherData(filename, plt) {
-            d3.csv(filename, function (d, i) {
-                var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-                return {val: parseFloat(d.Temp), ms: dat.getTime()};
-            }, function (error, rows) {
-                if (error) {
-                    console.log("error");
-                    return;
-                }
+            plt.addDataToBinData(rows, 0);
+        });
+    }
 
-                plt.addDataToBinData(rows, 0);
-            });
-        }
-    });
+    function addCloudCoverData (filename, plt) {
+        d3.csv(filename, function (d, i) {
+            var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+            var val = (d.Weather === "Clear" || d.Weather === "Mainly Clear") ? 1 : 0;
+            return {val: val, ms: dat.getTime()};
+        }, function (error, rows) {
+            if (error) {
+                console.log("error");
+                return;
+            }
+
+            plt.addDataToBinData(rows, 0);
+        });
+    }
 }
 
 // OFFLINE DATA }}}
