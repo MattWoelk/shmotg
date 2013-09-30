@@ -646,17 +646,17 @@ function offlinedata() {
         }
 
         function addWeatherData(filename, plt) {
-                d3.csv(filename, function (d, i) {
-                    var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-                    return {val: parseFloat(d.Temp), ms: dat.getTime()};
-                }, function (error, rows) {
-                    if (error) {
-                        console.log("error");
-                        return;
-                    }
+            d3.csv(filename, function (d, i) {
+                var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
+                return {val: parseFloat(d.Temp), ms: dat.getTime()};
+            }, function (error, rows) {
+                if (error) {
+                    console.log("error");
+                    return;
+                }
 
-                    plt.addDataToBinData(rows, 0);
-                });
+                plt.addDataToBinData(rows, 0);
+            });
         }
     });
 }
