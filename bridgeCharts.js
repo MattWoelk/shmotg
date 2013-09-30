@@ -534,9 +534,6 @@ var firstTime = true;
 //  console.log("disconnected !!");
 //});
 
-//offlinedata();
-setTimeout(function() { offlinedata(); }, 200);
-
 socket.on('news', function (data) {
     // only do this once, so that plots don't get overlapped whenever the server restarts.
     if (!firstTime) {
@@ -620,6 +617,10 @@ socket.on('req_data', function (data) {
 
 //{{{ OFFLINE DATA
 
+//offlinedata();
+setTimeout(function() { offlinedata(); }, 200);
+
+
 function offlinedata() {
     var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
     var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
@@ -672,7 +673,6 @@ function offlinedata() {
 
 // set up the slider.
 rescaleTo(Math.pow(2, mySlider.handlePosition() / boxSize));
-
 
 // {{{ EDITABLES
 d3.select("#edit").on("click", toggleEditables);
