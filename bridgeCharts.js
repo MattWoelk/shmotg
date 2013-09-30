@@ -703,9 +703,9 @@ var primeWorker = new Worker('worker.js');
 var current = 12;
 console.log(current);
 primeWorker.postMessage(current);
+primeWorker.postMessage("oneSample");
 primeWorker.onmessage = function(event) {
     console.log("Receiving from Worker: " + event.data);
-    console.log(event);
 };
 // WEB WORKERS }}}
 
