@@ -1,7 +1,9 @@
 self.addEventListener('message',  function(event){
-    switch (event.data) {
+    var command = event.data.command;
+    var argz = event.data.argz;
+    switch (command) {
         case "oneSample":
-            postMessage("one");
+            postMessage(argz);
             break;
         default:
             var currPrime = event.data

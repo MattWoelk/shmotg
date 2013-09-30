@@ -703,7 +703,12 @@ var primeWorker = new Worker('worker.js');
 var current = 12;
 console.log(current);
 primeWorker.postMessage(current);
-primeWorker.postMessage("oneSample");
+var testo = {
+    command:"oneSample",
+    argz: ["one", "two", "three"]
+};
+console.log(testo);
+primeWorker.postMessage(testo);
 primeWorker.onmessage = function(event) {
     console.log("Receiving from Worker: " + event.data);
 };
