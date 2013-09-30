@@ -49,7 +49,7 @@ path.quartiles {
     fill-opacity: 0.2;
 }
 
-path.posAreacloudcover1 {
+path.posPathcloudcover1 {
     fill: url(#cloudgradient);
 }
 

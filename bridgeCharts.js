@@ -382,9 +382,9 @@ function setLoadingIcon(on) {
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
-function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level) {
+function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover) {
     var plot;
-    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level);
+    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, cloudcover);
     plot.xScale(xScale.copy());
 
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
@@ -623,7 +623,7 @@ setTimeout(function() { offlinedata(); }, 200);
 
 function offlinedata() {
     var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
-    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
+    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel, true);
 
     var filenames = [ "weather/eng-hourly-01012012-01312012.csv",
                       "weather/eng-hourly-02012012-02292012.csv",

@@ -7,6 +7,32 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 // {{{ HELPER FUNCTIONS
 
+var createColorGradient = function(svg) {
+    var grad;
+    return function (id, data) {
+        console.log("once");
+        if (!svg) { return id; }
+        grad = grad ? grad : svg.append("linearGradient");
+        grad.attr("id", id)
+            .attr("gradientUnits", "userSpaceOnUse")
+            .attr("x1", xScale.range()[0]).attr("y1", 0)
+            .attr("x2", xScale.range()[1]).attr("y2", 0)
+            .selectAll("stop")
+                //.data([
+                //    {offset: "0%", color: "black"},
+                //    {offset: "50%", color: "black"},
+                //    {offset: "50%", color: "red"},
+                //    {offset: "100%", color: "red"}
+                //])
+                .data(data)
+                .enter().append("stop")
+                    .attr("offset", function(d) { return d.ms; })
+                    .attr("stop-opacity", function(d) { return d.val; })
+                    .attr("stop-color", function(d) { return "black"; });
+        return id;
+    }
+}();
+
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
@@ -215,7 +241,7 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level, cc) {
 
     //{{{ VARIABLES
 
@@ -284,6 +310,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     if (oneSample) {
         binData.oneSample(oneSample);
     }
+
+    var cloudcover = cc // when true, only render average, and render it as boxes instead of lines.
 
 
     // Where all the rendered d0s are stored.
@@ -431,7 +459,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 }
 
                 if (key === 'quartiles') {
-                    // render AREA d0s
+                    // render AREA d0s//{{{
+                    if (cloudcover) { continue; }
 
                     var q1Filter = binData.getDateRangeWithMissingValues(
                             'q1',
@@ -451,8 +480,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
 
+                    //}}}
                 } else if (key === 'loadingBox') {
-                    // render Missing averages
+                    // render Missing averages//{{{
+                    if (cloudcover) { continue; }
                     var fil = binData.getDateRangeWithMissingValues(
                             'average',
                             whichLevelToRender,
@@ -492,8 +523,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             .x(renderFunction)
                             .y(function (d, i) { return yScale.range()[0]; }) //.val
                             .interpolate( interpolationMethod )(lineMissingFilter);
+
+                    //}}}
                 } else if (key === 'missing') {
-                    // render Missing averages
+                    // render Missing averages//{{{
+                    if (cloudcover) { continue; }
 
                     var fil = binData.getDateRangeWithMissingValues(
                             'average',
@@ -593,38 +627,39 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             .x(renderFunction)
                             .y(function (d, i) { return yScale(d.val); })
                             .interpolate( interpolationMethod )(lineFilter);
+
+                    //}}}
                 } else {
-                    // render LINES d0s
+                    // render LINES d0s//{{{
+                    if (cloudcover && key !== "average") { continue; }
+                    if (cloudcover && key === "average") {
+                        // get ready the boxes for this
+
+                        var lineFilter = binData.getDateRangeWithMissingValues(
+                            key,
+                            whichLevelToRender,
+                            renderRange,
+                            interpolationMethod === "step-after");
+
+                        renderedD0s.average[whichLevelToRender] = d3.svg.area()
+                            .defined(function (d) { return !isNaN(d.val); })
+                            .x(renderFunction)
+                            .y0(yScale(0))
+                            .y1(yScale(1))
+                            .interpolate( interpolationMethod )(lineFilter);
+
+                        if (cloudcover) {
+                            createColorGradient(chart, "cloudgradient", lineFilter);
+                        }
+
+                        continue;
+                    }
 
                     var lineFilter = binData.getDateRangeWithMissingValues(
                             key,
                             whichLevelToRender,
                             renderRange,
                             interpolationMethod === "step-after");
-
-                    var createColorGradient = function() {
-                        var grad;
-                        return function (id, data) {
-                            if (!chart) { return id; }
-                            grad = grad ? grad : chart.append("linearGradient");
-                            grad.attr("id", id)
-                                .attr("gradientUnits", "userSpaceOnUse")
-                                .attr("x1", xScale.range()[0]).attr("y1", 0)
-                                .attr("x2", xScale.range()[1]).attr("y2", 0)
-                                .selectAll("stop")
-                                    .data([
-                                        {offset: "0%", color: "black"},
-                                        {offset: "50%", color: "black"},
-                                        {offset: "50%", color: "red"},
-                                        {offset: "100%", color: "red"}
-                                    ])
-                                    .enter().append("stop")
-                                        .attr("offset", function(d) { return d.offset; })
-                                        .attr("stop-color", function(d) { return d.color; });
-                            return id;
-                        }
-                    }();
-                    createColorGradient("cloudgradient", lineFilter);
 
 
                     if (0) {
@@ -641,7 +676,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         .y(function (d, i) { return yScale(d.val); })
                         .interpolate( interpolationMethod )(lineFilter);
                     }
-                } // if quartiles else lines
+
+                    //}}}
+                }
 
                 // update the Ranges of rendered data
                 renderedD0s[key + "Ranges"][whichLevelToRender] = [renderRange[0], renderRange[1]];
@@ -761,8 +798,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
                          sensorType+sensorNumber,
-                         function (d) { return "rgba(0,0,0,0)"; },
-                         function (d) { if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
+                         function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
+                         function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
                          function (d) { return binData.getDash(d.key); },
                          xScale,
                          transitionNextTime,
