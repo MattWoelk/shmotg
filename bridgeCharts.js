@@ -699,19 +699,17 @@ toggleEditables();
 
 // {{{ WEB WORKERS
 var primeWorker = new Worker('worker.js');
-//var current = d3.select('#prime').attr('value');
-var current = 12;
-console.log(current);
-primeWorker.postMessage(current);
-var testo = {
-    command:"oneSample",
-    argz: ["one", "two", "three"]
-};
-console.log(testo);
-primeWorker.postMessage(testo);
 primeWorker.onmessage = function(event) {
     console.log("Receiving from Worker: " + event.data);
 };
+primeWorker.postMessage({
+    command:"oneSample",
+    argz: []
+});
+primeWorker.postMessage({
+    command:"getKeys",
+    argz: []
+});
 // WEB WORKERS }}}
 
 /* vim: set foldmethod=marker: */
