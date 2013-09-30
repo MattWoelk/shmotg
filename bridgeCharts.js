@@ -338,7 +338,7 @@ function addMultiChart (parentAIndex, parentBIndex) {
     var parentA = plots[parentAIndex];
     var parentB = plots[parentBIndex];
     var interval = 5;
-    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel, true);
+    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel, false, true);
     plt.makeIntoMultiChart([parentA, parentB]);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
