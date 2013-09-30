@@ -7,34 +7,6 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 // {{{ HELPER FUNCTIONS
 
-var grad = false;
-var createColorGradient = function(container, id, data) {
-    return function (container, id, data) {
-        var svg = d3.select("#"+container);
-        if (!svg) { return id; }
-        console.log(!!grad);
-        grad = grad ? grad : svg.append("linearGradient");
-        console.log("twice", grad);
-        grad.attr("id", id)
-            .attr("gradientUnits", "userSpaceOnUse")
-            .attr("x1", xScale.range()[0]).attr("y1", 0)
-            .attr("x2", xScale.range()[1]).attr("y2", 0)
-            .selectAll("stop")
-                //.data([
-                //    {offset: "0%", color: "black"},
-                //    {offset: "50%", color: "black"},
-                //    {offset: "50%", color: "red"},
-                //    {offset: "100%", color: "red"}
-                //])
-                .data(data)
-                .enter().append("stop")
-                    .attr("offset", function(d) { return d.ms; })
-                    .attr("stop-opacity", function(d) { return d.val; })
-                    .attr("stop-color", function(d) { return "black"; });
-        return id;
-    }
-}();
-
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
@@ -355,6 +327,33 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
         return (d.ms - renderScale.domain()[0]) * getScaleValue(renderScale);
     };
+
+    var createColorGradient = function(container, id, data) {
+        var grad = false;
+        return function (container, id, data) {
+            var svg = d3.select("#"+container);
+            if (!svg) { return id; }
+            grad = grad ? grad : svg.append("linearGradient");
+            var stops = grad.attr("id", id)
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", xScale.range()[0]).attr("y1", 0)
+                .attr("x2", xScale.range()[1]).attr("y2", 0)
+                .selectAll("stop")
+                    //.data([
+                    //    {offset: "0%", color: "black"},
+                    //    {offset: "50%", color: "black"},
+                    //    {offset: "50%", color: "red"},
+                    //    {offset: "100%", color: "red"}
+                    //])
+                    .data(data)
+            stops.enter().append("stop")
+            stops.attr("offset", renderFunction)
+                 .attr("stop-opacity", function(d) { return parseFloat(d.val); })
+                 .attr("stop-color", function(d) { "black"; });
+            stops.exit().remove();
+            return id;
+        }
+    }();
 
     // This stores the scale at which the d0s were
     // originally rendered. It's our base-point for
