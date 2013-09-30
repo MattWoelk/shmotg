@@ -49,6 +49,11 @@ path.quartiles {
     fill-opacity: 0.2;
 }
 
+path.posPathcloudcover1 {
+    fill: url(#cloudgradient);
+    stroke: none;
+}
+
 path.missing {
     stroke: #C00;
     stroke-dasharray: 4

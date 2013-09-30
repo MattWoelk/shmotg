@@ -1,0 +1,41 @@
+// 0 means dark, 1 means light
+// there looks to be only two which could mean light: "Clear" and "Mainly Clear"
+"Clear":1
+"Cloudy":
+"Drizzle":
+"Drizzle,Fog":
+"Fog":
+"Freezing Drizzle,Fog":
+"Freezing Fog":
+"Heavy Thunderstorms,Heavy Rain Showers":
+"Ice Crystals":
+"Ice Pellets":
+"Mainly Clear":1
+"Moderate Rain":
+"Moderate Rain Showers":
+"Moderate Rain Showers,Fog":
+"Moderate Rain Showers,Snow Showers":
+"Moderate Rain,Fog":
+"Mostly Cloudy":
+"Rain":
+"Rain Showers":
+"Rain Showers,Fog":
+"Rain Showers,Snow Showers":
+"Rain,Fog":
+"Rain,Ice Pellet Showers":
+"Rain,Snow":
+"Rain,Snow,Fog":
+"Snow":
+"Snow Grains,Fog":
+"Snow Showers":
+"Snow Showers,Fog":
+"Snow,Blowing Snow":
+"Snow,Fog":
+"Snow,Freezing Fog":
+"Snow,Snow Pellets,Fog":
+"Thunderstorms":
+"Thunderstorms,Heavy Rain Showers":
+"Thunderstorms,Moderate Rain Showers":
+"Thunderstorms,Moderate Rain Showers,Fog":
+"Thunderstorms,Rain Showers":
+"Thunderstorms,Rain Showers,Fog":
