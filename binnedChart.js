@@ -7,12 +7,14 @@ var TIME_CONTEXT_VERTICAL_EACH = 25;
 
 // {{{ HELPER FUNCTIONS
 
-var createColorGradient = function(svg) {
-    var grad;
-    return function (id, data) {
-        console.log("once");
+var grad = false;
+var createColorGradient = function(container, id, data) {
+    return function (container, id, data) {
+        var svg = d3.select("#"+container);
         if (!svg) { return id; }
+        console.log(!!grad);
         grad = grad ? grad : svg.append("linearGradient");
+        console.log("twice", grad);
         grad.attr("id", id)
             .attr("gradientUnits", "userSpaceOnUse")
             .attr("x1", xScale.range()[0]).attr("y1", 0)
@@ -649,7 +651,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             .interpolate( interpolationMethod )(lineFilter);
 
                         if (cloudcover) {
-                            createColorGradient(chart, "cloudgradient", lineFilter);
+                            createColorGradient("cloudcover1", "cloudgradient", lineFilter);
                         }
 
                         continue;
