@@ -534,7 +534,8 @@ var firstTime = true;
 //  console.log("disconnected !!");
 //});
 
-offlinedata();
+//offlinedata();
+setTimeout(function() { offlinedata(); }, 200);
 
 socket.on('news', function (data) {
     // only do this once, so that plots don't get overlapped whenever the server restarts.
@@ -625,9 +626,9 @@ function offlinedata() {
     var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
     var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
 
-    var filenames = [ "weather/eng-hourly-02012012-02292012.csv",
+    var filenames = [ "weather/eng-hourly-01012012-01312012.csv",
+                      "weather/eng-hourly-02012012-02292012.csv",
                       "weather/eng-hourly-03012012-03312012.csv",
-                      "weather/eng-hourly-01012012-01312012.csv",
                       "weather/eng-hourly-04012012-04302012.csv",
                       "weather/eng-hourly-08012011-08312011.csv",
                       "weather/eng-hourly-09012011-09302011.csv",
