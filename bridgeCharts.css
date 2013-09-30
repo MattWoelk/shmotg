@@ -46,8 +46,11 @@ path.q3 {
 
 path.quartiles {
     fill: #800;
-    fill: url(#cloudgradient);
     fill-opacity: 0.2;
+}
+
+path.posAreacloudcover1 {
+    fill: url(#cloudgradient);
 }
 
 path.missing {
