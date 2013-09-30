@@ -165,8 +165,8 @@ var redraw = function () {
     plotSVGs.call(plotsCaller);
 
     // Get list of available-but-not-on-display sensors
-    var sensorsAvailable = ["temperature_1",
-                            "girder_18",
+    // TODO: put in temperature 1 and cloudcover 1 when they work. (Put them server-side?)
+    var sensorsAvailable = ["girder_18",
                             "girder_19",
                             "girder_20",
                             "girder_22",
