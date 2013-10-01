@@ -265,7 +265,6 @@ binnedData = function () {
     }
 
     function rebin (bd, range_to_rebin, level_to_rebin, oneSample) {
-        //TODO: call webworker's rebin function
         bdWorker.postMessage({
             command: "rebin",
             argz: [bd, range_to_rebin, level_to_rebin, oneSample]

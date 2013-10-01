@@ -26,10 +26,10 @@ var bd_meta  = {
         func   : function (a, b) { return (a+b)/2; },
     },
     maxes : {
-        func   : function (a, b) { return d3.max([a,b]); },
+        func   : function (a, b) { return Math.max(a,b); },
     },
     mins : {
-        func   : function (a, b) { return d3.min([a,b]); },
+        func   : function (a, b) { return Math.min(a,b); },
     },
     q1 : {
         func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
@@ -114,7 +114,6 @@ function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneSa
             var newdate = combo[i/*+1*/].ms;
 
             if (key === 'q1' || key === 'q3') {
-                log("bdat getting pushed");
                 bDat.push({ val:  func(
                                     combo[i].val,
                                     combo[i+1].val,
@@ -302,3 +301,24 @@ function combineWithoutDuplicates(arr1, arr2) {
 
     return arr1.concat(uniques);
 }
+
+function getTwoSmallest (array) {
+    var arr = array.slice();
+    first = Math.min.apply(this, arr);//d3.min(arr);
+    arr.splice(arr.indexOf(first),1);
+    second = Math.min.apply(this, arr);//d3.min(arr);
+    return [first, second];
+};
+
+function average (array) {
+    var sum = array.reduce(function(a, b) { return a + b });
+    return sum/array.length;
+};
+
+function getTwoLargest (array) {
+    var arr = array.slice();
+    first = Math.max.apply(this, arr);
+    arr.splice(arr.indexOf(first),1);
+    second = Math.max.apply(this, arr);
+    return [first, second];
+};
