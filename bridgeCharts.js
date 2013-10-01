@@ -697,19 +697,4 @@ function toggleEditables() {
 toggleEditables();
 // EDITABLES }}}
 
-// {{{ WEB WORKERS
-var primeWorker = new Worker('worker.js');
-primeWorker.onmessage = function(event) {
-    console.log("Receiving from Worker: " + event.data);
-};
-primeWorker.postMessage({
-    command:"oneSample",
-    argz: []
-});
-primeWorker.postMessage({
-    command:"getKeys",
-    argz: []
-});
-// WEB WORKERS }}}
-
 /* vim: set foldmethod=marker: */
