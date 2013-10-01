@@ -982,19 +982,19 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
-    //my.update_throttle = function (reRender) {
-    //    console.log("update");
-    //    my.setSelectedLines();
-    //    //console.log(slctn);
-    //    my(slctn);
-    //}
-
-    //my.update = _.throttle(my.update_throttle, 1000);
-    my.update = function (reRender) {
+    my.update_throttle = function (reRender) {
+        console.log("update");
         my.setSelectedLines();
         //console.log(slctn);
         my(slctn);
     }
+
+    my.update = _.throttle(my.update_throttle, 100);
+    //my.update = function (reRender) {
+    //    my.setSelectedLines();
+    //    //console.log(slctn);
+    //    my(slctn);
+    //}
 
     my.showTimeContext = function (show) {
         if (!arguments.length) return showTimeContext;
