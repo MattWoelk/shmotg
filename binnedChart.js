@@ -37,9 +37,8 @@ function transformScale(scal, oldScal, mar) {
 }
 
 // selection are the objects,
-// fill and stroke are functions,
 // scal is the scale
-function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
+function drawElements(keyObject, container, id, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
     var sel = container.selectAll("."+name+id)
             .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
 
@@ -50,8 +49,7 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
            .transition().ease(ease).duration(dur)
            .attr("transform", transformScale(scal, renScale, mar));
     } else {
-        sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
-           .attr("d", function (d, i) { return d0s[d.key][d.which] ? d0s[d.key][d.which] : "M -1000 -1000 L -1000 -1000"; }) // if the d0 is empty, replace it with a very distant dot (to prevent errors)
+        sel.attr("d", function (d, i) { return d0s[d.key][d.which] ? d0s[d.key][d.which] : "M -1000 -1000 L -1000 -1000"; }) // if the d0 is empty, replace it with a very distant dot (to prevent errors)
            .attr("transform", transformScale(scal, renScale, mar));
     }
 
@@ -64,11 +62,9 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
         sel.attr("transform", transformScale(scalOld, renScale, mar))
             .attr("opacity", 0)
             .transition().ease(ease).duration(dur)
-            .attr("transform", transformScale(scal, renScale, mar))
-            .attr("opacity", function (d) { return bin.getOpacity(d.key); });
+            .attr("transform", transformScale(scal, renScale, mar));
     } else {
-        sel.attr("transform", transformScale(scal, renScale, mar))
-            .attr("opacity", function (d) { return bin.getOpacity(d.key); });
+        sel.attr("transform", transformScale(scal, renScale, mar));
     }
 
     //exit
@@ -762,9 +758,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             drawElements(quartileObjectForKeyFanciness,
                          pathArea,
                          sensorType+sensorNumber,
-                         function (d) { return binData.getColor(d.key); },
-                         function (d) { return "rgba(0,0,0,0)"; },
-                         function (d) { return binData.getDash(d.key); },
                          xScale,
                          transitionNextTime,
                          previousXScale,
@@ -800,9 +793,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
                          sensorType+sensorNumber,
-                         function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
-                         function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
-                         function (d) { return binData.getDash(d.key); },
                          xScale,
                          transitionNextTime,
                          previousXScale,
