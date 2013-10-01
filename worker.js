@@ -2,11 +2,8 @@ var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scr
 var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of items per bin container
 
 if(typeof importScripts == "function"){
-    importScripts('binnedData.js'); // TODO: why does this need to be in here?
     importScripts('node_modules/underscore/underscore-min.js'); // TODO: why does this need to be in here?
 }
-
-//var binData = binnedData();
 
 var oneSample;
 
@@ -56,7 +53,6 @@ function rebin (bd, range_to_rebin, level_to_rebin, oneS) {
 
             // bin and store data from lower bin
             var newData = binTheDataWithFunction(bd, j-1, key, bd_meta[key].func, range_to_rebin, oneSample);
-            //log(newData); // TODO: this is always empty!
 
             if (newData.length === 0) {
                 continue; // Nothing to add; move along.
@@ -84,7 +80,6 @@ function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneSa
 
     // Combine all data which is within range_to_rebin
     var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
-    log(combo.length === 0);
 
     // if we're calculating for quartiles, then we need the other quartile as well
     if (key === 'q1') {
@@ -128,7 +123,6 @@ function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneSa
             }
         }
     }
-    //log(bDat);
     return bDat; // TODO: currently this returns [];
 };
 
@@ -151,7 +145,6 @@ function combineFilteredBinContainerInformation (bin, lvl, key, range) {
 
     var combo = [];
     for (var i in binsToBeCombined) {
-        //log(bin[key].levels[lvl][binsToBeCombined[i]]);
         if (bin[key].levels[lvl][binsToBeCombined[i]]){
             combo = combo.concat(bin[key].levels[lvl][binsToBeCombined[i]]);
         }
@@ -276,7 +269,6 @@ function combineWithoutDuplicates(arr1, arr2) {
 
                 uniques.push(arr2[i]);
 
-                //console.log("add them:", arr1[arr1Index].ms, arr2[i].ms);
                 break;
             } else if (arr1[arr1Index].ms === arr2[i].ms) {
                 // If the next one is the same,
@@ -287,13 +279,11 @@ function combineWithoutDuplicates(arr1, arr2) {
                     arr1[arr1Index].val = arr2[i].val;
                 }
 
-                //console.log("dont add:", arr1[arr1Index].ms, arr2[i].ms);
                 break;
             } else {
                 // If the next one is lower than this one,
                 // increment and compare to the new one from arr1
 
-                //console.log("continue:", arr1[arr1Index].ms, arr2[i].ms);
                 arr1Index++;
             }
         }

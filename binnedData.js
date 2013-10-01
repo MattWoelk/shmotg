@@ -71,12 +71,14 @@ binnedData = function () {
     bdWorker.onmessage = function(event) {
         // TODO: when we get 'rebin' back, set bd to the sent bd
         // TODO: - combine them instead?
-        if(event.data.command === "print") {
+        var command = event.data.command;
+        if(command === "print") {
             console.log("WORKER:", event.data.result);
-            return;
+        } else if (command === "rebin") {
+            bd = event.data.result;
+        } else {
+            console.log("Receiving from Worker: ", event.data.command, event.data.result.average);
         }
-        console.log("Receiving from Worker: ", event.data.result.average);
-        bd = event.data.result;
     };
 
     // VARIABLES }}}
@@ -298,61 +300,6 @@ binnedData = function () {
 
         return combo;
     }
-
-    // Bin the data in a level into abstracted bins
-    function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) {
-        var bDat = new Array();
-        if (!bin[key].levels[curLevel]) {
-            return bDat;
-        }
-
-        // Combine all data which is within range_to_rebin
-        var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
-
-        // if we're calculating for quartiles, then we need the other quartile as well
-        if (key === 'q1') {
-            var combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q3', range_to_rebin);
-        } else if (key === 'q3'){
-            var combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q1', range_to_rebin);
-        }
-
-        // Use this new combined data instead of bin[key].levels[curLevel].length
-        for(var i = 0; i < combo.length; i = i + 2){
-            // If we are at a bad spot to begin a bin, decrement i by 1 and continue;
-            var sampleIsAtModularLocation = atModularLocation(combo[i].ms, curLevel+1);
-            var nextSampleExists = combo.length > i + 1;
-            var nextSampleIsRightDistanceAway = nextSampleExists ?
-                combo[i+1].ms - combo[i].ms === sampleSize(curLevel) :
-                true;
-
-            if (!sampleIsAtModularLocation || !nextSampleExists || !nextSampleIsRightDistanceAway) {
-                // This is here so that both the server and client's bins start and end at the same place
-                // no matter what range of data they have to work with.
-                // we skip over values which are not at the beginning of a bin
-                i = i - 1;
-                continue;
-            }
-
-            if (combo[i+1]){
-                var newdate = combo[i/*+1*/].ms;
-
-                if (key === 'q1' || key === 'q3') {
-                    bDat.push({ val:  func(
-                                        combo[i].val,
-                                        combo[i+1].val,
-                                        combo2[i].val,
-                                        combo2[i+1].val)
-                              , ms: newdate }); // This is messy and depends on a lot of things
-                }else{
-                    bDat.push( { val: func(
-                                        combo[i].val,
-                                        combo[i+1].val)
-              , ms: newdate });
-                }
-            }
-        }
-        return bDat;
-    };
 
     function atModularLocation(ms, lvl) {
         // True if ms is at the beginning of a bin in level lvl.
