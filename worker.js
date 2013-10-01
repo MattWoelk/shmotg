@@ -6,11 +6,18 @@ if(typeof importScripts == "function"){
 }
 
 var oneSample;
+var bd;
 
 self.addEventListener('message',  function(event){
     var command = event.data.command;
     var argz = event.data.argz;
-    postMessage({'command': command, 'result': rebin.apply(this, argz)});
+    if (command === "rebin"){
+        postMessage({'command': command, 'result': rebin.apply(this, argz)});
+    } else if (command === "addRawData") {
+        postMessage({'command': command, 'result': addRawData.apply(this, argz)});
+    } else if (command === "addBinnedData") {
+        postMessage({'command': command, 'result': addBinnedData.apply(this, argz)});
+    }
 });
 
 function log(message) {
@@ -35,6 +42,42 @@ var bd_meta  = {
         func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
     },
 }
+
+var bd = { // where all of the data is stored
+    rawData : {
+        levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
+                    // with one key for each range of object, up to a maximum size
+                    // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
+                    //           ^-- a "bin container" -----------------------------------------------------^
+    },
+    average : {
+        levels: [],
+    },
+    maxes : {
+        levels: [],
+    },
+    mins : {
+        levels: [],
+    },
+    q1 : {
+        levels: [],
+    },
+    q3 : {
+        levels: [],
+    },
+    quartiles : {
+        levels: [],
+    },
+    missing : {
+        levels: [],
+    },
+    missingBox : {
+        levels: [],
+    },
+    loadingBox : {
+        levels: [],
+    },
+}; // where everything is stored
 
 function rebin (bd, range_to_rebin, level_to_rebin, oneS) {
     if(typeof bd === "undefined") {
@@ -299,9 +342,9 @@ function combineWithoutDuplicates(arr1, arr2) {
 
 function getTwoSmallest (array) {
     var arr = array.slice();
-    first = Math.min.apply(this, arr);//d3.min(arr);
+    first = Math.min.apply(this, arr);
     arr.splice(arr.indexOf(first),1);
-    second = Math.min.apply(this, arr);//d3.min(arr);
+    second = Math.min.apply(this, arr);
     return [first, second];
 };
 
@@ -317,3 +360,89 @@ function getTwoLargest (array) {
     second = Math.max.apply(this, arr);
     return [first, second];
 };
+
+addData = function (data, key, lvl) {
+    // data must be in the following form: (example)
+    // [ {val: value_point, ms: ms_since_epoch},
+    //   {val: value_point, ms: ms_since_epoch},
+    //   {etc...},
+    // ],
+
+    var splitData = splitIntoBinsAtLevel(data, lvl);
+
+    for (prop in splitData) {
+        // Create if we don't have:
+        if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
+        if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
+
+        // combine and put in bd
+        bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
+    }
+}
+
+addRawData = function (data, dontBin) {
+    // data must be in the following form: (example)
+    // [ {val: value_point, ms: ms_since_epoch},
+    //   {val: value_point, ms: ms_since_epoch},
+    //   {etc...},
+    // ],
+
+    var range = timeExtent(data);
+    addData(data, 'rawData', 0);
+
+    if(!dontBin) {
+        rebin(bd, range, 0, oneSample);
+    }
+}
+
+timeExtent = function (arr) {
+    return [_.min(arr, function (d) { return d.ms; }),
+            _.max(arr, function (d) { return d.ms; })];
+}
+
+addBinnedData = function (bData, lvl, dontBin) {
+    // only the level lvl will be stored
+    // data must be in the form of the following example:
+    // { average: {
+    //     levels: [
+    //       [{val: value_point, ms: ms_since_epoch},
+    //        {val: value_point, ms: ms_since_epoch},
+    //        {etc...}],
+    //       [etc.]
+    //     ],
+    //   },
+    //   q1: {
+    //     levels: [
+    //       [etc.]
+    //     ],
+    //   },
+    //   etc: {},
+    // }
+
+    var lows = [];
+    var highs = [];
+    var keys = ['average', 'q1', 'q3', 'mins', 'maxes'];
+
+    for (var i = 0; i < keys.length; i++) {
+        if (bData[keys[i]] && bData[keys[i]].levels && bData[keys[i]].levels[lvl]) {
+            var ext = timeExtent(bData[keys[i]].levels[lvl]);
+            lows.push(ext[0]);
+            highs.push(ext[1]);
+        }
+    }
+
+    var range = [
+            Math.min.apply(this, lows),
+            Math.max.apply(this, highs)
+    ];
+
+    for (var k in bd_meta.keys) { // for each of max_val, min_val, etc.
+        var key = bd_meta.keys[k];
+        addData(bData[key].levels[lvl], key, lvl);
+    }; // for each of max_val, min_val, etc.
+
+    if(!dontBin) {
+        rebin(bd, range, lvl, oneSample);
+    }
+}
+

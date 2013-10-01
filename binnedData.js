@@ -76,6 +76,13 @@ binnedData = function () {
             console.log("WORKER:", event.data.result);
         } else if (command === "rebin") {
             bd = event.data.result;
+            // TODO: update the plot?
+        } else if (command === "addRawData") {
+            console.log("added raw data");
+            // TODO: update the plot?
+        } else if (command === "addBinnedData") {
+            console.log("added binned data");
+            // TODO: update the plot?
         } else {
             console.log("Receiving from Worker: ", event.data.command, event.data.result.average);
         }
@@ -241,26 +248,6 @@ binnedData = function () {
     // MY }}}
 
     //{{{ PUBLIC METHODS
-
-    my.addData = function (data, key, lvl) {
-        // data must be in the following form: (example)
-        // [ {val: value_point, ms: ms_since_epoch},
-        //   {val: value_point, ms: ms_since_epoch},
-        //   {etc...},
-        // ],
-
-        var splitData = splitIntoBinsAtLevel(data, lvl);
-
-        for (prop in splitData) {
-            // Create if we don't have:
-            if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
-            if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
-
-            // combine and put in bd
-            bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
-        }
-    }
-
     my.addRawData = function (data, dontBin) {
         // data must be in the following form: (example)
         // [ {val: value_point, ms: ms_since_epoch},
@@ -268,20 +255,15 @@ binnedData = function () {
         //   {etc...},
         // ],
 
-        var range = d3.extent(data, function (d) { return d.ms; });
-
-        my.addData(data, 'rawData', 0);
-
-        if(!dontBin) {
-            rebin(bd, range, 0, oneSample);
-        }
+        bdWorker.postMessage({
+            command: "addRawData",
+            argz: [data, dontBin]
+        });
 
         return my;
-
     }
 
     my.addBinnedData = function (bData, lvl, dontBin) {
-        // TODO: put in web worker
         // only the level lvl will be stored
         // data must be in the form of the following example:
         // { average: {
@@ -300,33 +282,10 @@ binnedData = function () {
         //   etc: {},
         // }
 
-        var lows = [];
-        var highs = [];
-        var keys = ['average', 'q1', 'q3', 'mins', 'maxes'];
-
-        for (var i = 0; i < keys.length; i++) {
-            if (bData[keys[i]] && bData[keys[i]].levels && bData[keys[i]].levels[lvl]) {
-                var ext = d3.extent(bData[keys[i]].levels[lvl], function (d) { return d.ms; });
-                lows.push(ext[0]);
-                highs.push(ext[1]);
-            }
-        }
-
-        var range = [
-                d3.min(lows),
-                d3.max(highs)
-        ];
-
-        //var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
-
-        for (var k in bd_meta.keys) { // for each of max_val, min_val, etc.
-            var key = bd_meta.keys[k];
-            my.addData(bData[key].levels[lvl], key, lvl);
-        }; // for each of max_val, min_val, etc.
-
-        if(!dontBin) {
-            rebin(bd, range, lvl, oneSample);
-        }
+        bdWorker.postMessage({
+            command: "addBinnedData",
+            argz: [bData, lvl, dontBin]
+        });
 
         return my;
     }
@@ -513,11 +472,6 @@ binnedData = function () {
             result.push(ms-siz);
         }
         return result;
-    }
-
-    my.toString = function () {
-        // Give bd as a string
-        return JSON.stringify(bd);
     }
 
     // PUBLIC METHODS }}}

@@ -20,3 +20,11 @@ rebin: in webworker
 next up: addRawData, addBinnedData
          my.update() (which calls my(slcn) is taking up most of the time)
          - likely generating all of the d0s is taking so long.
+
+
+All the functions which call bd directly:
+
+addRawData
+    addData
+addBinnedData
+getDateRange
