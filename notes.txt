@@ -14,3 +14,9 @@ x - rebinAll
 o's are both called by incomingRequestedData
 addRawData is called before my() is defined.
 x's are not called by the client.
+
+rebin: in webworker
+       - NOT WORKING
+next up: addRawData, addBinnedData
+         my.update() (which calls my(slcn) is taking up most of the time)
+         - likely generating all of the d0s is taking so long.

@@ -71,17 +71,13 @@ binnedData = function () {
     bdWorker.onmessage = function(event) {
         // TODO: when we get 'rebin' back, set bd to the sent bd
         // TODO: - combine them instead?
-        console.log("Receiving from Worker: " + event.data.result);
+        if(event.data.command === "print") {
+            console.log("WORKER:", event.data.result);
+            return;
+        }
+        console.log("Receiving from Worker: ", event.data.result.average);
         bd = event.data.result;
     };
-    bdWorker.postMessage({
-        command:"oneSample",
-        argz: []
-    });
-    bdWorker.postMessage({
-        command:"getKeys",
-        argz: []
-    });
 
     // VARIABLES }}}
 
@@ -450,7 +446,7 @@ binnedData = function () {
         my.addData(data, 'rawData', 0);
 
         if(!dontBin) {
-            rebin(bd, range, 0);
+            rebin(bd, range, 0, oneSample);
         }
 
         return my;
@@ -473,7 +469,7 @@ binnedData = function () {
         bd.rawData.levels[0] = data;
 
         if(!dontBin) {
-            rebin(bd, range, 0);
+            rebin(bd, range, 0, oneSample);
         }
 
         return my;
@@ -523,7 +519,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(bd, range, lvl);
+            rebin(bd, range, lvl, oneSample);
         }
 
         return my;
@@ -566,7 +562,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(bd, range, 0);
+            rebin(bd, range, 0, oneSample);
         }
 
         return my;
@@ -994,7 +990,7 @@ binnedData = function () {
     }
 
     my.rebinAll = function (range, lvl) {
-        rebin(bd, range, lvl);
+        rebin(bd, range, lvl, oneSample);
     }
 
     // PUBLIC METHODS }}}
