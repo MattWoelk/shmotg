@@ -12,22 +12,6 @@ binnedData = function () {
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample
 
-    var bdWorker = new Worker('worker.js');
-    bdWorker.onmessage = function(event) {
-        // TODO: when we get 'rebin' back, set bd to the sent bd
-        // TODO: - combine them instead?
-        console.log("Receiving from Worker: " + event.data.result);
-        bd = event.data.result;
-    };
-    bdWorker.postMessage({
-        command:"oneSample",
-        argz: []
-    });
-    bdWorker.postMessage({
-        command:"getKeys",
-        argz: []
-    });
-
     var bd_meta  = {// where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         average : {
@@ -82,6 +66,22 @@ binnedData = function () {
             levels: [],
         },
     }; // where everything is stored
+
+    var bdWorker = new Worker('worker.js');
+    bdWorker.onmessage = function(event) {
+        // TODO: when we get 'rebin' back, set bd to the sent bd
+        // TODO: - combine them instead?
+        console.log("Receiving from Worker: " + event.data.result);
+        bd = event.data.result;
+    };
+    bdWorker.postMessage({
+        command:"oneSample",
+        argz: []
+    });
+    bdWorker.postMessage({
+        command:"getKeys",
+        argz: []
+    });
 
     // VARIABLES }}}
 
