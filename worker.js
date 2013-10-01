@@ -37,7 +37,12 @@ var bd_meta  = {
 }
 
 function rebin (bd, range_to_rebin, level_to_rebin, oneS) {
+    if(typeof bd === "undefined") {
+        return;
+    }
+
     oneSample = oneS;
+
     // link raw data to the source
     for (var keyValue in bd_meta.keys) {
         var key = bd_meta.keys[keyValue];
