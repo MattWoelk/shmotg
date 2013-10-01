@@ -426,212 +426,235 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
         var didWeRenderAnything = false;
 
+        // TODO: use something built into worker.js to do this instead.
         // calculate new y scale before we render any d0s
-        // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
-        // - this will give the option of all charts having the same y axis
         var showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, renderRange), function (d) {
             return d.val;
         });
 
-        // for each key
-        // 1. find out whether we should render things
-        for (var keyValue in renderThis) {
-            var key = renderThis[keyValue];
+        //_.throttle(generateManyThings, 1000); //{leading: false} ???
+        generateManyThings();
+        function generateManyThings() {
+            console.log("update");
+            // for each key
+            // 1. find out whether we should render things
+            for (var keyValue in renderThis) {
+                var key = renderThis[keyValue];
 
-            // These two variables are here to remove the slight amount
-            // of un-rendered space which shows up on the sides just
-            // before the new data is generated. It provides a buffer zone.
-            var tenDiff = (renderedD0s[key + "Ranges"][whichLevelToRender][1] -
-                           renderedD0s[key + "Ranges"][whichLevelToRender][0]) * 0.1;
-            var ninetyPercentRange = [ renderedD0s[key + "Ranges"][whichLevelToRender][0] + tenDiff ,
-                renderedD0s[key + "Ranges"][whichLevelToRender][1] - tenDiff ];
+                // These two variables are here to remove the slight amount
+                // of un-rendered space which shows up on the sides just
+                // before the new data is generated. It provides a buffer zone.
+                var tenDiff = (renderedD0s[key + "Ranges"][whichLevelToRender][1] -
+                               renderedD0s[key + "Ranges"][whichLevelToRender][0]) * 0.1;
+                var ninetyPercentRange = [ renderedD0s[key + "Ranges"][whichLevelToRender][0] + tenDiff ,
+                    renderedD0s[key + "Ranges"][whichLevelToRender][1] - tenDiff ];
 
-            //if we are not within the range OR reRenderTheNextTime
-            if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
-                //render the new stuff
-                didWeRenderAnything = true;
+                //if we are not within the range OR reRenderTheNextTime
+                if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
+                    //render the new stuff
+                    didWeRenderAnything = true;
 
-                if (!yAxisLock && !waitingForServer) {
-                    yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
+                    if (!yAxisLock && !waitingForServer) {
+                        yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
                                   , showing_range[1] ? showing_range[1] : yScale.domain()[1] ]);
-                }
+                    }
 
-                if (key === 'quartiles') {
-                    // render AREA d0s//{{{
-                    if (cloudcover) { continue; }
+                    if (key === 'quartiles') {
+                        // render AREA d0s//{{{
+                        if (cloudcover) { continue; }
 
-                    var q1Filter = binData.getDateRangeWithMissingValues(
+                        var q1Filter = binData.getDateRangeWithMissingValues(
                             'q1',
                             whichLevelToRender,
                             renderRange,
                             interpolationMethod === "step-after");
-                    var q3Filter = binData.getDateRangeWithMissingValues(
+                        var q3Filter = binData.getDateRangeWithMissingValues(
                             'q3',
                             whichLevelToRender,
                             renderRange,
                             interpolationMethod === "step-after");
 
-                    renderedD0s.quartiles[whichLevelToRender] = d3.svg.area()
+                            renderedD0s.quartiles[whichLevelToRender] = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
                             .x(renderFunction)
                             .y0(function (d, i) { return yScale( q1Filter[i].val ); }) //.val
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
 
-                    //}}}
-                } else if (key === 'loadingBox') {
-                    // render Missing averages//{{{
-                    if (cloudcover) { continue; }
-                    var fil = binData.getDateRangeWithMissingValues(
+                            //}}}
+                    } else if (key === 'loadingBox') {
+                        // render Missing averages//{{{
+                        if (cloudcover) { continue; }
+                        var fil = binData.getDateRangeWithMissingValues(
                             'average',
                             whichLevelToRender,
                             renderRange,
                             false);
 
-                    var toBeAddedMissing = [];
-                    var countMissing = 0;
-                    var lineMissingFilter = [];
+                        var toBeAddedMissing = [];
+                        var countMissing = 0;
+                        var lineMissingFilter = [];
 
-                    if (fil.length <= 1) {
-                        // No data. Fill everything. (Everything is missing.)
-                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
-                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
-                    } else {
-                        lineMissingFilter = _.map(fil, function (d) {
-                            tmp = {};
-                            tmp.val = d.val;
-                            tmp.ms = d.ms;
-                            if (isNaN(tmp.val)) {
-                                var siz = binData.binSize(whichLevelToRender);
-                                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
-                            } else {
-                                // tmp.val = NaN; // display it all
+                        if (fil.length <= 1) {
+                            // No data. Fill everything. (Everything is missing.)
+                            lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+                            lineMissingFilter.push({val: NaN, ms: renderRange[1]});
+                        } else {
+                            lineMissingFilter = _.map(fil, function (d) {
+                                tmp = {};
+                                tmp.val = d.val;
+                                tmp.ms = d.ms;
+                                if (isNaN(tmp.val)) {
+                                    var siz = binData.binSize(whichLevelToRender);
+                                    var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                                    toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                                } else {
+                                    // tmp.val = NaN; // display it all
+                                }
+                                countMissing++;
+                                return tmp;
+                            });
+                        }
+
+                        lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                        lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+
+                        renderedD0s.loadingBox[0] = d3.svg.line()
+                        .defined(function (d) { return isNaN(d.val); })
+                        .x(renderFunction)
+                        .y(function (d, i) { return yScale.range()[0]; }) //.val
+                        .interpolate( interpolationMethod )(lineMissingFilter);
+
+                        //}}}
+                    } else if (key === 'missing') {
+                        // render Missing averages//{{{
+                        if (cloudcover) { continue; }
+
+                        var fil = binData.getDateRangeWithMissingValues(
+                            'average',
+                            whichLevelToRender,
+                            renderRange,
+                            false);
+
+                        var averageOfRange = function (data) {
+                            var result = 0;
+                            var count = 0;
+                            for (var i = 0; i < data.length; i++) {
+                                if (!isNaN(data[i].val)) {
+                                    result += data[i].val;
+                                    count++;
+                                }
                             }
-                            countMissing++;
-                            return tmp;
-                        });
-                    }
+                            if (count === 0) {
+                                return NaN;
+                            } else {
+                                return result / count;
+                            }
+                        };
 
-                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
-                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
-
-                    renderedD0s.loadingBox[0] = d3.svg.line()
-                            .defined(function (d) { return isNaN(d.val); })
-                            .x(renderFunction)
-                            .y(function (d, i) { return yScale.range()[0]; }) //.val
-                            .interpolate( interpolationMethod )(lineMissingFilter);
-
-                    //}}}
-                } else if (key === 'missing') {
-                    // render Missing averages//{{{
-                    if (cloudcover) { continue; }
-
-                    var fil = binData.getDateRangeWithMissingValues(
-                            'average',
-                            whichLevelToRender,
-                            renderRange,
-                            false);
-
-                    var averageOfRange = function (data) {
-                        var result = 0;
+                        var toBeAdded = [];
                         var count = 0;
-                        for (var i = 0; i < data.length; i++) {
-                            if (!isNaN(data[i].val)) {
-                                result += data[i].val;
-                                count++;
-                            }
-                        }
-                        if (count === 0) {
-                            return NaN;
-                        } else {
-                            return result / count;
-                        }
-                    };
 
-                    var toBeAdded = [];
-                    var count = 0;
-
-                    var lineFilter = _.map(fil, function (d) {
-                        tmp = {};
-                        tmp.val = d.val;
-                        tmp.ms = d.ms;
-                        if (isNaN(tmp.val)) {
-                            var siz = binData.binSize(whichLevelToRender);
-                            var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                            tmp.val = averageOfRange(binData.getDateRangeWithMissingValues(
-                                'average',
-                                whichLevelToRender - 1,
-                                range));
-                            if (fil[count-1] && !isNaN(fil[count-1].val)) {
-                                toBeAdded.push({val: fil[count-1].val, ms: fil[count-1].ms});
-                            }
-                            if (fil[count+1] && !isNaN(fil[count+1].val)) {
-                                toBeAdded.push({val: fil[count+1].val, ms: fil[count+1].ms});
-                            } else {
-                                toBeAdded.push({val: tmp.val, ms: tmp.ms+siz-1});
-                            }
-                        } else {
-                            // tmp.val = NaN; // display it all
-                        }
-                        count++;
-                        return tmp;
-                    });
-
-
-                    lineFilter.sort(function (a, b) { return a.ms - b.ms; });
-                    lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
-
-                    // TODO: if fil is empty (or all are NaN; whatever happens when we zoom out until nothing is visible), then have one bin which fills the entire screen.
-
-                    var toBeAddedMissing = [];
-                    var countMissing = 0;
-                    var lineMissingFilter = [];
-
-                    if (fil.length <= 1) {
-                        // we have no data, therefore:
-                        // make a big grey box that fills the entire screen
-                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
-                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
-                    } else {
-                        lineMissingFilter = _.map(fil, function (d) {
+                        var lineFilter = _.map(fil, function (d) {
                             tmp = {};
                             tmp.val = d.val;
                             tmp.ms = d.ms;
                             if (isNaN(tmp.val)) {
                                 var siz = binData.binSize(whichLevelToRender);
                                 var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                                tmp.val = averageOfRange(binData.getDateRangeWithMissingValues(
+                                    'average',
+                                    whichLevelToRender - 1,
+                                    range));
+                                    if (fil[count-1] && !isNaN(fil[count-1].val)) {
+                                        toBeAdded.push({val: fil[count-1].val, ms: fil[count-1].ms});
+                                    }
+                                    if (fil[count+1] && !isNaN(fil[count+1].val)) {
+                                        toBeAdded.push({val: fil[count+1].val, ms: fil[count+1].ms});
+                                    } else {
+                                        toBeAdded.push({val: tmp.val, ms: tmp.ms+siz-1});
+                                    }
                             } else {
                                 // tmp.val = NaN; // display it all
                             }
-                            countMissing++;
+                            count++;
                             return tmp;
                         });
-                    }
 
-                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
-                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
 
-                    renderedD0s.missingBox[0] = d3.svg.area()
-                            .defined(function (d) { return isNaN(d.val); })
-                            .x(renderFunction)
-                            .y0(function (d, i) { return yScale.range()[0]; }) //.val
-                            .y1(function (d, i) { return yScale.range()[1]; }) //.val
-                            .interpolate( interpolationMethod )(lineMissingFilter);
+                        lineFilter.sort(function (a, b) { return a.ms - b.ms; });
+                        lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
 
-                    renderedD0s[key][whichLevelToRender] = d3.svg.line()
+                        // TODO: if fil is empty (or all are NaN; whatever happens when we zoom out until nothing is visible), then have one bin which fills the entire screen.
+
+                        var toBeAddedMissing = [];
+                        var countMissing = 0;
+                        var lineMissingFilter = [];
+
+                        if (fil.length <= 1) {
+                            // we have no data, therefore:
+                            // make a big grey box that fills the entire screen
+                            lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+                            lineMissingFilter.push({val: NaN, ms: renderRange[1]});
+                        } else {
+                            lineMissingFilter = _.map(fil, function (d) {
+                                tmp = {};
+                                tmp.val = d.val;
+                                tmp.ms = d.ms;
+                                if (isNaN(tmp.val)) {
+                                    var siz = binData.binSize(whichLevelToRender);
+                                    var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                                    toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                                } else {
+                                    // tmp.val = NaN; // display it all
+                                }
+                                countMissing++;
+                                return tmp;
+                            });
+                        }
+
+                        lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                        lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+
+                        renderedD0s.missingBox[0] = d3.svg.area()
+                        .defined(function (d) { return isNaN(d.val); })
+                        .x(renderFunction)
+                        .y0(function (d, i) { return yScale.range()[0]; }) //.val
+                        .y1(function (d, i) { return yScale.range()[1]; }) //.val
+                        .interpolate( interpolationMethod )(lineMissingFilter);
+
+                        renderedD0s[key][whichLevelToRender] = d3.svg.line()
+                        .defined(function (d) { return !isNaN(d.val); })
+                        .x(renderFunction)
+                        .y(function (d, i) { return yScale(d.val); })
+                        .interpolate( interpolationMethod )(lineFilter);
+
+                        //}}}
+                    } else {
+                        // render LINES d0s//{{{
+                        if (cloudcover && key !== "average") { continue; }
+                        if (cloudcover && key === "average") {
+                            // get ready the boxes for this
+
+                            var lineFilter = binData.getDateRangeWithMissingValues(
+                                key,
+                                whichLevelToRender,
+                                renderRange,
+                                interpolationMethod === "step-after");
+
+                            renderedD0s.average[whichLevelToRender] = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
                             .x(renderFunction)
-                            .y(function (d, i) { return yScale(d.val); })
+                            .y0(yScale(0))
+                            .y1(yScale(1))
                             .interpolate( interpolationMethod )(lineFilter);
 
-                    //}}}
-                } else {
-                    // render LINES d0s//{{{
-                    if (cloudcover && key !== "average") { continue; }
-                    if (cloudcover && key === "average") {
-                        // get ready the boxes for this
+                            if (cloudcover) {
+                                createColorGradient("cloudcover1", "cloudgradient", lineFilter);
+                            }
+
+                            continue;
+                        }
 
                         var lineFilter = binData.getDateRangeWithMissingValues(
                             key,
@@ -639,72 +662,53 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             renderRange,
                             interpolationMethod === "step-after");
 
-                        renderedD0s.average[whichLevelToRender] = d3.svg.area()
+
+                        if (0) {
+                            // TODO: render a big box, then make and send a linearGradient to be used to set the colors
+                            renderedD0s[key][whichLevelToRender] = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
                             .x(renderFunction)
-                            .y0(yScale(0))
-                            .y1(yScale(1))
+                            .y(function (d, i) { return yScale(d.val); })
                             .interpolate( interpolationMethod )(lineFilter);
-
-                        if (cloudcover) {
-                            createColorGradient("cloudcover1", "cloudgradient", lineFilter);
+                        } else {
+                            renderedD0s[key][whichLevelToRender] = d3.svg.line()
+                            .defined(function (d) { return !isNaN(d.val); })
+                            .x(renderFunction)
+                            .y(function (d, i) { return yScale(d.val); })
+                            .interpolate( interpolationMethod )(lineFilter);
                         }
 
-                        continue;
+                        //}}}
                     }
 
-                    var lineFilter = binData.getDateRangeWithMissingValues(
-                            key,
-                            whichLevelToRender,
-                            renderRange,
-                            interpolationMethod === "step-after");
+                    // update the Ranges of rendered data
+                    renderedD0s[key + "Ranges"][whichLevelToRender] = [renderRange[0], renderRange[1]];
+                } // if we should render anything
+            } // for
 
-
-                    if (0) {
-                        // TODO: render a big box, then make and send a linearGradient to be used to set the colors
-                        renderedD0s[key][whichLevelToRender] = d3.svg.area()
-                        .defined(function (d) { return !isNaN(d.val); })
-                        .x(renderFunction)
-                        .y(function (d, i) { return yScale(d.val); })
-                        .interpolate( interpolationMethod )(lineFilter);
-                    } else {
-                        renderedD0s[key][whichLevelToRender] = d3.svg.line()
-                        .defined(function (d) { return !isNaN(d.val); })
-                        .x(renderFunction)
-                        .y(function (d, i) { return yScale(d.val); })
-                        .interpolate( interpolationMethod )(lineFilter);
+            // If we rendered anything, see if we need more data from the server
+            // AKA see if we didn't have enough data to render the entire domain.
+            if (didWeRenderAnything && !waitingForServer) {
+                // If we don't have every piece of data in this range, ask for it all.
+                if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
+                    var req = {
+                        sensorNumber: sensorNumber,
+                        sensorType: sensorType,
+                        ms_start: renderRange[0],
+                        ms_end: renderRange[1],
+                        bin_level: whichLevelToRender,
                     }
 
-                    //}}}
-                }
-
-                // update the Ranges of rendered data
-                renderedD0s[key + "Ranges"][whichLevelToRender] = [renderRange[0], renderRange[1]];
-            } // if we should render anything
-        } // for
-
-        // If we rendered anything, see if we need more data from the server
-        // AKA see if we didn't have enough data to render the entire domain.
-        if (didWeRenderAnything && !waitingForServer) {
-            // If we don't have every piece of data in this range, ask for it all.
-            if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
-                var req = {
-                    sensorNumber: sensorNumber,
-                    sensorType: sensorType,
-                    ms_start: renderRange[0],
-                    ms_end: renderRange[1],
-                    bin_level: whichLevelToRender,
-                }
-
-                waitingForServer = true;
-                if (dataReq !== undefined && !dataReq(req)) {
-                    // if it's too soon, or it failed
-                    waitingForServer = false;
+                    waitingForServer = true;
+                    if (dataReq !== undefined && !dataReq(req)) {
+                        // if it's too soon, or it failed
+                        waitingForServer = false;
+                    }
                 }
             }
-        }
 
-        reRenderTheNextTime = false;
+            reRenderTheNextTime = false;
+        }
 
         // GENERATE ALL d0s. (generate the lines paths) }}}
 
@@ -978,11 +982,19 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return my;
     }
 
+    //my.update_throttle = function (reRender) {
+    //    console.log("update");
+    //    my.setSelectedLines();
+    //    //console.log(slctn);
+    //    my(slctn);
+    //}
+
+    //my.update = _.throttle(my.update_throttle, 1000);
     my.update = function (reRender) {
         my.setSelectedLines();
         //console.log(slctn);
         my(slctn);
-    };
+    }
 
     my.showTimeContext = function (show) {
         if (!arguments.length) return showTimeContext;
