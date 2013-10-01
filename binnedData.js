@@ -12,8 +12,26 @@ binnedData = function () {
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample
 
-    var bd = { // where all of the data is stored
+    var bd_meta  = {// where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
+        average : {
+            func   : function (a, b) { return (a+b)/2; },
+        },
+        maxes : {
+            func   : function (a, b) { return d3.max([a,b]); },
+        },
+        mins : {
+            func   : function (a, b) { return d3.min([a,b]); },
+        },
+        q1 : {
+            func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
+        },
+        q3 : {
+            func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
+        },
+    }
+
+    var bd = { // where all of the data is stored
         rawData : {
             levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
                         // with one key for each range of object, up to a maximum size
@@ -21,23 +39,18 @@ binnedData = function () {
                         //           ^-- a "bin container" -----------------------------------------------------^
         },
         average : {
-            func   : function (a, b) { return (a+b)/2; },
             levels: [],
         },
         maxes : {
-            func   : function (a, b) { return d3.max([a,b]); },
             levels: [],
         },
         mins : {
-            func   : function (a, b) { return d3.min([a,b]); },
             levels: [],
         },
         q1 : {
-            func   : function (a, b, c, d) { return average(getTwoSmallest([a, b, c, d])); }, // average the two smallest values from q1 and q3
             levels: [],
         },
         q3 : {
-            func   : function (a, b, c, d) { return average(getTwoLargest([a, b, c, d])); }, // average the two largest values from q1 and q3
             levels: [],
         },
         quartiles : {
@@ -158,8 +171,8 @@ binnedData = function () {
     function combineAllOfKeyAndLevel(key, lvl) {
         var result = [];
 
-        for (var keyValue in bd.keys) {
-            var key = bd.keys[keyValue];
+        for (var keyValue in bd_meta.keys) {
+            var key = bd_meta.keys[keyValue];
             result = result.concat(bd[key].levels[lvl]);
         }
 
@@ -241,8 +254,8 @@ binnedData = function () {
 
     function rebin (range_to_rebin, level_to_rebin) {
         // link raw data to the source
-        for (var keyValue in bd.keys) {
-            var key = bd.keys[keyValue];
+        for (var keyValue in bd_meta.keys) {
+            var key = bd_meta.keys[keyValue];
             bd[key].levels[0] = bd.rawData.levels[0];
         }
 
@@ -250,11 +263,11 @@ binnedData = function () {
         //   for each key,
         //     bin the data from the lower level
         for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-            for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
-                var key = bd.keys[keyValue];
+            for (var keyValue in bd_meta.keys) { // for each of 'average', 'max', 'min', etc.
+                var key = bd_meta.keys[keyValue];
 
                 // bin and store data from lower bin
-                var newData = binTheDataWithFunction(bd, j-1, key, bd[key].func, range_to_rebin);
+                var newData = binTheDataWithFunction(bd, j-1, key, bd_meta[key].func, range_to_rebin);
 
                 if (newData.length === 0) {
                     continue; // Nothing to add; move along.
@@ -512,8 +525,8 @@ binnedData = function () {
 
         //var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
-        for (var k in bd.keys) { // for each of max_val, min_val, etc.
-            var key = bd.keys[k];
+        for (var k in bd_meta.keys) { // for each of max_val, min_val, etc.
+            var key = bd_meta.keys[k];
             my.addData(bData[key].levels[lvl], key, lvl);
         }; // for each of max_val, min_val, etc.
 
@@ -547,8 +560,8 @@ binnedData = function () {
 
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
-        for (var k in bd.keys) { // for each of max_val, min_val, etc.
-            var key = bd.keys[k];
+        for (var k in bd_meta.keys) { // for each of max_val, min_val, etc.
+            var key = bd_meta.keys[k];
 
             //if we don't have a lvl for this already, initialize one
             if (!bd[key].levels[lvl]) {
@@ -695,7 +708,7 @@ binnedData = function () {
 
     my.getMinValOfAllKeys = function (lvl) {
         var result = 999999;
-        _.each(bd.keys, function (k) {
+        _.each(bd_meta.keys, function (k) {
             result = Math.min(result, my.getMinValOfKey(lvl, k));
         });
         return result;
@@ -877,8 +890,8 @@ binnedData = function () {
     my.removeAllLevelsBelow = function(LowestLevel) {
         //TODO
         for(var i = 0; i < LowestLevel; i++) {
-            for(k in bd.keys) {
-                var key = bd.keys[k];
+            for(k in bd_meta.keys) {
+                var key = bd_meta.keys[k];
                 //console.log("removing", key, i);
                 bd[key].levels[i] = {};
             }
@@ -958,7 +971,7 @@ binnedData = function () {
     }
 
     my.getKeys = function () {
-        return bd.keys.slice(0); // give a copy of the array
+        return bd_meta.keys.slice(0); // give a copy of the array
     }
 
     my.bd = function () {
