@@ -12,6 +12,22 @@ binnedData = function () {
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample
 
+    var bdWorker = new Worker('worker.js');
+    bdWorker.onmessage = function(event) {
+        // TODO: when we get 'rebin' back, set bd to the sent bd
+        // TODO: - combine them instead?
+        console.log("Receiving from Worker: " + event.data.result);
+        bd = event.data.result;
+    };
+    bdWorker.postMessage({
+        command:"oneSample",
+        argz: []
+    });
+    bdWorker.postMessage({
+        command:"getKeys",
+        argz: []
+    });
+
     var bd_meta  = {// where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         average : {
@@ -252,36 +268,12 @@ binnedData = function () {
         });
     }
 
-    function rebin (range_to_rebin, level_to_rebin) {
-        // link raw data to the source
-        for (var keyValue in bd_meta.keys) {
-            var key = bd_meta.keys[keyValue];
-            bd[key].levels[0] = bd.rawData.levels[0];
-        }
-
-        // for each level other than raw data level,
-        //   for each key,
-        //     bin the data from the lower level
-        for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-            for (var keyValue in bd_meta.keys) { // for each of 'average', 'max', 'min', etc.
-                var key = bd_meta.keys[keyValue];
-
-                // bin and store data from lower bin
-                var newData = binTheDataWithFunction(bd, j-1, key, bd_meta[key].func, range_to_rebin);
-
-                if (newData.length === 0) {
-                    continue; // Nothing to add; move along.
-                }
-
-                // TODO: filter out what is already in the old data, OR add that ability to addData();
-                // Combine what was already there and what was just calculated
-                // - What was already in this bin level gets precedence
-                //   over what is being binned from the lower level
-
-                my.addData(newData, key, j);
-
-            } // for each key
-        } // for each bin level
+    function rebin (bd, range_to_rebin, level_to_rebin, oneSample) {
+        //TODO: call webworker's rebin function
+        bdWorker.postMessage({
+            command: "rebin",
+            argz: [bd, range_to_rebin, level_to_rebin, oneSample]
+        });
     }
 
     function combineFilteredBinContainerInformation (bin, lvl, key, range) {
@@ -458,7 +450,7 @@ binnedData = function () {
         my.addData(data, 'rawData', 0);
 
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(bd, range, 0);
         }
 
         return my;
@@ -481,7 +473,7 @@ binnedData = function () {
         bd.rawData.levels[0] = data;
 
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(bd, range, 0);
         }
 
         return my;
@@ -531,7 +523,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(range, lvl);
+            rebin(bd, range, lvl);
         }
 
         return my;
@@ -574,7 +566,7 @@ binnedData = function () {
         }; // for each of max_val, min_val, etc.
 
         if(!dontBin) {
-            rebin(range, 0);
+            rebin(bd, range, 0);
         }
 
         return my;
@@ -1002,7 +994,7 @@ binnedData = function () {
     }
 
     my.rebinAll = function (range, lvl) {
-        rebin(range, lvl);
+        rebin(bd, range, lvl);
     }
 
     // PUBLIC METHODS }}}
