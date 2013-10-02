@@ -253,10 +253,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var defclip;
     var xAxisContainer;
     var xAxisMinorContainer;
-    var xAxis;
-    var xAxisMinor;
     var yAxisContainer;
-    var yAxis;
     var xScale;
     var yScale;
     var previousXScale = d3.scale.linear(); // used for rendering transitions
@@ -731,13 +728,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //{{{ CONTAINER AND CLIPPING
             if (!yAxisLock) {
-                if (!yAxis) {
-                    yAxis = d3.svg.axis().ticks(hideYAxisLabels ? 0 : 5)
-                                         .tickSubdivide(true)
-                                         .tickSize(width, 0, 0) // major, minor, end
-                                         .orient("left");
-                }
-                yAxis.scale(yScale);
             }
 
             chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
@@ -827,15 +817,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //{{{ AXES
             // Draw Axes using msToCentury.js format and values
-            if (!xAxis) { xAxis = d3.svg.axis(); }
-            xAxis.tickFormat(msToCenturyTickFormat)
-                 .tickValues(msToCenturyTickValues(xScale, width))
-                 .scale(xScale).orient("bottom");
-
-            if (!xAxisMinor) { xAxisMinor = d3.svg.axis(); }
-            xAxisMinor.tickFormat(msToCenturyTickFormat)
-                      .tickValues(msToCenturySubTickValues(xScale, width))
-                      .scale(xScale).orient("bottom");
 
             //d3.selectAll("text").attr("fill", "#F0F");
             // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
@@ -848,18 +829,13 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                           .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
             //.attr("transform", "translate(" + margin.left + "," + height + ")");
             if (transitionNextTime) {
-                xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-                xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
             } else {
-                xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
-                xAxisMinorContainer/*.transition().duration(transitionDuration)*/.call(xAxisMinor);
             }
 
             if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
             yAxisContainer.attr("class", "y axis")
                           .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
                           //.attr("transform", "translate(" + margin.left + "," + height + ")");
-            yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
             // AXES }}}
 
             // {{{ Y AXIS LOCK
