@@ -598,6 +598,7 @@ function sendRequestToServer(req) {
     return true;
 }
 
+// TODO: put all this socket stuff in a web worker ???
 socket.on('req_data', function (data) {
     var received = JSON.parse(data);
     // remove request from server queue
