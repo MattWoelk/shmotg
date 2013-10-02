@@ -89,7 +89,6 @@ function rebin (range_to_rebin, level_to_rebin, oneS) {
     // link raw data to the source
     for (var keyValue in bd_meta.keys) {
         var key = bd_meta.keys[keyValue];
-        bd[key].levels[0] = bd.rawData.levels[0];
     }
 
     // for each level other than raw data level,
@@ -122,7 +121,7 @@ function rebin (range_to_rebin, level_to_rebin, oneS) {
 // Bin the data in a level into abstracted bins
 function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneS) {
     var bDat = new Array();
-    if (!bin[key].levels[curLevel]) {
+    if (!bin[curLevel === 0 ? "rawData" : key].levels[curLevel]) {
         return bDat;
     }
 
@@ -193,8 +192,8 @@ function combineFilteredBinContainerInformation (bin, lvl, key, range) {
 
     var combo = [];
     for (var i in binsToBeCombined) {
-        if (bin[key].levels[lvl][binsToBeCombined[i]]){
-            combo = combo.concat(bin[key].levels[lvl][binsToBeCombined[i]]);
+        if (bin[curLevel === 0 ? "rawData" : key].levels[lvl][binsToBeCombined[i]]){
+            combo = combo.concat(bin[curLevel === 0 ? "rawData" : key].levels[lvl][binsToBeCombined[i]]);
         }
     }
 
@@ -493,8 +492,8 @@ getDateRange = function (keys, lvl, range) {
     for (var k = 0; k < keys.length; k++) {
         var key = keys[k];
         _.each(whichBinsToLookIn, function (n) {
-            if(!bd[key] || !bd[key].levels[lvl]) { return; }
-            var dat = bd[key].levels[lvl][n];
+            if(!bd[lvl === 0 ? "rawData" : key] || !bd[lvl === 0 ? "rawData" : key].levels[lvl]) { return; }
+            var dat = bd[lvl === 0 ? "rawData" : key].levels[lvl][n];
 
             result = result.concat(_.filter(dat, function (d, i) {
                 return d.ms <= range[1] && d.ms >= range[0];
