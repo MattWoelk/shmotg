@@ -118,7 +118,7 @@ function rebin (range_to_rebin, level_to_rebin, oneS) {
 
 
 // Bin the data in a level into abstracted bins
-function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneSample) {
+function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneS) {
     var bDat = new Array();
     if (!bin[key].levels[curLevel]) {
         return bDat;
@@ -140,7 +140,7 @@ function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin, oneSa
         var sampleIsAtModularLocation = atModularLocation(combo[i].ms, curLevel+1);
         var nextSampleExists = combo.length > i + 1;
         var nextSampleIsRightDistanceAway = nextSampleExists ?
-            combo[i+1].ms - combo[i].ms === sampleSize(curLevel, oneSample) :
+            combo[i+1].ms - combo[i].ms === sampleSize(curLevel, oneS) :
             true;
 
         if (!sampleIsAtModularLocation || !nextSampleExists || !nextSampleIsRightDistanceAway) {
@@ -208,8 +208,8 @@ function getMSStartForTimeAtLevel (ms, lvl) {
     return Math.floor(ms / ( sizeOfTheBinContainerInMS )) * sizeOfTheBinContainerInMS;
 }
 
-function sampleSize(lvl, oneSample) {
-    return Math.pow(2, lvl) * oneSample;
+function sampleSize(lvl, oneS) {
+    return Math.pow(2, lvl) * oneS;
 }
 
 binContainerSize = function (lvl) {
@@ -378,7 +378,7 @@ addData = function (data, key, lvl) {
     }
 }
 
-addRawData = function (data, dontBin) {
+addRawData = function (data, dontBin, oneS) {
     // data must be in the following form: (example)
     // [ {val: value_point, ms: ms_since_epoch},
     //   {val: value_point, ms: ms_since_epoch},
@@ -389,7 +389,7 @@ addRawData = function (data, dontBin) {
     addData(data, 'rawData', 0);
 
     if(!dontBin) {
-        rebin(range, 0, oneSample);
+        rebin(range, 0, oneS);
     }
 }
 
@@ -398,7 +398,7 @@ timeExtent = function (arr) {
             _.max(arr, function (d) { return d.ms; })];
 }
 
-addBinnedData = function (bData, lvl, dontBin) {
+addBinnedData = function (bData, lvl, dontBin, oneS) {
     // only the level lvl will be stored
     // data must be in the form of the following example:
     // { average: {
@@ -440,7 +440,7 @@ addBinnedData = function (bData, lvl, dontBin) {
     }; // for each of max_val, min_val, etc.
 
     if(!dontBin) {
-        rebin(range, lvl, oneSample);
+        rebin(range, lvl, oneS);
     }
 }
 

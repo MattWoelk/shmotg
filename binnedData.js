@@ -1,7 +1,6 @@
 // This is binnedData. A convenient way of storing binned data
 
 //{{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
 var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of items per bin container
 // TODO: phase this out (preferable) OR set it as a really high number
 
@@ -31,17 +30,15 @@ binnedData = function () {
         },
     }
 
-    var haveDataInRangeCallBack = function () {};
+    var haveDataInRangeCallBack = function () {}; // TODO: make this a list, doing one at a time? But they'll need a key so that they match up properly...
 
     var bdWorker = new Worker('worker.js');
     bdWorker.onmessage = function(event) {
-        // TODO: - combine them instead?
         var command = event.data.command;
         if(command === "print") {
             console.log("WORKER:", event.data.result);
         } else if (command === "rebin") {
             console.log("rebinned");
-            //bd = event.data.result;
             // TODO: update the plot?
         } else if (command === "addRawData") {
             console.log("added raw data");
@@ -139,19 +136,6 @@ binnedData = function () {
         return _.range(startRounded, end, binSize);
     }
 
-    function splitIntoBinsAtLevel (data, lvl) {
-        // TODO: round level down to nearest maxNumberOfBins
-        //       then separate the data out into a structure:
-        //       { '0': [{ms: 3}, {ms: 4}]
-        //         '5': [{ms: 5}, {ms: 9}]}
-        //       This function is to be used when adding raw data
-        // Assumption: data is ordered and continuous
-
-        return _.groupBy(data, function (d) {
-            return getMSStartForTimeAtLevel(d.ms, lvl);
-        });
-    }
-
     function atModularLocation(ms, lvl) {
         // True if ms is at the beginning of a bin in level lvl.
         return ms % (Math.pow(2, lvl) * oneSample) === 0;
@@ -220,7 +204,7 @@ binnedData = function () {
 
         bdWorker.postMessage({
             command: "addRawData",
-            argz: [data, dontBin]
+            argz: [data, dontBin, oneSample]
         });
 
         return my;
@@ -247,7 +231,7 @@ binnedData = function () {
 
         bdWorker.postMessage({
             command: "addBinnedData",
-            argz: [bData, lvl, dontBin]
+            argz: [bData, lvl, dontBin, oneSample]
         });
 
         return my;

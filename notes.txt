@@ -44,3 +44,5 @@ Must be moved over to worker.js:
 - getDateRangeWithMissingValues
 - basically the entire generate d0s section
 - move all of selection.each to an update() function ???
+- missingBins
+  - only called by getDateRangeWithMissingValues
