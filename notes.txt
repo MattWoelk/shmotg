@@ -28,3 +28,17 @@ addRawData
     addData
 addBinnedData
 getDateRange
+
+
+List of events after which lines should be redrawn:
+- user scrolls too far
+- level is changed
+- new data is received from the server
+- lines are shown/hidden
+- interpolation method is changed
+- initPlot
+
+Must be moved over to worker.js:
+- getDateRangeWithMissingValues
+- basically the entire generate d0s section
+- move all of selection.each to an update() function ???

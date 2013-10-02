@@ -17,6 +17,8 @@ self.addEventListener('message',  function(event){
         postMessage({'command': command, 'result': addRawData.apply(this, argz)});
     } else if (command === "addBinnedData") {
         postMessage({'command': command, 'result': addBinnedData.apply(this, argz)});
+    } else if (command === "haveDataInRange") {
+        postMessage({'command': command, 'result': haveDataInRange.apply(this, argz)});
     }
 });
 
@@ -444,5 +446,67 @@ addBinnedData = function (bData, lvl, dontBin) {
     if(!dontBin) {
         rebin(bd, range, lvl, oneSample);
     }
+}
+
+haveDataInRange = function(ms_range, level) {
+    // Determine the number of samples which we should have in the given range.
+
+    // TODO TODO TODO: update for new bin containers
+
+    var key;
+    if (level === 0) {
+        key = "rawData";
+    } else {
+        key = "average";
+    }
+
+    var datedRange = getDateRange([key], level, ms_range);
+
+    if (datedRange.length === 0) {
+        return false;
+    }
+
+    var firstSample = datedRange[0].ms;
+
+    if (firstSample > ms_range[0] + sampleSize(level)) {
+        return false;
+    }
+
+    var actualRange = ms_range[1] - firstSample;
+    var numberWeShouldHave = Math.floor(actualRange / sampleSize(level));
+
+    var numberWeHave = datedRange.length;
+
+    return numberWeHave >= numberWeShouldHave;
+}
+
+getDateRange = function (keys, lvl, range) {
+    // give the range of data for this key and level
+    // NOT including the highest value in range
+    // USE:
+    // filter an array so that we don't render much more
+    // than the required amount of line and area
+
+    var result = [];
+
+    // where to look for this data:
+    var whichBinsToLookIn = getSurroundingBinContainers(range[0], range[1], lvl);
+
+    for (var k = 0; k < keys.length; k++) {
+        var key = keys[k];
+        _.each(whichBinsToLookIn, function (n) {
+            if(!bd[key] || !bd[key].levels[lvl]) { return; }
+            var dat = bd[key].levels[lvl][n];
+
+            result = result.concat(_.filter(dat, function (d, i) {
+                return d.ms <= range[1] && d.ms >= range[0];
+            }));
+        });
+    }
+
+    // sort it
+    result = result.sort(function (a, b) { return a.ms - b.ms; });
+
+    return result;
 }
 

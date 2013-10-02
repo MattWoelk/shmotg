@@ -687,21 +687,23 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         // AKA see if we didn't have enough data to render the entire domain.
         if (didWeRenderAnything && !waitingForServer) {
             // If we don't have every piece of data in this range, ask for it all.
-            if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
-                var req = {
-                    sensorNumber: sensorNumber,
-                    sensorType: sensorType,
-                    ms_start: renderRange[0],
-                    ms_end: renderRange[1],
-                    bin_level: whichLevelToRender,
-                }
+            binData.haveDataInRange(renderRange, whichLevelToRender, function (inRange) {
+                if (!inRange) {
+                    var req = {
+                        sensorNumber: sensorNumber,
+                        sensorType: sensorType,
+                        ms_start: renderRange[0],
+                        ms_end: renderRange[1],
+                        bin_level: whichLevelToRender,
+                    }
 
-                waitingForServer = true;
-                if (dataReq !== undefined && !dataReq(req)) {
-                    // if it's too soon, or it failed
-                    waitingForServer = false;
+                    waitingForServer = true;
+                    if (dataReq !== undefined && !dataReq(req)) {
+                        // if it's too soon, or it failed
+                        waitingForServer = false;
+                    }
                 }
-            }
+            });
         }
 
         reRenderTheNextTime = false;

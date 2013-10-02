@@ -67,9 +67,10 @@ binnedData = function () {
         },
     }; // where everything is stored
 
+    var haveDataInRangeCallBack = function () {};
+
     var bdWorker = new Worker('worker.js');
     bdWorker.onmessage = function(event) {
-        // TODO: when we get 'rebin' back, set bd to the sent bd
         // TODO: - combine them instead?
         var command = event.data.command;
         if(command === "print") {
@@ -82,6 +83,10 @@ binnedData = function () {
             // TODO: update the plot?
         } else if (command === "addBinnedData") {
             console.log("added binned data");
+            // TODO: update the plot?
+        } else if (command === "haveDataInRange") {
+            console.log("added binned data");
+            haveDataInRangeCallBack(event.data.result);
             // TODO: update the plot?
         } else {
             console.log("Receiving from Worker: ", event.data.command, event.data.result.average);
@@ -290,36 +295,17 @@ binnedData = function () {
         return my;
     }
 
-    my.haveDataInRange = function(ms_range, level) {
+    my.haveDataInRange = function (ms_range, level, callback) {
         // Determine the number of samples which we should have in the given range.
 
-        // TODO TODO TODO: update for new bin containers
+        bdWorker.postMessage({
+            command: "haveDataInRange",
+            argz: [ms_range, level]
+        });
 
-        var key;
-        if (level === 0) {
-            key = "rawData";
-        } else {
-            key = "average";
-        }
+        haveDataInRangeCallBack = callback;
 
-        var datedRange = my.getDateRange([key], level, ms_range);
-
-        if (datedRange.length === 0) {
-            return false;
-        }
-
-        var firstSample = datedRange[0].ms;
-
-        if (firstSample > ms_range[0] + sampleSize(level)) {
-            return false;
-        }
-
-        var actualRange = ms_range[1] - firstSample;
-        var numberWeShouldHave = Math.floor(actualRange / sampleSize(level));
-
-        var numberWeHave = datedRange.length;
-
-        return numberWeHave >= numberWeShouldHave;
+        return my;
     }
 
     my.missingBins = function(ms_range, level, samplesInsteadOfRanges) {
