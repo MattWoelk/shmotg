@@ -37,6 +37,8 @@ List of events after which lines should be redrawn:
 - lines are shown/hidden
 - interpolation method is changed
 - initPlot
+- basically, whenever rebin() is called ???
+  - and when the level/lines is/are changed
 
 Must be moved over to worker.js:
 - getDateRangeWithMissingValues

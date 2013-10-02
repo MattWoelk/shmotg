@@ -31,42 +31,6 @@ binnedData = function () {
         },
     }
 
-    var bd = { // where all of the data is stored
-        rawData : {
-            levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
-                        // with one key for each range of object, up to a maximum size
-                        // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
-                        //           ^-- a "bin container" -----------------------------------------------------^
-        },
-        average : {
-            levels: [],
-        },
-        maxes : {
-            levels: [],
-        },
-        mins : {
-            levels: [],
-        },
-        q1 : {
-            levels: [],
-        },
-        q3 : {
-            levels: [],
-        },
-        quartiles : {
-            levels: [],
-        },
-        missing : {
-            levels: [],
-        },
-        missingBox : {
-            levels: [],
-        },
-        loadingBox : {
-            levels: [],
-        },
-    }; // where everything is stored
-
     var haveDataInRangeCallBack = function () {};
 
     var bdWorker = new Worker('worker.js');
@@ -76,7 +40,8 @@ binnedData = function () {
         if(command === "print") {
             console.log("WORKER:", event.data.result);
         } else if (command === "rebin") {
-            bd = event.data.result;
+            console.log("rebinned");
+            //bd = event.data.result;
             // TODO: update the plot?
         } else if (command === "addRawData") {
             console.log("added raw data");
@@ -85,7 +50,7 @@ binnedData = function () {
             console.log("added binned data");
             // TODO: update the plot?
         } else if (command === "haveDataInRange") {
-            console.log("added binned data");
+            console.log("have data in range");
             haveDataInRangeCallBack(event.data.result);
             // TODO: update the plot?
         } else {
@@ -184,13 +149,6 @@ binnedData = function () {
 
         return _.groupBy(data, function (d) {
             return getMSStartForTimeAtLevel(d.ms, lvl);
-        });
-    }
-
-    function rebin (bd, range_to_rebin, level_to_rebin, oneSample) {
-        bdWorker.postMessage({
-            command: "rebin",
-            argz: [bd, range_to_rebin, level_to_rebin, oneSample]
         });
     }
 

@@ -81,11 +81,7 @@ var bd = { // where all of the data is stored
     },
 }; // where everything is stored
 
-function rebin (bd, range_to_rebin, level_to_rebin, oneS) {
-    if(typeof bd === "undefined") {
-        return;
-    }
-
+function rebin (range_to_rebin, level_to_rebin, oneS) {
     oneSample = oneS;
 
     // link raw data to the source
@@ -117,7 +113,7 @@ function rebin (bd, range_to_rebin, level_to_rebin, oneS) {
 
         } // for each key
     } // for each bin level
-    return bd;
+    postMessage({'command': "rebin", 'result': "success"});
 }
 
 
@@ -393,7 +389,7 @@ addRawData = function (data, dontBin) {
     addData(data, 'rawData', 0);
 
     if(!dontBin) {
-        rebin(bd, range, 0, oneSample);
+        rebin(range, 0, oneSample);
     }
 }
 
@@ -444,7 +440,7 @@ addBinnedData = function (bData, lvl, dontBin) {
     }; // for each of max_val, min_val, etc.
 
     if(!dontBin) {
-        rebin(bd, range, lvl, oneSample);
+        rebin(range, lvl, oneSample);
     }
 }
 
