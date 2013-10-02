@@ -160,7 +160,7 @@ binnedData = function () {
 
         for (var keyValue in bd.keys) {
             var key = bd.keys[keyValue];
-            result = result.concat(bd[key].levels[lvl]);
+            result = result.concat(bd[lvl === 0 ? "rawData" : key].levels[lvl]);
         }
 
         return result;
@@ -243,7 +243,6 @@ binnedData = function () {
         // link raw data to the source
         for (var keyValue in bd.keys) {
             var key = bd.keys[keyValue];
-            bd[key].levels[0] = bd.rawData.levels[0];
         }
 
         // for each level other than raw data level,
@@ -291,8 +290,8 @@ binnedData = function () {
 
         var combo = [];
         for (var i in binsToBeCombined) {
-            if (bin[key].levels[lvl][binsToBeCombined[i]]){
-                combo = combo.concat(bin[key].levels[lvl][binsToBeCombined[i]]);
+            if (bin[lvl === 0 ? "rawData" : key].levels[lvl][binsToBeCombined[i]]){
+                combo = combo.concat(bin[lvl === 0 ? "rawData" : key].levels[lvl][binsToBeCombined[i]]);
             }
         }
 
@@ -302,7 +301,7 @@ binnedData = function () {
     // Bin the data in a level into abstracted bins
     function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) {
         var bDat = new Array();
-        if (!bin[key].levels[curLevel]) {
+        if (!bin[curLevel === 0 ? "rawData" : key].levels[curLevel]) {
             return bDat;
         }
 
@@ -859,8 +858,8 @@ binnedData = function () {
         for (var k = 0; k < keys.length; k++) {
             var key = keys[k];
             _.each(whichBinsToLookIn, function (n) {
-                if(!bd[key] || !bd[key].levels[lvl]) { return; }
-                var dat = bd[key].levels[lvl][n];
+                if(!bd[lvl === 0 ? "rawData" : key] || !bd[lvl === 0 ? "rawData" : key].levels[lvl]) { return; }
+                var dat = bd[lvl === 0 ? "rawData" : key].levels[lvl][n];
 
                 result = result.concat(_.filter(dat, function (d, i) {
                     return d.ms <= range[1] && d.ms >= range[0];
