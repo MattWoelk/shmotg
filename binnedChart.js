@@ -269,7 +269,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var pathArea;
     var pathPath;
 
-    var slctn; // Save the selection so that my.update() works.
+    var slctn = {each: function(){}}; // Save the selection so that my.update() works.
 
     // whether we used the buttons to zoom
     var transitionNextTime = false;
@@ -918,8 +918,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         reRenderTheNextTime = false;
 
         // GENERATE ALL d0s. (generate the lines paths) }}}
-
-        //// SELECTION.EACH ////
 
     };
 

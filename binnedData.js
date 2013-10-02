@@ -33,6 +33,7 @@ binnedData = function (renderF) {
     }
 
     var haveDataInRangeCallBack = function () {}; // TODO: make this a list, doing one at a time? But they'll need a key so that they match up properly...
+    var getDateRangeWithMissingValuesCallback = function () {}; // TODO: make this a list, doing one at a time? But they'll need a key so that they match up properly...
 
     var bdWorker = new Worker('worker.js');
     bdWorker.onmessage = function(event) {
@@ -51,6 +52,10 @@ binnedData = function (renderF) {
         } else if (command === "haveDataInRange") {
             console.log("have data in range");
             haveDataInRangeCallBack(event.data.result);
+            renderFunction();
+        } else if (command === "getDateRangeWithMissingValues") {
+            console.log("have data in range");
+            getDateRangeWithMissingValuesCallback(event.data.result);
             renderFunction();
         } else {
             console.log("Receiving from Worker: ", event.data.command, event.data.result.average);
@@ -252,50 +257,8 @@ binnedData = function (renderF) {
         return my;
     }
 
-    my.missingBins = function(ms_range, level, samplesInsteadOfRanges) {
-        // Return which bins which we are missing in the given range and level.
-        // returns [[start, end],[start,end],...] ranges of required data
-
-        var key;
-        if (level === 0) {
-            key = "rawData";
-        } else {
-            key = "average";
-        }
-
-        var fir = Math.floor(ms_range[0] / (Math.pow(2, level) * oneSample));
-        var las = Math.floor(ms_range[1] / (Math.pow(2, level) * oneSample));
-
-        var normalizedRange = [ fir * Math.pow(2, level) * oneSample, (las + 1) * Math.pow(2, level) * oneSample ];
-        var datedRange = my.getDateRange([key], level, normalizedRange);
-
-        if (datedRange.length === 0) {
-            // TODO: for the grey missing data boxes, should this return something different?
-            if (samplesInsteadOfRanges) { return [ms_range[0]]; }
-            return [ms_range];
-        }
-
-        var neededBins = _.range(normalizedRange[0], normalizedRange[1], sampleSize(level));
-        neededBins.forEach(function (d) {
-            d = d * Math.pow(2, level) * oneSample;
-        });
-
-        var missingSamples = inAButNotInB(neededBins, _.pluck(datedRange, 'ms'));
-        missingSamples.total = datedRange.length;
-
-        if(samplesInsteadOfRanges) { return missingSamples; }
-
-        var missingRanges = [];
-
-        _.each(missingSamples, function (d,i) {
-            missingRanges.push([d, d + sampleSize(level)]);
-            // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
-        });
-
-        return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
-    }
-
-    my.getDateRangeWithMissingValues = function (key, lvl, range, extra) {
+    my.getDateRangeWithMissingValues = function (key, lvl, range, extra, callback) {
+        // TODO: put in worker.js
         // give the range of data for this key and level
         // NOT including the highest value in range
         // USE:
@@ -303,31 +266,14 @@ binnedData = function (renderF) {
         // than the required amount of line and area
         // missing values are NaN's
 
-        var missings = my.missingBins(range, lvl, true);
-
-        missingsObjs = missings.map(function (d) {
-            return {ms: d, val: NaN};
+        bdWorker.postMessage({
+            command: "getDateRangeWithMissingValues",
+            argz: [key, lvl, range, extra]
         });
 
-        result = combineAndSortArraysOfDateValObjects(
-                missingsObjs,
-                my.getDateRange([key], lvl, range)
-                );
+        getDateRangeWithMissingValuesCallback = callback ? callback : getDateRangeWithMissingValuesCallback;
 
-        // if we should add in an extra value before each NaN
-        // so that everything looks nice for step-after interpolation
-        if (extra) {
-            var toEnd = result.length;
-            for (var i = 1; i < toEnd; i++) {
-                if (isNaN(result[i].val)) {
-                    result.splice(i, 0, { ms: result[i].ms, val: result[i-1].val });
-                    i++;
-                    toEnd++;
-                }
-            }
-        }
-
-        return result;
+        return my;
     }
 
     my.getDateRange = function (keys, lvl, range) {
