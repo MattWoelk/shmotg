@@ -718,12 +718,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //{{{ CONTAINER AND CLIPPING
             if (!yAxisLock) {
-                yAxis = d3.svg.axis()
-                        .scale(yScale)
-                        .ticks(hideYAxisLabels ? 0 : 5)
-                        .tickSubdivide(true)
-                        .tickSize(width, 0, 0) // major, minor, end
-                        .orient("left");
+                if (!yAxis){
+                    yAxis = d3.svg.axis()
+                    .ticks(hideYAxisLabels ? 0 : 5)
+                    .tickSubdivide(true)
+                    .tickSize(width, 0, 0) // major, minor, end
+                    .orient("left");
+                }
+                yAxis.scale(yScale);
             }
 
             chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
@@ -819,17 +821,19 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //{{{ AXES
             // Draw Axes using msToCentury.js format and values
-            xAxis = d3.svg.axis()
-                    //DEPRECATED.tickSize(6, 3, 3) //major, minor, end
+            if (!xAxis) {
+                xAxis = d3.svg.axis()
                     .tickFormat(msToCenturyTickFormat)
-                    .tickValues(msToCenturyTickValues(xScale, width))
-                    //.tickSubdivide(msToCenturyTickSubDivide(xScale, width))
-                    .scale(xScale).orient("bottom");
+                    .orient("bottom");
+            }
+            xAxis.scale(xScale).tickValues(msToCenturyTickValues(xScale, width))
 
-            xAxisMinor = d3.svg.axis()
+            if (!xAxisMinor) {
+                xAxisMinor = d3.svg.axis()
                     .tickFormat(msToCenturyTickFormat)
-                    .tickValues(msToCenturySubTickValues(xScale, width))
                     .scale(xScale).orient("bottom");
+            }
+            xAxisMinor.scale(xScale).tickValues(msToCenturySubTickValues(xScale, width));
 
             //d3.selectAll("text").attr("fill", "#F0F");
             // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
