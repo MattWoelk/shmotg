@@ -6,10 +6,12 @@ var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of i
 
 /// CONSTANTS }}}
 
-binnedData = function () {
+binnedData = function (renderF) {
 
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample
+
+    var renderFunction = renderF ? renderF : function(){};
 
     var bd_meta  = {// where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
@@ -39,17 +41,17 @@ binnedData = function () {
             console.log("WORKER:", event.data.result);
         } else if (command === "rebin") {
             console.log("rebinned");
-            // TODO: update the plot?
+            renderFunction();
         } else if (command === "addRawData") {
             console.log("added raw data");
-            // TODO: update the plot?
+            renderFunction();
         } else if (command === "addBinnedData") {
             console.log("added binned data");
-            // TODO: update the plot?
+            renderFunction();
         } else if (command === "haveDataInRange") {
             console.log("have data in range");
             haveDataInRangeCallBack(event.data.result);
-            // TODO: update the plot?
+            renderFunction();
         } else {
             console.log("Receiving from Worker: ", event.data.command, event.data.result.average);
         }

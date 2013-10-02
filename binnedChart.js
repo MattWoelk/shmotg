@@ -276,8 +276,217 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var reRenderTheNextTime = true;
     var waitingForServer = false;
 
+    var renderFunction = function () {
+        var renderThis = [];
+        renderThis = renderThis.concat(whichLinesToRender);
+        if (whichLinesToRender.indexOf("quartiles") !== -1) {
+            // If we're going to render the quartiles, we need to render q1 and q3.
+            if (whichLinesToRender.indexOf("q3") === -1) {
+                renderThis = ['q3'].concat(renderThis);
+            }
+            if (whichLinesToRender.indexOf("q1") === -1) {
+                renderThis = ['q1'].concat(renderThis);
+            }
+        }
+        if (whichLinesToRender.indexOf("missing") !== -1) {
+            renderThis = ['missingBox'].concat(renderThis);
+        }
+        if (whichLevelToRender === 0) {
+            renderThis = ['average'];
+            // TODO: render it as black.
+        }
+        renderThis = ['loadingBox'].concat(renderThis);
+        // TODO: take all the renderedD0s and render them to the screen.
+        // TODO: this should only be called by binnedData when it receives updates from worker.js
+
+        slctn.each(function () {
+
+            //{{{ CONTAINER AND CLIPPING
+            if (!yAxisLock) {
+                yAxis = d3.svg.axis()
+                        .scale(yScale)
+                        .ticks(hideYAxisLabels ? 0 : 5)
+                        .tickSubdivide(true)
+                        .tickSize(width, 0, 0) // major, minor, end
+                        .orient("left");
+            }
+
+            chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
+
+            //Set it's container's dimensions
+            slctn.attr("width", width);
+
+            //Set the chart's dimensions
+            chart.attr("width", width + margin.left + margin.right)
+                 .attr("height", height + margin.top + margin.bottom);
+
+            //Allow dragging and zooming.
+            //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
+
+
+            //Make the clipPath (for cropping the paths)
+            if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + sensorType + sensorNumber).append("rect"); }
+            defclip.attr("width", width)
+                   //.transition().duration(transitionDuration)
+                   .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+                   .attr("height", height);
+
+            // CONTAINER AND CLIPPING }}}
+
+            //{{{ AREAS
+
+            //Apply the clipPath
+            pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
+            pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                    .attr("class", "posArea")
+                    .attr("height", height);
+
+            //make and render the area
+            var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(renderThis, whichLevelToRender, interpolationMethod, true)
+
+            drawElements(quartileObjectForKeyFanciness,
+                         pathArea,
+                         sensorType+sensorNumber,
+                         xScale,
+                         transitionNextTime,
+                         previousXScale,
+                         easingMethod,
+                         transitionDuration,
+                         renderedD0s,
+                         binData,
+                         margin,
+                         renderScale,
+                         strokeWidth,
+                         "posArea");
+
+            // AREAS }}}
+
+            //{{{ LINES
+
+            //Apply the clipPath
+            pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
+            pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                    .attr("class", "posPath")
+                    .attr("height", height);
+
+            //Make and render the Positive lines.
+            var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
+            if (renderThis.indexOf('loadingBox') > -1) {
+                dataObjectForKeyFanciness.push({
+                    key: 'loadingBox',
+                    which: 0,
+                    interpolate: interpolationMethod
+                });
+            }
+
+            console.log("drawelements");
+            drawElements(dataObjectForKeyFanciness,
+                         pathPath,
+                         sensorType+sensorNumber,
+                         xScale,
+                         transitionNextTime,
+                         previousXScale,
+                         easingMethod,
+                         transitionDuration,
+                         renderedD0s,
+                         binData,
+                         margin,
+                         renderScale,
+                         strokeWidth,
+                         "posPath");
+
+                         // LINES }}}
+
+            //{{{ AXES
+            // Draw Axes using msToCentury.js format and values
+            xAxis = d3.svg.axis()
+                    //DEPRECATED.tickSize(6, 3, 3) //major, minor, end
+                    .tickFormat(msToCenturyTickFormat)
+                    .tickValues(msToCenturyTickValues(xScale, width))
+                    //.tickSubdivide(msToCenturyTickSubDivide(xScale, width))
+                    .scale(xScale).orient("bottom");
+
+            xAxisMinor = d3.svg.axis()
+                    .tickFormat(msToCenturyTickFormat)
+                    .tickValues(msToCenturySubTickValues(xScale, width))
+                    .scale(xScale).orient("bottom");
+
+            //d3.selectAll("text").attr("fill", "#F0F");
+            // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
+
+            if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
+            xAxisContainer.attr("class", "x axis")
+                          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+            if (!xAxisMinorContainer) { xAxisMinorContainer = chart.append("g"); }
+            xAxisMinorContainer.attr("class", "x axis minor")
+                          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+            //.attr("transform", "translate(" + margin.left + "," + height + ")");
+            if (transitionNextTime) {
+                xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+                xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
+            } else {
+                xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
+                xAxisMinorContainer/*.transition().duration(transitionDuration)*/.call(xAxisMinor);
+            }
+
+            if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
+            yAxisContainer.attr("class", "y axis")
+                          .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
+                          //.attr("transform", "translate(" + margin.left + "," + height + ")");
+            yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
+            // AXES }}}
+
+            // {{{ Y AXIS LOCK
+            if (!yAxisLockContainer) { yAxisLockContainer = chart.append("g"); }
+
+            // Draw Y Axis Lock
+            var yAxisLockSelection = yAxisLockContainer.selectAll("img")
+                    .data()
+            // Y AXIS LOCK }}}
+
+            //{{{ TIME CONTEXT
+            if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
+
+            // Draw Time Context
+            var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
+                    .data(["⬐ " + getTimeContextString(xScale, showTimeContext)]);
+            var titleContainer = timeContextContainer.selectAll(".sensor_title")
+                    .data([sensorType.capitalize() + " " + sensorNumber]);
+
+            // enter
+            timeContextSelection.enter().append("text")
+                .attr("class", "sensor_time_context");
+            titleContainer.enter().append("text")
+                .attr("class", "sensor_title");
+
+            // update
+            timeContextSelection
+                    .text(function (d) { return d; })
+                    .attr("x", margin.left -5)
+                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+            titleContainer
+                    .text(function (d) { return d; })
+                    .attr("x", margin.left + (width))
+                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+
+            // exit
+            timeContextSelection.exit().remove();
+            titleContainer.exit().remove();
+
+            // TIME CONTEXT }}}
+
+            //{{{ TRANSITION NEXT TIME
+            if (transitionNextTime) {
+                // So that this only happens once per button click
+                transitionNextTime = false;
+            }
+            // TRANSITION NEXT TIME }}}
+
+        });
+    }
+
     // Where all data is stored, but NOT rendered d0's
-    var binData = binnedData();
+    var binData = binnedData(renderFunction);
     if (oneSample) {
         binData.oneSample(oneSample);
     }
@@ -712,189 +921,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
         //// SELECTION.EACH ////
 
-        selection.each(function () {
-
-            //{{{ CONTAINER AND CLIPPING
-            if (!yAxisLock) {
-                yAxis = d3.svg.axis()
-                        .scale(yScale)
-                        .ticks(hideYAxisLabels ? 0 : 5)
-                        .tickSubdivide(true)
-                        .tickSize(width, 0, 0) // major, minor, end
-                        .orient("left");
-            }
-
-            chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
-
-            //Set it's container's dimensions
-            selection.attr("width", width);
-
-            //Set the chart's dimensions
-            chart.attr("width", width + margin.left + margin.right)
-                 .attr("height", height + margin.top + margin.bottom);
-
-            //Allow dragging and zooming.
-            //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
-
-
-            //Make the clipPath (for cropping the paths)
-            if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + sensorType + sensorNumber).append("rect"); }
-            defclip.attr("width", width)
-                   //.transition().duration(transitionDuration)
-                   .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                   .attr("height", height);
-
-            // CONTAINER AND CLIPPING }}}
-
-            //{{{ AREAS
-
-            //Apply the clipPath
-            pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
-            pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-                    .attr("class", "posArea")
-                    .attr("height", height);
-
-            //make and render the area
-            var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(renderThis, whichLevelToRender, interpolationMethod, true)
-
-            drawElements(quartileObjectForKeyFanciness,
-                         pathArea,
-                         sensorType+sensorNumber,
-                         xScale,
-                         transitionNextTime,
-                         previousXScale,
-                         easingMethod,
-                         transitionDuration,
-                         renderedD0s,
-                         binData,
-                         margin,
-                         renderScale,
-                         strokeWidth,
-                         "posArea");
-
-            // AREAS }}}
-
-            //{{{ LINES
-
-            //Apply the clipPath
-            pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
-            pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-                    .attr("class", "posPath")
-                    .attr("height", height);
-
-            //Make and render the Positive lines.
-            var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, whichLinesToRender, whichLevelToRender, interpolationMethod);
-            if (renderThis.indexOf('loadingBox') > -1) {
-                dataObjectForKeyFanciness.push({
-                    key: 'loadingBox',
-                    which: 0,
-                    interpolate: interpolationMethod
-                });
-            }
-
-            drawElements(dataObjectForKeyFanciness,
-                         pathPath,
-                         sensorType+sensorNumber,
-                         xScale,
-                         transitionNextTime,
-                         previousXScale,
-                         easingMethod,
-                         transitionDuration,
-                         renderedD0s,
-                         binData,
-                         margin,
-                         renderScale,
-                         strokeWidth,
-                         "posPath");
-
-                         // LINES }}}
-
-            //{{{ AXES
-            // Draw Axes using msToCentury.js format and values
-            xAxis = d3.svg.axis()
-                    //DEPRECATED.tickSize(6, 3, 3) //major, minor, end
-                    .tickFormat(msToCenturyTickFormat)
-                    .tickValues(msToCenturyTickValues(xScale, width))
-                    //.tickSubdivide(msToCenturyTickSubDivide(xScale, width))
-                    .scale(xScale).orient("bottom");
-
-            xAxisMinor = d3.svg.axis()
-                    .tickFormat(msToCenturyTickFormat)
-                    .tickValues(msToCenturySubTickValues(xScale, width))
-                    .scale(xScale).orient("bottom");
-
-            //d3.selectAll("text").attr("fill", "#F0F");
-            // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
-
-            if (!xAxisContainer) { xAxisContainer = chart.append("g"); }
-            xAxisContainer.attr("class", "x axis")
-                          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-            if (!xAxisMinorContainer) { xAxisMinorContainer = chart.append("g"); }
-            xAxisMinorContainer.attr("class", "x axis minor")
-                          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-            //.attr("transform", "translate(" + margin.left + "," + height + ")");
-            if (transitionNextTime) {
-                xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-                xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
-            } else {
-                xAxisContainer/*.transition().duration(transitionDuration)*/.call(xAxis);
-                xAxisMinorContainer/*.transition().duration(transitionDuration)*/.call(xAxisMinor);
-            }
-
-            if (!yAxisContainer) { yAxisContainer = chart.append("g"); }
-            yAxisContainer.attr("class", "y axis")
-                          .attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
-                          //.attr("transform", "translate(" + margin.left + "," + height + ")");
-            yAxisContainer/*.transition().duration(transitionDuration)*/.call(yAxis);
-            // AXES }}}
-
-            // {{{ Y AXIS LOCK
-            if (!yAxisLockContainer) { yAxisLockContainer = chart.append("g"); }
-
-            // Draw Y Axis Lock
-            var yAxisLockSelection = yAxisLockContainer.selectAll("img")
-                    .data()
-            // Y AXIS LOCK }}}
-
-            //{{{ TIME CONTEXT
-            if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
-
-            // Draw Time Context
-            var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
-                    .data(["⬐ " + getTimeContextString(xScale, showTimeContext)]);
-            var titleContainer = timeContextContainer.selectAll(".sensor_title")
-                    .data([sensorType.capitalize() + " " + sensorNumber]);
-
-            // enter
-            timeContextSelection.enter().append("text")
-                .attr("class", "sensor_time_context");
-            titleContainer.enter().append("text")
-                .attr("class", "sensor_title");
-
-            // update
-            timeContextSelection
-                    .text(function (d) { return d; })
-                    .attr("x", margin.left -5)
-                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
-            titleContainer
-                    .text(function (d) { return d; })
-                    .attr("x", margin.left + (width))
-                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
-
-            // exit
-            timeContextSelection.exit().remove();
-            titleContainer.exit().remove();
-
-            // TIME CONTEXT }}}
-
-            //{{{ TRANSITION NEXT TIME
-            if (transitionNextTime) {
-                // So that this only happens once per button click
-                transitionNextTime = false;
-            }
-            // TRANSITION NEXT TIME }}}
-
-        });
     };
 
     //{{{ Getters and Setters
