@@ -170,6 +170,7 @@ var redraw = function () {
                             "girder_19",
                             "girder_20",
                             "girder_22",
+                            "girder_40",
                             "girder_45"];
     var sensorsShown = _.map(plots, function (d) {
         return d.sensorType() + "_" + d.sensorNumber();
