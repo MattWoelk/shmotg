@@ -106,13 +106,15 @@ slider = function () {
         highlightSliderElement();
     }
 
-    function dragHandle() {
+    function dragHandle(han) {
+        console.log(han);
         var adjustment = d3.event.dy;
         var dragTarget = handle_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
         var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
         handlePosition = finalY;
+        console.log(handlePosition, d3.event.y);
         dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
 
         highlightSliderElement();
