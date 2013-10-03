@@ -33,8 +33,6 @@ slider = function () {
     var handlePosition = 0;//boxSize*2;
     var scrollPosition = 0;
 
-    var mightBeClicking = false; // set when mouse down, reset when scroll, used when click
-
     var surrounding_lines;
     var line_bottom;
     var line_left;
@@ -56,7 +54,6 @@ slider = function () {
     }
 
     var ondown = function(e) {
-        mightBeClicking = true;
         d3.select(this).classed("hover", false);
         d3.select(this).classed("mousedown", true);
         if (e.preventDefault) {
@@ -66,7 +63,7 @@ slider = function () {
     }
 
     var onclick = function() {
-        if(!mightBeClicking) { return; }
+        if (d3.event.defaultPrevented) return; // click suppressed
         d3.select(this).classed("hover", false);
         d3.select(this).classed("mousedown", false);
         // TODO: set as selected and trigger stuff
@@ -99,7 +96,6 @@ slider = function () {
     }
 
     function dragSlider() {
-        mightBeClicking = false;
         var adjustment = d3.event.dy;
         var dragTarget = slide_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
