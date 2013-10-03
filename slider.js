@@ -1,4 +1,4 @@
-/* Usage: TODO
+/* Usage: TODO: this is wrong
 * var mySlider = slider({width: 960, height: 500, id: "loader"});
 * mySlider();
 */
@@ -31,6 +31,7 @@ slider = function () {
     var handle;
 
     var handlePosition = 0;//boxSize*2;
+    var scrollPosition = 0;
 
     var surrounding_lines;
     var line_bottom;
@@ -357,6 +358,7 @@ slider = function () {
 
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
+        if (value === scrollPosition) { return my; }
         scrollPosition = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
         var dragTarget = d3.select("#slide_region" + id);
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
