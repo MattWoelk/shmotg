@@ -873,7 +873,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             // Draw Time Context
             var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
-                    .data(["⬐ " + getTimeContextString(xScale, showTimeContext)]);
+                    .data([getTimeContextString(xScale, showTimeContext)]);
             var titleContainer = timeContextContainer.selectAll(".sensor_title")
                     .data([sensorType.capitalize() + " " + sensorNumber]);
 
