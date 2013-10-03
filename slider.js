@@ -62,23 +62,13 @@ slider = function () {
         e.returnValue = false;
     }
 
-    var onscroll = function(e) {
-        console.log(e);
-        if (e.preventDefault) {
-            console.log("PREVENTING");
-            e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
-        }
-        e.returnValue = false;
-        d3.select(this).classed("hover", false);
-        d3.select(this).classed("mousedown", false);
-        dragSlider(d3.event.wheelDeltaY / 5);
-    }
-
     var onclick = function() {
         d3.select(this).classed("hover", false);
         d3.select(this).classed("mousedown", false);
         // TODO: set as selected and trigger stuff
-        console.log("CLICK");
+        var which_box = this.__data__;
+        var newPos = (which_box * boxSize) + scrollPosition;
+        my.handlePosition(newPos).update();
     }
     // EVENTS }}}
 
@@ -104,8 +94,8 @@ slider = function () {
         return curTrans[1];
     }
 
-    function dragSlider(usethis) {
-        var adjustment = usethis ? usethis : d3.event.dy;
+    function dragSlider() {
+        var adjustment = d3.event.dy;
         var dragTarget = slide_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
@@ -115,8 +105,8 @@ slider = function () {
         highlightSliderElement();
     }
 
-    function dragHandle(usethis) {
-        var adjustment = usethis ? usethis : d3.event.dy;
+    function dragHandle() {
+        var adjustment = d3.event.dy;
         var dragTarget = handle_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
@@ -239,8 +229,9 @@ slider = function () {
             // {{{ HANDLE
             handle_region = handle_region ? handle_region : svg.append("g")
                 .attr("id", "handle_region" + id)
-                .attr("class", "handle_region")
-                .attr("transform", "translate(0," + handlePosition + ")")
+                .attr("class", "handle_region");
+            handle_region
+                .attr("transform", "translate(0," + handlePosition + ")");
 
             // TODO: make top and bottom dynamic
             var pointer_top = Math.max(0, boxSize/2);
@@ -367,8 +358,10 @@ slider = function () {
         return my;
     }
 
-    my.handlePosition = function () {
-        return handlePosition;
+    my.handlePosition = function (value) {
+        if (!arguments.length) return handlePosition;
+        handlePosition = Math.max(0, Math.min(height - boxSize, value));//d3.min([0, d3.max([height - boxSize, value])]);
+        return my;
     }
 
     my.highlightSliderElement = function () {
