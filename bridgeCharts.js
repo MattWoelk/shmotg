@@ -397,27 +397,17 @@ var updateZoom = function () { return 0; };
 var oldXScale = d3.scale.linear();
 
 function zoomAll() {
+    console.log("zoomAll");
     // adjust slider
     var scal = getScaleValue(xScale);
     var newPos = boxSize * (Math.log(scal) / Math.log(2));
 
-    if (mySlider.pastExtents(newPos)) {
-        var tmpScale = oldXScale.copy();
+    mySlider.scrollPosition(newPos).update(true);
 
-        plots.forEach(function (plt) {
-            plt.xScale(tmpScale.copy()).update();
-        });
-        xScale = tmpScale.copy();
-
-        zoom.x(xScale);
-    } else {
-        mySlider.scrollPosition(newPos).update(true);
-
-        // set plot scales
-        plots.forEach(function (plt) {
-            plt.xScale(xScale.copy()).update();
-        });
-    }
+    // set plot scales
+    plots.forEach(function (plt) {
+        plt.xScale(xScale.copy()).update();
+    });
 
     oldXScale = xScale.copy();
 }
