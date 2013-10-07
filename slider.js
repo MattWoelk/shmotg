@@ -86,8 +86,8 @@ slider = function () {
 
     // {{{ HELPER FUNCTIONS
     function highlightSliderElement() {
-        var locationOfHandle = d3.transform(handle_region.attr("transform")).translate[1] + (boxSize/2);
-        var locationOfSlider = d3.transform(slide_region.attr("transform")).translate[1];
+        var locationOfHandle = handlePosition + (boxSize / 2); //d3.transform(handle_region.attr("transform")).translate[1] + (boxSize/2);
+        var locationOfSlider = scrollPosition; //d3.transform(slide_region.attr("transform")).translate[1];
         var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize); // level being pointed to
         changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
         d3.selectAll(".slider_boxes")
@@ -118,14 +118,14 @@ slider = function () {
     }
 
     function dragHandle(han) {
-        console.log(han);
+        // console.log(han);
         var adjustment = d3.event.dy;
         var dragTarget = handle_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
         var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
         handlePosition = finalY;
-        console.log(handlePosition, d3.event.y);
+        // console.log(handlePosition, d3.event.y);
         dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
 
         highlightSliderElement();
