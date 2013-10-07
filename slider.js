@@ -41,6 +41,16 @@ slider = function () {
     var line_top;
 
     var avoidChangeCallBack; // TODO: make this not required.
+
+    var dragS = d3.behavior.drag()
+        .origin(Object)
+        .on("drag", dragSlider);
+
+    var dragH = d3.behavior.drag()
+        .origin(Object)
+        .on("drag", dragHandle);
+
+    var once = true; // for things which only run the first time my() is called.
     // Set Defaults }}}
 
     // {{{ EVENTS
@@ -291,21 +301,15 @@ slider = function () {
             // HANDLE }}}
 
             // {{{ DRAGGING
-            var dragS = d3.behavior.drag()
-                .origin(Object)
-                .on("drag", dragSlider);
-
-            var dragH = d3.behavior.drag()
-                .origin(Object)
-                .on("drag", dragHandle);
-
-            slide_region.call(dragS);
-            handle_region.call(dragH);
-
-
+            if (once){
+                slide_region.call(dragS);
+                handle_region.call(dragH);
+            }
             // DRAGGING }}}
 
             highlightSliderElement();
+
+            once = false;
         });
         d3.timer.flush();
     };
