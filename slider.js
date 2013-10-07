@@ -107,14 +107,14 @@ slider = function () {
     }
 
     function dragHandle(han) {
-        ////console.log(han);
+        console.log(han);
         var adjustment = d3.event.dy;
         var dragTarget = handle_region;
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
         var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
         handlePosition = finalY;
-        ////console.log(handlePosition, d3.event.y);
+        console.log(handlePosition, d3.event.y);
         dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
 
         highlightSliderElement();
@@ -339,7 +339,7 @@ slider = function () {
         return my;
     }
 
-    my.isPastExtents = function (val) {
+    my.pastExtents = function (val) {
         // return true if we are out of bounds
         if (val < height - boxSize*numberOfLevels) {
             return true;
@@ -348,6 +348,7 @@ slider = function () {
         } else {
             return false;
         }
+        var scrl = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
     }
 
     my.scrollPosition = function (value) {
