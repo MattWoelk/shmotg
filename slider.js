@@ -184,25 +184,28 @@ slider = function () {
             // VARIABLES }}}
 
             // {{{ CLIPPING
-            defclip = defclip ? defclip : svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect");
-            defclip
+            if(once) {
+                defclip = defclip ? defclip : svg.insert("defs").append("clipPath").attr("id", "clip" + id).append("rect");
+                defclip
                 .attr("width", boxSize)
                 .attr("transform", "translate(" + side_margin + ", " + 0 + ")")
                 .attr("height", height);
+            }
             // CLIPPING }}}
 
             // {{{ SLIDER
-            slide_region = slide_region ? slide_region : svg.append("g")
+            if(once){
+                slide_region = slide_region ? slide_region : svg.append("g")
                 .attr("id", "slide_container" + id)
                 .attr("clip-path", "url(#clip" + id + ")")
                 .append("g") // another 'g' so that the clip doesn't move with the slide_region
                 .attr("id", "slide_region" + id)
                 .attr("class", "slide_region")
 
-            slide_dat_applied = slide_region.selectAll("g")
+                slide_dat_applied = slide_region.selectAll("g")
                 .data(d3.range(numberOfLevels));
-            slide_enter = slide_dat_applied.enter().append("g");
-            slide_enter.append("path")
+                slide_enter = slide_dat_applied.enter().append("g");
+                slide_enter.append("path")
                 .attr("d", drawBox)
                 .on("mouseover", onhover)
                 .on("mouseout", onoff)
@@ -210,57 +213,60 @@ slider = function () {
                 .on("click", onclick)
                 //.on("mousewheel", onscroll)
                 .attr("class", "slider_boxes");
-            slide_enter.append("text")
+                slide_enter.append("text")
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
                 .attr("x", function (d) { return side_margin + (boxSize / 2.0); })
                 .attr("y", function (d, i) { return (i+1)*boxSize - (boxSize/2); })
                 .text(function (d, i) { return i; })
                 .attr("class", "slider_text");
-            slide_dat_applied.exit()
+                slide_dat_applied.exit()
                 .remove();
+            }
             // SLIDER }}}
 
             // {{{ SURROUNDING LINES
-            surrounding_lines = surrounding_lines ? surrounding_lines : svg.append("g")
-                .attr("id", "surrounding_lines" + id);
+            if (once){
+                surrounding_lines = surrounding_lines ? surrounding_lines : svg.append("g")
+                    .attr("id", "surrounding_lines" + id);
 
-            var line_top_data = [ {x: 0,     y: 0},
-                                  {x: boxSize + (2*side_margin), y: 0} ];
+                var line_top_data = [ {x: 0,     y: 0},
+                    {x: boxSize + (2*side_margin), y: 0} ];
 
-            var line_bottom_data = [ {x: 0,     y: height},
-                                     {x: boxSize + (2*side_margin), y: height} ];
+                var line_bottom_data = [ {x: 0,     y: height},
+                    {x: boxSize + (2*side_margin), y: height} ];
 
-            var line_left_data = [ {x: side_margin, y: 0},
-                                   {x: side_margin, y: height}];
+                var line_left_data = [ {x: side_margin, y: 0},
+                    {x: side_margin, y: height}];
 
-            var line_right_data = [ {x: boxSize + side_margin, y: 0},
-                                    {x: boxSize + side_margin, y: height}];
+                var line_right_data = [ {x: boxSize + side_margin, y: 0},
+                    {x: boxSize + side_margin, y: height}];
 
-            line = line ? line : d3.svg.line()
-                .x(function(d) { return d.x; })
-                .y(function(d) { return d.y; })
-                .interpolate("linear");
+                line = line ? line : d3.svg.line()
+                    .x(function(d) { return d.x; })
+                    .y(function(d) { return d.y; })
+                    .interpolate("linear");
 
-            line_top = line_top ? line_top : surrounding_lines.append("path")
-                .attr("class", "slider_outlines");
-            line_top
-                .attr("d", line(line_top_data));
+                line_top = line_top ? line_top : surrounding_lines.append("path")
+                    .attr("class", "slider_outlines");
+                line_top
+                    .attr("d", line(line_top_data));
 
-            line_bottom = line_bottom ? line_bottom : surrounding_lines.append("path")
-                .attr("class", "slider_outlines");
-            line_bottom
-                .attr("d", line(line_bottom_data));
+                line_bottom = line_bottom ? line_bottom : surrounding_lines.append("path")
+                    .attr("class", "slider_outlines");
+                line_bottom
+                    .attr("d", line(line_bottom_data));
 
-            line_left = line_left ? line_left : surrounding_lines.append("path")
-                .attr("class", "slider_outlines");
-            line_left
-                .attr("d", line(line_left_data));
+                line_left = line_left ? line_left : surrounding_lines.append("path")
+                    .attr("class", "slider_outlines");
+                line_left
+                    .attr("d", line(line_left_data));
 
-            line_right = line_right ? line_right : surrounding_lines.append("path")
-                .attr("class", "slider_outlines");
-            line_right
-                .attr("d", line(line_right_data));
+                line_right = line_right ? line_right : surrounding_lines.append("path")
+                    .attr("class", "slider_outlines");
+                line_right
+                    .attr("d", line(line_right_data));
+            }
             // SURROUNDING LINES }}}
 
             // {{{ HANDLE
