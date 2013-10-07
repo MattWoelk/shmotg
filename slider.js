@@ -339,6 +339,17 @@ slider = function () {
         return my;
     }
 
+    my.isPastExtents = function (val) {
+        // return true if we are out of bounds
+        if (val < height - boxSize*numberOfLevels) {
+            return true;
+        } else if (val > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
         if (value === scrollPosition) { return my; }
