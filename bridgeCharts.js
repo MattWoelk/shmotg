@@ -413,7 +413,7 @@ function zoomAll() {
     } else {
         mySlider.scrollPosition(newPos).update(true);
 
-        var cp = xScale.copy();
+        var cp = xScale.copy(); // TODO: instead of creating a brand new scale, just set scale parameters for each plot. (domain and/or range)
         // set plot scales
         plots.forEach(function (plt) {
             plt.xScale(cp).update();

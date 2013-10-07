@@ -429,13 +429,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         }
 
         var didWeRenderAnything = false;
-
-        // calculate new y scale before we render any d0s
-        // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
-        // - this will give the option of all charts having the same y axis
-        var showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, renderRange), function (d) {
-            return d.val;
-        });
+        var showing_range;
 
         // for each key
         // 1. find out whether we should render things
@@ -454,6 +448,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
                 //render the new stuff
                 didWeRenderAnything = true;
+
+                // calculate new y scale before we render any d0s
+                // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
+                // - this will give the option of all charts having the same y axis
+                if (!showing_range) {
+                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, renderRange), function (d) {
+                        return d.val;
+                    });
+                }
 
                 if (!yAxisLock && !waitingForServer) {
                     yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
