@@ -82,7 +82,7 @@ slider = function () {
         // TODO: set as selected and trigger stuff
         var which_box = this.__data__;
         var newPos = (which_box * boxSize) + scrollPosition;
-        my.handlePosition(newPos).update();
+        my.handlePosition(newPos).update(true);
     }
     // EVENTS }}}
 
