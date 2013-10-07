@@ -413,9 +413,10 @@ function zoomAll() {
     } else {
         mySlider.scrollPosition(newPos).update(true);
 
+        var cp = xScale.copy();
         // set plot scales
         plots.forEach(function (plt) {
-            plt.xScale(xScale.copy()).update();
+            plt.xScale(cp).update();
         });
     }
 
