@@ -814,99 +814,99 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //{{{ LINES
 
-                         function dolines() {
-                             //Apply the clipPath
-                             pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
-                             pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-                             .attr("class", "posPath")
-                             .attr("height", height);
+            function dolines() {
+                //Apply the clipPath
+                pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
+                pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                .attr("class", "posPath")
+                .attr("height", height);
 
-                             var shownLines = whichLevelToRender === 0 ? ["average"] : whichLinesToRender;
+                var shownLines = whichLevelToRender === 0 ? ["average"] : whichLinesToRender;
 
-                             //Make and render the Positive lines.
-                             var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, shownLines, whichLevelToRender, interpolationMethod);
-                             if (renderThis.indexOf('loadingBox') > -1) {
-                                 dataObjectForKeyFanciness.push({
-                                     key: 'loadingBox',
-                                     which: 0,
-                                     interpolate: interpolationMethod
-                                 });
-                             }
+                //Make and render the Positive lines.
+                var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, shownLines, whichLevelToRender, interpolationMethod);
+                if (renderThis.indexOf('loadingBox') > -1) {
+                    dataObjectForKeyFanciness.push({
+                        key: 'loadingBox',
+                        which: 0,
+                        interpolate: interpolationMethod
+                    });
+                }
 
-                             drawElements(dataObjectForKeyFanciness,
-                                          pathPath,
-                                          sensorType+sensorNumber,
-                                          function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
-                                          function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
-                                          function (d) { return binData.getDash(d.key); },
-                                          xScale,
-                                          transitionNextTime,
-                                          previousXScale,
-                                          easingMethod,
-                                          transitionDuration,
-                                          renderedD0s,
-                                          binData,
-                                          margin,
-                                          renderScale,
-                                          strokeWidth,
-                                          "posPath",
-                                          didWeRenderAnything || reRenderTheNextTime);
-                         }
-                         dolines();
+                drawElements(dataObjectForKeyFanciness,
+                             pathPath,
+                             sensorType+sensorNumber,
+                             function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
+                             function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
+                             function (d) { return binData.getDash(d.key); },
+                             xScale,
+                             transitionNextTime,
+                             previousXScale,
+                             easingMethod,
+                             transitionDuration,
+                             renderedD0s,
+                             binData,
+                             margin,
+                             renderScale,
+                             strokeWidth,
+                             "posPath",
+                             didWeRenderAnything || reRenderTheNextTime);
+            }
+            dolines();
 
-                         // LINES }}}
+            // LINES }}}
 
             //{{{ AXES
             // Draw Axes using msToCentury.js format and values
-                         function doaxes() {
-                             if (!xAxis) {
-                                 xAxis = d3.svg.axis()
-                                 .tickFormat(msToCenturyTickFormat)
-                                 .orient("bottom");
-                             }
-                             xAxis.scale(xScale).tickValues(msToCenturyTickValues(xScale, width))
+            function doaxes() {
+                if (!xAxis) {
+                    xAxis = d3.svg.axis()
+                    .tickFormat(msToCenturyTickFormat)
+                    .orient("bottom");
+                }
+                xAxis.scale(xScale).tickValues(msToCenturyTickValues(xScale, width))
 
-                             if (!xAxisMinor) {
-                                 xAxisMinor = d3.svg.axis()
-                                 .tickFormat(msToCenturyTickFormat)
-                                 .scale(xScale).orient("bottom");
-                             }
-                             xAxisMinor.scale(xScale);
+                if (!xAxisMinor) {
+                    xAxisMinor = d3.svg.axis()
+                    .tickFormat(msToCenturyTickFormat)
+                    .scale(xScale).orient("bottom");
+                }
+                xAxisMinor.scale(xScale);
 
-                             if (!xAxisContainer) {
-                                 xAxisContainer = chart.append("g")
-                                 .attr("class", "x axis")
-                             }
-                             if (reRenderTheNextTime) {
-                                 xAxisContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-                             }
+                if (!xAxisContainer) {
+                    xAxisContainer = chart.append("g")
+                    .attr("class", "x axis")
+                }
+                if (reRenderTheNextTime) {
+                    xAxisContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+                }
 
-                             if (!xAxisMinorContainer) {
-                                 xAxisMinorContainer = chart.append("g")
-                                 .attr("class", "x axis minor")
-                             }
-                             if (reRenderTheNextTime) {
-                                 xAxisMinorContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-                             }
+                if (!xAxisMinorContainer) {
+                    xAxisMinorContainer = chart.append("g")
+                    .attr("class", "x axis minor")
+                }
+                if (reRenderTheNextTime) {
+                    xAxisMinorContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+                }
 
-                             if (transitionNextTime) {
-                                 xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-                                 xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
-                             } else {
-                                 xAxisContainer.call(xAxis);
-                                 xAxisMinorContainer.call(xAxisMinor);
-                             }
+                if (transitionNextTime) {
+                    xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+                    xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
+                } else {
+                    xAxisContainer.call(xAxis);
+                    xAxisMinorContainer.call(xAxisMinor);
+                }
 
-                             if (!yAxisContainer) {
-                                 yAxisContainer = chart.append("g")
-                                 .attr("class", "y axis");
-                             }
-                             if (reRenderTheNextTime) {
-                                 yAxisContainer.attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")")
-                             }
-                             yAxisContainer.call(yAxis);
-                         }
-                         doaxes();
+                if (!yAxisContainer) {
+                    yAxisContainer = chart.append("g")
+                    .attr("class", "y axis");
+                }
+                if (reRenderTheNextTime) {
+                    yAxisContainer.attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")")
+                }
+                yAxisContainer.call(yAxis);
+            }
+            doaxes();
             // AXES }}}
 
             //{{{ TIME CONTEXT
