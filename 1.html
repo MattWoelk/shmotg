@@ -37,22 +37,22 @@ function showhide() {
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
     <div id="loader_container"></div>
     </br>
-    <input type="checkbox" id="isexpanded" /><label for="isexpanded"><img src="./img/black0.svg"><img src="./img/black1.svg">Lines</label>
+    <input type="checkbox" id="isexpanded" /><label for="isexpanded"></label><label for="isexpanded">Lines</label>
     <div id="controls">
         <form>
             <ul id="render-lines">
-                <li><input type="checkbox" checked id="maxes"     value="maxes"/>    <label for="maxes"><img src="./img/blue0.svg"><img src="./img/blue1.svg">Maximums</label></li>
-                <li><input type="checkbox"         id="q3"        value="q3"/>       <label for="q3"><img src="./img/red_dark0.svg"><img src="./img/red_dark1.svg">3rd Quartile</label></li>
-                <li><input type="checkbox" checked id="average"   value="average"/>  <label for="average"><img src="./img/red_dark0.svg"><img src="./img/red_dark1.svg">Averages</label></li>
-                <li><input type="checkbox" checked id="quartiles" value="quartiles"/><label for="quartiles"><img src="./img/red_light0.svg"><img src="./img/red_light1.svg">Quartile Area</label></li>
-                <li><input type="checkbox"         id="q1"        value="q1"/>       <label for="q1"><img src="./img/red_dark0.svg"><img src="./img/red_dark1.svg">1st Quartile</label></li>
-                <li><input type="checkbox" checked id="mins"      value="mins"/>     <label for="mins"><img src="./img/green0.svg"><img src="./img/green1.svg">Minimums</label></li>
-                <li><input type="checkbox" checked id="missing"   value="missing"/>  <label for="missing"><img src="./img/black0.svg"><img src="./img/black1.svg">Missing</label></li>
+                <li><input type="checkbox" checked id="maxes"     value="maxes"/>    <label for="maxes"></label><label for="maxes">Maximums</label></li>
+                <li><input type="checkbox"         id="q3"        value="q3"/>       <label for="q3"></label><label for="q3">3rd Quartile</label></li>
+                <li><input type="checkbox" checked id="average"   value="average"/>  <label for="average"></label><label for="average">Averages</label></li>
+                <li><input type="checkbox" checked id="quartiles" value="quartiles"/><label for="quartiles"></label><label for="quartiles">Quartile Area</label></li>
+                <li><input type="checkbox"         id="q1"        value="q1"/>       <label for="q1"></label><label for="q1">1st Quartile</label></li>
+                <li><input type="checkbox" checked id="mins"      value="mins"/>     <label for="mins"></label><label for="mins">Minimums</label></li>
+                <li><input type="checkbox" checked id="missing"   value="missing"/>  <label for="missing"></label><label for="missing">Missing</label></li>
             </ul>
 
             <ul id="render-method">
-                <li><input type="radio" checked id="stp_rad" name="render-method" value="step-after"/><label for="stp_rad"><img src="./img/circ0.svg"><img src="./img/circ1.svg">Step</label></li>
-                <li><input type="radio"         id="lin_rad"  name="render-method" value="linear"/><label for="lin_rad"><img src="./img/circ0.svg"><img src="./img/circ1.svg">Linear</label></li>
+                <li><input type="radio" checked id="stp_rad" name="render-method" value="step-after"/><label for="stp_rad"></label><label for="stp_rad">Step</label></li>
+                <li><input type="radio"         id="lin_rad"  name="render-method" value="linear"/><label for="lin_rad"></label><label for="lin_rad">Linear</label></li>
                 <!--<li><label><input type="radio"                   name="render-method" value="cardinal"/>Cardinal</li>-->
                 <!--<li><input type="radio"         id="mon_rad" name="render-method" value="monotone"/><label for="mon_rad"></label><label for="mon_rad">Monotone</label></li>-->
             </ul>
@@ -60,9 +60,7 @@ function showhide() {
     </div>
     </br>
 
-    <div>
-        <div id="slider_container">
-        </div>
+    <div id="slider_container">
     </div>
 
 
@@ -79,11 +77,29 @@ function showhide() {
 
 <!--<button id='fade' onclick='fade()'>fade</button>-->
 
+<!--{{{ PRELOAD IMAGES FOR CUSTOM CHCKBOXES-->
+<img src="./img/blue0.svg" style="display:none">
+<img src="./img/blue1.svg" style="display:none">
+<img src="./img/green0.svg" style="display:none">
+<img src="./img/green1.svg" style="display:none">
+<img src="./img/red_dark0.svg" style="display:none">
+<img src="./img/red_dark1.svg" style="display:none">
+<img src="./img/red_light0.svg" style="display:none">
+<img src="./img/red_light1.svg" style="display:none">
+<img src="./img/black0.svg" style="display:none">
+<img src="./img/black1.svg" style="display:none">
+<img src="./img/circ0.svg" style="display:none">
+<img src="./img/circ1.svg" style="display:none">
+<img src="./img/add.svg" style="display:none">
+<img src="./img/remove.svg" style="display:none">
+<img src="./img/updown.svg" style="display:none">
+<!--}}}-->
+
 </body>
 <!--{{{ JAVASCRIPT LOADING-->
 <script src="./loader.js"></script>
 <script src="socket.io.min.js"></script>
-<script src="d3/d3.min.js"></script>
+<script src="d3/d3.js"></script>
 <script src="node_modules/underscore/underscore-min.js"></script>
 <script src="msToCentury.js"></script>
 <script src="binnedData.js"></script>
