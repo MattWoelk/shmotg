@@ -34,6 +34,8 @@ slider = function () {
     var handlePosition = 0;//boxSize*2;
     var scrollPosition = 0;
 
+    var beingPointedTo = -1;
+
     var surrounding_lines;
     var line_bottom;
     var line_left;
@@ -86,12 +88,15 @@ slider = function () {
 
     // {{{ HELPER FUNCTIONS
     function highlightSliderElement() {
-        var locationOfHandle = handlePosition + (boxSize / 2); //d3.transform(handle_region.attr("transform")).translate[1] + (boxSize/2);
-        var locationOfSlider = scrollPosition; //d3.transform(slide_region.attr("transform")).translate[1];
-        var beingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize); // level being pointed to
+        var locationOfHandle = handlePosition + (boxSize / 2);
+        var locationOfSlider = scrollPosition;
+        var newBeingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize); // level being pointed to
         changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
-        d3.selectAll(".slider_boxes")
-            .classed("highlighted", function (d, i) { return i == beingPointedTo; });
+        if (beingPointedTo !== newBeingPointedTo){
+            d3.selectAll(".slider_boxes")
+                .classed("highlighted", function (d, i) { return i == newBeingPointedTo; });
+        }
+        beingPointedTo = newBeingPointedTo;
     }
 
     function currentHandlePosition () {
@@ -307,7 +312,10 @@ slider = function () {
             }
             // DRAGGING }}}
 
-            highlightSliderElement();
+            if (avoidChangeCallBack){
+                // only necessary if the mouse zoomed us.
+                highlightSliderElement();
+            }
 
             once = false;
         });
