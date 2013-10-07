@@ -275,10 +275,10 @@ slider = function () {
             var pointer_bottom = Math.min(height, boxSize/2);
             var handle_distance = boxSize/2;
 
-            handleClip = handleClip ? handleClip : handle_region.append("clipPath");
-            handleClip
+            handleClip = handleClip ? handleClip : handle_region.append("clipPath")
                 .attr("id", "clip-handle" + id)
                 .append("path")
+            handleClip
                 .attr("d", drawHandle(pointer_top, pointer_bottom, handle_distance))
 
             handle = handle ? handle : handle_region.append("path");
