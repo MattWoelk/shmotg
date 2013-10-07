@@ -39,9 +39,23 @@ function transformScale(scal, oldScal, mar) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name) {
+function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
     var sel = container.selectAll("."+name+id)
             .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
+
+    if(!fullRender) {
+        //update
+        if (toTransition) {
+            sel.attr("transform", transformScale(scalOld, renScale, mar))
+               .transition().ease(ease).duration(dur)
+               .attr("transform", transformScale(scal, renScale, mar));
+        } else {
+            sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
+               .attr("transform", transformScale(scal, renScale, mar));
+        }
+
+        return;
+    }
 
     //update
     if (toTransition) {
@@ -711,7 +725,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             }
         }
 
-        reRenderTheNextTime = false;
 
         // GENERATE ALL d0s. (generate the lines paths) }}}
 
@@ -733,12 +746,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
 
-            //Set it's container's dimensions
-            selection.attr("width", width);
+            if (reRenderTheNextTime){
+                //Set it's container's dimensions
+                selection.attr("width", width);
 
-            //Set the chart's dimensions
-            chart.attr("width", width + margin.left + margin.right)
-                 .attr("height", height + margin.top + margin.bottom);
+                //Set the chart's dimensions
+                chart.attr("width", width + margin.left + margin.right)
+                     .attr("height", height + margin.top + margin.bottom);
+            }
 
             //Allow dragging and zooming.
             //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
@@ -746,10 +761,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //Make the clipPath (for cropping the paths)
             if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + sensorType + sensorNumber).append("rect"); }
-            defclip.attr("width", width)
-                   //.transition().duration(transitionDuration)
-                   .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                   .attr("height", height);
+            if (reRenderTheNextTime) {
+                defclip.attr("width", width)
+                //.transition().duration(transitionDuration)
+                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+                .attr("height", height);
+            }
 
             // CONTAINER AND CLIPPING }}}
 
@@ -757,9 +774,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
             //Apply the clipPath
             pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
-            pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-                    .attr("class", "posArea")
-                    .attr("height", height);
+            if (reRenderTheNextTime){
+                pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+                .attr("class", "posArea")
+                .attr("height", height);
+            }
 
             //make and render the area
             var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(renderThis, whichLevelToRender, interpolationMethod, true)
@@ -780,7 +799,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          margin,
                          renderScale,
                          strokeWidth,
-                         "posArea");
+                         "posArea",
+                         didWeRenderAnything || reRenderTheNextTime);
 
             // AREAS }}}
 
@@ -820,7 +840,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          margin,
                          renderScale,
                          strokeWidth,
-                         "posPath");
+                         "posPath",
+                         didWeRenderAnything || reRenderTheNextTime);
 
                          // LINES }}}
 
@@ -912,6 +933,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             // TRANSITION NEXT TIME }}}
 
         });
+
+        reRenderTheNextTime = false;
     };
 
     //{{{ Getters and Setters
