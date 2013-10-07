@@ -24,6 +24,7 @@ slider = function () {
     var slctn; // Save the selection so that my.update() works.
     var slide_region;
     var handle_region;
+    var handle_lines;
     var svg;
     var defclip;
     var line;
@@ -281,7 +282,8 @@ slider = function () {
                 .attr("clip-path", "url(#clip-handle" + id + ")")
                 .attr("class", "handle");
 
-            handle_region.append("g").attr("id", "dragLines" + id).selectAll("path").data([0, 1, 2])
+            handle_lines = handle_lines ? handle_lines : handle_region.append("g").attr("id", "dragLines" + id)
+            handle_lines.selectAll("path").data([0, 1, 2])
                 .enter().append("path")
                 .attr("d", drawDragLines)
                 .attr("class", "dragLines")
