@@ -864,14 +864,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     .tickFormat(msToCenturyTickFormat)
                     .orient("bottom");
                 }
-                xAxis.scale(xScale).tickValues(msToCenturyTickValues(xScale, width))
+                xAxis.scale(xScale)
+                    .tickValues(msToCenturyTickValues(xScale, width))
 
                 if (!xAxisMinor) {
                     xAxisMinor = d3.svg.axis()
-                    .tickFormat(msToCenturyTickFormat)
+                    //.tickFormat(msToCenturyTickFormat)
                     .scale(xScale).orient("bottom");
                 }
-                xAxisMinor.scale(xScale);
+                xAxisMinor.scale(xScale).tickValues(msToCenturySubTickValues(xScale, width))
 
                 if (!xAxisContainer) {
                     xAxisContainer = chart.append("g")
