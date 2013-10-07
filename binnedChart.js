@@ -977,7 +977,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (!xScale) {
             previousXScale = d3.scale.linear(); // now it's initialized.
             previousLevelToRender = whichLevelToRender;
-        }else if (xScale && ( xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1] )) {
+        }else if (xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1]) {
             previousXScale = xScale.copy();
             previousLevelToRender = whichLevelToRender;
         } // else, don't change previousXScale
