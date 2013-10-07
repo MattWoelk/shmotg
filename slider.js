@@ -278,16 +278,10 @@ slider = function () {
             handleClip = handleClip ? handleClip : handle_region.append("clipPath")
                 .attr("id", "clip-handle" + id)
                 .append("path")
-            handleClip
                 .attr("d", drawHandle(pointer_top, pointer_bottom, handle_distance))
 
-            handle = handle ? handle : handle_region.append("path");
-            handle
+            handle = handle ? handle : handle_region.append("path")
                 .attr("d", drawHandle(pointer_top, pointer_bottom, handle_distance))
-                //.on("mouseover", onhover)
-                //.on("mouseout", onoff)
-                //.on("mousedown", ondown)
-                //.on("click", onclick)
                 .attr("id", "handle" + id)
                 .attr("clip-path", "url(#clip-handle" + id + ")")
                 .attr("class", "handle");
@@ -295,9 +289,9 @@ slider = function () {
             handle_lines = handle_lines ? handle_lines : handle_region.append("g").attr("id", "dragLines" + id)
             handle_lines.selectAll("path").data([0, 1, 2])
                 .enter().append("path")
-                .attr("d", drawDragLines)
-                .attr("class", "dragLines")
-                .attr("transform", "translate(" + (side_margin + boxSize + handle_distance) + "," + 0 + ")")
+                    .attr("d", drawDragLines)
+                    .attr("class", "dragLines")
+                    .attr("transform", "translate(" + (side_margin + boxSize + handle_distance) + "," + 0 + ")")
             // HANDLE }}}
 
             // {{{ DRAGGING
