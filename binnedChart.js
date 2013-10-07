@@ -744,7 +744,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         .tickSize(width, 0, 0) // major, minor, end
                         .orient("left");
                     }
-                    yAxis.scale(yScale);
+                    yAxis.scale(yScale).tickSize(width, 0, 0);
                 }
 
                 chart = d3.select(th); //Since we're using a .call(), "this" is the svg element.
