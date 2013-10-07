@@ -906,7 +906,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                              }
                              yAxisContainer.call(yAxis);
                          }
-                         //doaxes();
+                         doaxes();
             // AXES }}}
 
             //{{{ TIME CONTEXT
