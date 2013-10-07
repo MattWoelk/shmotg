@@ -859,7 +859,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     .tickFormat(msToCenturyTickFormat)
                     .scale(xScale).orient("bottom");
             }
-            xAxisMinor.scale(xScale).tickValues(msToCenturySubTickValues(xScale, width));
+            xAxisMinor.scale(xScale);
 
             //d3.selectAll("text").attr("fill", "#F0F");
             // TODO: instead of the above nonsense, put a gradient box as a mask over the x axes.
