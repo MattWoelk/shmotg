@@ -854,9 +854,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             }
             xAxis.scale(xScale).tickValues(msToCenturyTickValues(xScale, width))
 
-            if (!xAxisMinor) {
-                xAxisMinor = d3.svg.axis()
-                    .tickFormat(msToCenturyTickFormat)
+                if (!xAxisMinor) {
+                    xAxisMinor = d3.svg.axis()
+                    .tickFormat(null)
                     .scale(xScale).orient("bottom");
             }
             xAxisMinor.scale(xScale).tickValues(msToCenturySubTickValues(xScale, width));
