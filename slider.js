@@ -82,7 +82,7 @@ slider = function () {
         // TODO: set as selected and trigger stuff
         var which_box = this.__data__;
         var newPos = (which_box * boxSize) + scrollPosition;
-        my.handlePosition(newPos).update();
+        my.handlePosition(newPos).update(true);
     }
     // EVENTS }}}
 
@@ -91,7 +91,7 @@ slider = function () {
         var locationOfHandle = handlePosition + (boxSize / 2);
         var locationOfSlider = scrollPosition;
         var newBeingPointedTo = Math.floor((locationOfHandle - locationOfSlider) / boxSize); // level being pointed to
-        changeCallBack(currentScrollPosition(), beingPointedTo, avoidChangeCallBack);
+        changeCallBack(currentScrollPosition(), newBeingPointedTo, avoidChangeCallBack);
         if (beingPointedTo !== newBeingPointedTo){
             d3.selectAll(".slider_boxes")
                 .classed("highlighted", function (d, i) { return i == newBeingPointedTo; });
