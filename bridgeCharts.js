@@ -135,6 +135,26 @@ var redraw = function () {
         }
     }
 
+    function swapWithPrevItem(i) {
+        if (i-1 < 0 || i >= plots.length) {
+            return;
+        }
+
+        swapItems(plots, i, i-1); // swap in plots
+
+        insertBeforeDOMPlot(i, i-1); // swap in the DOM
+    }
+
+    function swapWithNextItem(i) {
+        if (i < 0 || i+1 >= plots.length) {
+            return;
+        }
+
+        swapItems(plots, i, i+1); // swap in plots
+
+        insertBeforeDOMPlot(i+1, i); // swap in the DOM
+    }
+
     // ENTER
     plotSVGs.enter().append("svg").attr("id", function(d, i) { return d.sensorType() + d.sensorNumber(); });
 
@@ -168,7 +188,8 @@ var redraw = function () {
 
     // Expand chart container when add buttons are present.
     var plotHeight = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
-    var offset = 0;
+    var showingEdits = document.getElementById("edit").checked;
+    var offset = showingEdits ? toBeAdded.length*plotHeight : 0;
 
     // TODO: when add buttons show up and one scroll bar appears, both scroll bars appear.
     plots.forEach(function (plt) {
@@ -656,5 +677,28 @@ function offlinedata() {
 
 // set up the slider.
 rescaleTo(Math.pow(2, mySlider.handlePosition() / boxSize));
+
+// {{{ EDITABLES
+d3.select("#edit").on("click", toggleEditables);
+
+function toggleEditables() {
+    var active = document.getElementById("edit").checked;
+    if (active) {
+        d3.select("#edit_remove").style("display", "block");
+        d3.select("#edit_add").style("display", "block");
+        d3.select("#edit_swap").style("display", "block");
+        d3.select("#edit_mult").style("display", "block");
+        d3.select("#zoomRectGreyOut").style("display", "block");
+    } else {
+        d3.select("#edit_remove").style("display", "none");
+        d3.select("#edit_add").style("display", "none");
+        d3.select("#edit_swap").style("display", "none");
+        d3.select("#edit_mult").style("display", "none");
+        d3.select("#zoomRectGreyOut").style("display", "none");
+    }
+    redraw();
+}
+toggleEditables();
+// EDITABLES }}}
 
 /* vim: set foldmethod=marker: */

@@ -35,6 +35,7 @@ function showhide() {
 <!-- SHOWHIDE JAVASCRIPT }}}-->
 
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
+    <input type="checkbox" id="lockhide" onchange="showhide();" /><label for="lockhide"><img style="width:30px; height:30px" src="./img/iconmonstr-lock-11-icon.svg"><img style="width:30px; height:30px" src="./img/iconmonstr-lock-3-icon.svg"></label>
     <div id="loader_container"></div>
     </br>
     <input type="checkbox" id="isexpanded" /><label for="isexpanded"><img src="./img/black0.svg"><img src="./img/black1.svg">Lines</label>
@@ -59,6 +60,7 @@ function showhide() {
         </form>
     </div>
     </br>
+    <input type="checkbox" id="edit" value="edit"/><label for="edit"><img src="./img/black0.svg"><img src="./img/black1.svg">Edit</label>
 
     <div id="slider_container">
     </div>
@@ -72,10 +74,25 @@ function showhide() {
     <div id="charts"></div>
     <svg id="zoomSVG">
         <rect id="zoomRect" />
+        <rect id="zoomRectGreyOut" />
+        <g id="edit_add"></g>
     </svg>
 </div>
 
+<div id="edit_elements">
+    <div id="edit_remove"></div>
+    <div id="edit_swap"></div>
+    <div id="edit_mult"></div>
+</div>
+
 <!--<button id='fade' onclick='fade()'>fade</button>-->
+
+<!--{{{ PRELOAD IMAGES-->
+<img src="./img/add.svg" style="display:none">
+<img src="./img/mult.svg" style="display:none">
+<img src="./img/remove.svg" style="display:none">
+<img src="./img/updown.svg" style="display:none">
+<!--}}}-->
 
 </body>
 <!--{{{ JAVASCRIPT LOADING-->
@@ -85,6 +102,7 @@ function showhide() {
 <script src="node_modules/underscore/underscore-min.js"></script>
 <script src="msToCentury.js"></script>
 <script src="binnedData.js"></script>
+<script src="multiData.js"></script>
 <script src="./slider.js"></script>
 <script src="binnedChart.js"></script>
 <script src="bridgeCharts.js"></script>
