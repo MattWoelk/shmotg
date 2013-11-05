@@ -213,7 +213,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
       return d % increment == 0;
     });
 
-    curange = _.map(curange, function (d) { return new Date(d, 0); });
+    curange = _.map(curange, function (d) { return (new Date(d, 0)).getTime(); });
 
     return curange;
 
@@ -228,7 +228,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
     curange = _.map(curange, function (d, i) {
       return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
         // For each month of the year
-        return new Date(d, f);
+        return (new Date(d, f)).getTime();
       });
     });
     curange = _.flatten(curange);
