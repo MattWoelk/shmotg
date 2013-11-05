@@ -547,8 +547,8 @@ socket.on('news', function (data) {
     socket.emit('ack', "Message received!");
 
     initPlot({}, sendRequestToServer, 5, "girder", 18, curLevel);
-    initPlot({}, sendRequestToServer, 5, "girder", 19, curLevel);
-    initPlot({}, sendRequestToServer, 5, "girder", 20, curLevel);
+    //initPlot({}, sendRequestToServer, 5, "girder", 19, curLevel);
+    //initPlot({}, sendRequestToServer, 5, "girder", 20, curLevel);
 });
 
 sizeOfQueue = function() {
@@ -623,7 +623,7 @@ socket.on('req_data', function (data) {
 //{{{ OFFLINE DATA
 
 //offlinedata();
-//setTimeout(function() { offlinedata(); }, 200);
+setTimeout(function() { offlinedata(); }, 200);
 
 
 function offlinedata() {
