@@ -345,6 +345,13 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return (d.ms - renderScale.domain()[0]) * getScaleValue(renderScale);
     };
 
+    var convert_ms_to_percent = function(ms, scal) {
+        var start = 0;
+        var end = 2000;
+        var x = xScale(ms);
+        return ((x-start)/(end-start)) * 100 + "%";
+    }
+
     var createColorGradient = function(container, id, data) {
         var grad = false;
         return function (container, id, data) {
@@ -353,8 +360,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             grad = grad ? grad : svg.append("linearGradient");
             var stops = grad.attr("id", id)
                 .attr("gradientUnits", "userSpaceOnUse")
-                .attr("x1", xScale.range()[0]).attr("y1", 0)
-                .attr("x2", xScale.range()[1]).attr("y2", 0)
+                .attr("x1", xScale(xScale.range()[0])).attr("y1", 0)
+                .attr("x2", xScale(xScale.range()[1])).attr("y2", 0)
                 .selectAll("stop")
                     //.data([
                     //    {offset: "0%", color: "black"},
@@ -362,9 +369,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     //    {offset: "50%", color: "red"},
                     //    {offset: "100%", color: "red"}
                     //])
-                    .data(data)
+                    .data(data) // form: [{ms: 123, val: 123}, {...}, ...]
             stops.enter().append("stop")
-            stops.attr("offset", renderFunction)
+            stops.attr("offset", function(d, i) { return convert_ms_to_percent(d.ms, xScale)})
                  .attr("stop-opacity", function(d) { return parseFloat(d.val); })
                  .attr("stop-color", function(d) { "black"; });
             stops.exit().remove();
