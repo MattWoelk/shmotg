@@ -363,12 +363,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 .attr("x1", xScale.range()[0]).attr("y1", 0)
                 .attr("x2", xScale.range()[1]).attr("y2", 0)
                 .selectAll("stop")
-                    //.data([
-                    //    {offset: "0%", color: "black"},
-                    //    {offset: "50%", color: "black"},
-                    //    {offset: "50%", color: "red"},
-                    //    {offset: "100%", color: "red"}
-                    //])
                     .data(data) // form: [{ms: 123, val: 123}, {...}, ...]
             stops.enter().append("stop")
             stops.attr("offset", function(d, i) { return convert_ms_to_percent(d.ms, xScale)})
