@@ -346,8 +346,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     };
 
     var convert_ms_to_percent = function(ms, scal) {
-        var start = 0;
-        var end = 2000;
+        var start = scal.range()[0];
+        var end = scal.range()[1];
         var x = xScale(ms);
         return ((x-start)/(end-start)) * 100 + "%";
     }
@@ -360,8 +360,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             grad = grad ? grad : svg.append("linearGradient");
             var stops = grad.attr("id", id)
                 .attr("gradientUnits", "userSpaceOnUse")
-                .attr("x1", xScale(xScale.range()[0])).attr("y1", 0)
-                .attr("x2", xScale(xScale.range()[1])).attr("y2", 0)
+                .attr("x1", xScale.range()[0]).attr("y1", 0)
+                .attr("x2", xScale.range()[1]).attr("y2", 0)
                 .selectAll("stop")
                     //.data([
                     //    {offset: "0%", color: "black"},
