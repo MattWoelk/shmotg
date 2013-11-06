@@ -657,11 +657,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     if (cloudcover && key === "average") {
                         // get ready the boxes for this
 
-                        var lineFilter = binData.getDateRangeWithMissingValues(
-                            key,
+                        var lineFilter = binData.getDateRange(
+                            [ key ],
                             whichLevelToRender,
-                            renderRange,
-                            interpolationMethod === "step-after");
+                            renderRange);
 
                         renderedD0s.average = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
