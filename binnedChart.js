@@ -836,7 +836,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 drawElements(dataObjectForKeyFanciness,
                              pathPath,
                              sensorType+sensorNumber,
-                             function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
+                             function (d) { return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
                              function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
                              function (d) { return binData.getDash(d.key); },
                              xScale,
@@ -1041,7 +1041,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     my.update = function (reRender) {
         my.setSelectedLines();
-        //console.log(slctn);
         my(slctn);
     };
 
