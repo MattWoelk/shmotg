@@ -10,6 +10,8 @@ query = 'SELECT Time FROM SPBRTData_0A LIMIT 10';
 query =
 'SELECT Time FROM SPBRTData_0A WHERE Time BETWEEN "2012-01-02 10:00:01" AND "2012-01-02 10:00:02" LIMIT 10';
 
+query = 'Show databases'
+
 var mysqlconnection = mysql.createConnection({
   host     : 'shm1.ee.umanitoba.ca',
   user     : 'mattwoelk',
