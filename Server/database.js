@@ -1,3 +1,6 @@
+// TODO: CURRENT PROBLEM:
+// err:  { [Error: ER_NO_SUCH_TABLE: Table 'spb_shm_2013mm08.spbrtdata_0a' doesn't exist] code: 'ER_NO_SUCH_TABLE', index: 0 }sending db query
+
 // {{{ SETUP
 var fs = require('fs');
 var mysql = require('mysql');
