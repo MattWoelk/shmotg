@@ -61,12 +61,12 @@ function series(item, func) {
         callMetaRebinner(
                 [start_year, start_month, end_year, end_month, 15, sensorNumber],
                 // Then rebin everything at lvl 20 and up:
-                callRebinner(
-                        [2010, 1, 1, 2013, 1, 1, 20, sensorNumber],
-                        function () {
-                            console.log("DONE!");
-                            process.exit(0);
-                        }));
+                function () { callRebinner(
+                               [2010, 1, 1, 2013, 1, 1, 20, sensorNumber],
+                               function () {
+                                   console.log("DONE!");
+                                   process.exit(0);
+                               }) });
     }
 }
 
