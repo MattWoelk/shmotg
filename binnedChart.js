@@ -471,7 +471,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
                 // - this will give the option of all charts having the same y axis
                 if (!showing_range) {
-                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, renderRange), function (d) {
+                    var binSize = binData.binSize(whichLevelToRender);
+                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, [renderRange[0]-binSize, renderRange[1]+binSize]), function (d) {
                         return d.val;
                     });
                 }
@@ -693,7 +694,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             0,
                             renderRange,
                             interpolationMethod === "step-after");
-                        console.log(lineFilter)
                     }
 
                     if (my.uniqueID() === "temperature1") {
@@ -1002,6 +1002,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (!arguments.length) return whichLevelToRender;
         if (whichLevelToRender !== value) my.reRenderTheNextTime(true);
         whichLevelToRender = value - Math.floor(Math.log(oneSample/5) / Math.log(2)); // set the level proportionately to the sample size.
+        whichLevelToRender = Math.max(whichLevelToRender, 0);
         return my;
     };
 

@@ -816,7 +816,10 @@ binnedData = function () {
         // than the required amount of line and area
         // missing values are NaN's
 
+        // Send one extra value on the front and end of the range, no matter what
+
         var missings = my.missingBins(range, lvl, true);
+        var binSize = my.binSize(lvl);
 
         missingsObjs = missings.map(function (d) {
             return {ms: d, val: NaN};
@@ -824,7 +827,7 @@ binnedData = function () {
 
         result = combineAndSortArraysOfDateValObjects(
                 missingsObjs,
-                my.getDateRange([key], lvl, range)
+                my.getDateRange([key], lvl, [range[0]-binSize, range[1]+binSize])
                 );
 
         // if we should add in an extra value before each NaN
