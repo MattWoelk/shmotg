@@ -661,7 +661,7 @@ function offlinedata() {
     function addCloudCoverData (filename, plt) {
         d3.csv(filename, function (d, i) {
             var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
-            var val = (d.Weather === "Clear" || d.Weather === "Mainly Clear") ? 0 : 1;
+            var val = (d.Weather === "Clear" || d.Weather === "Mainly Clear") ? 1 : 0;
             return {val: val, ms: dat.getTime()};
         }, function (error, rows) {
             if (error) {
