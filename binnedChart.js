@@ -69,6 +69,7 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
            .attr("transform", transformScale(scal, renScale, mar));
     }
 
+
     //enter
     sel.enter()/*.append("g").attr("class", name)*/.append("path")
             .attr("class", function(d) { return name+id+" "+d.key; })
@@ -470,7 +471,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
                 // - this will give the option of all charts having the same y axis
                 if (!showing_range) {
-                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, renderRange), function (d) {
+                    var binSize = binData.binSize(whichLevelToRender);
+                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, [renderRange[0]-binSize, renderRange[1]+binSize]), function (d) {
                         return d.val;
                     });
                 }
@@ -682,8 +684,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             renderRange,
                             interpolationMethod === "step-after");
 
-
-                    if (0) {
+                    if (0) { // TODO: get rid of this old code
                         // TODO: render a big box, then make and send a linearGradient to be used to set the colors
                         renderedD0s[key] = d3.svg.area()
                         .defined(function (d) { return !isNaN(d.val); })
@@ -984,6 +985,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (!arguments.length) return whichLevelToRender;
         if (whichLevelToRender !== value) my.reRenderTheNextTime(true);
         whichLevelToRender = value - Math.floor(Math.log(oneSample/5) / Math.log(2)); // set the level proportionately to the sample size.
+        whichLevelToRender = Math.max(whichLevelToRender, 0);
         return my;
     };
 
