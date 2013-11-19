@@ -367,7 +367,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     .data(data) // form: [{ms: 123, val: 123}, {...}, ...]
             stops.enter().append("stop")
             stops.attr("offset", function(d, i) { return convert_ms_to_percent(d.ms, xScale)})
-                 .attr("stop-opacity", function(d) { return parseFloat(d.val); })
+                 .attr("stop-opacity", function(d) { return 1-parseFloat(d.val); })
                  .attr("stop-color", function(d) { "black"; });
             stops.exit().remove();
             return id;
