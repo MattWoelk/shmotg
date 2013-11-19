@@ -685,22 +685,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             renderRange,
                             interpolationMethod === "step-after");
 
-                    if (whichLevelToRender < 0) {
-                        //Pick the bin which we are currently within,
-                        //and render it as a line across the screen.
-                        //NOPE: render level 0 as if it was here
-                        lineFilter = binData.getDateRangeWithMissingValues(
-                            key,
-                            0,
-                            renderRange,
-                            interpolationMethod === "step-after");
-                    }
-
-                    if (my.uniqueID() === "temperature1") {
-                        //console.log(Math.max(whichLevelToRender, 0), lineFilter)
-                    }
-
-
                     if (0) { // TODO: get rid of this old code
                         // TODO: render a big box, then make and send a linearGradient to be used to set the colors
                         renderedD0s[key] = d3.svg.area()
