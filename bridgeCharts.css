@@ -298,4 +298,9 @@ path.loadingBox {
 }
 /* EDITABLES }}} */
 
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-user-modify: read-only;
+}
+
 /* vim: set foldmethod=marker: */
