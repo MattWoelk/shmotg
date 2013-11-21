@@ -7,11 +7,12 @@ var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of i
 
 /// CONSTANTS }}}
 
-multiData = function () {
+multiData = function (multTrueDivideFalse) {
 
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample
     var parentBDs = [];
+    var mult = multTrueDivideFalse;
 
 //    var bd = { // where all of the data is stored
 //        keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
@@ -709,7 +710,11 @@ multiData = function () {
                 result.push({
                     ms: ms,
                     val: _.reduce(found, function (memo, num) {
-                        return memo * (num + offset);
+			if (mult) {
+                            return memo * (num + offset);
+			} else {
+                            return memo / (num + offset);
+			}
                     }, 1)
                 });
             }

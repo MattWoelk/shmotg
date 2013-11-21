@@ -282,9 +282,24 @@ var redraw = function () {
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i) { addMultiChart(i, i+1); redraw(); })
+        .on("click", function(d, i) { addMultiChart(i, i+1, true); redraw(); })
     add_dat
         .style("left", (xbuffer + 90) + "px")
+        .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
+    add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
+    add_dat.exit().remove();
+
+    // Show combine with division buttons
+    var add_dat = d3.select("#edit_div").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
+    add_dat.enter().append("img")
+        .style("position", "absolute")
+        .attr("src", "./img/div.svg")
+        .attr("width", xsize)
+        .attr("height", xsize)
+        .attr("cursor", "pointer")
+        .on("click", function(d, i) { addMultiChart(i, i+1, false); redraw(); })
+    add_dat
+        .style("left", (xbuffer + 180) + "px")
         .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
     add_dat.exit().remove();
@@ -336,12 +351,12 @@ function printArrayOfPlots(array) {
     }))
 }
 
-function addMultiChart (parentAIndex, parentBIndex) {
+function addMultiChart (parentAIndex, parentBIndex, multTrueDivideFalse) {
     var parentA = plots[parentAIndex];
     var parentB = plots[parentBIndex];
     var interval = 5;
     var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + "x" + parentB.sensorNumber(), curLevel, false, true);
-    plt.makeIntoMultiChart([parentA, parentB]);
+    plt.makeIntoMultiChart([parentA, parentB], multTrueDivideFalse);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
 
@@ -690,12 +705,14 @@ function toggleEditables() {
         d3.select("#edit_add").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
         d3.select("#edit_mult").style("display", "block");
+        d3.select("#edit_div").style("display", "block");
         d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
         d3.select("#edit_remove").style("display", "none");
         d3.select("#edit_add").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
         d3.select("#edit_mult").style("display", "none");
+        d3.select("#edit_div").style("display", "none");
         d3.select("#zoomRectGreyOut").style("display", "none");
     }
     redraw();
