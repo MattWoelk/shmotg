@@ -422,7 +422,7 @@ function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, clo
         xScale = plot.xScale();
         yScale = plot.yScale();
         zoom.x(xScale);
-	xScale.range([0, document.getElementById("chartContainer").offsetWidth]);
+        xScale.range([0, document.getElementById("chartContainer").offsetWidth]);
         //zoom.y(yScale); // This breaks proper updating of the y axis when you scroll left and right.
     };
 

@@ -472,15 +472,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 // - this will give the option of all charts having the same y axis
                 if (!showing_range) {
                     var binSize = binData.binSize(whichLevelToRender);
-                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, [renderRange[0]-binSize, renderRange[1]+binSize]), function (d) {
+                    showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, [renderRange[0]-binSize, renderRange[1]+binSize], renderThis), function (d) {
                         return d.val;
                     });
                 }
 
                 if (!yAxisLock && !waitingForServer) {
-		    if (isMultiChart) {
-		        yScale.domain([0, 1]);
-		    } else {
+                    if (isMultiChart) {
+                        yScale.domain([0, 1]);
+                    } else {
                         yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
                                       , showing_range[1] ? showing_range[1] : yScale.domain()[1] ]);
                     }
@@ -494,12 +494,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             'q1',
                             whichLevelToRender,
                             renderRange,
-                            interpolationMethod === "step-after");
+                            interpolationMethod === "step-after",
+                            renderThis);
                     var q3Filter = binData.getDateRangeWithMissingValues(
                             'q3',
                             whichLevelToRender,
                             renderRange,
-                            interpolationMethod === "step-after");
+                            interpolationMethod === "step-after",
+                            renderThis);
 
                     renderedD0s.quartiles = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
@@ -516,7 +518,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             'average',
                             whichLevelToRender,
                             renderRange,
-                            false);
+                            false,
+                            renderThis);
 
                     var toBeAddedMissing = [];
                     var countMissing = 0;
@@ -561,7 +564,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             'average',
                             whichLevelToRender,
                             renderRange,
-                            false);
+                            false,
+                            renderThis);
 
                     var averageOfRange = function (data) {
                         var result = 0;
@@ -592,7 +596,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             tmp.val = averageOfRange(binData.getDateRangeWithMissingValues(
                                 'average',
                                 whichLevelToRender - 1,
-                                range));
+                                range,
+                                false,
+                                renderThis));
                             if (fil[count-1] && !isNaN(fil[count-1].val)) {
                                 toBeAdded.push({val: fil[count-1].val, ms: fil[count-1].ms});
                             }
@@ -666,7 +672,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         var lineFilter = binData.getDateRange(
                             [ key ],
                             whichLevelToRender,
-                            renderRange);
+                            renderRange,
+                            false,
+                            renderThis);
 
                         renderedD0s.average = d3.svg.area()
                             .defined(function (d) { return !isNaN(d.val); })
@@ -686,7 +694,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             key,
                             whichLevelToRender,
                             renderRange,
-                            interpolationMethod === "step-after");
+                            interpolationMethod === "step-after",
+                            renderThis);
 
                     if (0) { // TODO: get rid of this old code
                         // TODO: render a big box, then make and send a linearGradient to be used to set the colors
@@ -715,7 +724,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         // AKA see if we didn't have enough data to render the entire domain.
         if (didWeRenderAnything && !waitingForServer) {
             // If we don't have every piece of data in this range, ask for it all.
-            if (!binData.haveDataInRange(renderRange, whichLevelToRender)) {
+            if (!binData.haveDataInRange(renderRange, whichLevelToRender, renderThis)) {
                 var req = {
                     sensorNumber: sensorNumber,
                     sensorType: sensorType,

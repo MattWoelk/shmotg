@@ -425,7 +425,7 @@ multiData = function (multTrueDivideFalse) {
     }
 
 
-    my.haveDataInRange = function(ms_range, level) {
+    my.haveDataInRange = function(ms_range, level, visibleKeys) {
         // Determine the number of samples which we should have in the given range.
 
         // TODO TODO TODO: update for new bin containers
@@ -437,7 +437,7 @@ multiData = function (multTrueDivideFalse) {
             key = "average";
         }
 
-        var datedRange = my.getDateRange([key], level, ms_range);
+        var datedRange = my.getDateRange([key], level, ms_range, visibleKeys);
 
         if (datedRange.length === 0) {
             return false;
@@ -642,7 +642,7 @@ multiData = function (multTrueDivideFalse) {
         return send_req;
     }
 
-    my.getDateRangeWithMissingValues = function (key, lvl, range, extra) {
+    my.getDateRangeWithMissingValues = function (key, lvl, range, extra, visibleKeys) {
         // give the range of data for this key and level
         // NOT including the highest value in range
         // USE:
@@ -653,7 +653,7 @@ multiData = function (multTrueDivideFalse) {
         var pdbs = [];
         // Run getDateRange on each parent
         _.each(parentBDs, function (pdb) {
-            pdbs.push(my.normalizeArrayOfMSValues(pdb.getDateRangeWithMissingValues(key, lvl, range, extra)));
+            pdbs.push(my.normalizeArrayToDomainOfKeys(pdb.getDateRangeWithMissingValues(key, lvl, range, extra), visibleKeys, range, lvl));
         });
 
         // get lowest value of all keys for this level in all parents
@@ -664,36 +664,37 @@ multiData = function (multTrueDivideFalse) {
         //console.log(pdbs);
         //console.log(my.multiplyArraysOfDateValObjects(pdbs));
 
-	// TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is
-	//       - but actually we want to normalize it based on what lines are being shown
-	//         based on all lines for each parent.
-	//       - NEED KEYS??
+        // TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is
+        //       - but actually we want to normalize it based on what lines are being shown
+        //         based on all lines for each parent.
+        //       - NEED KEYS??
 
         return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
-    my.lowestOfAllParentsInLevel = function (lvl, keys) {
-        var lowest_of_all = 999999;
+    my.normalizeArrayToDomainOfKeys = function(array, keys, range, lvl) {
+        //Figure out the domain, then call normalizeArrayOfMSValues
+        var allExtents = [];
         _.each(parentBDs, function (pbds) {
-            lowest_of_all = Math.min(lowest_of_all, pbds.getMinValOfKeys(lvl, keys));
+            allExtents = allExtents.concat(pbds.getExtentsForLvlKeysRange(lvl, keys, range));
         });
-        return lowest_of_all;
+        return my.normalizeArrayOfMSValues(array, d3.extent(allExtents));
     }
 
     my.normalizeArrayOfMSValues = function(array, domain){
         // returns the array, normalized to values 0.0001 through 1
-	var scal = d3.scale.linear()
-	    .range([0.0001, 1]);
+        var scal = d3.scale.linear()
+            .range([0.0001, 1]);
 
-	if(domain){
-	    scal.domain(domain);
-	} else {
-	    scal.domain(d3.extent(array, function(d) { return d.val}));
-	}
+        if(domain){
+            scal.domain(domain);
+        } else {
+            scal.domain(d3.extent(array, function(d) { return d.val}));
+        }
 
         return _.map(array, function(d){
-	    return {ms: d.ms, val: scal(d.val)};
-	});
+            return {ms: d.ms, val: scal(d.val)};
+        });
     }
 
     my.multiplyArraysOfDateValObjects = function (arrays) {
@@ -727,11 +728,11 @@ multiData = function (multTrueDivideFalse) {
                 result.push({
                     ms: ms,
                     val: _.reduce(found, function (memo, num) {
-			if (mult) {
+                        if (mult) {
                             return memo * num;
-			} else {
+                        } else {
                             return memo / num;
-			}
+                        }
                     }, 1)
                 });
             }
@@ -740,7 +741,7 @@ multiData = function (multTrueDivideFalse) {
         return result;
     }
 
-    my.getDateRange = function (keys, lvl, range) {
+    my.getDateRange = function (keys, lvl, range, visibleKeys) {
         // give the range of data for this key and level
         // NOT including the highest value in range
         // COMMON USE CASE:
@@ -748,15 +749,16 @@ multiData = function (multTrueDivideFalse) {
         // than the required amount of line and area
 
         var pdbs = [];
+        console.log("vis", visibleKeys);
         // Run getDateRange on each parent
         _.each(parentBDs, function (pdb) {
-            pdbs.push(my.normalizeArrayOfMSValues(pdb.getDateRange(keys, lvl, range)));
+            pdbs.push(my.normalizeArrayToDomainOfKeys(pdb.getDateRange(keys, lvl, range), visibleKeys, range, lvl));
         });
 
-	// TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is
-	//       - but actually we want to normalize it based on what lines are being shown
-	//         based on all lines for each parent.
-	//       - NEED KEYS??
+        // TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is
+        //       - but actually we want to normalize it based on what lines are being shown
+        //         based on all lines for each parent.
+        //       - NEED KEYS??
 
         // get lowest value of all keys for this level in all parents
         // to be used as the offset for multiplyArraysOfDateValObjects
