@@ -400,9 +400,9 @@ function setLoadingIcon(on) {
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
 }
 
-function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover, hideYAxisLabels) {
+function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover, isMulti) {
     var plot;
-    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, cloudcover, hideYAxisLabels);
+    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, cloudcover, isMulti);
     plot.xScale(xScale.copy());
 
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();

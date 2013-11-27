@@ -680,11 +680,17 @@ multiData = function (multTrueDivideFalse) {
         return lowest_of_all;
     }
 
-    my.normalizeArrayOfMSValues = function(array){
+    my.normalizeArrayOfMSValues = function(array, domain){
         // returns the array, normalized to values 0.0001 through 1
 	var scal = d3.scale.linear()
-	    .domain(d3.extent(array, function(d) { return d.val}))
 	    .range([0.0001, 1]);
+
+	if(domain){
+	    scal.domain(domain);
+	} else {
+	    scal.domain(d3.extent(array, function(d) { return d.val}));
+	}
+
         return _.map(array, function(d){
 	    return {ms: d.ms, val: scal(d.val)};
 	});

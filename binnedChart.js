@@ -230,7 +230,7 @@ var getTimeContextString = function (scal, show) {
 
 // HELPER FUNCTIONS }}}
 
-var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level, cc, hideY) {
+var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample, level, cc, isMulti) {
 
     //{{{ VARIABLES
 
@@ -264,7 +264,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var interpolationMethod = ['linear'];
 
     var showTimeContext = true;
-    var hideYAxisLabels = hideY;
+    var isMultiChart = isMulti;
 
     var transitionDuration = 500;
     var easingMethod = 'cubic-in-out';
@@ -478,8 +478,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 }
 
                 if (!yAxisLock && !waitingForServer) {
-                    yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
-                                  , showing_range[1] ? showing_range[1] : yScale.domain()[1] ]);
+		    if (isMultiChart) {
+		        yScale.domain([0, 1]);
+		    } else {
+                        yScale.domain([ showing_range[0] ? showing_range[0] : yScale.domain()[0]
+                                      , showing_range[1] ? showing_range[1] : yScale.domain()[1] ]);
+                    }
                 }
 
                 if (key === 'quartiles') {
@@ -740,7 +744,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 if (!yAxisLock) {
                     if (!yAxis){
                         yAxis = d3.svg.axis()
-                        .ticks(hideYAxisLabels ? 0 : 5)
+                        .ticks(5)
                         .tickSubdivide(true)
                         .tickSize(width, 0, 0) // major, minor, end
                         .orient("left");
