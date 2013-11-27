@@ -653,36 +653,47 @@ multiData = function (multTrueDivideFalse) {
         var pdbs = [];
         // Run getDateRange on each parent
         _.each(parentBDs, function (pdb) {
-            pdbs.push(pdb.getDateRangeWithMissingValues(key, lvl, range, extra));
+            pdbs.push(my.normalizeArrayOfMSValues(pdb.getDateRangeWithMissingValues(key, lvl, range, extra)));
         });
 
         // get lowest value of all keys for this level in all parents
         // to be used as the offset for multiplyArraysOfDateValObjects
-        lowest_of_all = my.lowestOfAllParentsInLevel(lvl);
+        //lowest_of_all = my.lowestOfAllParentsInLevel(lvl, keys);
 
         // Go through each result and combine them.
         //console.log(pdbs);
         //console.log(my.multiplyArraysOfDateValObjects(pdbs));
-        return my.multiplyArraysOfDateValObjects(pdbs, Math.abs(lowest_of_all) + 1);
+
+	// TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is
+	//       - but actually we want to normalize it based on what lines are being shown
+	//         based on all lines for each parent.
+	//       - NEED KEYS??
+
+        return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
-    my.lowestOfAllParentsInLevel = function (lvl) {
+    my.lowestOfAllParentsInLevel = function (lvl, keys) {
         var lowest_of_all = 999999;
         _.each(parentBDs, function (pbds) {
-            lowest_of_all = Math.min(lowest_of_all, pbds.getMinValOfAllKeys(lvl));
+            lowest_of_all = Math.min(lowest_of_all, pbds.getMinValOfKeys(lvl, keys));
         });
         return lowest_of_all;
     }
 
-    my.multiplyArraysOfDateValObjects = function (arrays, offset) {
+    my.normalizeArrayOfMSValues = function(array){
+        // returns the array, normalized to values 0.0001 through 1
+	var scal = d3.scale.linear()
+	    .domain(d3.extent(array, function(d) { return d.val}))
+	    .range([0.0001, 1]);
+        return _.map(array, function(d){
+	    return {ms: d.ms, val: scal(d.val)};
+	});
+    }
+
+    my.multiplyArraysOfDateValObjects = function (arrays) {
+        // TODO: arrays should be normalized (zero to 1) before they get to this function
+
         // Return an array which is each element of a and b multiplied
-        // BUT first normalizes the data so no value is lower than 1.
-
-        //console.log("offset", offset);
-        if (!offset) {
-            offset = 0;
-        }
-
 
         // List of all ms values in either a or b
         var ms_values = [];
@@ -711,9 +722,9 @@ multiData = function (multTrueDivideFalse) {
                     ms: ms,
                     val: _.reduce(found, function (memo, num) {
 			if (mult) {
-                            return memo * (num + offset);
+                            return memo * num;
 			} else {
-                            return memo / (num + offset);
+                            return memo / num;
 			}
                     }, 1)
                 });
@@ -733,15 +744,20 @@ multiData = function (multTrueDivideFalse) {
         var pdbs = [];
         // Run getDateRange on each parent
         _.each(parentBDs, function (pdb) {
-            pdbs.push(pdb.getDateRange(keys, lvl, range));
+            pdbs.push(my.normalizeArrayOfMSValues(pdb.getDateRange(keys, lvl, range)));
         });
+
+	// TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is
+	//       - but actually we want to normalize it based on what lines are being shown
+	//         based on all lines for each parent.
+	//       - NEED KEYS??
 
         // get lowest value of all keys for this level in all parents
         // to be used as the offset for multiplyArraysOfDateValObjects
-        lowest_of_all = my.lowestOfAllParentsInLevel(lvl);
+        //lowest_of_all = my.lowestOfAllParentsInLevel(lvl, keys);
 
         // Go through each result and combine them.
-        return my.multiplyArraysOfDateValObjects(pdbs, Math.abs(lowest_of_all) + 1);
+        return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
     my.removeAllLevelsBelow = function(LowestLevel) {

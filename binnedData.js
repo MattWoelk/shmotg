@@ -692,7 +692,7 @@ binnedData = function () {
     //    return currentMissingBinStarts;
     //}
 
-    my.getMinValOfAllKeys = function (lvl) {
+    my.getMinValOfKeys = function (lvl, keys) {
         var result = 999999;
         _.each(bd.keys, function (k) {
             result = Math.min(result, my.getMinValOfKey(lvl, k));
