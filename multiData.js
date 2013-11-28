@@ -653,7 +653,7 @@ multiData = function (multTrueDivideFalse) {
         var pdbs = [];
         // Run getDateRange on each parent
         _.each(parentBDs, function (pdb) {
-            pdbs.push(my.normalizeArrayToDomainOfKeys(pdb.getDateRangeWithMissingValues(key, lvl, range, extra), visibleKeys, range, lvl));
+            pdbs.push(my.normalizeArrayToDomainOfKeys(pdb, pdb.getDateRangeWithMissingValues(key, lvl, range, extra), visibleKeys, range, lvl));
         });
 
         // get lowest value of all keys for this level in all parents
@@ -672,13 +672,10 @@ multiData = function (multTrueDivideFalse) {
         return my.multiplyArraysOfDateValObjects(pdbs);
     }
 
-    my.normalizeArrayToDomainOfKeys = function(array, keys, range, lvl) {
+    my.normalizeArrayToDomainOfKeys = function(parent, array, keys, range, lvl) {
         //Figure out the domain, then call normalizeArrayOfMSValues
-        var allExtents = [];
-        _.each(parentBDs, function (pbds) {
-            allExtents = allExtents.concat(pbds.getExtentsForLvlKeysRange(lvl, keys, range));
-        });
-        return my.normalizeArrayOfMSValues(array, d3.extent(allExtents));
+        var result = parent.getExtentsForLvlKeysRange(lvl, keys, range);
+        return my.normalizeArrayOfMSValues(array, result);
     }
 
     my.normalizeArrayOfMSValues = function(array, domain){
@@ -749,10 +746,9 @@ multiData = function (multTrueDivideFalse) {
         // than the required amount of line and area
 
         var pdbs = [];
-        console.log("vis", visibleKeys);
         // Run getDateRange on each parent
         _.each(parentBDs, function (pdb) {
-            pdbs.push(my.normalizeArrayToDomainOfKeys(pdb.getDateRange(keys, lvl, range), visibleKeys, range, lvl));
+            pdbs.push(my.normalizeArrayToDomainOfKeys(pdb, pdb.getDateRange(keys, lvl, range), visibleKeys, range, lvl));
         });
 
         // TODO: normalize each so that it goes from 0 to 1 instead of whatever its range is

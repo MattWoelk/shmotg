@@ -693,7 +693,7 @@ binnedData = function () {
     //}
 
     my.getExtentsForLvlKeysRange = function (lvl, keys, range) {
-        return d3.extent(my.getDateRange(keys, lvl, range));
+        return d3.extent(my.getDateRange(keys, lvl, range), function (d) { return d.val; });
     }
 
     my.getMin = function (lvl) {
