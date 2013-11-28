@@ -675,6 +675,7 @@ multiData = function (multTrueDivideFalse) {
     my.normalizeArrayToDomainOfKeys = function(parent, array, keys, range, lvl) {
         //Figure out the domain, then call normalizeArrayOfMSValues
         var result = parent.getExtentsForLvlKeysRange(lvl, keys, range);
+	console.log(result[0], result[1]);
         return my.normalizeArrayOfMSValues(array, result);
     }
 
@@ -722,13 +723,14 @@ multiData = function (multTrueDivideFalse) {
             if (_.contains(found, null)) {
                 // do not add to result.
             } else {
+	        var scal = d3.scale.linear().domain([-1,1]).range([0,1]);
                 result.push({
                     ms: ms,
                     val: _.reduce(found, function (memo, num) {
                         if (mult) {
                             return memo * num;
                         } else {
-                            return memo / num;
+                            return scal(memo - num);
                         }
                     }, 1)
                 });

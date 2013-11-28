@@ -290,10 +290,10 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show combine with division buttons
-    var add_dat = d3.select("#edit_div").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
+    var add_dat = d3.select("#edit_minus").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
-        .attr("src", "./img/div.svg")
+        .attr("src", "./img/minus.svg")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
@@ -706,14 +706,14 @@ function toggleEditables() {
         d3.select("#edit_add").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
         d3.select("#edit_mult").style("display", "block");
-        d3.select("#edit_div").style("display", "block");
+        d3.select("#edit_minus").style("display", "block");
         d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
         d3.select("#edit_remove").style("display", "none");
         d3.select("#edit_add").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
         d3.select("#edit_mult").style("display", "none");
-        d3.select("#edit_div").style("display", "none");
+        d3.select("#edit_minus").style("display", "none");
         d3.select("#zoomRectGreyOut").style("display", "none");
     }
     redraw();
