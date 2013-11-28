@@ -351,13 +351,13 @@ function printArrayOfPlots(array) {
     }))
 }
 
-function addMultiChart (parentAIndex, parentBIndex, multTrueDivideFalse) {
+function addMultiChart (parentAIndex, parentBIndex, multTrueMinusFalse) {
     var parentA = plots[parentAIndex];
     var parentB = plots[parentBIndex];
     var interval = 5;
-    var divider = multTrueDivideFalse ? 'x' : 'div';
+    var divider = multTrueMinusFalse ? 'x' : '-';
     var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + divider + parentB.sensorNumber(), curLevel, false, true);
-    plt.makeIntoMultiChart([parentA, parentB], multTrueDivideFalse);
+    plt.makeIntoMultiChart([parentA, parentB], multTrueMinusFalse);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
 
