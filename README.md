@@ -1,2 +1,5 @@
-Thesis Project. Will be like this demo, but with years of 200Hz data instead of 1 sample per day.
-http://bl.ocks.org/MattWoelk/5196687
+SHMOTG - Structural Health Monitoring On The Go
+
+This project allows the user to zoom and scan through their SHM data using an interface like the one in this static demo: http://bl.ocks.org/MattWoelk/5196687
+
+TODO: link to thesis paper.
