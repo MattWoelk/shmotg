@@ -259,19 +259,19 @@ input[type="radio"]:checked + label img:nth-child(2) {
 /* {{{ LOADING LINES */
 @-webkit-keyframes spin {
     to {
-        stroke-dashoffset: -264;
+        stroke-dashoffset: 264;
     }
 }
 
 @-moz-keyframes spin {
     to {
-        stroke-dashoffset: -264;
+        stroke-dashoffset: 132;
     }
 }
 
 @keyframes spin {
     to {
-        stroke-dashoffset: -264;
+        stroke-dashoffset: 132;
     }
 }
 
