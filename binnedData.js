@@ -1,12 +1,5 @@
 // This is binnedData. A convenient way of storing binned data
 
-//{{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with ../binnedChart.js and scraper.js
-var MAX_NUMBER_OF_ITEMS_PER_ARRAY = 32; // MUST BE A POWER OF 2. The number of items per bin container
-// TODO: phase this out (preferable) OR set it as a really high number
-
-/// CONSTANTS }}}
-
 binnedData = function () {
 
     //{{{ VARIABLES
@@ -15,7 +8,7 @@ binnedData = function () {
     var bd = { // where all of the data is stored
         keys : ['average', 'maxes', 'mins', 'q1', 'q3'],
         rawData : {
-            levels: [], // stores all of the values for each level in an array of objects (MAX_NUMBER_OF_ITEMS_PER_ARRAY).
+            levels: [], // stores all of the values for each level in an array of objects (shmotg.MAX_NUMBER_OF_ITEMS_PER_ARRAY).
                         // with one key for each range of object, up to a maximum size
                         // example: [{ ms_key: [{val: 1.7, ms: ms_since_epoch}, {val: 2.3, ms: ms_since_epoch}] }, [etc.]]
                         //           ^-- a "bin container" -----------------------------------------------------^
@@ -123,81 +116,9 @@ binnedData = function () {
         // [at this level] in which this ms would fit.
 
 
-        var sizeOfTheBinContainerInMS = sampleSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+        var sizeOfTheBinContainerInMS = sampleSize(lvl) * shmotg.MAX_NUMBER_OF_ITEMS_PER_ARRAY;
 
         return Math.floor(ms / ( sizeOfTheBinContainerInMS )) * sizeOfTheBinContainerInMS;
-    }
-
-    //function splitAndApplyToEachWithOverflowAtLevel (data, func, lvl) {
-    //    // - data is split into sections
-    //    // - func will be applied to each binnedData at level lvl
-    //    //   using the split data
-
-    //    // TODO TODO TODO: test this function!
-
-    //    var splitData = splitIntoBinsAtLevel(data, lvl);
-
-    //    for (prop in splitData) {
-
-    //        // Create if we don't have:
-    //        if( !bds[lvl] ) { bds[lvl] = {}; }
-    //        if( !bds[lvl][prop] ) { bds[lvl][prop] = binnedData(maxNumberOfBins); }
-
-    //        var overflow = func.call(bds[lvl][prop], splitData[prop]);
-    //        //console.log("overflow:", overflow);
-    //        // TODO: May have to use apply instead
-    //        //       so as to transfer arguments
-
-    //        //while (overflow){
-    //            // TODO TODO: handle overflows!
-    //        //}
-    //    }
-
-    //}
-
-    function combineAllOfKeyAndLevel(key, lvl) {
-        var result = [];
-
-        for (var keyValue in bd.keys) {
-            var key = bd.keys[keyValue];
-            result = result.concat(bd[lvl === 0 ? "rawData" : key].levels[lvl]);
-        }
-
-        return result;
-    }
-
-    function callForAllAtLevelAndCombineResults (func, lvl) {
-        // func must return an array
-
-        var result = [];
-
-        for (key in bds[lvl]) {
-            var res = func(bds[lvl][key]);
-
-            if(isArray(res)) {
-                result = result.concat(res);
-            } else if (res.hasOwnProperty("rawData") || res.hasOwnProperty("average")) {
-                if (isArray(result)) { result = binnedData(); }
-
-                if (lvl === 0) {
-                    result.addRawData(res.rawData.levels[0]);
-                }else {
-                    result.addBinnedData(res);
-                }
-
-            } else {
-                result = binnedData().combineAndSortArraysOfDateValObjects(result, res);
-            }
-        }
-
-        return result;
-    }
-
-    function doWeHaveBinsForThisRangeAndLevel (rng, lvl) {
-        // TODO: calculate the key we're looking for
-        if (key in bds[lvl]) {
-        }
-        return false;
     }
 
     function isArray(a) {
@@ -240,15 +161,10 @@ binnedData = function () {
     }
 
     function rebin (range_to_rebin, level_to_rebin) {
-        // link raw data to the source
-        for (var keyValue in bd.keys) {
-            var key = bd.keys[keyValue];
-        }
-
         // for each level other than raw data level,
         //   for each key,
         //     bin the data from the lower level
-        for (var j = level_to_rebin + 1; j < MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
+        for (var j = level_to_rebin + 1; j < shmotg.MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
             for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
                 var key = bd.keys[keyValue];
 
@@ -300,19 +216,20 @@ binnedData = function () {
 
     // Bin the data in a level into abstracted bins
     function binTheDataWithFunction (bin, curLevel, key, func, range_to_rebin) {
-        var bDat = new Array();
+        var bDat = [];
         if (!bin[curLevel === 0 ? "rawData" : key].levels[curLevel]) {
             return bDat;
         }
 
         // Combine all data which is within range_to_rebin
         var combo = combineFilteredBinContainerInformation(bin, curLevel, key, range_to_rebin);
+        var combo2 = [];
 
         // if we're calculating for quartiles, then we need the other quartile as well
         if (key === 'q1') {
-            var combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q3', range_to_rebin);
+            combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q3', range_to_rebin);
         } else if (key === 'q3'){
-            var combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q1', range_to_rebin);
+            combo2 = combineFilteredBinContainerInformation(bin, curLevel, 'q1', range_to_rebin);
         }
 
         // Use this new combined data instead of bin[key].levels[curLevel].length
@@ -340,18 +257,17 @@ binnedData = function () {
                                         combo[i].val,
                                         combo[i+1].val,
                                         combo2[i].val,
-                                        combo2[i+1].val)
-                              , ms: newdate }); // This is messy and depends on a lot of things
+                                        combo2[i+1].val),
+                                ms: newdate }); // This is messy and depends on a lot of things
                 }else{
-                    bDat.push( { val: func(
-                                        combo[i].val,
-                                        combo[i+1].val)
-              , ms: newdate });
+                    bDat.push( { val: func( combo[i].val,
+                                            combo[i+1].val),
+                                 ms: newdate });
                 }
             }
         }
         return bDat;
-    };
+    }
 
     function atModularLocation(ms, lvl) {
         // True if ms is at the beginning of a bin in level lvl.
@@ -360,23 +276,23 @@ binnedData = function () {
 
     function getTwoLargest (array) {
         var arr = array.slice();
-        first = d3.max(arr);
+        var first = d3.max(arr);
         arr.splice(arr.indexOf(first),1);
-        second = d3.max(arr);
+        var second = d3.max(arr);
         return [first, second];
-    };
+    }
 
     function average (array) {
         return d3.sum(array)/array.length;
-    };
+    }
 
     function getTwoSmallest (array) {
         var arr = array.slice();
-        first = d3.min(arr);
+        var first = d3.min(arr);
         arr.splice(arr.indexOf(first),1);
-        second = d3.min(arr);
+        var second = d3.min(arr);
         return [first, second];
-    };
+    }
 
     function combineAndSortArraysOfDateValObjects (arr1, arr2) {
         // Add the objects from arr2 (array) to arr1 (array)
@@ -407,7 +323,7 @@ binnedData = function () {
     //{{{ MY (runs whenever something changes)
 
     var my = function () {
-    }
+    };
 
     // MY }}}
 
@@ -422,7 +338,7 @@ binnedData = function () {
 
         var splitData = splitIntoBinsAtLevel(data, lvl);
 
-        for (prop in splitData) {
+        for (var prop in splitData) {
             // Create if we don't have:
             if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
             if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
@@ -430,7 +346,7 @@ binnedData = function () {
             // combine and put in bd
             bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
         }
-    }
+    };
 
     my.addRawData = function (data, dontBin) {
         // data must be in the following form: (example)
@@ -449,7 +365,7 @@ binnedData = function () {
 
         return my;
 
-    }
+    };
 
     my.replaceRawData = function (data, dontBin) {
         // data must be in the following form: (example)
@@ -471,7 +387,7 @@ binnedData = function () {
         }
 
         return my;
-    }
+    };
 
     my.addBinnedData = function (bData, lvl, dontBin) {
         // only the level lvl will be stored
@@ -496,9 +412,11 @@ binnedData = function () {
         var highs = [];
         var keys = ['average', 'q1', 'q3', 'mins', 'maxes'];
 
+        var justms = function(d) { return d.ms; };
+
         for (var i = 0; i < keys.length; i++) {
             if (bData[keys[i]] && bData[keys[i]].levels && bData[keys[i]].levels[lvl]) {
-                var ext = d3.extent(bData[keys[i]].levels[lvl], function (d) { return d.ms; });
+                var ext = d3.extent(bData[keys[i]].levels[lvl], justms);
                 lows.push(ext[0]);
                 highs.push(ext[1]);
             }
@@ -514,14 +432,14 @@ binnedData = function () {
         for (var k in bd.keys) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
             my.addData(bData[key].levels[lvl], key, lvl);
-        }; // for each of max_val, min_val, etc.
+        } // for each of max_val, min_val, etc.
 
         if(!dontBin) {
             rebin(range, lvl);
         }
 
         return my;
-    }
+    };
 
     my.replaceBinnedData = function(bData, lvl, dontBin) {
         // only the level lvl will be stored
@@ -557,19 +475,19 @@ binnedData = function () {
             if(bData[key].levels) {
                 bd[key].levels[lvl] = bData[key].levels[lvl];
             }
-        }; // for each of max_val, min_val, etc.
+        } // for each of max_val, min_val, etc.
 
         if(!dontBin) {
             rebin(range, 0);
         }
 
         return my;
-    }
+    };
 
     my.replaceAllData = function (bDat) {
         // Replace all data with what is given
         bd = bDat;
-    }
+    };
 
 
     my.haveDataInRange = function(ms_range, level) {
@@ -602,7 +520,7 @@ binnedData = function () {
         var numberWeHave = datedRange.length;
 
         return numberWeHave >= numberWeShouldHave;
-    }
+    };
 
     my.missingBins = function(ms_range, level, samplesInsteadOfRanges) {
         // Return which bins which we are missing in the given range and level.
@@ -639,141 +557,105 @@ binnedData = function () {
 
         var missingRanges = [];
 
-        _.each(missingSamples, function (d,i) {
+        _.each(missingSamples, function (d) {
             missingRanges.push([d, d + sampleSize(level)]);
             // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
         });
 
         return missingRanges; // form: [[0,1],[1,2],[4,5],[5,6],[6,7]]
-    }
-
-    //my.missingRawBinsUnderThisRangeAndLevel = function (ms_range, level) {
-
-    //    // TODO TODO TODO: update for new bin containers
-    //    var currentMissingBinStarts = my.missingBins(ms_range, level);
-    //    var nextMissingBinStarts = [];
-
-    //    console.log("levels:");
-    //    //console.log(bd.average.levels);
-
-    //    var oneSample = 1000 / 200; // milliseconds per sample
-    //    var sampleSize = Math.pow(2, level) * oneSample;
-
-    //    //console.log("currentMissingBinStarts", currentMissingBinStarts);
-
-    //    // for each level, going DOWN to zero:
-    //    for(var lvl = level; lvl >= 0; lvl--) {
-    //        sampleSize = Math.pow(2, lvl);
-    //        //console.log("level", lvl);
-
-    //        // for each range
-    //        // - find which bins are missing in the previous level's ranges
-    //        for(var rng = 0; rng < currentMissingBinStarts.length; rng++) {
-    //            //console.log("  checking range", currentMissingBinStarts[rng]);
-    //            // add the start of each missing range found within
-    //            // the above missing range
-    //            nextMissingBinStarts.push(my.missingBins(currentMissingBinStarts[rng], lvl, true));
-    //        }
-
-    //        // swap the variables
-    //        var flattened = _.uniq(_.flatten(nextMissingBinStarts).sort());
-
-
-    //        var missingRanges = [];
-    //        _.each(flattened, function (d,i) {
-    //            missingRanges.push([d, d + sampleSize]);
-    //            // missingRanges will now be like this: [[0,1],[1,2],[4,5],[5,6],[6,7]]
-    //        });
-    //        //console.log("  level", lvl, "was missing", missingRanges);
-    //        currentMissingBinStarts = missingRanges;
-    //        nextMissingBinStarts = [];
-    //    }
-
-    //    return currentMissingBinStarts;
-    //}
+    };
 
     my.getExtentsForLvlKeysRange = function (lvl, keys, range) {
         return d3.extent(my.getDateRange(keys, lvl, range), function (d) { return d.val; });
-    }
+    };
 
     my.getMin = function (lvl) {
         var lowestValue = 999999;
+        var k = "";
+        var justval = function (d) { return d.val; };
 
         if (lvl === 0) {
-            var k = "rawData";
+            k = "rawData";
         } else {
-            var k = "average";
+            k = "average";
         }
 
-        for (key in bd[k].levels[lvl]) {
-            lowestValue = Math.min(d3.min(bd[k].levels[lvl][key], function (d) { return d.val; }),
+        for (var key in bd[k].levels[lvl]) {
+            lowestValue = Math.min(d3.min(bd[k].levels[lvl][key], justval),
                                     lowestValue);
         }
 
         return lowestValue;
-    }
+    };
 
     my.getMax = function (lvl) {
         var highestValue = -999999;
+        var k = "";
+        var justval = function (d) { return d.val; };
 
         if (lvl === 0) {
-            var k = "rawData";
+            k = "rawData";
         } else {
-            var k = "average";
+            k = "average";
         }
 
-        for (key in bd[k].levels[lvl]) {
-            highestValue = Math.max(d3.max(bd[k].levels[lvl][key], function (d) { return d.val; }),
+        for (var key in bd[k].levels[lvl]) {
+            highestValue = Math.max(d3.max(bd[k].levels[lvl][key], justval),
                                     highestValue);
         }
 
         return highestValue;
-    }
+    };
 
     my.getMinMS = function (lvl) {
-        // pick the minimum bin (highest key) in bds level lvl
+        // pick the minimum bin (highest key) in bd level lvl
         // and ask for the lowest raw value
+        var justms = function (d) { return d.ms; };
+        var k = "";
 
         if (lvl === 0) {
-            var k = "rawData";
+            k = "rawData";
         } else {
-            var k = "average";
+            k = "average";
         }
 
         var getMinOfArray = function (numArray) {
             return Math.min.apply(null, numArray);
-        }
+        };
 
         var keys = Object.keys(bd[k].levels[lvl]);
-        return d3.min(bd[k].levels[lvl][getMinOfArray(keys)], function (d) { return d.ms; });
-    }
+        return d3.min(bd[k].levels[lvl][getMinOfArray(keys)], justms);
+    };
 
     my.getMaxMS = function (lvl) {
+        var justms = function (d) { return d.ms; };
+        var k = "";
+
         if (lvl === 0) {
-            var k = "rawData";
+            k = "rawData";
         } else {
-            var k = "average";
+            k = "average";
         }
 
         var getMaxOfArray = function (numArray) {
             return Math.max.apply(null, numArray);
-        }
+        };
 
         var keys = Object.keys(bd[k].levels[lvl]);
-        return d3.max(bd[k].levels[lvl][getMaxOfArray(keys)], function (d) { return d.ms; });
-    }
+        return d3.max(bd[k].levels[lvl][getMaxOfArray(keys)], justms);
+    };
 
     my.getColor = function (key) {
         return bd[key].color;
-    }
+    };
 
     my.getDash = function (key) {
         return bd[key].dash;
-    }
+    };
 
     my.getOpacity = function (key) {
         return bd[key].opacity;
-    }
+    };
 
     my.getAllInRange = function(lvl, range) {
         // return a bd-like data structure but only
@@ -791,7 +673,7 @@ binnedData = function () {
         }
 
         return send_req;
-    }
+    };
 
     my.getDateRangeWithMissingValues = function (key, lvl, range, extra) {
         // give the range of data for this key and level
@@ -810,7 +692,7 @@ binnedData = function () {
             return {ms: d, val: NaN};
         });
 
-        result = combineAndSortArraysOfDateValObjects(
+        var result = combineAndSortArraysOfDateValObjects(
                 missingsObjs,
                 my.getDateRange([key], lvl, [range[0]-binSize, range[1]+binSize])
                 );
@@ -829,7 +711,7 @@ binnedData = function () {
         }
 
         return result;
-    }
+    };
 
     my.getDateRange = function (keys, lvl, range) {
         // give the range of data for this key and level
@@ -839,32 +721,33 @@ binnedData = function () {
         // than the required amount of line and area
 
         var result = [];
+        var combineAll = function(n) {
+            if(!bd[lvl === 0 ? "rawData" : key] || !bd[lvl === 0 ? "rawData" : key].levels[lvl]) { return; }
+            var dat = bd[lvl === 0 ? "rawData" : key].levels[lvl][n];
+
+            result = result.concat(_.filter(dat, function (d) {
+                return d.ms <= range[1] && d.ms >= range[0];
+            }));
+        };
 
         // where to look for this data:
         var whichBinsToLookIn = getSurroundingBinContainers(range[0], range[1], lvl);
 
         for (var k = 0; k < keys.length; k++) {
             var key = keys[k];
-            _.each(whichBinsToLookIn, function (n) {
-                if(!bd[lvl === 0 ? "rawData" : key] || !bd[lvl === 0 ? "rawData" : key].levels[lvl]) { return; }
-                var dat = bd[lvl === 0 ? "rawData" : key].levels[lvl][n];
-
-                result = result.concat(_.filter(dat, function (d, i) {
-                    return d.ms <= range[1] && d.ms >= range[0];
-                }));
-            });
+            _.each(whichBinsToLookIn, combineAll);
         }
 
         // sort it
         result = result.sort(function (a, b) { return a.ms - b.ms; });
 
         return result;
-    }
+    };
 
     my.removeAllLevelsBelow = function(LowestLevel) {
         //TODO
         for(var i = 0; i < LowestLevel; i++) {
-            for(k in bd.keys) {
+            for(var k in bd.keys) {
                 var key = bd.keys[k];
                 //console.log("removing", key, i);
                 bd[key].levels[i] = {};
@@ -878,19 +761,19 @@ binnedData = function () {
         }
 
         //console.log("removing ;]");
-    }
+    };
 
     my.importDataFromAnotherBinnedDataObject = function (otherBinnedData) {
-        for (k in otherBinnedData.keys) {
+        for (var k in otherBinnedData.keys) {
             var key = otherBinnedData.keys[k];
             // for each key in otherBinnedData
 
-            for (var l = 0; l < MAX_NUMBER_OF_BIN_LEVELS; l++) {
+            for (var l = 0; l < shmotg.MAX_NUMBER_OF_BIN_LEVELS; l++) {
                 // for each level
 
                 if (!otherBinnedData[key].levels[l]) { continue; }
 
-                for (b in otherBinnedData[key].levels[l]) {
+                for (var b in otherBinnedData[key].levels[l]) {
                     // for each bin container
 
                     if (!bd[key].levels[l]) {
@@ -909,58 +792,58 @@ binnedData = function () {
                 } // for each bin container
             } // for each level
         } // for each key
-    }
+    };
 
     my.doToEachContainerInRange = function (range, level, func) {
         getSurroundingBinContainers(range[0], range[1], level).forEach(function (d) {
             func(d);
         });
-    }
+    };
 
     // TODO: use this instead of manually doing it everywhere
     my.binSize = function (lvl) {
         return Math.pow(2, lvl) * oneSample;
-    }
+    };
 
     my.oneSample = function (value) {
         if (!arguments.length) return oneSample;
         oneSample = value;
         return my;
-    }
+    };
 
     my.binContainerSize = function (lvl) {
-        return my.binSize(lvl) * MAX_NUMBER_OF_ITEMS_PER_ARRAY;
-    }
+        return my.binSize(lvl) * shmotg.MAX_NUMBER_OF_ITEMS_PER_ARRAY;
+    };
 
     my.getSurroundingBinContainers = function (r0, r1, lvl) {
         return getSurroundingBinContainers(r0, r1, lvl);
-    }
+    };
 
     my.getSurroundingBins = function (start, end, lvl) {
         return getSurroundingBins(start, end, lvl);
-    }
+    };
 
     my.getBinContainerForMSAtLevel = function (ms, lvl) {
         return getMSStartForTimeAtLevel(ms, lvl);
-    }
+    };
 
     my.getKeys = function () {
         return bd.keys.slice(0); // give a copy of the array
-    }
+    };
 
     my.bd = function () {
         return bd;
-    }
+    };
 
     my.combineAndSortArraysOfDateValObjects = function(a, b) {
         return combineAndSortArraysOfDateValObjects(a, b);
-    }
+    };
 
     my.getChildBins = function(ms, lvl) {
         // TODO: Return an array of two bins of level lvl-1,
         //       which are the bins which are used to calculate
         //       the value for the bin at ms.
-        result = [ms];
+        var result = [ms];
         var siz = my.binSize(lvl-1);
         if (atModularLocation(ms, lvl)) {
             result.push(ms+siz);
@@ -968,20 +851,20 @@ binnedData = function () {
             result.push(ms-siz);
         }
         return result;
-    }
+    };
 
     my.toString = function () {
         // Give bd as a string
         return JSON.stringify(bd);
-    }
+    };
 
     my.rebinAll = function (range, lvl) {
         rebin(range, lvl);
-    }
+    };
 
     // PUBLIC METHODS }}}
 
     return my;
-}
+};
 
 /* vim: set foldmethod=marker: */
