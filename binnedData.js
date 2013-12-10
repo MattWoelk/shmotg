@@ -165,7 +165,7 @@ binnedData = function () {
         //   for each key,
         //     bin the data from the lower level
         for (var j = level_to_rebin + 1; j < shmotg.MAX_NUMBER_OF_BIN_LEVELS; j++){ // for each bin level
-            for (var keyValue in bd.keys) { // for each of 'average', 'max', 'min', etc.
+            for (var keyValue = 0; keyValue < bd.keys.length; keyValue++) { // for each of 'average', 'max', 'min', etc.
                 var key = bd.keys[keyValue];
 
                 // bin and store data from lower bin
@@ -339,12 +339,14 @@ binnedData = function () {
         var splitData = splitIntoBinsAtLevel(data, lvl);
 
         for (var prop in splitData) {
-            // Create if we don't have:
-            if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
-            if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
+            if (splitData.hasOwnProperty(prop)){
+                // Create if we don't have:
+                if (!bd[key].levels[lvl]) { bd[key].levels[lvl] = {}; }
+                if (!bd[key].levels[lvl][prop]) { bd[key].levels[lvl][prop] = []; }
 
-            // combine and put in bd
-            bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
+                // combine and put in bd
+                bd[key].levels[lvl][prop] = combineAndSortArraysOfDateValObjects(bd[key].levels[lvl][prop], splitData[prop]);
+            }
         }
     };
 
@@ -429,7 +431,7 @@ binnedData = function () {
 
         //var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
-        for (var k in bd.keys) { // for each of max_val, min_val, etc.
+        for (var k = 0; k < bd.keys.length; k++) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
             my.addData(bData[key].levels[lvl], key, lvl);
         } // for each of max_val, min_val, etc.
@@ -464,7 +466,7 @@ binnedData = function () {
 
         var range = d3.extent(bData.average.levels[lvl], function (d) { return d.ms; }); // ASSUMPTION: average is always included
 
-        for (var k in bd.keys) { // for each of max_val, min_val, etc.
+        for (var k = 0; k < bd.keys.length; k++) { // for each of max_val, min_val, etc.
             var key = bd.keys[k];
 
             //if we don't have a lvl for this already, initialize one
@@ -580,7 +582,7 @@ binnedData = function () {
             k = "average";
         }
 
-        for (var key in bd[k].levels[lvl]) {
+        for (var key = 0; key < bd[k].levels[lvl].length; key++) {
             lowestValue = Math.min(d3.min(bd[k].levels[lvl][key], justval),
                                     lowestValue);
         }
@@ -599,7 +601,7 @@ binnedData = function () {
             k = "average";
         }
 
-        for (var key in bd[k].levels[lvl]) {
+        for (var key = 0; key < bd[k].levels[lvl].length; key++) {
             highestValue = Math.max(d3.max(bd[k].levels[lvl][key], justval),
                                     highestValue);
         }
@@ -688,7 +690,7 @@ binnedData = function () {
         var missings = my.missingBins(range, lvl, true);
         var binSize = my.binSize(lvl);
 
-        missingsObjs = missings.map(function (d) {
+        var missingsObjs = missings.map(function (d) {
             return {ms: d, val: NaN};
         });
 
@@ -747,7 +749,7 @@ binnedData = function () {
     my.removeAllLevelsBelow = function(LowestLevel) {
         //TODO
         for(var i = 0; i < LowestLevel; i++) {
-            for(var k in bd.keys) {
+            for(var k = 0; k < bd.keys.length; k++) {
                 var key = bd.keys[k];
                 //console.log("removing", key, i);
                 bd[key].levels[i] = {};
@@ -764,7 +766,7 @@ binnedData = function () {
     };
 
     my.importDataFromAnotherBinnedDataObject = function (otherBinnedData) {
-        for (var k in otherBinnedData.keys) {
+        for (var k = 0; k < otherBinnedData.keys.length; k++) {
             var key = otherBinnedData.keys[k];
             // for each key in otherBinnedData
 
@@ -773,7 +775,7 @@ binnedData = function () {
 
                 if (!otherBinnedData[key].levels[l]) { continue; }
 
-                for (var b in otherBinnedData[key].levels[l]) {
+                for (var b = 0; b < otherBinnedData[key].levels[l].length; b++) {
                     // for each bin container
 
                     if (!bd[key].levels[l]) {
