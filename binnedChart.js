@@ -222,7 +222,7 @@ var getTimeContextString = function (scal, show) {
     var d1 = scal.domain()[1];
     var doneNow = false;
 
-    parseDate = d3.time.format(_.reduce(timeContextFormatSpecifier, function (str, dat) {
+    var parseDate = d3.time.format(_.reduce(timeContextFormatSpecifier, function (str, dat) {
         if ( doneNow ) return str;
         if (dat.fun(d0, d1)) {
             return str + dat.formIf;
@@ -551,7 +551,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         lineMissingFilter.push({val: NaN, ms: renderRange[1]});
                     } else {
                         lineMissingFilter = _.map(fil, function (d) {
-                            tmp = {};
+                            var tmp = {};
                             tmp.val = d.val;
                             tmp.ms = d.ms;
                             if (isNaN(tmp.val)) {
