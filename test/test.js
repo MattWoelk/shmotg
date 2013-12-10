@@ -27,11 +27,26 @@ var d = [[{ms: 0, val: 1}, {ms: 5, val: 2}, {ms: 10, val: 4}]];
 var allKeys = ['average', 'rawData', 'q1', 'q3', 'mins', 'maxes'];
 
 describe('binnedData', function(){
-    describe('read-write', function(){
+
+    describe('write-read', function(){
         it('should return whatever is inserted', function(){
             var bd = binnedData();
             bd.addRawData(d[0]);
-            assert.equal(d[0].toString(), bd.getDateRange(['average'], 0, [-1000, 1000]).toString());
+            assert.deepEqual(d[0], bd.getDateRange(['average'], 0, [-1000, 1000]));
         })
     })
+
+    //NOT necessary, because getAllInRange just uses getDateRange anyway...
+    //describe('write-readAll', function(){
+    //    it('should return whatever is inserted, two ways', function(){
+    //        console.log("asdfasdf")
+    //        var bd = binnedData();
+    //        bd.addRawData(d[0]);
+    //        console.log( bd.getAllInRange(0, [-1000, 1000]));
+    //        assert.equal(d[0], bd.getAllInRange(0, [-1000, 1000]));
+    //        console.log( bd.getAllInRange(1, [-1000, 1000]).toString());
+    //        assert.equal(d[0], bd.getAllInRange(1, [-1000, 1000]));
+
+    //    })
+    //})
 })
