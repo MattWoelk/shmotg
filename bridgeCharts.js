@@ -102,13 +102,13 @@ var getTotalChartHeight = function (plotsArray) {
         total = total + d.height();
     });
     return total;
-}
+};
 
 var setAllYAxisLocks = function (toLock) {
     plots.forEach(function (plt) {
         plt.yAxisLock(toLock);
     });
-}
+};
 
 function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
     var parent = document.getElementById("charts");
@@ -119,8 +119,8 @@ function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
 function plots_filtered() {
     return _.filter(plots, function (d) {
         return d.displayThisChart();
-    })
-};
+    });
+}
 
 var redraw = function () {
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots_filtered(), function (d, i) { return d.uniqueID(); });
@@ -133,7 +133,7 @@ var redraw = function () {
         for(var i = 0; i < allPlots.length; i++) {
             d3.select(allPlots[i]).call(plots_filtered()[i]);
         }
-    }
+    };
 
     function swapWithPrevItem(i) {
         if (i-1 < 0 || i >= plots.length) {
@@ -204,12 +204,12 @@ var redraw = function () {
            .attr("height", getTotalChartHeight(plots_filtered()) + offset);
     zoomRect.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
-            .attr("height", Math.max(0, getTotalChartHeight(plots_filtered())-offset_fix))
+            .attr("height", Math.max(0, getTotalChartHeight(plots_filtered())-offset_fix));
     zoomRectGreyOut.attr("width", document.getElementById("chartContainer").offsetWidth - margin.left - margin.right - offset_fix*2)
             .attr("transform", "translate(" + margin.left + ", " + (margin.top + offset_fix) + ")")
             .attr("height", Math.max(0, getTotalChartHeight(plots_filtered())-offset_fix))
             .style("opacity", 0.15)
-            .style("fill", "#000")
+            .style("fill", "#000");
 
     //{{{ DRAW EDIT ELEMENTS
     var xsize = 70;
@@ -220,14 +220,14 @@ var redraw = function () {
     // Show add/remove buttons
     var add_dat = d3.select("#edit_remove").selectAll("g").data(plots_filtered().concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     var add_dat_enter = add_dat.enter().append("g")
-        .style("position", "absolute")
+        .style("position", "absolute");
     add_dat_enter.append("img")
         .style("position", "absolute")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
         .attr("src", "./img/remove.svg")
-        .on("click", function(d){ removePlot(d); })
+        .on("click", function(d){ removePlot(d); });
     add_dat_enter.append("img")
         .style("position", "absolute")
         .attr("width", xsize)
@@ -235,72 +235,72 @@ var redraw = function () {
         .attr("cursor", "pointer")
         .attr("class", "edit_on_top")
         .attr("src", "./img/add.svg")
-        .on("click", function(d, i){ addPlot(d.sensorType(), d.sensorNumber()); })
+        .on("click", function(d, i){ addPlot(d.sensorType(), d.sensorNumber()); });
 
     add_dat.select(".edit_on_top").transition().duration(duration)
         .style("display", "block")
         .style("opacity", function (d) { if (_.contains(plots_filtered(), d)) { return 0; } else { return 1; }})
-        .transition().duration(0).style("display", function (d) { if(_.contains(plots_filtered(), d)) { return "none"; } else { return "block"; }})
+        .transition().duration(0).style("display", function (d) { if(_.contains(plots_filtered(), d)) { return "none"; } else { return "block"; }});
     add_dat.transition().duration(duration)
         .style("left", (width - xsize) + "px")
-        .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; })
+        .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; });
 
     add_dat.exit().remove();
 
     // Show swap buttons
-    var add_dat = d3.select("#edit_swap").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
+    add_dat = d3.select("#edit_swap").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
         .attr("src", "./img/updown.svg")
         .attr("width", 90)
         .attr("height", 90)
         .attr("cursor", "pointer")
-        .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); })
+        .on("click", function(d, i) { swapWithPrevItem(i+1); redraw(); });
     add_dat
         .style("left", xbuffer + "px")
-        .style("top", function(d,i) { return ((plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
+        .style("top", function(d,i) { return ((plotHeight/2 + 20) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; });
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
     add_dat.exit().remove();
 
     // Show add button text
-    var add_dat = d3.select("#edit_add").selectAll("text").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    add_dat = d3.select("#edit_add").selectAll("text").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("text")
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
-        .style("opacity", 1)
+        .style("opacity", 1);
     add_dat.transition().duration(duration)
         .attr("x", width - 15)
-        .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); })
+        .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); });
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
 
     // Show combine with multiplication buttons
-    var add_dat = d3.select("#edit_mult").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
+    add_dat = d3.select("#edit_mult").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
         .attr("src", "./img/mult.svg")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i) { addMultiChart(i, i+1, true); redraw(); })
+        .on("click", function(d, i) { addMultiChart(i, i+1, true); redraw(); });
     add_dat
         .style("left", (xbuffer + 90) + "px")
-        .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
+        .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; });
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
     add_dat.exit().remove();
 
     // Show combine with division buttons
-    var add_dat = d3.select("#edit_minus").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
+    add_dat = d3.select("#edit_minus").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
         .attr("src", "./img/minus.svg")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .on("click", function(d, i) { addMultiChart(i, i+1, false); redraw(); })
+        .on("click", function(d, i) { addMultiChart(i, i+1, false); redraw(); });
     add_dat
         .style("left", (xbuffer + 180) + "px")
-        .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; })
+        .style("top", function(d,i) { return ((plotHeight/2 + 30) + i*(plotHeight) + ((plotHeight - 90) / 2)) + "px"; });
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
     add_dat.exit().remove();
 
@@ -308,10 +308,10 @@ var redraw = function () {
 
     //update the zoom for the new plot size
     updateZoom();
-}
+};
 
 function removePlot(p) {
-    printArrayOfPlots(plots_filtered())
+    printArrayOfPlots(plots_filtered());
     // Show each of this plot's parents
     var plt = _.find(plots, function (d) {
         return p.sensorNumber() === d.sensorNumber() && p.sensorType() === d.sensorType();
@@ -322,7 +322,7 @@ function removePlot(p) {
         var ty = d.sensorType();
         var nu = d.sensorNumber();
         plots.splice(plots.indexOf(d), 1);
-        addPlot(d.sensorType(), d.sensorNumber())
+        addPlot(d.sensorType(), d.sensorNumber());
         //redraw();
         //console.log(plots_filtered().indexOf(plt), plots_filtered().length - 1);
         //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
@@ -348,7 +348,7 @@ function removePlot(p) {
 function printArrayOfPlots(array) {
     console.log(_.map(array, function (d) {
         return d.sensorType() + "-" + d.sensorNumber();
-    }))
+    }));
 }
 
 function addMultiChart (parentAIndex, parentBIndex, multTrueMinusFalse) {
@@ -578,14 +578,14 @@ sizeOfQueue = function() {
 
 removeFromQueue = function (key) {
     delete serverQueue[key];
-}
+};
 
 // things which we are waiting for the server to send to us
 var serverQueue = {};
 
 function addToServerQueue(ob) {
     serverQueue[ob.id] = ob.req;
-};
+}
 
 var uniqueRequestID = 0;
 var listOfRequestsMade = [];
