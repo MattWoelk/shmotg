@@ -470,6 +470,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         var notNaNVal = function (d) {
             return !isNaN(d.val);
         };
+        var isNaNVal = function (d) {
+            return isNaN(d.val);
+        };
+        var msDifference = function (a, b) {
+            return a.ms - b.ms;
+        };
+        var valThroughYScale = function(d) {
+            return yScale(d.val);
+        }
 
         // for each key
         // 1. find out whether we should render things
@@ -523,6 +532,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             interpolationMethod === "step-after",
                             renderThis);
 
+                    // TODO: make an object like [{q1: q1obj, q3: q3obj}, {q1: asdf, q3: asdf}, {...}, ...]
+                    //       then feed that into .interpolate() instead of q1Filter
+
                     renderedD0s.quartiles = d3.svg.area()
                             .defined(notNaNVal)
                             .x(renderFunction)
@@ -566,13 +578,13 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         });
                     }
 
-                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineMissingFilter.sort(msDifference);
                     lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
 
                     renderedD0s.loadingBox = d3.svg.line()
-                            .defined(function (d) { return isNaN(d.val); })
+                            .defined(isNaNVal)
                             .x(renderFunction)
-                            .y(function (d, i) { return yScale.range()[0]; }) //.val
+                            .y(yScale.range()[0])
                             .interpolate( interpolationMethod )(lineMissingFilter);
 
                     //}}}
@@ -619,7 +631,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     });
 
 
-                    lineFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineFilter.sort(msDifference);
                     lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
 
                     // TODO: if fil is empty (or all are NaN; whatever happens when we zoom out until nothing is visible), then have one bin which fills the entire screen.
@@ -650,20 +662,20 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         });
                     }
 
-                    lineMissingFilter.sort(function (a, b) { return a.ms - b.ms; });
+                    lineMissingFilter.sort(msDifference);
                     lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
 
                     renderedD0s.missingBox = d3.svg.area()
-                            .defined(function (d) { return isNaN(d.val); })
+                            .defined(isNaNVal)
                             .x(renderFunction)
-                            .y0(function (d, i) { return yScale.range()[0]; }) //.val
-                            .y1(function (d, i) { return yScale.range()[1]; }) //.val
+                            .y0(yScale.range()[0])
+                            .y1(yScale.range()[1])
                             .interpolate( interpolationMethod )(lineMissingFilter);
 
                     renderedD0s[key] = d3.svg.line()
-                            .defined(function (d) { return !isNaN(d.val); })
+                            .defined(notNaNVal)
                             .x(renderFunction)
-                            .y(function (d, i) { return yScale(d.val); })
+                            .y(valThroughYScale)
                             .interpolate( interpolationMethod )(lineFilter);
 
                     //}}}
@@ -681,7 +693,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             renderThis);
 
                         renderedD0s.average = d3.svg.area()
-                            .defined(function (d) { return !isNaN(d.val); })
+                            .defined(notNaNVal)
                             .x(renderFunction)
                             .y0(yScale(0))
                             .y1(yScale(1))
@@ -704,15 +716,15 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     if (0) { // TODO: get rid of this old code
                         // TODO: render a big box, then make and send a linearGradient to be used to set the colors
                         renderedD0s[key] = d3.svg.area()
-                        .defined(function (d) { return !isNaN(d.val); })
+                        .defined(notNaNVal)
                         .x(renderFunction)
-                        .y(function (d, i) { return yScale(d.val); })
+                        .y(valThroughYScale)
                         .interpolate( interpolationMethod )(lineFilter);
                     } else {
                         renderedD0s[key] = d3.svg.line()
-                        .defined(function (d) { return !isNaN(d.val); })
+                        .defined(notNaNVal)
                         .x(renderFunction)
-                        .y(function (d, i) { return yScale(d.val); })
+                        .y(valThroughYScale)
                         .interpolate( interpolationMethod )(lineFilter);
                     }
 
@@ -1172,9 +1184,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     my.addDataToBinData = function (datas, level) {
         // add data to binData IN THE CORRECT ORDER
         waitingForServer = false;
+        var filteredDatas = [];
 
         if (level === 0) {
-            var filteredDatas = _.filter(datas, function(d) {
+            filteredDatas = _.filter(datas, function(d) {
                 return !isNaN(d.val);
             });
         } else {
