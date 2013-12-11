@@ -110,6 +110,10 @@ function onScreenSizeOfLabels(millisecondsPerLabel, screenWidth, distanceBtwnLab
 }
 
 function findLevel(dom, wid) {
+  var numInDom = function (num) {
+    return num < dom[1] && num > dom[0];
+  };
+
   for (i = 0; i < rounding_scales.length; i++) {
     var ro = rounding_scales[i];
     var compr = onScreenSizeOfLabels(ro[0]*ro[1], wid, MIN_DISTANCE_BETWEEN_X_AXIS_LABELS);
@@ -118,9 +122,7 @@ function findLevel(dom, wid) {
       var result = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1], wid);
 
       // filter this for only what is actually on-screen.
-      result = _.filter(result, function (num) {
-        return num < dom[1] && num > dom[0];
-      });
+      result = _.filter(result, numInDom);
 
       return i;
     }
@@ -162,7 +164,7 @@ function msToCenturySubTickValues(scal, wid) {
   var ro = rounding_scales[lvl];
   var rng = makeTickRange(dom[0], dom[1], ro[1], ro[3], ro[2], ro[0]*ro[1], wid);
 
-  var res = []
+  var res = [];
 
   var numToInterpolate = msToCenturyTickSubDivide(scal, wid);
 
@@ -175,8 +177,8 @@ function msToCenturySubTickValues(scal, wid) {
   }
 
   for (var i = 0; i < rng.length; i++) {
-    for (var b = 0; b < whichToGet.length; b++) {
-      res.push(rng[i] + whichToGet[b]*(spaceBetweenMajorTicks / numToInterpolate));
+    for (var c = 0; c < whichToGet.length; c++) {
+      res.push(rng[i] + whichToGet[c]*(spaceBetweenMajorTicks / numToInterpolate));
     }
   }
 
@@ -201,16 +203,17 @@ function msToCenturyTickSubDivide(scal, wid) {
 }
 
 function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, wid) {
+  var startyear, endyear, curange;
   if ( incrementOf === d3.time.year ) {
     // For Years
-    var startyear = d3.time.year.floor(dt(start));
-    var endyear   = d3.time.year.ceil( dt(end  ));
+    startyear = d3.time.year.floor(dt(start));
+    endyear   = d3.time.year.ceil( dt(end  ));
 
-    var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+    curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
     // Filter for proper increments
     curange = _.filter(curange, function (d, i) {
-      return d % increment == 0;
+      return d % increment === 0;
     });
 
     curange = _.map(curange, function (d) { return (new Date(d, 0)).getTime(); });
@@ -219,10 +222,10 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
 
   } else if ( incrementOf === d3.time.month ) {
     // For Months
-    var startyear = d3.time.year.floor(dt(start));
-    var endyear   = d3.time.year.ceil( dt(end  ));
+    startyear = d3.time.year.floor(dt(start));
+    endyear   = d3.time.year.ceil( dt(end  ));
 
-    var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+    curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
     // for each year, get all of the months for it
     curange = _.map(curange, function (d, i) {
@@ -235,17 +238,17 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
 
     curange = _.filter(curange, function (d, i) {
       // Filter for proper increments
-      return i % increment == 0;
+      return i % increment === 0;
     });
 
     return curange;
 
   } else if (baseFunc === d3.time.month){
     // For Days
-    var startyear = d3.time.year.floor(dt(start));
-    var endyear   = d3.time.year.ceil( dt(end  ));
+    startyear = d3.time.year.floor(dt(start));
+    endyear   = d3.time.year.ceil( dt(end  ));
 
-    var curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
+    curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
     // For each year, get all of the months for it
     curange = _.map(curange, function (year, i) {
@@ -257,7 +260,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
           // Filter for proper increments
           //   and remove ones which are too close
           //   together near the ends of the months
-          if ((day - 1) % increment == 0 && monthDays + 1 - day >= increment ) {
+          if ((day - 1) % increment === 0 && monthDays + 1 - day >= increment ) {
             return (new Date(year, month, day)).getTime();
           } else {
             return [];
@@ -300,7 +303,7 @@ var rounding_ticks = {
    100 : 50 ,
    200 : 50 ,
    500 : 100,
-}
+};
 
 // Data object to help make custom axis' tick values
 // [ estimate size in milliseconds,
