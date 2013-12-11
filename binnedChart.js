@@ -11,6 +11,125 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
+var msDifference = function (a, b) {
+    return a.ms - b.ms;
+};
+
+var generateLoadingBoxArray = function (whichLevelToRender, renderRange, renderThis, binData) {
+    var fil = binData.getDateRangeWithMissingValues(
+        'average',
+        whichLevelToRender,
+        renderRange,
+        false,
+        renderThis);
+
+        var toBeAddedMissing = [];
+        var countMissing = 0;
+        var lineMissingFilter = [];
+
+        if (fil.length <= 1) {
+            // No data. Fill everything. (Everything is missing.)
+            lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+            lineMissingFilter.push({val: NaN, ms: renderRange[1]});
+        } else {
+            lineMissingFilter = _.map(fil, function (d) {
+                var tmp = {};
+                tmp.val = d.val;
+                tmp.ms = d.ms;
+                if (isNaN(tmp.val)) {
+                    var siz = binData.binSize(whichLevelToRender);
+                    var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                    toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+                } else {
+                    // tmp.val = NaN; // display it all
+                }
+                countMissing++;
+                return tmp;
+            });
+        }
+
+        lineMissingFilter.sort(msDifference);
+        lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+        return lineMissingFilter;
+};
+
+var generateMissingArray = function (whichLevelToRender, renderRange, renderThis, binData) {
+    var fil = binData.getDateRangeWithMissingValues(//{{{
+            'average',
+            whichLevelToRender,
+            renderRange,
+            false,
+            renderThis);
+
+    var toBeAdded = [];
+    var count = 0;
+
+    var lineFilter = _.map(fil, function (d) {
+        tmp = {};
+        tmp.val = d.val;
+        tmp.ms = d.ms;
+        if (isNaN(tmp.val)) {
+            var siz = binData.binSize(whichLevelToRender);
+            var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+            tmp.val = averageOfRange(binData.getDateRangeWithMissingValues(
+                'average',
+                whichLevelToRender - 1,
+                range,
+                false,
+                renderThis));
+            if (fil[count-1] && !isNaN(fil[count-1].val)) {
+                toBeAdded.push({val: fil[count-1].val, ms: fil[count-1].ms});
+            }
+            if (fil[count+1] && !isNaN(fil[count+1].val)) {
+                toBeAdded.push({val: fil[count+1].val, ms: fil[count+1].ms});
+            } else {
+                toBeAdded.push({val: tmp.val, ms: tmp.ms+siz-1});
+            }
+        } else {
+            // tmp.val = NaN; // display it all
+        }
+        count++;
+        return tmp;
+    });
+
+
+    lineFilter.sort(msDifference);
+    lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
+
+    // TODO: if fil is empty (or all are NaN; whatever happens when we zoom out until nothing is visible), then have one bin which fills the entire screen.
+
+    var toBeAddedMissing = [];
+    var countMissing = 0;
+    var lineMissingFilter = [];
+
+    if (fil.length <= 1) {
+        // we have no data, therefore:
+        // make a big grey box that fills the entire screen
+        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
+        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
+    } else {
+        lineMissingFilter = _.map(fil, function (d) {
+            tmp = {};
+            tmp.val = d.val;
+            tmp.ms = d.ms;
+            if (isNaN(tmp.val)) {
+                var siz = binData.binSize(whichLevelToRender);
+                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
+                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
+            } else {
+                // tmp.val = NaN; // display it all
+            }
+            countMissing++;
+            return tmp;
+        });
+    }
+
+    lineMissingFilter.sort(msDifference);
+    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);//}}}
+
+    return [lineFilter, lineMissingFilter];
+};
+
 var averageOfRange = function (data) {
     var result = 0;
     var count = 0;
@@ -479,9 +598,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         var isNaNVal = function (d) {
             return isNaN(d.val);
         };
-        var msDifference = function (a, b) {
-            return a.ms - b.ms;
-        };
         var valThroughYScale = function(d) {
             return yScale(d.val);
         };
@@ -558,40 +674,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 } else if (key === 'loadingBox') {
                     // render Missing averages//{{{
                     if (cloudcover) { continue; }
-                    var fil = binData.getDateRangeWithMissingValues(
-                            'average',
-                            whichLevelToRender,
-                            renderRange,
-                            false,
-                            renderThis);
-
-                    var toBeAddedMissing = [];
-                    var countMissing = 0;
-                    var lineMissingFilter = [];
-
-                    if (fil.length <= 1) {
-                        // No data. Fill everything. (Everything is missing.)
-                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
-                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
-                    } else {
-                        lineMissingFilter = _.map(fil, function (d) {
-                            var tmp = {};
-                            tmp.val = d.val;
-                            tmp.ms = d.ms;
-                            if (isNaN(tmp.val)) {
-                                var siz = binData.binSize(whichLevelToRender);
-                                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
-                            } else {
-                                // tmp.val = NaN; // display it all
-                            }
-                            countMissing++;
-                            return tmp;
-                        });
-                    }
-
-                    lineMissingFilter.sort(msDifference);
-                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+                    var lineMissingFilter = generateLoadingBoxArray(whichLevelToRender, renderRange, renderThis, binData);
 
                     renderedD0s.loadingBox = d3.svg.line()
                             .defined(isNaNVal)
@@ -604,100 +687,30 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     // render Missing averages//{{{
                     if (cloudcover) { continue; }
 
-                    var fil = binData.getDateRangeWithMissingValues(
-                            'average',
-                            whichLevelToRender,
-                            renderRange,
-                            false,
-                            renderThis);
-
-                    var toBeAdded = [];
-                    var count = 0;
-
-                    var lineFilter = _.map(fil, function (d) {
-                        tmp = {};
-                        tmp.val = d.val;
-                        tmp.ms = d.ms;
-                        if (isNaN(tmp.val)) {
-                            var siz = binData.binSize(whichLevelToRender);
-                            var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                            tmp.val = averageOfRange(binData.getDateRangeWithMissingValues(
-                                'average',
-                                whichLevelToRender - 1,
-                                range,
-                                false,
-                                renderThis));
-                            if (fil[count-1] && !isNaN(fil[count-1].val)) {
-                                toBeAdded.push({val: fil[count-1].val, ms: fil[count-1].ms});
-                            }
-                            if (fil[count+1] && !isNaN(fil[count+1].val)) {
-                                toBeAdded.push({val: fil[count+1].val, ms: fil[count+1].ms});
-                            } else {
-                                toBeAdded.push({val: tmp.val, ms: tmp.ms+siz-1});
-                            }
-                        } else {
-                            // tmp.val = NaN; // display it all
-                        }
-                        count++;
-                        return tmp;
-                    });
-
-
-                    lineFilter.sort(msDifference);
-                    lineFilter = binData.combineAndSortArraysOfDateValObjects(lineFilter, toBeAdded);
-
-                    // TODO: if fil is empty (or all are NaN; whatever happens when we zoom out until nothing is visible), then have one bin which fills the entire screen.
-
-                    var toBeAddedMissing = [];
-                    var countMissing = 0;
-                    var lineMissingFilter = [];
-
-                    if (fil.length <= 1) {
-                        // we have no data, therefore:
-                        // make a big grey box that fills the entire screen
-                        lineMissingFilter.push({val: NaN, ms: renderRange[0]});
-                        lineMissingFilter.push({val: NaN, ms: renderRange[1]});
-                    } else {
-                        lineMissingFilter = _.map(fil, function (d) {
-                            tmp = {};
-                            tmp.val = d.val;
-                            tmp.ms = d.ms;
-                            if (isNaN(tmp.val)) {
-                                var siz = binData.binSize(whichLevelToRender);
-                                var range = binData.getChildBins(tmp.ms, whichLevelToRender);
-                                toBeAddedMissing.push({val: tmp.val, ms: tmp.ms+siz-1});
-                            } else {
-                                // tmp.val = NaN; // display it all
-                            }
-                            countMissing++;
-                            return tmp;
-                        });
-                    }
-
-                    lineMissingFilter.sort(msDifference);
-                    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
+                    var lineAndMissingFilter = generateMissingArray(whichLevelToRender, renderRange, renderThis, binData);
 
                     renderedD0s.missingBox = d3.svg.area()
                             .defined(isNaNVal)
                             .x(renderFunction)
                             .y0(yScale.range()[0])
                             .y1(yScale.range()[1])
-                            .interpolate( interpolationMethod )(lineMissingFilter);
+                            .interpolate( interpolationMethod )(lineAndMissingFilter[1]);
 
                     renderedD0s[key] = d3.svg.line()
                             .defined(notNaNVal)
                             .x(renderFunction)
                             .y(valThroughYScale)
-                            .interpolate( interpolationMethod )(lineFilter);
+                            .interpolate( interpolationMethod )(lineAndMissingFilter[0]);
 
                     //}}}
                 } else {
                     // render LINES d0s//{{{
+                    var lineFilter = [];
                     if (cloudcover && key !== "average") { continue; }
                     if (cloudcover && key === "average") {
                         // get ready the boxes for this
 
-                        var lineFilter = binData.getDateRange(
+                        lineFilter = binData.getDateRange(
                             [ key ],
                             whichLevelToRender,
                             renderRange,
@@ -718,7 +731,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                         continue;
                     }
 
-                    var lineFilter = binData.getDateRangeWithMissingValues(
+                    lineFilter = binData.getDateRangeWithMissingValues(
                             key,
                             whichLevelToRender,
                             renderRange,
