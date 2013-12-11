@@ -36,13 +36,13 @@ loader = function () {
                     .startAngle(0);
 
             var gElement = svg.append("g")
-                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
             var background = gElement.append("path")
                     .datum({endAngle: 0.33*tau})
                     .style("fill", "#4D4D4D")
                     .attr("d", arc)
-                    .call(spin, 1500)
+                    .call(spin, 1500);
 
             function spin(selection, duration) {
                 selection.transition()
@@ -63,20 +63,20 @@ loader = function () {
             }
         });
         d3.timer.flush();
-    };
+    }
 
     // {{{ GETTERS AND SETTERS
     my.width = function (value) {
         if (!arguments.length) return width;
         width = value;
         return my;
-    }
+    };
 
     my.height = function (value) {
         if (!arguments.length) return height;
         height = value;
         return my;
-    }
+    };
 
     my.update = function () {
         my(slctn);
@@ -84,7 +84,7 @@ loader = function () {
     // GETTERS AND SETTERS }}}
 
     return my;
-}
+};
 
 })();
 
