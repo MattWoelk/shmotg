@@ -102,7 +102,7 @@ function msToCenturyTickFormat(ti) {
      [ d3.time.format("%Lms")  , function(d) { return d.getMilliseconds(); } ]
     ]);
 
-  return function(d) { return customTimeFormat(ti); }();
+  return function() { return customTimeFormat(ti); }();
 }
 
 function onScreenSizeOfLabels(millisecondsPerLabel, screenWidth, distanceBtwnLabels) {
@@ -114,7 +114,7 @@ function findLevel(dom, wid) {
     return num < dom[1] && num > dom[0];
   };
 
-  for (i = 0; i < rounding_scales.length; i++) {
+  for (var i = 0; i < rounding_scales.length; i++) {
     var ro = rounding_scales[i];
     var compr = onScreenSizeOfLabels(ro[0]*ro[1], wid, MIN_DISTANCE_BETWEEN_X_AXIS_LABELS);
 
@@ -212,7 +212,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
     curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
     // Filter for proper increments
-    curange = _.filter(curange, function (d, i) {
+    curange = _.filter(curange, function (d) {
       return d % increment === 0;
     });
 
@@ -228,7 +228,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
     curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
     // for each year, get all of the months for it
-    curange = _.map(curange, function (d, i) {
+    curange = _.map(curange, function (d) {
       return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (f) {
         // For each month of the year
         return (new Date(d, f)).getTime();
@@ -251,7 +251,7 @@ function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, w
     curange = d3.range(startyear.getFullYear(), endyear.getFullYear());
 
     // For each year, get all of the months for it
-    curange = _.map(curange, function (year, i) {
+    curange = _.map(curange, function (year) {
       return _.map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11], function (month) {
         // For each month of the year
         var monthDays = getNumberOfDaysInCurrentMonth(new Date(year, month));
