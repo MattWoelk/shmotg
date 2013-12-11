@@ -59,12 +59,12 @@ slider = function () {
     var onhover = function() {
         d3.select(this).classed("hover", true);
         d3.select(this).classed("mousedown", false);
-    }
+    };
 
     var onoff = function() {
         d3.select(this).classed("hover", false);
         d3.select(this).classed("mousedown", false);
-    }
+    };
 
     var ondown = function(e) {
         d3.select(this).classed("hover", false);
@@ -73,7 +73,7 @@ slider = function () {
             e.preventDefault(); // So Chrome doesn't change the cursor to be text-select
         }
         e.returnValue = false;
-    }
+    };
 
     var onclick = function() {
         if (d3.event.defaultPrevented) return; // click suppressed
@@ -83,7 +83,7 @@ slider = function () {
         var which_box = this.__data__;
         var newPos = (which_box * boxSize) + scrollPosition;
         my.handlePosition(newPos).update(true);
-    }
+    };
     // EVENTS }}}
 
     // {{{ HELPER FUNCTIONS
@@ -117,7 +117,7 @@ slider = function () {
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
         var finalY = Math.max(-numberOfLevels*boxSize + height, Math.min(0, curTrans[1] + adjustment));
-        dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+        dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")");
 
         highlightSliderElement();
     }
@@ -131,7 +131,7 @@ slider = function () {
         var finalY = Math.min(height - boxSize, Math.max(0, curTrans[1] + adjustment));
         handlePosition = finalY;
         // console.log(handlePosition, d3.event.y);
-        dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")")
+        dragTarget.attr("transform", "translate(" + finalX + "," + finalY + ")");
 
         highlightSliderElement();
     }
@@ -145,7 +145,7 @@ slider = function () {
             .x(function (d) { return d.x; })
             .y(function (d) { return d.y; })
             .interpolate("linear")(dat);
-    }
+    };
 
     var drawHandle = function (top, bot, dist) {
         dat = [ {x: boxSize + side_margin, y: top},
@@ -159,8 +159,8 @@ slider = function () {
                 .x(function (d) { return d.x; })
                 .y(function (d) { return d.y; })
                 .interpolate("linear")(dat);
-        }
-    }
+        };
+    };
 
     var drawDragLines = function (d, i) {
         dat = [ {x: (1/3)*boxSize, y: ((i+2)/6)*boxSize},
@@ -169,7 +169,7 @@ slider = function () {
             .x(function (d) { return d.x; })
             .y(function (d) { return d.y; })
             .interpolate("linear")(dat);
-    }
+    };
 
     // HELPER FUNCTIONS }}}
 
@@ -205,7 +205,7 @@ slider = function () {
                 .attr("clip-path", "url(#clip" + id + ")")
                 .append("g") // another 'g' so that the clip doesn't move with the slide_region
                 .attr("id", "slide_region" + id)
-                .attr("class", "slide_region")
+                .attr("class", "slide_region");
 
                 slide_dat_applied = slide_region.selectAll("g")
                 .data(d3.range(numberOfLevels));
@@ -289,7 +289,7 @@ slider = function () {
             handleClip = handleClip ? handleClip : handle_region.append("clipPath")
                 .attr("id", "clip-handle" + id)
                 .append("path")
-                .attr("d", drawHandle(pointer_top, pointer_bottom, handle_distance))
+                .attr("d", drawHandle(pointer_top, pointer_bottom, handle_distance));
 
             handle = handle ? handle : handle_region.append("path")
                 .attr("d", drawHandle(pointer_top, pointer_bottom, handle_distance))
@@ -297,12 +297,12 @@ slider = function () {
                 .attr("clip-path", "url(#clip-handle" + id + ")")
                 .attr("class", "handle");
 
-            handle_lines = handle_lines ? handle_lines : handle_region.append("g").attr("id", "dragLines" + id)
+            handle_lines = handle_lines ? handle_lines : handle_region.append("g").attr("id", "dragLines" + id);
             handle_lines.selectAll("path").data([0, 1, 2])
                 .enter().append("path")
                     .attr("d", drawDragLines)
                     .attr("class", "dragLines")
-                    .attr("transform", "translate(" + (side_margin + boxSize + handle_distance) + "," + 0 + ")")
+                    .attr("transform", "translate(" + (side_margin + boxSize + handle_distance) + "," + 0 + ")");
             // HANDLE }}}
 
             // {{{ DRAGGING
@@ -320,38 +320,38 @@ slider = function () {
             once = false;
         });
         d3.timer.flush();
-    };
+    }
 
     // {{{ GETTERS AND SETTERS
     my.width = function (value) {
         if (!arguments.length) return width;
         width = value;
         return my;
-    }
+    };
 
     my.height = function (value) {
         if (!arguments.length) return height;
         height = value;
         return my;
-    }
+    };
 
     my.boxSize = function (value) {
         if (!arguments.length) return boxSize;
         boxSize = value;
         return my;
-    }
+    };
 
     my.numberOfLevels = function (value) {
         if (!arguments.length) return numberOfLevels;
         numberOfLevels = value;
         return my;
-    }
+    };
 
     my.changeCallBack = function (value) {
         if (!arguments.length) return changeCallBack;
         changeCallBack = value;
         return my;
-    }
+    };
 
     my.pastExtents = function (val) {
         // return true if we are out of bounds
@@ -363,7 +363,7 @@ slider = function () {
             return false;
         }
         var scrl = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
-    }
+    };
 
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
@@ -372,19 +372,19 @@ slider = function () {
         var dragTarget = d3.select("#slide_region" + id);
         var curTrans = d3.transform(dragTarget.attr("transform")).translate;
         var finalX = curTrans[0];
-        dragTarget.attr("transform", "translate(" + curTrans[0] + "," + scrollPosition + ")")
+        dragTarget.attr("transform", "translate(" + curTrans[0] + "," + scrollPosition + ")");
         return my;
-    }
+    };
 
     my.handlePosition = function (value) {
         if (!arguments.length) return handlePosition;
         handlePosition = Math.max(0, Math.min(height - boxSize, value));//d3.min([0, d3.max([height - boxSize, value])]);
         return my;
-    }
+    };
 
     my.highlightSliderElement = function () {
         highlightSliderElement();
-    }
+    };
 
     my.update = function (avoidChangeCallBack) {
         if (avoidChangeCallBack) {
@@ -396,7 +396,7 @@ slider = function () {
     // GETTERS AND SETTERS }}}
 
     return my;
-}
+};
 
 })();
 
