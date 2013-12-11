@@ -478,7 +478,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         };
         var valThroughYScale = function(d) {
             return yScale(d.val);
-        }
+        };
 
         // for each key
         // 1. find out whether we should render things
@@ -538,9 +538,10 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     renderedD0s.quartiles = d3.svg.area()
                             .defined(notNaNVal)
                             .x(renderFunction)
-                            .y0(function (d, i) { return yScale( q1Filter[i].val ); }) //.val
+                            .y0(valThroughYScale) //.val
                             .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
                             .interpolate( interpolationMethod )(q1Filter);
+                    //renderedD0s.quartiles.y1(function (d, i) { return yScale})
 
                     //}}}
                 } else if (key === 'loadingBox') {
