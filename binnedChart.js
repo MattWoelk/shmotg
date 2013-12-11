@@ -361,6 +361,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
         return (d.ms - renderScale.domain()[0]) * getScaleValue(renderScale);
     };
+    var renderFunctionFirst = function (d) {
+        return renderFunction(d[0]);
+    };
 
     var convert_ms_to_percent = function(ms, scal) {
         var start = scal.range()[0];
@@ -470,6 +473,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         var notNaNVal = function (d) {
             return !isNaN(d.val);
         };
+        var notNaNValFirst = function (d) {
+            return notNaNVal(d[0]);
+        };
         var isNaNVal = function (d) {
             return isNaN(d.val);
         };
@@ -478,6 +484,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         };
         var valThroughYScale = function(d) {
             return yScale(d.val);
+        };
+        var valFirstThroughYScale = function(d) {
+            return yScale(d[0].val);
+        };
+        var valSecondThroughYScale = function(d) {
+            return yScale(d[1].val);
         };
 
         // for each key
@@ -536,12 +548,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     //       then feed that into .interpolate() instead of q1Filter
 
                     renderedD0s.quartiles = d3.svg.area()
-                            .defined(notNaNVal)
-                            .x(renderFunction)
-                            .y0(valThroughYScale) //.val
-                            .y1(function (d, i) { return yScale( q3Filter[i].val ); }) //.val
-                            .interpolate( interpolationMethod )(q1Filter);
-                    //renderedD0s.quartiles.y1(function (d, i) { return yScale})
+                            .defined(notNaNValFirst)
+                            .x(renderFunctionFirst)
+                            .y0(valFirstThroughYScale)
+                            .y1(valSecondThroughYScale)
+                            .interpolate( interpolationMethod )(_.zip(q1Filter, q3Filter));
 
                     //}}}
                 } else if (key === 'loadingBox') {
