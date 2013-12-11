@@ -326,6 +326,7 @@ var getTimeContextString = function (scal, show) {
     if (!show) return [];
 
     var result = "";
+    var times = msToCentury.times;
 
     var timeContextFormatSpecifier = [
         { fun: function (a,b) { return (b - a) < 2 * times.y;  }, formIf: "%Y",  formIfNot: ""},
@@ -916,18 +917,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             function doaxes() {
                 if (!xAxis) {
                     xAxis = d3.svg.axis()
-                    .tickFormat(msToCenturyTickFormat)
+                    .tickFormat(msToCentury.TickFormat)
                     .orient("bottom");
                 }
                 xAxis.scale(xScale)
-                    .tickValues(msToCenturyTickValues(xScale, width));
+                    .tickValues(msToCentury.TickValues(xScale, width));
 
                 if (!xAxisMinor) {
                     xAxisMinor = d3.svg.axis()
                     .tickFormat(null)
                     .scale(xScale).orient("bottom");
                 }
-                xAxisMinor.scale(xScale).tickValues(msToCenturySubTickValues(xScale, width));
+                xAxisMinor.scale(xScale).tickValues(msToCentury.SubTickValues(xScale, width));
 
                 if (!xAxisContainer) {
                     xAxisContainer = chart.append("g")
