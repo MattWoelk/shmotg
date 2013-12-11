@@ -54,7 +54,7 @@ var generateLoadingBoxArray = function (whichLevelToRender, renderRange, renderT
 };
 
 var generateMissingArray = function (whichLevelToRender, renderRange, renderThis, binData) {
-    var fil = binData.getDateRangeWithMissingValues(//{{{
+    var fil = binData.getDateRangeWithMissingValues(
             'average',
             whichLevelToRender,
             renderRange,
@@ -125,7 +125,7 @@ var generateMissingArray = function (whichLevelToRender, renderRange, renderThis
     }
 
     lineMissingFilter.sort(msDifference);
-    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);//}}}
+    lineMissingFilter = binData.combineAndSortArraysOfDateValObjects(lineMissingFilter, toBeAddedMissing);
 
     return [lineFilter, lineMissingFilter];
 };
