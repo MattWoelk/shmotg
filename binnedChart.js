@@ -191,26 +191,26 @@ function transformScale(scal, oldScal, mar) {
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
 }
 
+function transformElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
+    var sel = container.selectAll("."+name+id)
+            .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
+
+    if (toTransition) {
+        sel.attr("transform", transformScale(scalOld, renScale, mar))
+           .transition().ease(ease).duration(dur)
+           .attr("transform", transformScale(scal, renScale, mar));
+    } else {
+        sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
+           .attr("transform", transformScale(scal, renScale, mar));
+    }
+}
+
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
 function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
     var sel = container.selectAll("."+name+id)
             .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
-
-    if(!fullRender) {
-        //update
-        if (toTransition) {
-            sel.attr("transform", transformScale(scalOld, renScale, mar))
-               .transition().ease(ease).duration(dur)
-               .attr("transform", transformScale(scal, renScale, mar));
-        } else {
-            sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
-               .attr("transform", transformScale(scal, renScale, mar));
-        }
-
-        return;
-    }
 
     //update
     if (toTransition) {
@@ -500,60 +500,69 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     var doAllTheRendering = function () {
         //{{{ CONTAINER AND CLIPPING
-        function cont(th) {
-            if (!yAxisLock) {
-                if (!yAxis){
-                    yAxis = d3.svg.axis()
-                    .ticks(5)
-                    .tickSubdivide(true)
-                    .tickSize(width, 0, 0) // major, minor, end
-                    .orient("left");
-                }
-                yAxis.scale(yScale).tickSize(width, 0, 0);
+        if (!yAxisLock) {
+            if (!yAxis){
+                yAxis = d3.svg.axis()
+                .ticks(5)
+                .tickSubdivide(true)
+                .tickSize(width, 0, 0) // major, minor, end
+                .orient("left");
             }
-
-            chart = d3.select(th); //Since we're using a .call(), "this" is the svg element.
-
-            if (reRenderTheNextTime){
-                //Set it's container's dimensions
-                slctn.attr("width", width);
-
-                //Set the chart's dimensions
-                chart.attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom);
-            }
-
-            //Allow dragging and zooming.
-            //chart.call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([0.125, 8]).on("zoom", my.zoom));
-
-
-            //Make the clipPath (for cropping the paths)
-            if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + sensorType + sensorNumber).append("rect"); }
-            if (reRenderTheNextTime) {
-                defclip.attr("width", width)
-                //.transition().duration(transitionDuration)
-                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                .attr("height", height);
-            }
+            yAxis.scale(yScale).tickSize(width, 0, 0);
         }
-        cont(this);
 
+        chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
+
+        if (reRenderTheNextTime){
+            //Set it's container's dimensions
+            slctn.attr("width", width);
+
+            //Set the chart's dimensions
+            chart.attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+        }
+
+        if (!defclip) { defclip = chart.insert("defs").append("clipPath").attr("id", "clip" + sensorType + sensorNumber).append("rect"); }
+        if (reRenderTheNextTime) {
+            defclip.attr("width", width)
+            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+            .attr("height", height);
+        }
         // CONTAINER AND CLIPPING }}}
 
         //{{{ AREAS
 
-        function doareas() {
-            //Apply the clipPath
-            pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
-            if (reRenderTheNextTime){
-                pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-                .attr("class", "posArea")
-                .attr("height", height);
-            }
+        //Apply the clipPath
+        pathArea = pathArea ? pathArea : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posArea");
+        if (reRenderTheNextTime){
+            pathArea.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+            .attr("class", "posArea")
+            .attr("height", height);
+        }
 
-            //make and render the area
-            var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(renderThis, whichLevelToRender, interpolationMethod, true);
+        //make and render the area
+        var quartileObjectForKeyFanciness = makeQuartileObjectForKeyFanciness(renderThis, whichLevelToRender, interpolationMethod, true);
 
+        if (!(didWeRenderAnything || reRenderTheNextTime)){
+            transformElements(quartileObjectForKeyFanciness,
+                              pathArea,
+                              sensorType+sensorNumber,
+                              function (d) { return binData.getColor(d.key); },
+                              function (d) { return "rgba(0,0,0,0)"; },
+                              function (d) { return binData.getDash(d.key); },
+                              xScale,
+                              transitionNextTime,
+                              previousXScale,
+                              easingMethod,
+                              transitionDuration,
+                              renderedD0s,
+                              binData,
+                              margin,
+                              renderScale,
+                              strokeWidth,
+                              "posArea",
+                              didWeRenderAnything || reRenderTheNextTime);
+        } else {
             drawElements(quartileObjectForKeyFanciness,
                          pathArea,
                          sensorType+sensorNumber,
@@ -573,31 +582,49 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          "posArea",
                          didWeRenderAnything || reRenderTheNextTime);
         }
-        doareas();
 
         // AREAS }}}
 
         //{{{ LINES
 
-        function dolines() {
-            //Apply the clipPath
-            pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
-            pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
-            .attr("class", "posPath")
-            .attr("height", height);
+        //Apply the clipPath
+        pathPath = pathPath ? pathPath : chart.append("g").attr("id", "paths"+sensorType+sensorNumber+"posPath");
+        pathPath.attr("clip-path", "url(#clip" + sensorType+sensorNumber + ")")
+        .attr("class", "posPath")
+        .attr("height", height);
 
-            var shownLines = whichLevelToRender === 0 ? ["average"] : whichLinesToRender;
+        var shownLines = whichLevelToRender === 0 ? ["average"] : whichLinesToRender;
 
-            //Make and render the Positive lines.
-            var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, shownLines, whichLevelToRender, interpolationMethod);
-            if (renderThis.indexOf('loadingBox') > -1) {
-                dataObjectForKeyFanciness.push({
-                    key: 'loadingBox',
-                    which: 0,
-                    interpolate: interpolationMethod
-                });
-            }
+        //Make and render the Positive lines.
+        var dataObjectForKeyFanciness = makeDataObjectForKeyFanciness(binData, shownLines, whichLevelToRender, interpolationMethod);
+        if (renderThis.indexOf('loadingBox') > -1) {
+            dataObjectForKeyFanciness.push({
+                key: 'loadingBox',
+                which: 0,
+                interpolate: interpolationMethod
+            });
+        }
 
+        if (!(didWeRenderAnything || reRenderTheNextTime)) {
+            transformElements(dataObjectForKeyFanciness,
+                         pathPath,
+                         sensorType+sensorNumber,
+                         function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
+                         function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
+                         function (d) { return binData.getDash(d.key); },
+                         xScale,
+                         transitionNextTime,
+                         previousXScale,
+                         easingMethod,
+                         transitionDuration,
+                         renderedD0s,
+                         binData,
+                         margin,
+                         renderScale,
+                         strokeWidth,
+                         "posPath",
+                         didWeRenderAnything || reRenderTheNextTime);
+        } else {
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
                          sensorType+sensorNumber,
@@ -617,101 +644,93 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          "posPath",
                          didWeRenderAnything || reRenderTheNextTime);
         }
-        dolines();
 
         // LINES }}}
 
         //{{{ AXES
         // Draw Axes using msToCentury.js format and values
-        function doaxes() {
-            if (!xAxis) {
-                xAxis = d3.svg.axis()
-                .tickFormat(msToCentury.TickFormat)
-                .orient("bottom");
-            }
-            xAxis.scale(xScale)
-                .tickValues(msToCentury.TickValues(xScale, width));
-
-            if (!xAxisMinor) {
-                xAxisMinor = d3.svg.axis()
-                .tickFormat(null)
-                .scale(xScale).orient("bottom");
-            }
-            xAxisMinor.scale(xScale).tickValues(msToCentury.SubTickValues(xScale, width));
-
-            if (!xAxisContainer) {
-                xAxisContainer = chart.append("g")
-                .attr("class", "x axis");
-            }
-            if (reRenderTheNextTime) {
-                xAxisContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-            }
-
-            if (!xAxisMinorContainer) {
-                xAxisMinorContainer = chart.append("g")
-                .attr("class", "x axis minor");
-            }
-            if (reRenderTheNextTime) {
-                xAxisMinorContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
-            }
-
-            if (transitionNextTime) {
-                xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-                xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
-            } else {
-                xAxisContainer.call(xAxis);
-                xAxisMinorContainer.call(xAxisMinor);
-            }
-
-            if (!yAxisContainer) {
-                yAxisContainer = chart.append("g")
-                .attr("class", "y axis");
-            }
-            if (reRenderTheNextTime) {
-                yAxisContainer.attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
-            }
-            yAxisContainer.call(yAxis);
+        if (!xAxis) {
+            xAxis = d3.svg.axis()
+            .tickFormat(msToCentury.TickFormat)
+            .orient("bottom");
         }
-        doaxes();
+        xAxis.scale(xScale)
+            .tickValues(msToCentury.TickValues(xScale, width));
+
+        if (!xAxisMinor) {
+            xAxisMinor = d3.svg.axis()
+            .tickFormat(null)
+            .scale(xScale).orient("bottom");
+        }
+        xAxisMinor.scale(xScale).tickValues(msToCentury.SubTickValues(xScale, width));
+
+        if (!xAxisContainer) {
+            xAxisContainer = chart.append("g")
+            .attr("class", "x axis");
+        }
+        if (reRenderTheNextTime) {
+            xAxisContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+        }
+
+        if (!xAxisMinorContainer) {
+            xAxisMinorContainer = chart.append("g")
+            .attr("class", "x axis minor");
+        }
+        if (reRenderTheNextTime) {
+            xAxisMinorContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
+        }
+
+        if (transitionNextTime) {
+            xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
+            xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
+        } else {
+            xAxisContainer.call(xAxis);
+            xAxisMinorContainer.call(xAxisMinor);
+        }
+
+        if (!yAxisContainer) {
+            yAxisContainer = chart.append("g")
+            .attr("class", "y axis");
+        }
+        if (reRenderTheNextTime) {
+            yAxisContainer.attr("transform", "translate(" + (width + margin.left) + ", " + margin.top + ")");
+        }
+        yAxisContainer.call(yAxis);
         // AXES }}}
 
         //{{{ TIME CONTEXT
-        function context() {
-            if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
+        if (!timeContextContainer) { timeContextContainer = chart.append("g"); }
 
-            // Draw Time Context
-            var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
-            .data([getTimeContextString(xScale, showTimeContext)]);
-            var titleContainer = timeContextContainer.selectAll(".sensor_title")
-            .data([sensorType.capitalize() + " " + sensorNumber]);
+        // Draw Time Context
+        var timeContextSelection = timeContextContainer.selectAll(".sensor_time_context")
+        .data([getTimeContextString(xScale, showTimeContext)]);
+        var titleContainer = timeContextContainer.selectAll(".sensor_title")
+        .data([sensorType.capitalize() + " " + sensorNumber]);
 
-            // enter
-            timeContextSelection.enter().append("text")
-            .attr("class", "sensor_time_context");
-            titleContainer.enter().append("text")
-            .attr("class", "sensor_title");
+        // enter
+        timeContextSelection.enter().append("text")
+        .attr("class", "sensor_time_context");
+        titleContainer.enter().append("text")
+        .attr("class", "sensor_title");
 
-            // update
-            timeContextSelection.text(function (d) { return d; });
-            if(reRenderTheNextTime){
-                timeContextSelection
-                    .attr("x", margin.left -5)
-                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
-            }
-
-            titleContainer.text(function (d) { return d; });
-            if(reRenderTheNextTime){
-                titleContainer
-                    .attr("x", margin.left + (width))
-                    .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
-            }
-
-            // exit
-            timeContextSelection.exit().remove();
-            titleContainer.exit().remove();
+        // update
+        timeContextSelection.text(function (d) { return d; });
+        if(reRenderTheNextTime){
+            timeContextSelection
+                .attr("x", margin.left -5)
+                .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
         }
-        context();
 
+        titleContainer.text(function (d) { return d; });
+        if(reRenderTheNextTime){
+            titleContainer
+                .attr("x", margin.left + (width))
+                .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+        }
+
+        // exit
+        timeContextSelection.exit().remove();
+        titleContainer.exit().remove();
         // TIME CONTEXT }}}
 
     };
