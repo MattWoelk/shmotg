@@ -4,6 +4,7 @@ d3.select("#loader_container").call(myLoader);
 /// Loading Spinner Icon }}}
 
 //{{{ ZOOMING AND CHANGING
+
 var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
 var windowListener = function () {
@@ -17,11 +18,6 @@ window.addEventListener(orientationEvent, windowListener, false);
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
-
-//d3.select("#zoomin").on("click", zoomin);
-//d3.select("#zoomout").on("click", zoomout);
-//d3.select("#scrollleft").on("click", scrollleft);
-//d3.select("#scrollright").on("click", scrollright);
 
 // ZOOMING AND CHANGING }}}
 
@@ -53,25 +49,26 @@ var sliderContainerName = "#slider_container";
 var curLevel = 0;
 var curPos = 0;
 var boxSize = 34;
+var sliderCallBack = function (pos, i, cameFromZoom) {
+    if (curLevel !== i) {
+        plots.forEach(function (plt) {
+            plt.whichLevelToRender(i).update();
+        });
+        curLevel = i;
+    }
+    var scaleFactor = Math.pow(2, pos/boxSize);
+    if (curPos !== pos) {
+        if (!cameFromZoom) {
+            rescaleTo(scaleFactor);
+        }
+        curPos = pos;
+    }
+};
 var mySlider = slider()
     .height(200)
     .width(boxSize*2.5)
     .boxSize(boxSize)
-    .changeCallBack(function (pos, i, cameFromZoom) {
-        if (curLevel !== i) {
-            plots.forEach(function (plt) {
-                plt.whichLevelToRender(i).update();
-            });
-            curLevel = i;
-        }
-        var scaleFactor = Math.pow(2, pos/boxSize);
-        if (curPos !== pos) {
-            if (!cameFromZoom) {
-                rescaleTo(scaleFactor);
-            }
-            curPos = pos;
-        }
-    })
+    .changeCallBack(sliderCallBack)
     .numberOfLevels(33);
 d3.select(sliderContainerName).call(mySlider);
 // SLIDER }}}
