@@ -1,5 +1,6 @@
-/* Usage: TODO: update this
-* var myLoader = loader({width: 960, height: 500, container: "#loader_container", id: "loader"});
+/* Usage:
+* var myLoader = loader().width(25).height(25);
+* d3.select("#loader_container").call(myLoader);
 * myLoader();
 */
 
