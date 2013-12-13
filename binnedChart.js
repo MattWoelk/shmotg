@@ -804,7 +804,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     //// MY //// (runs whenever something changes)
 
     var my = function (selection) {
-        console.log("my");
 
         //{{{ SELECTION AND SCALES
 
