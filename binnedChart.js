@@ -11,6 +11,13 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
+function addBValuesToA(a,b) {
+    var i, len = b.length;
+    for (i = 0; i < len; i += 1) {
+        a.push(b[i]);
+    }
+}
+
 var msDifference = function (a, b) {
     return a.ms - b.ms;
 };
@@ -413,7 +420,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var yAxisContainer;
     var yAxis;
     var xScale;
+    var xScaleRange;
     var yScale;
+    var yScaleRange;
     var previousXScale = d3.scale.linear(); // used for rendering transitions
     var previousLevelToRender; // used for rendering transitions;
     var timeContextContainer;
@@ -440,6 +449,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     }
 
     var cloudcover = cc; // when true, only render average, and render it as boxes instead of lines.
+    var renderThis = [];
+    var renderRange = [];
+    var showing_range = [];
 
 
     // Where all the rendered d0s are stored.
@@ -531,6 +543,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     //// MY //// (runs whenever something changes)
 
     var my = function (selection) {
+        console.log("my");
 
         //{{{ SELECTION AND SCALES
 
@@ -539,41 +552,47 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         width = containerWidth - margin.left - margin.right;
 
         if (!xScale) { xScale = d3.scale.linear().domain([0, 100]); }
-        xScale.range([0, width]); // So that the furthest-right point is at the right edge of the plot
+        if (!xScaleRange) { xScaleRange = [0, 0]; }
+        xScaleRange[1] = width;
+        xScale.range(xScaleRange); // So that the furthest-right point is at the right edge of the plot
 
         if (!yScale){ yScale = d3.scale.linear(); }
-        yScale.range([height, 0]);
+        if (!yScaleRange) { yScaleRange = [0, 0]; }
+        yScaleRange[0] = height;
+        yScale.range(yScaleRange);
 
         // SELECTION AND SCALES }}}
 
         //{{{ GENERATE d0s. (generate the lines paths)
 
         // Choose which d0s need to be generated based on which keys are active.
-        var renderThis = [];
-        renderThis = renderThis.concat(whichLinesToRender);
+        renderThis.length = 0; //wipe it
+        addBValuesToA(renderThis, whichLinesToRender);
+        //renderThis = renderThis.concat(whichLinesToRender);
         if (whichLinesToRender.indexOf("quartiles") !== -1) {
             // If we're going to render the quartiles, we need to render q1 and q3.
             if (whichLinesToRender.indexOf("q3") === -1) {
-                renderThis = ['q3'].concat(renderThis);
+                renderThis.push('q3');
             }
             if (whichLinesToRender.indexOf("q1") === -1) {
-                renderThis = ['q1'].concat(renderThis);
+                renderThis.push('q1');
             }
         }
         if (whichLinesToRender.indexOf("missing") !== -1) {
-            renderThis = ['missingBox'].concat(renderThis);
+            renderThis.unshift('missingBox');
         }
         if (whichLevelToRender === 0) {
-            renderThis = ['average'];
+            renderThis.length = 0;
+            renderThis.push('average');
             // TODO: render it as black.
         }
-        renderThis = ['loadingBox'].concat(renderThis);
+        renderThis.push('loadingBox');
 
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
 
         // figure out how much to render:
-        var renderRange = [ xScale.domain()[0] - xdiff, // render thrice what is necessary.
-            xScale.domain()[1] + xdiff ];               // (xdiff / 2) for twice
+        renderRange[0] = xScale.domain()[0] - xdiff; // render thrice what is necessary.
+        renderRange[1] = xScale.domain()[1] + xdiff;               // (xdiff / 2) for twice
 
         // initialize the array if it's the first time for this key:
         for (var keyValue in renderThis) {
@@ -586,7 +605,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         }
 
         var didWeRenderAnything = false;
-        var showing_range;
+        showing_range.length = 0;
         var justval = function (d) {
             return d.val;
         };
@@ -623,14 +642,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 renderedD0s[key + "Ranges"][1] - tenDiff ];
 
             //if we are not within the range OR reRenderTheNextTime
-            if (!isWithinRange([xScale.domain()[0], xScale.domain()[1]], ninetyPercentRange) || reRenderTheNextTime) {
+            if (!isWithinRange(xScale.domain(), ninetyPercentRange) || reRenderTheNextTime) {
                 //render the new stuff
                 didWeRenderAnything = true;
 
                 // calculate new y scale before we render any d0s
                 // TODO: make this a function of binnedData.js, and abstract it in binnedChart.js so that it can be called from outside
                 // - this will give the option of all charts having the same y axis
-                if (!showing_range) {
+                if (showing_range.length === 0) {
                     var binSize = binData.binSize(whichLevelToRender);
                     showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, [renderRange[0]-binSize, renderRange[1]+binSize], renderThis), justval);
                 }
@@ -674,7 +693,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     //}}}
                 } else if (key === 'loadingBox') {
                     // render Missing averages//{{{
-                    if (cloudcover) { continue; }
                     var lineMissingFilter = generateLoadingBoxArray(whichLevelToRender, renderRange, renderThis, binData);
 
                     renderedD0s.loadingBox = d3.svg.line()
@@ -684,9 +702,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             .interpolate( interpolationMethod )(lineMissingFilter);
 
                     //}}}
-                } else if (key === 'missing') {
+                } else if (key === 'missing' && !cloudcover) {
                     // render Missing averages//{{{
-                    if (cloudcover) { continue; }
 
                     var lineAndMissingFilter = generateMissingArray(whichLevelToRender, renderRange, renderThis, binData);
 
@@ -707,8 +724,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                 } else {
                     // render LINES d0s//{{{
                     var lineFilter = [];
-                    if (cloudcover && key !== "average") { continue; }
-                    if (cloudcover && key === "average") {
+                    if (cloudcover && key !== "average") {
+                        // do nothing
+                    } else if (cloudcover && key === "average") {
                         // get ready the boxes for this
 
                         lineFilter = binData.getDateRange(
@@ -725,36 +743,32 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                             .y1(yScale(1))
                             .interpolate( interpolationMethod )(lineFilter);
 
-                        if (cloudcover) {
-                            createColorGradient("cloudcover1", "cloudgradient", lineFilter);
-                        }
-
-                        continue;
-                    }
-
-                    lineFilter = binData.getDateRangeWithMissingValues(
-                            key,
-                            whichLevelToRender,
-                            renderRange,
-                            interpolationMethod === "step-after",
-                            renderThis);
-
-                    if (0) { // TODO: get rid of this old code
-                        // TODO: render a big box, then make and send a linearGradient to be used to set the colors
-                        renderedD0s[key] = d3.svg.area()
-                        .defined(notNaNVal)
-                        .x(renderFunction)
-                        .y(valThroughYScale)
-                        .interpolate( interpolationMethod )(lineFilter);
+                        createColorGradient("cloudcover1", "cloudgradient", lineFilter);
                     } else {
-                        renderedD0s[key] = d3.svg.line()
-                        .defined(notNaNVal)
-                        .x(renderFunction)
-                        .y(valThroughYScale)
-                        .interpolate( interpolationMethod )(lineFilter);
+                        lineFilter = binData.getDateRangeWithMissingValues(
+                                key,
+                                whichLevelToRender,
+                                renderRange,
+                                interpolationMethod === "step-after",
+                                renderThis);
+
+                        if (0) { // TODO: get rid of this old code
+                            // TODO: render a big box, then make and send a linearGradient to be used to set the colors
+                            renderedD0s[key] = d3.svg.area()
+                            .defined(notNaNVal)
+                            .x(renderFunction)
+                            .y(valThroughYScale)
+                            .interpolate( interpolationMethod )(lineFilter);
+                        } else {
+                            renderedD0s[key] = d3.svg.line()
+                            .defined(notNaNVal)
+                            .x(renderFunction)
+                            .y(valThroughYScale)
+                            .interpolate( interpolationMethod )(lineFilter);
+                        }
                     }
 
-                    //}}}
+                    // render LINES d0s}}}
                 }
 
                 // update the Ranges of rendered data
