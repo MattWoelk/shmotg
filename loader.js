@@ -6,6 +6,20 @@
 
 (function () {
 
+var interpolateRotateString = function() {
+    return d3.interpolateString("rotate(0)", "rotate(360)");
+};
+
+var spin = function(selection, duration) {
+    selection.transition()
+        .ease("linear")
+        .duration(duration)
+        .attrTween("transform", interpolateRotateString);
+
+    setTimeout(spin, duration, selection, duration);
+};
+
+
 loader = function () {
     var tau = 2 * Math.PI;
     var innerRadiusRatio = 0.5;
@@ -44,24 +58,6 @@ loader = function () {
                     .style("fill", "#4D4D4D")
                     .attr("d", arc)
                     .call(spin, 1500);
-
-            function spin(selection, duration) {
-                selection.transition()
-                    .ease("linear")
-                    .duration(duration)
-                    .attrTween("transform", function() {
-                        return d3.interpolateString("rotate(0)", "rotate(360)");
-                    });
-
-                setTimeout(function() { spin(selection, duration); }, duration);
-            }
-
-            function transitionFunction(path) {
-                path.transition()
-                    .duration(7500)
-                    .attrTween("stroke-dasharray", tweenDash)
-                    .each("end", function() { gElement.call(transition); });
-            }
         });
         d3.timer.flush();
     }
