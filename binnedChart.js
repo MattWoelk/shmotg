@@ -11,6 +11,19 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
+var justval = function (d) {
+    return d.val;
+};
+var notNaNVal = function (d) {
+    return !isNaN(d.val);
+};
+var notNaNValFirst = function (d) {
+    return notNaNVal(d[0]);
+};
+var isNaNVal = function (d) {
+    return isNaN(d.val);
+};
+
 function addBValuesToA(a,b) {
     var i, len = b.length;
     for (i = 0; i < len; i += 1) {
@@ -452,6 +465,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var renderThis = [];
     var renderRange = [];
     var showing_range = [];
+    var ninetyPercentRange = [];
 
 
     // Where all the rendered d0s are stored.
@@ -483,6 +497,16 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     // VARIABLES }}}
 
     //{{{ HELPER METHODS
+
+    var valThroughYScale = function(d) {
+        return yScale(d.val);
+    };
+    var valFirstThroughYScale = function(d) {
+        return yScale(d[0].val);
+    };
+    var valSecondThroughYScale = function(d) {
+        return yScale(d[1].val);
+    };
 
     // This is the function used to render the data at a specific size.
     var renderFunction = function (d) {
@@ -591,42 +615,11 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         var xdiff = xScale.domain()[1] - xScale.domain()[0];
 
         // figure out how much to render:
-        renderRange[0] = xScale.domain()[0] - xdiff; // render thrice what is necessary.
-        renderRange[1] = xScale.domain()[1] + xdiff;               // (xdiff / 2) for twice
-
-        // initialize the array if it's the first time for this key:
-        for (var keyValue in renderThis) {
-            var theKey = renderThis[keyValue];
-
-            if (!renderedD0s[theKey + "Ranges"]) {
-                // first time for this key
-                renderedD0s[theKey + "Ranges"] = [0, 0];
-            }
-        }
+        renderRange[0] = xScale.domain()[0] - xdiff;
+        renderRange[1] = xScale.domain()[1] + xdiff;
 
         var didWeRenderAnything = false;
         showing_range.length = 0;
-        var justval = function (d) {
-            return d.val;
-        };
-        var notNaNVal = function (d) {
-            return !isNaN(d.val);
-        };
-        var notNaNValFirst = function (d) {
-            return notNaNVal(d[0]);
-        };
-        var isNaNVal = function (d) {
-            return isNaN(d.val);
-        };
-        var valThroughYScale = function(d) {
-            return yScale(d.val);
-        };
-        var valFirstThroughYScale = function(d) {
-            return yScale(d[0].val);
-        };
-        var valSecondThroughYScale = function(d) {
-            return yScale(d[1].val);
-        };
 
         // for each key
         // 1. find out whether we should render things
@@ -638,8 +631,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             // before the new data is generated. It provides a buffer zone.
             var tenDiff = (renderedD0s[key + "Ranges"][1] -
                            renderedD0s[key + "Ranges"][0]) * 0.1;
-            var ninetyPercentRange = [ renderedD0s[key + "Ranges"][0] + tenDiff ,
-                renderedD0s[key + "Ranges"][1] - tenDiff ];
+            ninetyPercentRange[0] = renderedD0s[key + "Ranges"][0] + tenDiff;
+            ninetyPercentRange[1] = renderedD0s[key + "Ranges"][1] - tenDiff;
 
             //if we are not within the range OR reRenderTheNextTime
             if (!isWithinRange(xScale.domain(), ninetyPercentRange) || reRenderTheNextTime) {
