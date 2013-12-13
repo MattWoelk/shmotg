@@ -6,17 +6,14 @@ d3.select("#loader_container").call(myLoader);
 //{{{ ZOOMING AND CHANGING
 var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
-window.addEventListener(
-    orientationEvent,
-    function() {
-        if (navigator.userAgent.match(/android/i)) {
-            setTimeout("redraw()", 500); //Only wait for Android
-        } else {
-            redraw();
-        }
-    },
-    false
-);
+var windowListener = function () {
+    if (navigator.userAgent.match(/android/i)) {
+        setTimeout(redraw, 500); //Only wait for Android
+    } else {
+        redraw();
+    }
+};
+window.addEventListener(orientationEvent, windowListener, false);
 
 document.getElementById("render-lines").addEventListener("change", changeLines, false);
 document.getElementById("render-method").addEventListener("change", changeLines, false);
