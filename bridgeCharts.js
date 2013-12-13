@@ -562,7 +562,7 @@ socket.on('news', function (data) {
     //initPlot({}, sendRequestToServer, 5, "girder", 20, curLevel);
 });
 
-sizeOfQueue = function() {
+var sizeOfQueue = function() {
     var size = 0, key;
     for (key in serverQueue) {
         if (serverQueue.hasOwnProperty(key)) size++;
@@ -570,7 +570,7 @@ sizeOfQueue = function() {
     return size;
 };
 
-removeFromQueue = function (key) {
+var removeFromQueue = function (key) {
     delete serverQueue[key];
 };
 
