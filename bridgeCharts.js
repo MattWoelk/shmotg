@@ -586,17 +586,13 @@ var uniqueRequestID = 0;
 var listOfRequestsMade = [];
 
 function sendRequestToServer(req) {
-    // turn on loading icon
-    setLoadingIcon(true);
-
     if(_.findWhere(listOfRequestsMade, {sensorNumber: req.sensorNumber, sensorType: req.sensorType, ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
         // never request the same thing twice
-
-        if (sizeOfQueue() === 0) {
-            setLoadingIcon(false);
-        }
         return false;
     }
+
+    // turn on loading icon
+    setLoadingIcon(true);
 
     listOfRequestsMade.push(req);
 
@@ -622,13 +618,19 @@ socket.on('req_data', function (data) {
 
     // deactivate loading icon
     if (sizeOfQueue() === 0) {
-        setLoadingIcon(false);
+        setTimeout(disableLoadingIfQueueIsEmpty, 100);
     }
 
     for (i=0;i<plots.length;i++) {
         plots[i].incomingRequestedData(received);
     }
 });
+
+var disableLoadingIfQueueIsEmpty = function () {
+    if (sizeOfQueue() === 0) {
+        setLoadingIcon(false);
+    }
+};
 
 // SERVER COMMUNICATIONS }}}
 

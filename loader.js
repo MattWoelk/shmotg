@@ -21,6 +21,7 @@ loader = function () {
 
     var slctn; // Save the selection so that my.update() works.
     var svg;
+    var background;
 
     var spin = function(selection, duration) {
         if (isShowing){
@@ -28,9 +29,9 @@ loader = function () {
             .ease("linear")
             .duration(duration)
             .attrTween("transform", interpolateRotateString);
-        }
 
-        setTimeout(spin, duration, selection, duration);
+            setTimeout(spin, duration, selection, duration);
+        }
     };
 
 
@@ -56,7 +57,7 @@ loader = function () {
             var gElement = svg.append("g")
                 .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-            var background = gElement.append("path")
+            background = gElement.append("path")
                     .datum({endAngle: 0.33*tau})
                     .style("fill", "#4D4D4D")
                     .attr("d", arc)
@@ -84,6 +85,9 @@ loader = function () {
 
     my.isShowing = function (value) {
         if (!arguments.length) return isShowing;
+        if (value && !isShowing) {
+            isShowing = true;
+            spin(background, 1500); }
         isShowing = value;
         return my;
     };
