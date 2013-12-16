@@ -75,6 +75,14 @@ d3.select(sliderContainerName).call(mySlider);
 
 //{{{ HELPER FUNCTIONS
 
+var copyScaleWithoutGarbage = function (a,b){
+    // copy the properties of b into a
+    a.domain()[0] = b.domain()[0];
+    a.domain()[1] = b.domain()[1];
+    a.range()[0] = b.range()[0];
+    a.range()[1] = b.range()[1];
+};
+
 function swapItems(array, a, b) {
     array[a] = array.splice(b, 1, array[a])[0];
     return array;
@@ -334,7 +342,7 @@ function removePlot(p) {
     if(index === -1) { console.log("PLOT NOT IN PLOTS"); }
 
     // Remove the chart from the plots array
-    plots.splice(index, 1); redraw();
+    plots.splice(index, 1);
 
     redraw();
 }
@@ -447,14 +455,13 @@ function zoomAll() {
     } else {
         mySlider.scrollPosition(newPos).update(true);
 
-        var cp = xScale.copy(); // TODO: instead of creating a brand new scale, just set scale parameters for each plot. (domain and/or range)
         // set plot scales
         plots.forEach(function (plt) {
-            plt.xScale(cp).update();
+            plt.xScale(xScale).update();
         });
     }
 
-    oldXScale = xScale.copy();
+    copyScaleWithoutGarbage(oldXScale, xScale);
 }
 
 var zoom = d3.behavior.zoom()

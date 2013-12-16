@@ -750,7 +750,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         // See transformScale for the inverse.
 
         // Store this for later use.
-        renderScale = xScale.copy();
+        copyScaleWithoutGarbage(renderScale, xScale);
 
         return (d.ms - renderScale.domain()[0]) * getScaleValue(renderScale);
     };
@@ -785,6 +785,24 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             return id;
         };
     }();
+
+    var copyScaleWithoutGarbage = function (a,b){
+        // copy the properties of b into a
+        a.domain()[0] = b.domain()[0];
+        a.domain()[1] = b.domain()[1];
+        a.range()[0] = b.range()[0];
+        a.range()[1] = b.range()[1];
+    };
+
+    var applyScaleDomainWithoutGarbage = function (a,b){
+        a.domain()[0] = b[0];
+        a.domain()[1] = b[1];
+    };
+
+    var applyScaleRangeWithoutGarbage = function (a,b){
+        a.range()[0] = b[0];
+        a.range()[1] = b[1];
+    };
 
     // This stores the scale at which the d0s were
     // originally rendered. It's our base-point for
@@ -1105,8 +1123,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (!xScale) {
             previousXScale = d3.scale.linear(); // now it's initialized.
             previousLevelToRender = whichLevelToRender;
-        }else if (xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1]) {
-            previousXScale = xScale.copy();
+        } else if (xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1]) {
+            copyScaleWithoutGarbage(previousXScale, xScale);
             previousLevelToRender = whichLevelToRender;
         } // else, don't change previousXScale
 
