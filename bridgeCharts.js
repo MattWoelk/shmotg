@@ -107,9 +107,9 @@ var getTotalChartHeight = function (plotsArray) {
 };
 
 var setAllYAxisLocks = function (toLock) {
-    plots.forEach(function (plt) {
-        plt.yAxisLock(toLock);
-    });
+    for(var index = 0; index < plots.length; index++) {
+        plots[index].yAxisLock(toLock);
+    }
 };
 
 function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
@@ -195,9 +195,9 @@ var redraw = function () {
     var offset = showingEdits ? toBeAdded.length*plotHeight : 0;
 
     // TODO: when add buttons show up and one scroll bar appears, both scroll bars appear.
-    plots.forEach(function (plt) {
-        plt.containerWidth(document.getElementById("chartContainer").offsetWidth).update();
-    });
+    for (var index = 0, l = plots.length; index < l; index ++) {
+        plots[index].containerWidth(document.getElementById("chartContainer").offsetWidth).update();
+    }
 
     var offset_fix = 8;
     d3.select("#charts").attr("width", document.getElementById("chartContainer").offsetWidth);
@@ -319,7 +319,8 @@ function removePlot(p) {
         return p.sensorNumber() === d.sensorNumber() && p.sensorType() === d.sensorType();
     });
 
-    _.forEach(plt.multiChart_parentBinnedCharts(), function (d) {
+    for (var i = 0, l = plt.multiChart_parentBinnedCharts().length; i < l; i++) {
+        var d = plt.multiChart_parentBinnedCharts()[i];
         //d.displayThisChart(true); // TODO: instead of this, just delete it and recreate it.
         var ty = d.sensorType();
         var nu = d.sensorNumber();
@@ -328,7 +329,7 @@ function removePlot(p) {
         //redraw();
         //console.log(plots_filtered().indexOf(plt), plots_filtered().length - 1);
         //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
-    });
+    }
 
     // TODO: move the new plots in front of the old plot in the DOM
     //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
@@ -442,13 +443,14 @@ function zoomAll() {
     // adjust slider
     var scal = getScaleValue(xScale);
     var newPos = boxSize * (Math.log(scal) / Math.log(2));
+    var index = 0;
 
     if (mySlider.pastExtents(newPos)) {
         var tmpScale = oldXScale.copy();
 
-        plots.forEach(function (plt) {
-            plt.xScale(tmpScale.copy()).update();
-        });
+        for(index = 0; index < plots.length; index++){
+            plots[index].xScale(tmpScale.copy()).update();
+        }
         xScale = tmpScale.copy();
 
         zoom.x(xScale);
@@ -456,9 +458,9 @@ function zoomAll() {
         mySlider.scrollPosition(newPos).update(true);
 
         // set plot scales
-        plots.forEach(function (plt) {
-            plt.xScale(xScale).update();
-        });
+        for(index = 0; index < plots.length; index++){
+            plots[index].xScale(xScale).update();
+        }
     }
 
     copyScaleWithoutGarbage(oldXScale, xScale);
