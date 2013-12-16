@@ -52,6 +52,7 @@ var generateLoadingBoxArray = function (whichLevelToRender, renderRange, renderT
             lineMissingFilter.push({val: NaN, ms: renderRange[0]});
             lineMissingFilter.push({val: NaN, ms: renderRange[1]});
         } else {
+            // TODO: move this function to a wider scope.
             lineMissingFilter = _.map(fil, function (d) {
                 var tmp = {};
                 tmp.val = d.val;
@@ -84,6 +85,7 @@ var generateMissingArray = function (whichLevelToRender, renderRange, renderThis
     var toBeAdded = [];
     var count = 0;
 
+    // TODO: move this function o a wider scope.
     var lineFilter = _.map(fil, function (d) {
         tmp = {};
         tmp.val = d.val;
@@ -128,6 +130,7 @@ var generateMissingArray = function (whichLevelToRender, renderRange, renderThis
         lineMissingFilter.push({val: NaN, ms: renderRange[0]});
         lineMissingFilter.push({val: NaN, ms: renderRange[1]});
     } else {
+        // TODO: move this function o a wider scope.
         lineMissingFilter = _.map(fil, function (d) {
             tmp = {};
             tmp.val = d.val;
@@ -191,18 +194,8 @@ function transformScale(scal, oldScal, mar) {
     return "translate(" + tx + "," + ty + ")scale(" + sx + "," + sy + ")";
 }
 
-function transformElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
-    var sel = container.selectAll("."+name+id)
-            .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
-
-    if (toTransition) {
-        sel.attr("transform", transformScale(scalOld, renScale, mar))
-           .transition().ease(ease).duration(dur)
-           .attr("transform", transformScale(scal, renScale, mar));
-    } else {
-        sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
-           .attr("transform", transformScale(scal, renScale, mar));
-    }
+function generateKey(d) {
+    return d.key + d.which + d.interpolate;
 }
 
 // selection are the objects,
@@ -210,7 +203,7 @@ function transformElements(keyObject, container, id, fill, stroke, strokeDash, s
 // scal is the scale
 function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
     var sel = container.selectAll("."+name+id)
-            .data(keyObject, function (d) { return d.key + d.which + d.interpolate; });
+            .data(keyObject, generateKey);
 
     //update
     if (toTransition) {
@@ -497,6 +490,24 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     // VARIABLES }}}
 
     //{{{ HELPER METHODS
+
+    function getOpacity(d) {
+        return binData.getOpacity(d.key);
+    }
+
+    function transformElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
+        var sel = container.selectAll("."+name+id)
+                .data(keyObject, generateKey);
+
+        if (toTransition) {
+            sel.attr("transform", transformScale(scalOld, renScale, mar))
+               .transition().ease(ease).duration(dur)
+               .attr("transform", transformScale(scal, renScale, mar));
+        } else {
+            sel.attr("opacity", getOpacity)
+               .attr("transform", transformScale(scal, renScale, mar));
+        }
+    }
 
     var doAllTheRendering = function () {
         //{{{ CONTAINER AND CLIPPING
