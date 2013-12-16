@@ -179,6 +179,7 @@ slider = function () {
         avoidChangeCallBack = av;
 
         g.each(function(d, i) {
+            // TODO TODO: put this outside so that this mega function isn't being created each time.
             var g = d3.select(this);
 
             // {{{ VARIABLES
@@ -368,11 +369,10 @@ slider = function () {
     my.scrollPosition = function (value) {
         if (!arguments.length) return scrollPosition;
         if (value === scrollPosition) { return my; }
-        scrollPosition = d3.min([0, d3.max([height - boxSize*numberOfLevels, value])]);
+        scrollPosition = Math.min(0, Math.max(height - boxSize*numberOfLevels, value));
         var dragTarget = d3.select("#slide_region" + id);
-        var curTrans = d3.transform(dragTarget.attr("transform")).translate;
-        var finalX = curTrans[0];
-        dragTarget.attr("transform", "translate(" + curTrans[0] + "," + scrollPosition + ")");
+        var finalX = d3.transform(dragTarget.attr("transform")).translate[0];
+        dragTarget.attr("transform", "translate(" + finalX + "," + scrollPosition + ")");
         return my;
     };
 
