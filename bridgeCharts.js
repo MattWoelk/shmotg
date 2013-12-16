@@ -51,13 +51,13 @@ var curPos = 0;
 var boxSize = 34;
 var sliderCallBack = function (pos, i, cameFromZoom) {
     if (curLevel !== i) {
-        plots.forEach(function (plt) {
-            plt.whichLevelToRender(i).update();
-        });
+        for (var index = 0; index < plots.length; index++) {
+            plots[index].whichLevelToRender(i).update();
+        }
         curLevel = i;
     }
-    var scaleFactor = Math.pow(2, pos/boxSize);
     if (curPos !== pos) {
+        var scaleFactor = Math.pow(2, pos/boxSize);
         if (!cameFromZoom) {
             rescaleTo(scaleFactor);
         }
