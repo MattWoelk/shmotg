@@ -392,6 +392,7 @@ function transitionAllNextTime() {
 function setLoadingIcon(on) {
     d3.select("#loader_container").style("opacity", on ? 1 : 0);
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
+    myLoader.isShowing(on);
 }
 
 function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover, isMulti) {

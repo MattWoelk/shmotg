@@ -10,15 +10,6 @@ var interpolateRotateString = function() {
     return d3.interpolateString("rotate(0)", "rotate(360)");
 };
 
-var spin = function(selection, duration) {
-    selection.transition()
-        .ease("linear")
-        .duration(duration)
-        .attrTween("transform", interpolateRotateString);
-
-    setTimeout(spin, duration, selection, duration);
-};
-
 
 loader = function () {
     var tau = 2 * Math.PI;
@@ -26,9 +17,21 @@ loader = function () {
     var outerRadiusRatio = 0.9;
     var width = 25;
     var height = 25;
+    var isShowing = true;
 
     var slctn; // Save the selection so that my.update() works.
     var svg;
+
+    var spin = function(selection, duration) {
+        if (isShowing){
+            selection.transition()
+            .ease("linear")
+            .duration(duration)
+            .attrTween("transform", interpolateRotateString);
+        }
+
+        setTimeout(spin, duration, selection, duration);
+    };
 
 
     function my (g) {
@@ -77,6 +80,12 @@ loader = function () {
 
     my.update = function () {
         my(slctn);
+    };
+
+    my.isShowing = function (value) {
+        if (!arguments.length) return isShowing;
+        isShowing = value;
+        return my;
     };
     // GETTERS AND SETTERS }}}
 
