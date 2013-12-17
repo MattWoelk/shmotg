@@ -1,14 +1,15 @@
-// {{{ CONSTANTS
-var MAX_NUMBER_OF_BIN_LEVELS = 46; // keep sync'd with Server/serv.js
-        // TODO: phase this out (preferable) OR set it as a really high number
-var TIME_CONTEXT_VERTICAL_EACH = 25;
-        // vertical size of each section of the user time context system
-// CONSTANTS }}}
-
 // {{{ HELPER FUNCTIONS
 
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+var justItself = function(d){
+    return d;
+};
+
+var justValue = function(d){
+    return d.value;
 };
 
 var justval = function (d) {
@@ -264,7 +265,7 @@ var makeDataObjectForKeyFanciness = function (bin, whichLines, whichLevel, inter
     for (var keyValue in whichLines){ // for each of 'average', 'max', 'min'
         var key = whichLines[keyValue];
 
-        for (j = 0; j < MAX_NUMBER_OF_BIN_LEVELS; j++) {
+        for (j = 0; j < shmotg.MAX_NUMBER_OF_BIN_LEVELS; j++) {
             if (whichLevel === j){
                 resultArray.push({
                     key: key,
@@ -285,7 +286,7 @@ var makeQuartileObjectForKeyFanciness = function (whichLines, whichLevel, interp
 
     var j = 0;
     if (whichLines.indexOf('quartiles') > -1) {
-        for (j = 0; j < MAX_NUMBER_OF_BIN_LEVELS; j++) {
+        for (j = 0; j < shmotg.MAX_NUMBER_OF_BIN_LEVELS; j++) {
             if (whichLevel === j){
                 resultArray.push({
                         key: key,
@@ -325,7 +326,7 @@ function goToLevel(scal, msPS) {
     var toLevel = Math.log(samplesPerBin) / Math.log(2);
     toLevel = Math.floor(toLevel);
     toLevel = d3.max([0, toLevel]);
-    toLevel = d3.min([MAX_NUMBER_OF_BIN_LEVELS - 1, toLevel]);
+    toLevel = d3.min([shmotg.MAX_NUMBER_OF_BIN_LEVELS - 1, toLevel]);
 
     // TODO: this may not be the correct place for this: update the span with id "current_level"
     d3.select("#current_level").text(toLevel);
@@ -727,18 +728,18 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         .attr("class", "sensor_title");
 
         // update
-        timeContextSelection.text(function (d) { return d; });
+        timeContextSelection.text(justItself);
         if(reRenderTheNextTime){
             timeContextSelection
                 .attr("x", margin.left -5)
-                .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+                .attr("y", shmotg.TIME_CONTEXT_VERTICAL_EACH);
         }
 
-        titleContainer.text(function (d) { return d; });
+        titleContainer.text(justItself);
         if(reRenderTheNextTime){
             titleContainer
                 .attr("x", margin.left + (width))
-                .attr("y", function (d, i) { return TIME_CONTEXT_VERTICAL_EACH; });
+                .attr("y", shmotg.TIME_CONTEXT_VERTICAL_EACH);
         }
 
         // exit
@@ -793,7 +794,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             stops.enter().append("stop");
             stops.attr("offset", function(d, i) { return convert_ms_to_percent(d.ms, xScale); })
                  .attr("stop-opacity", function(d) { return 1-parseFloat(d.val); })
-                 .attr("stop-color", function(d) { "black"; });
+                 .attr("stop-color", "black");
             stops.exit().remove();
             return id;
         };
@@ -1163,14 +1164,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         if (!arguments.length) return showTimeContext;
 
         showTimeContext = show;
-        margin.top = margin.top + (showTimeContext ? TIME_CONTEXT_VERTICAL_EACH : 0);
+        margin.top = margin.top + (showTimeContext ? shmotg.TIME_CONTEXT_VERTICAL_EACH : 0);
 
         return my;
     };
 
     // TODO: make this independent of the actual HTML. Do it through bridgecharts.js instead
     my.setSelectedLines = function () {
-        var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), function (checkbox) { return checkbox.value;} );
+        var a = [].map.call (document.querySelectorAll ("#render-lines input:checked"), justValue);
         my.whichLinesToRender(a);
 
         //my.whichLevelToRender(goToLevel(xScale, milliSecondsPerSample));
@@ -1218,9 +1219,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     my.makeIntoMultiChart = function (parents, multTrueMinusFalse) {
         binData = multiData(multTrueMinusFalse);
-        _.each(parents, function (par) {
-            my.addMultiChartParent(par);
-        });
+        for(var index = 0; index < parents.length; index++){
+            my.addMultiChartParent(parents[index]);
+        }
         my.reRenderTheNextTime(true).update();
     };
 
@@ -1259,9 +1260,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         }
 
         // Notify children that there is updated data.
-        _.each(multiChart_childrenCharts, function (child) {
+        //_.each(multiChart_childrenCharts, function (child) {
             //child.reRenderTheNextTime(true).update();
-        });
+        //});
     };
 
     my.addDataToBinData = function (datas, level) {
@@ -1270,9 +1271,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         var filteredDatas = [];
 
         if (level === 0) {
-            filteredDatas = _.filter(datas, function(d) {
-                return !isNaN(d.val);
-            });
+            filteredDatas = _.filter(datas, notNaNVal);
         } else {
             filteredDatas = datas;
         }
