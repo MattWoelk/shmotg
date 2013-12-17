@@ -107,10 +107,10 @@ makeQuery = function(a, b, letter, sensorNumber, sensorType) {
 
     // TODO: implement sensorType
 
-    var let = letter ? letter : 'A';
+    var let = letter ? letter : '0A';
 
     // query = 'SELECT ESGgirder18, SampleIndex, Miliseconds, Time FROM SPBRTData_0A LIMIT 1000';
-    var queryHead = 'SELECT ESGgirder' + sensorNumber + ', SampleIndex, Time FROM SPBRTData_0' + let + ' WHERE Time BETWEEN';
+    var queryHead = 'SELECT ESGgirder' + sensorNumber + ', SampleIndex, Time FROM SPBRTData_' + let + ' WHERE Time BETWEEN';
     var query1 = ' "' + dtr.getFullYear() +
                '-' + pad(dtr.getMonth() + 1) +
                '-' + pad(dtr.getDate()) +
@@ -159,7 +159,7 @@ getDataFromDataBaseInRange = function (ms0, ms1, sensorNumber, sensorType, callb
     // TODO: if ms0 and ms=1 span months, query one for each month
     //       (will only ever be two months, otherwise it would
     //       take forever)
-    var vals = ['A','B','C','D','E','F'];
+    var vals = ['0A','0B','0C','0D','0E','0F'];
     var queries = [];
     for (var i = 0, l = vals.length; i < l; i ++) {
         queries.push(makeQuery(ms0, ms1, vals[i], sensorNumber, sensorType));
