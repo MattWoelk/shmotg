@@ -333,28 +333,36 @@ function goToLevel(scal, msPS) {
     return toLevel;
 }
 
+var times = msToCentury.times;
+var timeContextFormatSpecifier = [
+    { fun: function (a,b) { return (b - a) < 2 * times.y;  }, formIf: "%Y",  formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.mo; }, formIf: " %b", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.d;  }, formIf: " %a %d", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.h;  }, formIf: " %H", formIfNot: ""},
+    { fun: function (a,b) { return (b - a) < 2 * times.m;  }, formIf: ":%M", formIfNot: "h"},
+    { fun: function (a,b) { return (b - a) < 2 * times.s;  }, formIf: ":%Ss", formIfNot: ""},
+    // milliseconds would be unnecessary for our purposes
+];
+
+// Convert milliseconds to a Date object
+function dt (num) {
+    var newdate = new Date();
+    newdate.setTime(num);
+    return newdate;
+}
+
 // return a string label to be put in the user time context area
 // Depends on the times variable from msToCentury.js
 var getTimeContextString = function (scal, show) {
     if (!show) return [];
 
     var result = "";
-    var times = msToCentury.times;
-
-    var timeContextFormatSpecifier = [
-        { fun: function (a,b) { return (b - a) < 2 * times.y;  }, formIf: "%Y",  formIfNot: ""},
-        { fun: function (a,b) { return (b - a) < 2 * times.mo; }, formIf: " %b", formIfNot: ""},
-        { fun: function (a,b) { return (b - a) < 2 * times.d;  }, formIf: " %a %d", formIfNot: ""},
-        { fun: function (a,b) { return (b - a) < 2 * times.h;  }, formIf: " %H", formIfNot: ""},
-        { fun: function (a,b) { return (b - a) < 2 * times.m;  }, formIf: ":%M", formIfNot: "h"},
-        { fun: function (a,b) { return (b - a) < 2 * times.s;  }, formIf: ":%Ss", formIfNot: ""},
-        // milliseconds would be unnecessary for our purposes
-    ];
 
     var d0 = scal.domain()[0];
     var d1 = scal.domain()[1];
     var doneNow = false;
 
+    // TODO: this makes too many objects and looks like it would be slow.
     var parseDate = d3.time.format(_.reduce(timeContextFormatSpecifier, function (str, dat) {
         if ( doneNow ) return str;
         if (dat.fun(d0, d1)) {
@@ -364,14 +372,6 @@ var getTimeContextString = function (scal, show) {
             return str + dat.formIfNot;
         }
     }, ""));
-
-
-    // Convert milliseconds to a Date object
-    function dt (num) {
-        var newdate = new Date();
-        newdate.setTime(num);
-        return newdate;
-    }
 
     result = parseDate(dt(d0));
     return result;
@@ -558,6 +558,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             transformElements(quartileObjectForKeyFanciness,
                               pathArea,
                               sensorType+sensorNumber,
+                              // TODO: eliminate these three function objects
                               function (d) { return binData.getColor(d.key); },
                               function (d) { return "rgba(0,0,0,0)"; },
                               function (d) { return binData.getDash(d.key); },
@@ -620,6 +621,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             transformElements(dataObjectForKeyFanciness,
                          pathPath,
                          sensorType+sensorNumber,
+                         // TODO: eliminate these three function objects
                          function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
                          function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
                          function (d) { return binData.getDash(d.key); },
