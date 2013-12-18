@@ -22,6 +22,7 @@ var binData = binnedData();
 // GLOBAL VARIABLES}}}
 
 // {{{ COMMAND LINE INPUT
+// MUST BE RUN FROM THIS DIRECTORY! (The Server directory)
 if (process.argv[8] === undefined) {
     console.log("USAGE:");
     console.log("  start_year(YYYY) start_month(1-12) start_day(1-31)");
