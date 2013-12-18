@@ -163,7 +163,7 @@ getDataFromDataBaseInRange = function (ms0, ms1, sensorNumber, sensorType, callb
     // TODO: if ms0 and ms=1 span months, query one for each month
     //       (will only ever be two months, otherwise it would
     //       take forever)
-    var vals = ['0A','0B','0C','0D','0E','0F','Raw_AA','Raw_CC','Raw_DD'];
+    var vals = ['1A','1B','1C','1D','1E','1F','0A','0B','0C','0D','0E','0F','Raw_AA','Raw_CC','Raw_DD'];
     var queries = [];
     for (var i = 0, l = vals.length; i < l; i ++) {
         queries.push(makeQuery(ms0, ms1, vals[i], sensorNumber, sensorType));
