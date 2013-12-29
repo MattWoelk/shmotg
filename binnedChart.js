@@ -1,3 +1,4 @@
+"use strict";
 // {{{ HELPER FUNCTIONS
 
 String.prototype.capitalize = function() {
@@ -88,7 +89,7 @@ var generateMissingArray = function (whichLevelToRender, renderRange, renderThis
 
     // TODO: move this function o a wider scope.
     var lineFilter = _.map(fil, function (d) {
-        tmp = {};
+        var tmp = {};
         tmp.val = d.val;
         tmp.ms = d.ms;
         if (isNaN(tmp.val)) {
@@ -133,7 +134,7 @@ var generateMissingArray = function (whichLevelToRender, renderRange, renderThis
     } else {
         // TODO: move this function o a wider scope.
         lineMissingFilter = _.map(fil, function (d) {
-            tmp = {};
+            var tmp = {};
             tmp.val = d.val;
             tmp.ms = d.ms;
             if (isNaN(tmp.val)) {

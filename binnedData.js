@@ -1,6 +1,7 @@
 // This is binnedData. A convenient way of storing binned data
 
 binnedData = function () {
+    "use strict";
 
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample

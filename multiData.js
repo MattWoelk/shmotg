@@ -1,6 +1,7 @@
 // This is multiData. It sources data from multiple binnedData objects instead of storing anything itself.
 
 multiData = function (multTrueMinusFalse) {
+    "use strict";
 
     //{{{ VARIABLES
     var oneSample = 1000 / 200; // milliseconds per sample

@@ -1,3 +1,4 @@
+"use strict";
 // {{{ Loading Spinner Icon
 var myLoader = loader().width(25).height(25);
 d3.select("#loader_container").call(myLoader);
@@ -630,7 +631,7 @@ socket.on('req_data', function (data) {
         setTimeout(disableLoadingIfQueueIsEmpty, 100);
     }
 
-    for (i=0;i<plots.length;i++) {
+    for (var i=0;i<plots.length;i++) {
         plots[i].incomingRequestedData(received);
     }
 });
