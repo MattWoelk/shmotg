@@ -17,6 +17,9 @@ var justval = function (d) {
     return d.val;
 };
 var notNaNVal = function (d) {
+    if (! d.val) {
+        return false;
+    }
     return !isNaN(d.val);
 };
 var notNaNValFirst = function (d) {
@@ -685,6 +688,9 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return yScale(d[0].val);
     };
     var valSecondThroughYScale = function(d) {
+        if (!d[1].val) {
+            return NaN;
+        }
         return yScale(d[1].val);
     };
 
