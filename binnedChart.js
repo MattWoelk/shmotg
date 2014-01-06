@@ -201,9 +201,8 @@ function generateKey(d) {
 }
 
 // selection are the objects,
-// fill and stroke are functions,
 // scal is the scale
-function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, scalOld, d0s, bin, mar, renScale, strokeW, name, fullRender) {
+function drawElements(keyObject, container, id, scal, d0s, bin, mar, renScale, name) {
     var sel = container.selectAll("."+name+id)
             .data(keyObject, generateKey);
 
@@ -224,9 +223,7 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
     //exit
     sel = sel.exit();
 
-    sel.attr("transform", transformScale(scal, scalOld, mar))
-        .attr("opacity", 0)
-        .remove();
+    sel.remove();
 }
 
 // TODO: Phase 2 - make this external, as in, set from outside this chart object.
@@ -413,7 +410,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var xScaleRange;
     var yScale;
     var yScaleRange;
-    var previousXScale = d3.scale.linear(); // used for rendering transitions
     var previousLevelToRender; // used for rendering transitions;
     var timeContextContainer;
     var yAxisLockContainer;
@@ -478,7 +474,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return binData.getOpacity(d.key);
     }
 
-    function transformElements(keyObject, container, id, fill, stroke, strokeDash, scal, scalOld, d0s, bin, mar, renScale, strokeW, name, fullRender) {
+    function transformElements(keyObject, container, id, scal, d0s, bin, mar, renScale, name) {
         var sel = container.selectAll("."+name+id)
             .data(keyObject, generateKey);
 
@@ -535,35 +531,22 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             transformElements(quartileObjectForKeyFanciness,
                               pathArea,
                               sensorType+sensorNumber,
-                              // TODO: eliminate these three function objects
-                              function (d) { return binData.getColor(d.key); },
-                              function (d) { return "rgba(0,0,0,0)"; },
-                              function (d) { return binData.getDash(d.key); },
                               xScale,
-                              previousXScale,
                               renderedD0s,
                               binData,
                               margin,
                               renderScale,
-                              strokeWidth,
-                              "posArea",
-                              didWeRenderAnything || reRenderTheNextTime);
+                              "posArea");
         } else {
             drawElements(quartileObjectForKeyFanciness,
                          pathArea,
                          sensorType+sensorNumber,
-                         function (d) { return binData.getColor(d.key); },
-                         function (d) { return "rgba(0,0,0,0)"; },
-                         function (d) { return binData.getDash(d.key); },
                          xScale,
-                         previousXScale,
                          renderedD0s,
                          binData,
                          margin,
                          renderScale,
-                         strokeWidth,
-                         "posArea",
-                         didWeRenderAnything || reRenderTheNextTime);
+                         "posArea");
         }
 
         // AREAS }}}
@@ -592,35 +575,22 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             transformElements(dataObjectForKeyFanciness,
                          pathPath,
                          sensorType+sensorNumber,
-                         // TODO: eliminate these three function objects
-                         function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
-                         function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
-                         function (d) { return binData.getDash(d.key); },
                          xScale,
-                         previousXScale,
                          renderedD0s,
                          binData,
                          margin,
                          renderScale,
-                         strokeWidth,
-                         "posPath",
-                         didWeRenderAnything || reRenderTheNextTime);
+                         "posPath");
         } else {
             drawElements(dataObjectForKeyFanciness,
                          pathPath,
                          sensorType+sensorNumber,
-                         function (d) { console.log(cloudcover); return cloudcover ? "#F0F" : "rgba(0,0,0,0)"; },
-                         function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
-                         function (d) { return binData.getDash(d.key); },
                          xScale,
-                         previousXScale,
                          renderedD0s,
                          binData,
                          margin,
                          renderScale,
-                         strokeWidth,
-                         "posPath",
-                         didWeRenderAnything || reRenderTheNextTime);
+                         "posPath");
         }
 
         // LINES }}}
@@ -1085,15 +1055,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     my.xScale = function (value) {
         if (!arguments.length) return xScale;
 
-        // if value is the same as xScale, don't modify previousXScale
-        if (!xScale) {
-            previousXScale = d3.scale.linear(); // now it's initialized.
-            previousLevelToRender = whichLevelToRender;
-        } else if (xScale.domain()[0] != value.domain()[0] || xScale.domain()[1] != value.domain()[1]) {
-            copyScaleWithoutGarbage(previousXScale, xScale);
-            previousLevelToRender = whichLevelToRender;
-        } // else, don't change previousXScale
-
+        previousLevelToRender = whichLevelToRender;
         xScale = value;
         //my.reRenderTheNextTime(true);
         return my;
