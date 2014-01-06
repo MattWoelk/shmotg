@@ -203,21 +203,14 @@ function generateKey(d) {
 // selection are the objects,
 // fill and stroke are functions,
 // scal is the scale
-function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
+function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, scalOld, d0s, bin, mar, renScale, strokeW, name, fullRender) {
     var sel = container.selectAll("."+name+id)
             .data(keyObject, generateKey);
 
     //update
-    if (toTransition) {
-        sel.attr("transform", transformScale(scalOld, renScale, mar))
-           .attr("d", function (d, i) { return d0s[d.key]; })
-           .transition().ease(ease).duration(dur)
-           .attr("transform", transformScale(scal, renScale, mar));
-    } else {
-        sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
-           .attr("d", function (d, i) { return d0s[d.key] ? d0s[d.key] : "M -1000 -1000 L -1000 -1000"; }) // if the d0 is empty, replace it with a very distant dot (to prevent errors)
-           .attr("transform", transformScale(scal, renScale, mar));
-    }
+    sel.attr("opacity", function (d) { return bin.getOpacity(d.key); })
+       .attr("d", function (d, i) { return d0s[d.key] ? d0s[d.key] : "M -1000 -1000 L -1000 -1000"; }) // if the d0 is empty, replace it with a very distant dot (to prevent errors)
+       .attr("transform", transformScale(scal, renScale, mar));
 
 
     //enter
@@ -225,21 +218,11 @@ function drawElements(keyObject, container, id, fill, stroke, strokeDash, scal, 
             .attr("class", function(d) { return name+id+" "+d.key; })
             .attr("d", function (d, i) { return d0s[d.key]; });
 
-    if (toTransition) {
-        sel.attr("transform", transformScale(scalOld, renScale, mar))
-            .attr("opacity", 0)
-            .transition().ease(ease).duration(dur)
-            .attr("transform", transformScale(scal, renScale, mar))
-            .attr("opacity", function (d) { return bin.getOpacity(d.key); });
-    } else {
-        sel.attr("transform", transformScale(scal, renScale, mar))
-            .attr("opacity", function (d) { return bin.getOpacity(d.key); });
-    }
+    sel.attr("transform", transformScale(scal, renScale, mar))
+        .attr("opacity", function (d) { return bin.getOpacity(d.key); });
 
     //exit
-    sel = toTransition ?
-        sel.exit().transition().ease(ease).duration(dur) :
-        sel.exit();
+    sel = sel.exit();
 
     sel.attr("transform", transformScale(scal, scalOld, mar))
         .attr("opacity", 0)
@@ -417,7 +400,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var showTimeContext = true;
     var isMultiChart = isMulti;
 
-    var transitionDuration = 500;
     var easingMethod = 'cubic-in-out';
 
     var defclip;
@@ -446,7 +428,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var once = true; // some things only need to happen once.
 
     // whether we used the buttons to zoom
-    var transitionNextTime = false;
     var reRenderTheNextTime = true;
     var waitingForServer = false;
 
@@ -497,18 +478,12 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return binData.getOpacity(d.key);
     }
 
-    function transformElements(keyObject, container, id, fill, stroke, strokeDash, scal, toTransition, scalOld, ease, dur, d0s, bin, mar, renScale, strokeW, name, fullRender) {
+    function transformElements(keyObject, container, id, fill, stroke, strokeDash, scal, scalOld, d0s, bin, mar, renScale, strokeW, name, fullRender) {
         var sel = container.selectAll("."+name+id)
-                .data(keyObject, generateKey);
+            .data(keyObject, generateKey);
 
-        if (toTransition) {
-            sel.attr("transform", transformScale(scalOld, renScale, mar))
-               .transition().ease(ease).duration(dur)
-               .attr("transform", transformScale(scal, renScale, mar));
-        } else {
-            sel.attr("opacity", getOpacity)
-               .attr("transform", transformScale(scal, renScale, mar));
-        }
+        sel.attr("opacity", getOpacity)
+           .attr("transform", transformScale(scal, renScale, mar));
     }
 
     var doAllTheRendering = function () {
@@ -565,10 +540,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                               function (d) { return "rgba(0,0,0,0)"; },
                               function (d) { return binData.getDash(d.key); },
                               xScale,
-                              transitionNextTime,
                               previousXScale,
-                              easingMethod,
-                              transitionDuration,
                               renderedD0s,
                               binData,
                               margin,
@@ -584,10 +556,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          function (d) { return "rgba(0,0,0,0)"; },
                          function (d) { return binData.getDash(d.key); },
                          xScale,
-                         transitionNextTime,
                          previousXScale,
-                         easingMethod,
-                         transitionDuration,
                          renderedD0s,
                          binData,
                          margin,
@@ -628,10 +597,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
                          function (d) { return binData.getDash(d.key); },
                          xScale,
-                         transitionNextTime,
                          previousXScale,
-                         easingMethod,
-                         transitionDuration,
                          renderedD0s,
                          binData,
                          margin,
@@ -647,10 +613,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                          function (d) { if(cloudcover) { return "rgba(0,0,0,0)"; } else if (whichLevelToRender === 0) { return "#4D4D4D"; } else { return binData.getColor(d.key); } },
                          function (d) { return binData.getDash(d.key); },
                          xScale,
-                         transitionNextTime,
                          previousXScale,
-                         easingMethod,
-                         transitionDuration,
                          renderedD0s,
                          binData,
                          margin,
@@ -695,13 +658,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
             xAxisMinorContainer.attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")");
         }
 
-        if (transitionNextTime) {
-            xAxisContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxis);
-            xAxisMinorContainer.transition().duration(transitionDuration).ease(easingMethod).call(xAxisMinor);
-        } else {
-            xAxisContainer.call(xAxis);
-            xAxisMinorContainer.call(xAxisMinor);
-        }
+        xAxisContainer.call(xAxis);
+        xAxisMinorContainer.call(xAxisMinor);
 
         if (!yAxisContainer) {
             yAxisContainer = chart.append("g")
@@ -1066,7 +1024,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
         selection.each(doAllTheRendering);
 
-        transitionNextTime = false; // So that this only happens once per button click
         reRenderTheNextTime = false;
         once = false;
     };
@@ -1116,12 +1073,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     my.strokeWidth = function (value) {
         if (!arguments.length) return strokeWidth;
         strokeWidth = value;
-        return my;
-    };
-
-    my.transitionNextTime = function (value) {
-        if (!arguments.length) return transitionNextTime;
-        transitionNextTime = value;
         return my;
     };
 

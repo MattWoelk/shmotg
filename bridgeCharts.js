@@ -393,12 +393,6 @@ function setAllPlotLevels() {
     });
 }
 
-function transitionAllNextTime() {
-    plots.forEach(function (plt) {
-        plt.transitionNextTime(true);
-    });
-}
-
 function setLoadingIcon(on) {
     d3.select("#loader_container").style("opacity", on ? 1 : 0);
     d3.selectAll(".loadingBox").style("opacity", on ? 1 : 0);
