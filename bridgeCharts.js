@@ -652,6 +652,15 @@ function offlinedata() {
                       "weather/eng-hourly-02012012-02292012.csv",
                       "weather/eng-hourly-03012012-03312012.csv",
                       "weather/eng-hourly-04012012-04302012.csv",
+                      "weather/eng-hourly-05012012-05312012.csv",
+                      "weather/eng-hourly-06012012-06302012.csv",
+                      "weather/eng-hourly-07012012-07312012.csv",
+                      "weather/eng-hourly-08012012-08312012.csv",
+                      "weather/eng-hourly-09012012-09302012.csv",
+                      "weather/eng-hourly-10012012-10312012.csv",
+                      "weather/eng-hourly-11012012-11302012.csv",
+                      "weather/eng-hourly-12012012-12312012.csv",
+                      "weather/eng-hourly-01012013-01312013.csv",
                       "weather/eng-hourly-08012011-08312011.csv",
                       "weather/eng-hourly-09012011-09302011.csv",
                       "weather/eng-hourly-10012011-10312011.csv",
@@ -668,7 +677,7 @@ function offlinedata() {
             return {val: parseFloat(d.Temp), ms: dat.getTime()};
         }, function (error, rows) {
             if (error) {
-                console.log("error");
+                console.log("error in " + filename);
                 return;
             }
 
