@@ -208,13 +208,27 @@ label {
     cursor: pointer;
 }
 
-#maxes + label { color: #000fb5; }
-#q3 + label { color: #880000; }
-#average + label { color: #880000; }
-#quartiles + label { color: #c17272; }
-#q1 + label { color: #880000; }
-#mins + label { color: #00b515; }
-#missing + label { color: #4D4D4D; }
+input[type="checkbox"] {
+    cursor: pointer;
+    width: 1em;
+    height: 1em;
+}
+
+input[type="checkbox"] + label {
+    color: #ADADAD;
+}
+
+input[type="checkbox"]:checked + label {
+    color: #4D4D4D;
+}
+
+#maxes:checked + label { color: #000fb5; }
+#q3:checked + label { color: #880000; }
+#average:checked + label { color: #880000; }
+#quartiles:checked + label { color: #c17272; }
+#q1:checked + label { color: #880000; }
+#mins:checked + label { color: #00b515; }
+#missing:checked + label { color: #4D4D4D; }
 /*}}}*/
 
 /* {{{ Loading Spinner Icon */
