@@ -208,6 +208,20 @@ label {
     cursor: pointer;
 }
 
+input[type="radio"] {
+    cursor: pointer;
+    width: 1em;
+    height: 1em;
+}
+
+input[type="radio"] + label {
+    color: #ADADAD;
+}
+
+input[type="radio"]:checked + label {
+    color: #4D4D4D;
+}
+
 input[type="checkbox"] {
     cursor: pointer;
     width: 1em;
