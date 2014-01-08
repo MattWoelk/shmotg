@@ -17,9 +17,9 @@ var justval = function (d) {
     return d.val;
 };
 var notNaNVal = function (d) {
-    if (! d.val) {
-        return false;
-    }
+    //if (! d.val) {
+    //    return false;
+    //}
     return !isNaN(d.val);
 };
 var notNaNValFirst = function (d) {
