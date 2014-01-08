@@ -254,12 +254,20 @@ binnedData = function () {
                 var newdate = combo[i/*+1*/].ms;
 
                 if (key === 'q1' || key === 'q3') {
-                    bDat.push({ val:  func(
-                                        combo[i].val,
-                                        combo[i+1].val,
-                                        combo2[i].val,
-                                        combo2[i+1].val),
-                                ms: newdate }); // This is messy and depends on a lot of things
+                    if (combo[i] === undefined ||
+                        combo[i+1] === undefined ||
+                        combo2[i] === undefined ||
+                        combo2[i+1] === undefined) {
+                        //bDat.push { val: NaN, ms: newdate };
+                        // do nothing
+                    } else {
+                        bDat.push({ val:  func(
+                                            combo[i].val,
+                                            combo[i+1].val,
+                                            combo2[i].val,
+                                            combo2[i+1].val),
+                                    ms: newdate }); // This is messy and depends on a lot of things
+                    }
                 }else{
                     bDat.push( { val: func( combo[i].val,
                                             combo[i+1].val),

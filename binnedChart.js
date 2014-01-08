@@ -688,8 +688,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return yScale(d[0].val);
     };
     var valSecondThroughYScale = function(d) {
-        if (!d[1].val) {
-            return NaN;
+        if (d === undefined || !d[1].val) {
+            return undefined;
         }
         return yScale(d[1].val);
     };
