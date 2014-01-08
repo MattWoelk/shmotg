@@ -419,7 +419,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     var previousLevelToRender; // used for rendering transitions;
     var timeContextContainer;
     var yAxisLockContainer;
-    var yAxisLock;
 
     var chart; // the svg element (?)
     var pathArea;
@@ -490,16 +489,14 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
 
     var doAllTheRendering = function () {
         //{{{ CONTAINER AND CLIPPING
-        if (!yAxisLock) {
-            if (!yAxis){
-                yAxis = d3.svg.axis()
-                .ticks(5)
-                .tickSubdivide(true)
-                .tickSize(width, 0, 0) // major, minor, end
-                .orient("left");
-            }
-            yAxis.scale(yScale).tickSize(width, 0, 0);
+        if (!yAxis){
+            yAxis = d3.svg.axis()
+            .ticks(5)
+            .tickSubdivide(true)
+            .tickSize(width, 0, 0) // major, minor, end
+            .orient("left");
         }
+        yAxis.scale(yScale).tickSize(width, 0, 0);
 
         chart = d3.select(this); //Since we're using a .call(), "this" is the svg element.
 
@@ -853,7 +850,7 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
                     showing_range = d3.extent(binData.getDateRange(renderThis, whichLevelToRender, [renderRange[0]-binSize, renderRange[1]+binSize], renderThis), justval);
                 }
 
-                if (!yAxisLock && !waitingForServer) {
+                if (!waitingForServer) {
                     if (isMultiChart) {
                         yScale.domain([0, 1]);
                     } else {
@@ -1121,18 +1118,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     my.sensorNumber = function (value) {
         if (!arguments.length) return sensorNumber;
         sensorNumber = value;
-        return my;
-    };
-
-    my.yAxisLock = function (value) {
-        if (!arguments.length) return yAxisLock;
-        if (yAxisLock === true && value === false) {
-            // redraw everything
-            my.reRenderTheNextTime(true);
-            yAxisLock = value;
-            my.update();
-        }
-        yAxisLock = value;
         return my;
     };
 

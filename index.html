@@ -27,16 +27,7 @@ window.addEventListener('load', function() {
 
 <body>
 
-<!--{{{ SHOWHIDE JAVASCRIPT-->
-<script>
-function showhide() {
-    setAllYAxisLocks(document.getElementById("lockhide").checked);
-}
-</script>
-<!-- SHOWHIDE JAVASCRIPT }}}-->
-
 <div id="undercharts" style="position:fixed; top:0px; z-index:9;">
-    <input type="checkbox" id="lockhide" onchange="showhide();" /><label for="lockhide"><img style="width:30px; height:30px" src="./img/iconmonstr-lock-11-icon.svg"><img style="width:30px; height:30px" src="./img/iconmonstr-lock-3-icon.svg"></label>
     <div id="loader_container"></div>
     </br>
     <input type="checkbox" id="isexpanded" /><label for="isexpanded">Lines</label>

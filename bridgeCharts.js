@@ -107,12 +107,6 @@ var getTotalChartHeight = function (plotsArray) {
     return total;
 };
 
-var setAllYAxisLocks = function (toLock) {
-    for(var index = 0; index < plots.length; index++) {
-        plots[index].yAxisLock(toLock);
-    }
-};
-
 function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
     var parent = document.getElementById("charts");
     var charts = parent.childNodes;
