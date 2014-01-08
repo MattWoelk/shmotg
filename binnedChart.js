@@ -17,6 +17,9 @@ var justval = function (d) {
     return d.val;
 };
 var notNaNVal = function (d) {
+    if (d === undefined) {
+        return false;
+    }
     //if (! d.val) {
     //    return false;
     //}
@@ -688,8 +691,8 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
         return yScale(d[0].val);
     };
     var valSecondThroughYScale = function(d) {
-        if (d === undefined || !d[1].val) {
-            return undefined;
+        if (d === undefined || !d[1] || isNaN(d[1].val)) {
+            return NaN;
         }
         return yScale(d[1].val);
     };
