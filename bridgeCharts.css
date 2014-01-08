@@ -208,46 +208,13 @@ label {
     cursor: pointer;
 }
 
-input[type="checkbox"] {
-    display: none;
-}
-
-input[type="radio"] {
-    display: none;
-}
-
-input[type="checkbox"] + label img:nth-child(1) {
-    display: inline-block;
-}
-
-input[type="checkbox"]:checked + label img:nth-child(1) {
-    display: none;
-}
-
-input[type="checkbox"] + label img:nth-child(2) {
-    display: none;
-}
-
-input[type="checkbox"]:checked + label img:nth-child(2) {
-    display: inline-block;
-}
-
-input[type="radio"] + label img:nth-child(1) {
-    display: inline-block;
-}
-
-input[type="radio"]:checked + label img:nth-child(1) {
-    display: none;
-}
-
-input[type="radio"] + label img:nth-child(2) {
-    display: none;
-}
-
-input[type="radio"]:checked + label img:nth-child(2) {
-    display: inline-block;
-}
-
+#maxes + label { color: #000fb5; }
+#q3 + label { color: #880000; }
+#average + label { color: #880000; }
+#quartiles + label { color: #c17272; }
+#q1 + label { color: #880000; }
+#mins + label { color: #00b515; }
+#missing + label { color: #4D4D4D; }
 /*}}}*/
 
 /* {{{ Loading Spinner Icon */
