@@ -163,7 +163,9 @@ var redraw = function () {
 
     // Get list of available-but-not-on-display sensors
     // TODO: put in temperature 1 and cloudcover 1 when they work. (Put them server-side?)
-    var sensorsAvailable = ["girder_6",
+    var sensorsAvailable = ["temperature_1",
+                            "cloudcover_1",
+                            "girder_6",
                             "girder_18",
                             "girder_19",
                             "girder_20",
@@ -354,7 +356,7 @@ function addMultiChart (parentAIndex, parentBIndex, multTrueMinusFalse) {
     var parentB = plots[parentBIndex];
     var interval = 5;
     var divider = multTrueMinusFalse ? 'x' : '-';
-    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + divider + parentB.sensorNumber(), curLevel, true);
+    var plt = initPlot(true, {}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + divider + parentB.sensorNumber(), curLevel, true);
     plt.makeIntoMultiChart([parentA, parentB], multTrueMinusFalse);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
@@ -378,7 +380,15 @@ function putLastItemBeforeIndex(array, a) {
 function addPlot (sensorType, sensorNumber) {
     var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
     var interval = 5; // TODO: put special case here for temperature data.
-    initPlot(data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
+    if (sensorType === "girder"){
+        initPlot(true, data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
+    } else if (sensorType === "cloudcover") {
+        plots.push(cloudPlot);
+        updateUI();
+    } else if (sensorType === "temperature") {
+        plots.push(tempPlot);
+        updateUI();
+    }
 }
 
 function setAllPlotLevels() {
@@ -393,21 +403,25 @@ function setLoadingIcon(on) {
     myLoader.isShowing(on);
 }
 
-function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, isMulti) {
+function updateUI() {
+    redraw();
+    d3.select("#charts").attr("height", getTotalChartHeight(plots_filtered())).attr("width", document.getElementById("chartContainer").offsetWidth);
+    zoomRect.attr("fill", "rgba(0,0,0,0)")
+            .call(zoom);
+}
+
+function initPlot(addToDisplay, data, sendReq, oneSample, sensorType, sensorNumber, level, isMulti) {
     var plot;
     plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, sensorType === "cloudcover", isMulti);
     plot.xScale(xScale.copy());
 
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
 
-    plots.push(plot);
+    if (addToDisplay) {
+        plots.push(plot);
+    }
 
-    redraw();
-
-    d3.select("#charts").attr("height", getTotalChartHeight(plots_filtered())).attr("width", document.getElementById("chartContainer").offsetWidth); //TODO: make this dynamic
-
-    zoomRect.attr("fill", "rgba(0,0,0,0)")
-            .call(zoom);
+    updateUI();
 
     // Redefine this function now that we have data for it to work from
     updateZoom = function () {
@@ -556,7 +570,7 @@ socket.on('news', function (data) {
 
     socket.emit('ack', "Message received!");
 
-    initPlot({}, sendRequestToServer, 5, "girder", 18, curLevel);
+    initPlot(true, {}, sendRequestToServer, 5, "girder", 18, curLevel);
 });
 
 var sizeOfQueue = function() {
@@ -635,10 +649,13 @@ var disableLoadingIfQueueIsEmpty = function () {
 //offlinedata();
 setTimeout(function() { offlinedata(); }, 200);
 
+var tempPlot;
+var cloudPlot;
+
 
 function offlinedata() {
-    var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
-    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
+    tempPlot = initPlot(false, [], function(){}, 1000*60*60, "temperature", 1, curLevel);
+    cloudPlot = initPlot(false, [], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
 
     var filenames = [ "weather/eng-hourly-01012012-01312012.csv",
                       "weather/eng-hourly-02012012-02292012.csv",
@@ -659,11 +676,11 @@ function offlinedata() {
                       "weather/eng-hourly-11012011-11302011.csv",
                       "weather/eng-hourly-12012011-12312011.csv" ];
     for(var x = 0; x < filenames.length; x++){
-        addWeatherData(filenames[x], plt);
-        addCloudCoverData(filenames[x], plt2);
+        addTemperatureData(filenames[x], tempPlot);
+        addCloudCoverData(filenames[x], cloudPlot);
     }
 
-    function addWeatherData (filename, plt) {
+    function addTemperatureData (filename, plt) {
         d3.csv(filename, function (d, i) {
             var dat = new Date(d.Year, d.Month-1, d.Day, d.Time[0]+""+d.Time[1]);
             return {val: parseFloat(d.Temp), ms: dat.getTime()};
