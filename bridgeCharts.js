@@ -354,7 +354,7 @@ function addMultiChart (parentAIndex, parentBIndex, multTrueMinusFalse) {
     var parentB = plots[parentBIndex];
     var interval = 5;
     var divider = multTrueMinusFalse ? 'x' : '-';
-    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + divider + parentB.sensorNumber(), curLevel, false, true);
+    var plt = initPlot({}, function(){}, interval, parentA.sensorType(), parentA.sensorNumber() + divider + parentB.sensorNumber(), curLevel, true);
     plt.makeIntoMultiChart([parentA, parentB], multTrueMinusFalse);
     parentA.addMultiChartChild(plt);
     parentB.addMultiChartChild(plt);
@@ -393,9 +393,9 @@ function setLoadingIcon(on) {
     myLoader.isShowing(on);
 }
 
-function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, cloudcover, isMulti) {
+function initPlot(data, sendReq, oneSample, sensorType, sensorNumber, level, isMulti) {
     var plot;
-    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, cloudcover, isMulti);
+    plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, sensorType === "cloudcover", isMulti);
     plot.xScale(xScale.copy());
 
     plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
@@ -557,8 +557,6 @@ socket.on('news', function (data) {
     socket.emit('ack', "Message received!");
 
     initPlot({}, sendRequestToServer, 5, "girder", 18, curLevel);
-    //initPlot({}, sendRequestToServer, 5, "girder", 19, curLevel);
-    //initPlot({}, sendRequestToServer, 5, "girder", 20, curLevel);
 });
 
 var sizeOfQueue = function() {
@@ -640,7 +638,7 @@ setTimeout(function() { offlinedata(); }, 200);
 
 function offlinedata() {
     var plt = initPlot([], function(){}, 1000*60*60, "temperature", 1, curLevel);
-    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel, true, true);
+    var plt2 = initPlot([], function(){}, 1000*60*60, "cloudcover", 1, curLevel);
 
     var filenames = [ "weather/eng-hourly-01012012-01312012.csv",
                       "weather/eng-hourly-02012012-02292012.csv",
