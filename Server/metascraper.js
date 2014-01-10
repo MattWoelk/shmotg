@@ -56,18 +56,21 @@ function series(item, func) {
             return series(walkings.shift(), func);
         });
     } else {
-        console.log("Rebinning now!");
+        console.log("metascraper - Rebinning now!");
 
         // Rebin this with the two months around it:
         callMetaRebinner(
-                [start_year, start_month, end_year, end_month, 15, sensorNumber],
-                // Then rebin everything at lvl 20 and up:
-                function () { callRebinner(
-                               [2010, 1, 1, 2013, 1, 1, 20, sensorNumber],
-                               function () {
-                                   console.log("DONE!");
-                                   process.exit(0);
-                               }) });
+            [start_year, start_month, end_year, end_month, 15, sensorNumber],
+            function () { // Then rebin everything at lvl 20 and up:
+                callRebinner(
+                    [2010, 1, 1, 2013, 1, 1, 20, sensorNumber],
+                    function () {
+                        console.log("metascraper - DONE!");
+                        process.exit(0);
+                    }
+                )
+            }
+        );
     }
 }
 
@@ -88,6 +91,7 @@ for (var y = start_year; y <= end_year; y++) {
 }
 
 function callScraper (dat, callback) {
+    console.log('metascraper - starting scraper', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7], dat[8]);
     var scr = spawn('node',  ['scraper', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7], dat[8]]);
 
     scr.stdout.setEncoding('utf8');
@@ -98,12 +102,13 @@ function callScraper (dat, callback) {
     });
 
     scr.on('close', function (code) {
-        console.log('process exit code ' + code);
+        console.log('metascraper - process exit code ' + code);
         callback();
     });
 }
 
 function callMetaRebinner (dat, callback) {
+    console.log('metascraper - starting metarebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5]);
     var scr = spawn('node',  ['metarebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5]]);
 
     scr.stdout.setEncoding('utf8');
@@ -114,12 +119,13 @@ function callMetaRebinner (dat, callback) {
     });
 
     scr.on('close', function (code) {
-        console.log('process exit code ' + code);
+        console.log('metascraper - process exit code ' + code);
         callback();
     });
 }
 
 function callRebinner (dat, callback) {
+    console.log('metascraper - starting rebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7]);
     var scr = spawn('node',  ['rebinner', dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7]]);
 
     scr.stdout.setEncoding('utf8');
@@ -130,7 +136,7 @@ function callRebinner (dat, callback) {
     });
 
     scr.on('close', function (code) {
-        console.log('process exit code ' + code);
+        console.log('metascraper - process exit code ' + code);
         callback();
     });
 }

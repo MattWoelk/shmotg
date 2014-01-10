@@ -2,6 +2,7 @@
 // and rebins data as requested. (See USAGE);
 
 console.log("rebinner: engaged");
+var debug = false;
 
 ////////////////////////////////////////////////
 // Rebin at level 13 to best results.         //
@@ -82,12 +83,12 @@ var rangeToWalk = [(new Date(start_year, start_month, start_day, 0)).getTime(),
     (new Date(end_year, end_month, end_day, 24)).getTime()];
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
-    console.log("we already have that time span");
+    if(debug) console.log("rebinner - we already have that time span");
     return;
 }
 
 // WHERE TO WALK }}}
-console.log("** GETTING FROM COUCH **");
+if(debug) console.log("** rebinner - GETTING FROM COUCH **");
 
 var argsList = [];
 
@@ -98,11 +99,11 @@ var sendOut = function () {
     // TODO: fill the gaps from the mysql server
 
     // rebin the entire thing:
-    console.log("rebinning...")
+    if(debug) console.log("rebinner - rebinning...")
     binData.rebinAll(rangeToWalk, 6);
-    console.log("...twice...");
+    if(debug) console.log("rebinner - ...twice...");
     binData.rebinAll(rangeToWalk, 6);
-    console.log("...is done!");
+    console.log("rebinner - rebinning is done!");
 
     // Save it all back out to couchdb
     saveIt();
@@ -115,7 +116,6 @@ function seriesOfFiveParameters(item, func, finalFunc) {
             return seriesOfFiveParameters(argsList.shift(), func, finalFunc);
         });
     } else {
-        console.log(finalFunc);
         return finalFunc();
     }
 }
@@ -134,7 +134,7 @@ for (var j = 0; j < keyList.length; j++) {
 // TODO: func() should make sendo, and add it to binData.
 var func = function (st, sn, k, l, d, callback) {
     var id = makeIDString(st, sn, k, l, d);
-    console.log("Getting:", id);
+    if(debug) console.log("rebinner - Getting:", id);
     var clbk = function(dat) {
         var sendo     = {};
 
@@ -146,7 +146,7 @@ var func = function (st, sn, k, l, d, callback) {
 
         sendo[k].levels[l] = dat;
         if(dat.length === 0) {
-            console.log("  -- THERE was no DATA -- ");
+            if(debug) console.log("rebinner -   -- THERE was no DATA -- ");
         }
         binData.addBinnedData(sendo, l, true);
         callback();
@@ -193,7 +193,7 @@ function seriesSave(item, func) {
             return seriesSave(listOfThingsToDo.shift(), func);
         });
     } else {
-        console.log("DONE!");
+        console.log("rebinner - DONE!");
         process.exit(0);
     }
 }

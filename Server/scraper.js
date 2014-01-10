@@ -59,22 +59,17 @@ rangeToWalk[0] -= 10000; // buffer
 rangeToWalk[1] += 10000; // buffer
 
 if (rangeToWalk[0] >= rangeToWalk[1]) {
-    console.log("we already have that time span");
+    console.log("scraper - we already have that time span");
     return;
 }
 // WHERE TO WALK }}}
 
 // {{{ ASYNC
-function async_function_example(arg, callback) {
-  console.log('do something with \''+arg+'\', return 0.1 sec later');
-  setTimeout(function() { callback(arg); }, 100);
-}
-
 //Heavy inspiration from: http://book.mixu.net/ch7.html
 function sendQuerySync(item, callback) {
     getDataFromDataBaseInRange(item, item + STEP_SIZE, sensorNumber, "girder", function (queryResult) {
         // Bin the new data
-        console.log("- data received. binning data...");
+        console.log("scraper - data received. binning data...");
         if(queryResult == null) {
             callback();
             return;
@@ -85,10 +80,10 @@ function sendQuerySync(item, callback) {
             // Delete the bottom few levels
             binData.removeAllLevelsBelow(lowestLevelToKeep);
         } catch (e) {
-            console.log(magenta+"=*= ERROR =*="+reset, e.message);
+            console.log(magenta+"=*= scraper - ERROR =*="+reset, e.message);
             throw e;
         }
-        console.log("   ...done binning");
+        console.log("scraper -  ...done binning");
         callback();
     });
 }
@@ -107,8 +102,7 @@ function series(item, func) {
 
 // Final task (same in all the examples)
 function final() {
-    // TODO: save it out to couchdb
-    console.log('Done');
+    console.log('scraper - Done');
     //process.exit(0);
 }
 // ASYNC }}}
@@ -127,6 +121,7 @@ series(walk_steps.shift(), sendQuerySync);
 var listOfThingsToDo = [];
 
 function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
+    console.log("scraper - saving to database...")
     var dummykey = "average";
     for (var l = lowestLevelToKeep; l < MAX_NUMBER_OF_BIN_LEVELS; l++) { // for each level
         for (var c in binData.bd()[dummykey].levels[l]) { // for each bin container
@@ -143,8 +138,6 @@ function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
         }
     }
 
-    //console.log(listOfThingsToDo);
-
     function doIt(item, callback) {
         var id = makeIDString(item[0], item[1], item[2], item[3], item[4]);
         //console.log("saving:", id, "to couchDB");
@@ -157,11 +150,10 @@ function saveIt(callback) { // TODO: implement callback (perhaps not worth it)
 function seriesSave(item, func) {
     if(item) {
         func(item, function() {
-            //console.log(item);
             return seriesSave(listOfThingsToDo.shift(), func);
         });
     } else {
-        console.log("DONE!");
+        console.log("scraper - DONE!");
         process.exit(0);
     }
 }

@@ -1,5 +1,6 @@
 var cradle = require('cradle')
 var db = new(cradle.Connection)().database('bridge_test2');
+var debug = false;
 
 // TODO TODO TODO: make a function which merges data instead of just overwriting it
 //                 and use it instead!
@@ -86,7 +87,7 @@ saveToCouch = function (sensorType, sensorNumber, type, level, ms_start, data, c
             console.log("saving ERROR", err);
         } else {
             // Handle success
-            console.log("saving success!", idString);
+            if(debug) console.log("saving success!", idString);
         }
         if (callback) {
             callback();

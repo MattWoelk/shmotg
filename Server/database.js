@@ -1,6 +1,8 @@
 // TODO: CURRENT PROBLEM:
 // err:  { [Error: ER_NO_SUCH_TABLE: Table 'spb_shm_2013mm08.spbrtdata_0a' doesn't exist] code: 'ER_NO_SUCH_TABLE', index: 0 }sending db query
 
+var debug = false;
+
 // {{{ SETUP
 var fs = require('fs');
 var mysql = require('mysql');
@@ -190,7 +192,7 @@ getDataFromDataBaseInRange = function (ms0, ms1, sensorNumber, sensorType, callb
 }
 
 sendDatabaseQuery = function(query, doWithResult) {
-  console.log("sending db query");
+  if(debug) console.log("sending db query");
   var mysqlconnection = mysql.createConnection({
     host     : 'shm1.ee.umanitoba.ca',
     user     : 'mattwoelk',
@@ -199,7 +201,7 @@ sendDatabaseQuery = function(query, doWithResult) {
   });
 
   mysqlconnection.query(query.query, function (err, rows, fields) {
-    if (err) { console.log("err: ", err); doWithResult([]); return; }
+    if (err) { if(debug){console.log("err: ", err);} doWithResult([]); return; }
     console.log(red+query.query, blue+rows.length+reset);
     //console.log("ROWS: ", rows);
     var send_object = rows.map(function (d) {

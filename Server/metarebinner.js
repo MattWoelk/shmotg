@@ -39,7 +39,7 @@ function series(item, func) {
             return series(walkings.shift(), func);
         });
     } else {
-        console.log("DONE!");
+        console.log("metarebinner - DONE!");
         process.exit(0);
     }
 }
@@ -63,7 +63,7 @@ function callScraper (dat, callback) {
     });
 
     scr.on('close', function (code) {
-        console.log('process exit code ' + code);
+        console.log('metarebinner - process exit code ' + code);
         callback();
     });
 }
