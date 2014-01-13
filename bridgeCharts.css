@@ -283,8 +283,9 @@ path.loadingBox {
 /* LOADING LINES }}} */
 
 /* {{{ EDITABLES */
-#edit_add text {
+#edit_add p {
     text-anchor: end;
+    float: right;
 }
 
 #zoomRectGreyOut {

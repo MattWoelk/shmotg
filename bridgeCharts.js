@@ -216,25 +216,50 @@ var redraw = function () {
     var xbuffer = 130;
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
+    var add_dat = d3.select("#edit_elements")
+        .selectAll("div")
+        .data(plots_filtered().concat(sensorsAvailableObjects), function (d) {
+            return "" + d.sensorNumber() + d.sensorType();
+        });
+
+    var disp = function(d) {
+        return d.displayThisChart ? d.displayThisChart() : false
+    }
+
+    var editClick = function(d) {
+        if (disp(d)) {
+            removePlot(d);
+        } else {
+            addPlot(d.sensorType(), d.sensorNumber());
+        }
+    };
+
+    var editImage = function(d) {
+        if (disp(d)) {
+            return "./img/remove.svg";
+        } else {
+            return "./img/add.svg";
+        }
+    };
+
+
     // Show add/remove buttons
-    var add_dat = d3.select("#edit_remove").selectAll("g").data(plots_filtered().concat(sensorsAvailableObjects), function (d) { return "" + d.sensorNumber() + d.sensorType(); });
-    var add_dat_enter = add_dat.enter().append("g")
+
+    //ENTER
+    var add_dat_enter = add_dat.enter().append("div")
         .style("position", "absolute");
     add_dat_enter.append("img")
         .style("position", "absolute")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
-        .attr("src", "./img/remove.svg")
-        .on("click", function(d){ removePlot(d); });
-    add_dat_enter.append("img")
-        .style("position", "absolute")
-        .attr("width", xsize)
-        .attr("height", xsize)
-        .attr("cursor", "pointer")
-        .attr("class", "edit_on_top")
-        .attr("src", "./img/add.svg")
-        .on("click", function(d, i){ addPlot(d.sensorType(), d.sensorNumber()); });
+        .attr("src", editImage)
+        .on("click", editClick);
+
+    //UPDATE
+    add_dat.select("img")
+        .attr("src", editImage)
+        .on("click", editClick);
 
     add_dat.select(".edit_on_top").transition().duration(duration)
         .style("display", "block")
@@ -244,6 +269,7 @@ var redraw = function () {
         .style("left", (width - xsize) + "px")
         .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; });
 
+    //EXIT
     add_dat.exit().remove();
 
     // Show swap buttons
@@ -262,8 +288,8 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show add button text
-    add_dat = d3.select("#edit_add").selectAll("text").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
-    add_dat.enter().append("text")
+    add_dat = d3.select("#edit_add").selectAll("p").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    add_dat.enter().append("p")
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
@@ -721,15 +747,13 @@ d3.select("#edit").on("click", toggleEditables);
 function toggleEditables() {
     var active = document.getElementById("edit").checked;
     if (active) {
-        d3.select("#edit_remove").style("display", "block");
-        d3.select("#edit_add").style("display", "block");
+        d3.select("#edit_elements").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
         d3.select("#edit_mult").style("display", "block");
         d3.select("#edit_minus").style("display", "block");
         d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
-        d3.select("#edit_remove").style("display", "none");
-        d3.select("#edit_add").style("display", "none");
+        d3.select("#edit_elements").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
         d3.select("#edit_mult").style("display", "none");
         d3.select("#edit_minus").style("display", "none");
