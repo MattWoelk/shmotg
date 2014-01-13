@@ -288,15 +288,19 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // Show add button text
-    add_dat = d3.select("#edit_add").selectAll("p").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    add_dat = d3.select("#edit_text").selectAll("p").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("p")
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
+        //.style("margin-bottom", plotHeight + "px")
+        .style("height", plotHeight + "px")
         .style("opacity", 1);
     add_dat.transition().duration(duration)
         .attr("x", width - 15)
-        .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); });
+        .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); })
+        .style("height", plotHeight + "px")
+        .style("opacity", 1);
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
 
     // Show combine with multiplication buttons
@@ -748,12 +752,14 @@ function toggleEditables() {
     var active = document.getElementById("edit").checked;
     if (active) {
         d3.select("#edit_elements").style("display", "block");
+        d3.select("#edit_text").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
         d3.select("#edit_mult").style("display", "block");
         d3.select("#edit_minus").style("display", "block");
         d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
         d3.select("#edit_elements").style("display", "none");
+        d3.select("#edit_text").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
         d3.select("#edit_mult").style("display", "none");
         d3.select("#edit_minus").style("display", "none");

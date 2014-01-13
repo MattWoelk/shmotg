@@ -283,9 +283,22 @@ path.loadingBox {
 /* LOADING LINES }}} */
 
 /* {{{ EDITABLES */
-#edit_add p {
-    text-anchor: end;
+#edit_text {
+    position: absolute;
+    top: 5px;
+    width: 100%;
+}
+
+#edit_elements {
+    position: absolute;
+    width: 100%;
+}
+
+#edit_text p {
     float: right;
+    clear: right;
+    padding-right: 1.5em;
+    margin: 0;
 }
 
 #zoomRectGreyOut {
