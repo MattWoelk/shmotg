@@ -285,7 +285,7 @@ path.loadingBox {
 /* {{{ EDITABLES */
 #edit_text {
     position: absolute;
-    top: 5px;
+    margin-top: 5px;
     width: 100%;
 }
 

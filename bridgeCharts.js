@@ -264,7 +264,7 @@ var redraw = function () {
     add_dat.select(".edit_on_top").transition().duration(duration)
         .style("display", "block")
         .style("opacity", function (d) { if (_.contains(plots_filtered(), d)) { return 0; } else { return 1; }})
-        .transition().duration(0).style("display", function (d) { if(_.contains(plots_filtered(), d)) { return "none"; } else { return "block"; }});
+        .style("display", function (d) { if(_.contains(plots_filtered(), d)) { return "none"; } else { return "block"; }});
     add_dat.transition().duration(duration)
         .style("left", (width - xsize) + "px")
         .style("top", function(d,i) { return (i*(plotHeight) + ((plotHeight - xsize) / 2)) + "px"; });
@@ -287,15 +287,17 @@ var redraw = function () {
     add_dat.exit().transition().duration(duration/2).style("opacity", 0).transition().remove();
     add_dat.exit().remove();
 
-    // Show add button text
+    // Show text labels
+    d3.select("#edit_text").style("top", getTotalChartHeight(plots_filtered()) + "px");
     add_dat = d3.select("#edit_text").selectAll("p").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
     add_dat.enter().append("p")
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
         .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
-        //.style("margin-bottom", plotHeight + "px")
         .style("height", plotHeight + "px")
         .style("opacity", 1);
+    add_dat
+        .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); });
     add_dat.transition().duration(duration)
         .attr("x", width - 15)
         .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); })
