@@ -383,10 +383,6 @@ var binnedLineChart = function (data, dataRequester, sensorT, sensorN, oneSample
     // the frequency of the data samples
     var milliSecondsPerSample = 1;
 
-    // TODO: sync this with the one in bridgecharts.js
-    //       - can't do, because we're changing top depending
-    //         on if we're showing time context
-    //       - unless we make it a new offset variable instead of reusing margin
     var margin = {top: 10, right: 27, bottom: 25, left: 30 + 90};
 
     // the height of the chart by itself (not including axes or time context)

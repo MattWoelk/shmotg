@@ -10,7 +10,7 @@ var supportsOrientationChange = "onorientationchange" in window;
 var orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
 var windowListener = function () {
     if (navigator.userAgent.match(/android/i)) {
-        setTimeout(redraw, 500); //Only wait for Android
+        setTimeout(redraw, 500);
     } else {
         redraw();
     }
@@ -24,20 +24,16 @@ document.getElementById("render-method").addEventListener("change", changeLines,
 
 //{{{ VARIABLES
 
-var plots = []; //an array of all plots
+var plots = [];
 var msPS = 5; // frequency of data samples
 
-// TODO: sync this with the one in bridgeChart.js
 var margin = {top: 20, right: 10, bottom: 25, left: 30 + 90};
 var plotHeightDefault = 150;
 
-var zoomSVG = d3.select("#zoomSVG"); // holds zoomRect
-var zoomRect = d3.select("#zoomRect"); // overlay which takes scroll/zoom input
+var zoomSVG = d3.select("#zoomSVG");
+var zoomRect = d3.select("#zoomRect"); // overlay which takes scroll/zoom input events
 var zoomRectGreyOut = d3.select("#zoomRectGreyOut"); // overlay which disables zooming when edit buttons are shown.
 
-// these are the overall scales which are modified by zooming
-// they should be set as the default for new plots
-// and should show the offline demo data.
 var xScale = d3.scale.linear().domain([1325567551000, 1325567552000]).range([0, document.getElementById("chartContainer").offsetWidth]);
 var yScale = d3.scale.linear();
 
@@ -78,13 +74,14 @@ d3.select(sliderContainerName).call(mySlider);
 
 var copyScaleWithoutGarbage = function (a,b){
     // copy the properties of b into a
+    // without creating garbage-collectible objects
     a.domain()[0] = b.domain()[0];
     a.domain()[1] = b.domain()[1];
     a.range()[0] = b.range()[0];
     a.range()[1] = b.range()[1];
 };
 
-function swapItems(array, a, b) {
+function swapItemsInPlotsArray(array, a, b) {
     array[a] = array.splice(b, 1, array[a])[0];
     return array;
 }
@@ -110,7 +107,7 @@ var getTotalChartHeight = function (plotsArray) {
 function insertBeforeDOMPlot(newElementIndex, referenceElementIndex) {
     var parent = document.getElementById("charts");
     var charts = parent.childNodes;
-    parent.insertBefore(charts[newElementIndex], charts[referenceElementIndex]); // swap in DOM
+    parent.insertBefore(charts[newElementIndex], charts[referenceElementIndex]);
 }
 
 function plots_filtered() {
@@ -122,9 +119,9 @@ function plots_filtered() {
 var redraw = function () {
     var plotSVGs = d3.select("#charts").selectAll("svg").data(plots_filtered(), function (d, i) { return d.uniqueID(); });
 
-    // Weird hackery to reselect elements and call their specific plot
-    // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
     var plotsCaller = function(d) {
+        // Weird hackery to reselect elements and call their specific plot
+        // done this way because enter().selectAll().append().call(function(d)) doesn't give us anything useful.
         var allPlots = d[0];
 
         for(var i = 0; i < allPlots.length; i++) {
@@ -137,9 +134,9 @@ var redraw = function () {
             return;
         }
 
-        swapItems(plots, i, i-1); // swap in plots
+        swapItemsInPlotsArray(plots, i, i-1);
 
-        insertBeforeDOMPlot(i, i-1); // swap in the DOM
+        insertBeforeDOMPlot(i, i-1);
     }
 
     function swapWithNextItem(i) {
@@ -147,9 +144,9 @@ var redraw = function () {
             return;
         }
 
-        swapItems(plots, i, i+1); // swap in plots
+        swapItemsInPlotsArray(plots, i, i+1);
 
-        insertBeforeDOMPlot(i+1, i); // swap in the DOM
+        insertBeforeDOMPlot(i+1, i);
     }
 
     // ENTER
@@ -162,7 +159,6 @@ var redraw = function () {
     plotSVGs.call(plotsCaller);
 
     // Get list of available-but-not-on-display sensors
-    // TODO: put in temperature 1 and cloudcover 1 when they work. (Put them server-side?)
     var sensorsAvailable = ["temperature_1",
                             "cloudcover_1",
                             "girder_6",
@@ -208,7 +204,6 @@ var redraw = function () {
     var showingEdits = document.getElementById("edit").checked;
     var offset = showingEdits ? toBeAdded.length*plotHeight : 0;
 
-    // TODO: when add buttons show up and one scroll bar appears, both scroll bars appear.
     for (var index = 0, l = plots.length; index < l; index ++) {
         plots[index].containerWidth(document.getElementById("chartContainer").offsetWidth).update();
     }
@@ -354,12 +349,10 @@ var redraw = function () {
 
     // DRAW EDIT ELEMENTS }}}
 
-    //update the zoom for the new plot size
     updateZoom();
 };
 
 function removePlot(p) {
-    //printArrayOfPlots(plots_filtered());
     // Show each of this plot's parents
     var plt = _.find(plots, function (d) {
         return p.sensorNumber() === d.sensorNumber() && p.sensorType() === d.sensorType();
@@ -367,18 +360,12 @@ function removePlot(p) {
 
     for (var i = 0, l = plt.multiChart_parentBinnedCharts().length; i < l; i++) {
         var d = plt.multiChart_parentBinnedCharts()[i];
-        //d.displayThisChart(true); // TODO: instead of this, just delete it and recreate it.
         var ty = d.sensorType();
         var nu = d.sensorNumber();
         plots.splice(plots.indexOf(d), 1);
         addPlot(d.sensorType(), d.sensorNumber());
-        //redraw();
-        //console.log(plots_filtered().indexOf(plt), plots_filtered().length - 1);
-        //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
     }
 
-    // TODO: move the new plots in front of the old plot in the DOM
-    //insertBeforeDOMPlot(plots_filtered().indexOf(plt), plots_filtered().length - 1); // modify the DOM
 
     // Find the chart in the plots array
     var match = _.find(plots, function (d) {
@@ -411,8 +398,7 @@ function addMultiChart (parentAIndex, parentBIndex, multTrueMinusFalse) {
     parentB.addMultiChartChild(plt);
 
     // Insert the new plot where it should be in plots and in the DOM
-    insertBeforeDOMPlot(plots_filtered().indexOf(plt), parentAIndex); // modify the DOM
-    putLastItemBeforeIndex(plots, parentAIndex); // modify plots TODO: is this even necessary ??
+    insertBeforeDOMPlot(plots_filtered().indexOf(plt), parentAIndex);
 
     // Set both parents as invisible.
     parentA.displayThisChart(false);
@@ -427,10 +413,9 @@ function putLastItemBeforeIndex(array, a) {
 }
 
 function addPlot (sensorType, sensorNumber) {
-    var data = sensorType === "girder" ? {} : {}; // TODO: put special case here for temperature data.
-    var interval = 5; // TODO: put special case here for temperature data.
+    var interval = 5;
     if (sensorType === "girder"){
-        initPlot(true, data, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
+        initPlot(true, {}, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
     } else if (sensorType === "cloudcover") {
         plots.push(cloudPlot);
         updateUI();
@@ -464,7 +449,7 @@ function initPlot(addToDisplay, data, sendReq, oneSample, sensorType, sensorNumb
     plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, sensorType === "cloudcover", isMulti);
     plot.xScale(xScale.copy());
 
-    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);//.update();
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);
 
     if (addToDisplay) {
         plots.push(plot);
@@ -479,14 +464,13 @@ function initPlot(addToDisplay, data, sendReq, oneSample, sensorType, sensorNumb
         yScale = plot.yScale();
         zoom.x(xScale);
         xScale.range([0, document.getElementById("chartContainer").offsetWidth]);
-        //zoom.y(yScale); // This breaks proper updating of the y axis when you scroll left and right.
     };
 
     updateZoom();
     return plot;
 }
 
-// this will be changed once 'news' is sent from the server
+// This will be changed once 'news' is sent from the server
 // for now it's just a dummy
 var updateZoom = function () { return 0; };
 var oldXScale = d3.scale.linear();
@@ -594,25 +578,9 @@ function scrollright() {
 var socket = io.connect('130.179.231.28:8080/');
 var firstTime = true;
 
-//socket.on('connect_failed', function () {
-//  console.log("connect_failed :(");
-//});
-//
-//socket.on('connecting', function () {
-//  console.log("connecting :!");
-//});
-//
-//socket.on('connect', function () {
-//  console.log("connected !!");
-//});
-//
-//socket.on('disconnect', function () {
-//  console.log("disconnected !!");
-//});
-
 socket.on('news', function (data) {
-    // only do this once, so that plots don't get overlapped whenever the server restarts.
     if (!firstTime) {
+        // only do this once, so that plots don't get overlapped whenever the server restarts.
         return;
     }
     firstTime = false;
@@ -650,7 +618,6 @@ function sendRequestToServer(req) {
         return false;
     }
 
-    // turn on loading icon
     setLoadingIcon(true);
 
     listOfRequestsMade.push(req);
@@ -663,7 +630,6 @@ function sendRequestToServer(req) {
 
     uniqueRequestID = uniqueRequestID + 1;
 
-    // add the request to the queue
     addToServerQueue(sendReq);
 
     socket.emit('req', JSON.stringify(sendReq));
@@ -672,10 +638,8 @@ function sendRequestToServer(req) {
 
 socket.on('req_data', function (data) {
     var received = JSON.parse(data);
-    // remove request from server queue
     removeFromQueue(received.id);
 
-    // deactivate loading icon
     if (sizeOfQueue() === 0) {
         setTimeout(disableLoadingIfQueueIsEmpty, 100);
     }
@@ -695,7 +659,6 @@ var disableLoadingIfQueueIsEmpty = function () {
 
 //{{{ OFFLINE DATA
 
-//offlinedata();
 setTimeout(function() { offlinedata(); }, 200);
 
 var tempPlot;
