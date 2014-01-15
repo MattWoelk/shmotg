@@ -256,7 +256,7 @@ var redraw = function () {
 
     // Show add/remove buttons
 
-    var add_dat = d3.select("#edit_elements")
+    var add_dat = d3.select("#edit_add_minus")
         .selectAll("div")
         .data(plots_filtered().concat(sensorsAvailableObjects), function (d) {
             return "" + d.sensorNumber() + d.sensorType();
@@ -770,14 +770,14 @@ d3.select("#edit").on("click", toggleEditables);
 function toggleEditables() {
     var active = document.getElementById("edit").checked;
     if (active) {
-        d3.select("#edit_elements").style("display", "block");
+        d3.select("#edit_add_minus").style("display", "block");
         d3.select("#edit_text").style("display", "block");
         d3.select("#edit_swap").style("display", "block");
         d3.select("#edit_mult").style("display", "block");
         d3.select("#edit_minus").style("display", "block");
         d3.select("#zoomRectGreyOut").style("display", "block");
     } else {
-        d3.select("#edit_elements").style("display", "none");
+        d3.select("#edit_add_minus").style("display", "none");
         d3.select("#edit_text").style("display", "none");
         d3.select("#edit_swap").style("display", "none");
         d3.select("#edit_mult").style("display", "none");
