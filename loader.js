@@ -19,7 +19,7 @@ loader = function () {
     var height = 25;
     var isShowing = true;
 
-    var slctn; // Save the selection so that my.update() works.
+    var slctn;
     var svg;
     var background;
 
@@ -36,16 +36,14 @@ loader = function () {
 
 
     function my (g) {
-        slctn = g; // Saving the selection so that my.update() works.
+        slctn = g;
 
         g.each(function(d, i) {
             var g = d3.select(this);
 
-            // {{{ VARIABLES
             svg = svg ? svg : g.append("svg")
                 .attr("width", width)
                 .attr("height", height);
-            // VARIABLES }}}
 
             var radius = Math.min(width, height) / 2;
 
@@ -66,7 +64,6 @@ loader = function () {
         d3.timer.flush();
     }
 
-    // {{{ GETTERS AND SETTERS
     my.width = function (value) {
         if (!arguments.length) return width;
         width = value;
@@ -91,7 +88,6 @@ loader = function () {
         isShowing = value;
         return my;
     };
-    // GETTERS AND SETTERS }}}
 
     return my;
 };
