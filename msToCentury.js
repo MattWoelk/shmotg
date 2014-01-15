@@ -83,8 +83,9 @@ msToCentury = function() {
         return Math.floor(diff / oneDay);
     };
 
-    // custom formatting for x axis time
     msToCentury.TickFormat = function (ti) {
+        // custom formatting for x axis time
+
         function timeFormat(formats) {
             return function(date) {
                 var newdate = new Date();
@@ -209,7 +210,6 @@ msToCentury = function() {
     function makeTickRange(start, end, increment, incrementOf, baseFunc, smallInc, wid) {
         var startyear, endyear, curange;
         if ( incrementOf === d3.time.year ) {
-            // For Years
             startyear = d3.time.year.floor(dt(start));
             endyear   = d3.time.year.ceil( dt(end  ));
 
@@ -225,7 +225,6 @@ msToCentury = function() {
             return curange;
 
         } else if ( incrementOf === d3.time.month ) {
-            // For Months
             startyear = d3.time.year.floor(dt(start));
             endyear   = d3.time.year.ceil( dt(end  ));
 
@@ -248,7 +247,6 @@ msToCentury = function() {
             return curange;
 
         } else if (baseFunc === d3.time.month){
-            // For Days
             startyear = d3.time.year.floor(dt(start));
             endyear   = d3.time.year.ceil( dt(end  ));
 
@@ -261,9 +259,11 @@ msToCentury = function() {
                     var monthDays = getNumberOfDaysInCurrentMonth(new Date(year, month));
                     return _.map(d3.range(1, monthDays + 1), function (day) {
                         // For each day of the month
+
                         // Filter for proper increments
                         //   and remove ones which are too close
                         //   together near the ends of the months
+
                         if ((day - 1) % increment === 0 && monthDays + 1 - day >= increment ) {
                             return (new Date(year, month, day)).getTime();
                         } else {
@@ -277,8 +277,7 @@ msToCentury = function() {
 
             return curange;
 
-        } else {
-            // For everything smaller than days
+        } else { // For everything smaller than days
             return d3.range( baseFunc.floor( dt(start) ).getTime(),
                             baseFunc.ceil(  dt( end ) ).getTime(),
                             roundUpToNearestTime(
