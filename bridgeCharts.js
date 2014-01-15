@@ -186,6 +186,23 @@ var redraw = function () {
         return result;
     });
 
+    sensorsAvailableObjects.sort(function (a, b) {
+        var astring = a.sensorType() + "" + a.sensorNumber();
+        var bstring = b.sensorType() + "" + b.sensorNumber();
+
+        if (astring < bstring) {
+            return -1;
+        } else if (astring > bstring) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+
+    var justName = function (d) {
+        return d.sensorType() + "" + d.sensorNumber();
+    }
+
     // Expand chart container when add buttons are present.
     var plotHeight = plots[0] ? plots[0].height() : plotHeightDefault + margin.top + margin.bottom;
     var showingEdits = document.getElementById("edit").checked;
@@ -216,12 +233,6 @@ var redraw = function () {
     var xbuffer = 130;
     var width = document.getElementById("chartContainer").offsetWidth - margin.right;
 
-    var add_dat = d3.select("#edit_elements")
-        .selectAll("div")
-        .data(plots_filtered().concat(sensorsAvailableObjects), function (d) {
-            return "" + d.sensorNumber() + d.sensorType();
-        });
-
     var disp = function(d) {
         return d.displayThisChart ? d.displayThisChart() : false
     }
@@ -244,6 +255,12 @@ var redraw = function () {
 
 
     // Show add/remove buttons
+
+    var add_dat = d3.select("#edit_elements")
+        .selectAll("div")
+        .data(plots_filtered().concat(sensorsAvailableObjects), function (d) {
+            return "" + d.sensorNumber() + d.sensorType();
+        });
 
     //ENTER
     var add_dat_enter = add_dat.enter().append("div")
@@ -289,7 +306,7 @@ var redraw = function () {
 
     // Show text labels
     d3.select("#edit_text").style("top", getTotalChartHeight(plots_filtered()) + "px");
-    add_dat = d3.select("#edit_text").selectAll("p").data(sensorsAvailableObjects, function (d) { return "" + d.sensorNumber() + d.sensorType(); });
+    add_dat = d3.select("#edit_text").selectAll("p").data(sensorsAvailableObjects);
     add_dat.enter().append("p")
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
@@ -342,7 +359,7 @@ var redraw = function () {
 };
 
 function removePlot(p) {
-    printArrayOfPlots(plots_filtered());
+    //printArrayOfPlots(plots_filtered());
     // Show each of this plot's parents
     var plt = _.find(plots, function (d) {
         return p.sensorNumber() === d.sensorNumber() && p.sensorType() === d.sensorType();
