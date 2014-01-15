@@ -247,9 +247,9 @@ var redraw = function () {
 
     var editImage = function(d) {
         if (disp(d)) {
-            return "./img/remove.svg";
+            return "./img/remove.png";
         } else {
-            return "./img/add.svg";
+            return "./img/add.png";
         }
     };
 
@@ -293,7 +293,7 @@ var redraw = function () {
     add_dat = d3.select("#edit_swap").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
-        .attr("src", "./img/updown.svg")
+        .attr("src", "./img/updown.png")
         .attr("width", 90)
         .attr("height", 90)
         .attr("cursor", "pointer")
@@ -326,7 +326,7 @@ var redraw = function () {
     add_dat = d3.select("#edit_mult").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
-        .attr("src", "./img/mult.svg")
+        .attr("src", "./img/mult.png")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
@@ -341,7 +341,7 @@ var redraw = function () {
     add_dat = d3.select("#edit_minus").selectAll("img").data(plots_filtered().slice(0, plots_filtered().length-1));
     add_dat.enter().append("img")
         .style("position", "absolute")
-        .attr("src", "./img/minus.svg")
+        .attr("src", "./img/minus.png")
         .attr("width", xsize)
         .attr("height", xsize)
         .attr("cursor", "pointer")
