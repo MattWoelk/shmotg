@@ -421,9 +421,11 @@ function addPlot (sensorType, sensorNumber) {
     if (sensorType === "girder"){
         initPlot(true, {}, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
     } else if (sensorType === "cloudcover") {
+        cloudPlot.xScale(xScale.copy());
         plots.push(cloudPlot);
         updateUI();
     } else if (sensorType === "temperature") {
+        tempPlot.xScale(xScale.copy());
         plots.push(tempPlot);
         updateUI();
     }
