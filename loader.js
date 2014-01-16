@@ -19,9 +19,9 @@ loader = function () {
     var height = 25;
     var isShowing = true;
 
-    var slctn;
+    var selection;
     var svg;
-    var background;
+    var spinArc;
 
     var spin = function(selection, duration) {
         if (isShowing){
@@ -35,13 +35,13 @@ loader = function () {
     };
 
 
-    function my (g) {
-        slctn = g;
+    function my (selection) {
+        this.selection = selection;
 
-        g.each(function(d, i) {
-            var g = d3.select(this);
+        selection.each(function(d, i) {
+            var selection = d3.select(this);
 
-            svg = svg ? svg : g.append("svg")
+            svg = svg ? svg : selection.append("svg")
                 .attr("width", width)
                 .attr("height", height);
 
@@ -55,7 +55,7 @@ loader = function () {
             var gElement = svg.append("g")
                 .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-            background = gElement.append("path")
+            spinArc = gElement.append("path")
                     .datum({endAngle: 0.33*tau})
                     .style("fill", "#4D4D4D")
                     .attr("d", arc)
@@ -77,14 +77,14 @@ loader = function () {
     };
 
     my.update = function () {
-        my(slctn);
+        my(selection);
     };
 
     my.isShowing = function (value) {
         if (!arguments.length) return isShowing;
         if (value && !isShowing) {
             isShowing = true;
-            spin(background, 1500); }
+            spin(spinArc, 1500); }
         isShowing = value;
         return my;
     };
