@@ -107,7 +107,7 @@ binnedData = function () {
         return arr1.concat(uniques);
     }
 
-    function getMSStartForTimeAtLevel (ms, lvl) {
+    function startOfContainerAtLevel (ms, lvl) {
         // TODO: calculate the starting ms of the bin container
         // [at this level] in which this ms would fit.
 
@@ -127,7 +127,7 @@ binnedData = function () {
 
         var binSize = Math.pow(2, lvl) * oneSample;
 
-        var startRounded = getMSStartForTimeAtLevel(start, lvl);
+        var startRounded = startOfContainerAtLevel(start, lvl);
 
         return _.range(startRounded, end, binSize);
     }
@@ -138,7 +138,7 @@ binnedData = function () {
 
         var binSize = my.binContainerSize(lvl);
 
-        var startRounded = getMSStartForTimeAtLevel(start, lvl);
+        var startRounded = startOfContainerAtLevel(start, lvl);
 
         return _.range(startRounded, end, binSize);
     }
@@ -152,7 +152,7 @@ binnedData = function () {
         // Assumption: data is ordered and continuous
 
         return _.groupBy(data, function (d) {
-            return getMSStartForTimeAtLevel(d.ms, lvl);
+            return startOfContainerAtLevel(d.ms, lvl);
         });
     }
 
@@ -189,8 +189,8 @@ binnedData = function () {
 
         // get lvl+1's range of containers for this range
         var upperLevelRange = [ // range until very end
-            getMSStartForTimeAtLevel(range[0], lvl+1),
-            getMSStartForTimeAtLevel(range[1], lvl+1) + my.binContainerSize(lvl+1)
+            startOfContainerAtLevel(range[0], lvl+1),
+            startOfContainerAtLevel(range[1], lvl+1) + my.binContainerSize(lvl+1)
         ];
 
         if (!upperLevelRange[0] || !upperLevelRange[1]) {
@@ -798,7 +798,7 @@ binnedData = function () {
     };
 
     my.getBinContainerForMSAtLevel = function (ms, lvl) {
-        return getMSStartForTimeAtLevel(ms, lvl);
+        return startOfContainerAtLevel(ms, lvl);
     };
 
     my.getKeys = function () {
