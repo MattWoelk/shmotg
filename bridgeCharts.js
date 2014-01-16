@@ -25,7 +25,7 @@ document.getElementById("render-method").addEventListener("change", changeLines,
 //{{{ VARIABLES
 
 var plots = [];
-var msPS = 5; // frequency of data samples
+var millisecondsPerSample = 5; // frequency of data samples
 
 var margin = {top: 20, right: 10, bottom: 25, left: 30 + 90};
 var plotHeightDefault = 150;
@@ -72,27 +72,31 @@ d3.select(sliderContainerName).call(mySlider);
 
 //{{{ HELPER FUNCTIONS
 
-var copyScaleWithoutGarbage = function (a,b){
-    // copy the properties of b into a
+var copyScale = function (destination, source) {
+    // copy the properties of source into destination
     // without creating garbage-collectible objects
-    a.domain()[0] = b.domain()[0];
-    a.domain()[1] = b.domain()[1];
-    a.range()[0] = b.range()[0];
-    a.range()[1] = b.range()[1];
+    destination.domain()[0] = source.domain()[0];
+    destination.domain()[1] = source.domain()[1];
+    destination.range()[0] = source.range()[0];
+    destination.range()[1] = source.range()[1];
 };
 
-function swapItemsInPlotsArray(array, a, b) {
-    array[a] = array.splice(b, 1, array[a])[0];
+var capitalize = function(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+function swapItemsInPlotsArray(array, item1, item2) {
+    array[item1] = array.splice(item2, 1, array[item1])[0];
     return array;
 }
 
-function insertItem(array, a, index) {
-    array.splice(index, 0, a);
+function insertItem(array, item, index) {
+    array.splice(index, 0, item);
     return array;
 }
 
-function insertItemBeforeItem(array, a, beforeThisItem) {
-    array.splice(array.indexOf(beforeThisItem), 0, a);
+function insertItemBeforeItem(array, item, beforeThisItem) {
+    array.splice(array.indexOf(beforeThisItem), 0, item);
     return array;
 }
 
@@ -305,11 +309,11 @@ var redraw = function () {
     add_dat.enter().append("p")
         .attr("class", "sensor_title_add")
         .attr("cursor", "default")
-        .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); })
+        .text(function (d) { return capitalize(d.sensorType()) + " " + d.sensorNumber(); })
         .style("height", plotHeight + "px")
         .style("opacity", 1);
     add_dat
-        .text(function (d) { return d.sensorType().capitalize() + " " + d.sensorNumber(); });
+        .text(function (d) { return capitalize(d.sensorType()) + " " + d.sensorNumber(); });
     add_dat.transition().duration(duration)
         .attr("x", width - 15)
         .attr("y", function(d,i) { return (getTotalChartHeight(plots_filtered()) + i*(plotHeight) + (plotHeight/4)); })
@@ -449,7 +453,7 @@ function initPlot(addToDisplay, data, sendReq, oneSample, sensorType, sensorNumb
     plot = binnedLineChart(data, sendReq, sensorType, sensorNumber, oneSample, level, sensorType === "cloudcover", isMulti);
     plot.xScale(xScale.copy());
 
-    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(msPS);
+    plot.containerWidth(document.getElementById("chartContainer").offsetWidth).height(plotHeightDefault).showTimeContext(true).milliSecondsPerSample(millisecondsPerSample);
 
     if (addToDisplay) {
         plots.push(plot);
@@ -499,7 +503,7 @@ function zoomAll() {
         }
     }
 
-    copyScaleWithoutGarbage(oldXScale, xScale);
+    copyScale(oldXScale, xScale);
 }
 
 var zoom = d3.behavior.zoom()
@@ -541,34 +545,6 @@ function rescaleTo(val) {
 function getScaleValue(scal) {
     // gives a result which has units pixels / samples
     return (scal.range()[1] - scal.range()[0])/ (scal.domain()[1] - scal.domain()[0]);
-}
-
-function zoomin() {
-    changeZoom(
-        function (a, b) { return a + (b/4); },
-        function (a, b) { return a - (b/4); }
-    );
-}
-
-function zoomout() {
-    changeZoom(
-        function (a, b) { return a - (b/2); },
-        function (a, b) { return a + (b/2); }
-    );
-}
-
-function scrollleft() {
-    changeZoom(
-        function (a, b) { return a + (b/4); },
-        function (a, b) { return a + (b/4); }
-    );
-}
-
-function scrollright() {
-    changeZoom(
-        function (a, b) { return a - (b/4); },
-        function (a, b) { return a - (b/4); }
-    );
 }
 
 // HELPER FUNCTIONS }}}
@@ -663,7 +639,6 @@ setTimeout(function() { offlinedata(); }, 200);
 
 var tempPlot;
 var cloudPlot;
-
 
 function offlinedata() {
     tempPlot = initPlot(false, [], function(){}, 1000*60*60, "temperature", 1, curLevel);
