@@ -405,8 +405,6 @@ var binnedLineChart = function (data, dataRequester, sensorType, sensorNumber, o
 
     var selection; // Save the selection so that my.update() works.
 
-    var once = true; // some things only need to happen once.
-
     var reRenderTheNextTime = true;
     var waitingForServer = false;
 
@@ -960,7 +958,6 @@ var binnedLineChart = function (data, dataRequester, sensorType, sensorNumber, o
         selection.each(renderEverything);
 
         reRenderTheNextTime = false;
-        once = false;
     };
 
     //{{{ Getters and Setters
