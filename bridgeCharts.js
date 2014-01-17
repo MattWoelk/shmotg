@@ -423,25 +423,23 @@ function addPlot (sensorType, sensorNumber) {
     if (sensorType === "girder"){
         initPlot(true, {}, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
     } else if (sensorType === "cloudcover") {
-        cloudPlot.reRenderTheNextTime(true);
-        cloudPlot.whichLevelToRender(curLevel);
-        cloudPlot.xScale(xScale.copy());
-        plots.push(cloudPlot);
-        updateUI();
-        cloudPlot.update();
+        addOldPlot(cloudPlot);
     } else if (sensorType === "temperature") {
-        tempPlot.reRenderTheNextTime(true);
-        tempPlot.whichLevelToRender(curLevel);
-        tempPlot.xScale(xScale.copy());
-        plots.push(tempPlot);
-        tempPlot.displayThisChart(true);
-        updateUI();
+        addOldPlot(tempPlot);
     }
 }
 
+function addOldPlot(plot) {
+    plot.reRenderTheNextTime(true);
+    plot.whichLevelToRender(curLevel);
+    plot.xScale(xScale.copy());
+    plots.push(plot);
+    updateUI();
+}
+
 function setAllPlotLevels() {
-    plots.forEach(function (plt) {
-        plt.whichLevelToRender(curLevel).update();
+    plots.forEach(function (plot) {
+        plot.whichLevelToRender(curLevel).update();
     });
 }
 
