@@ -363,6 +363,8 @@ var binnedLineChart = function (data, dataRequester, sensorType, sensorNumber, o
     var multiChart_childrenCharts = [];
     var displayThisChart = true;
 
+    var grad = false; // gradient for cloudcover
+
     var strokeWidth = 1;
 
     var milliSecondsPerSample = 1; // the frequency of the data samples
@@ -687,7 +689,6 @@ var binnedLineChart = function (data, dataRequester, sensorType, sensorNumber, o
     };
 
     var createColorGradient = function(container, id, data) {
-        var grad = false;
         return function (container, id, data) {
             var svg = d3.select("#"+container);
             if (!svg) { return id; }
@@ -1114,6 +1115,20 @@ var binnedLineChart = function (data, dataRequester, sensorType, sensorNumber, o
         if (my.uniqueID() === "" + received.sensorType + received.sensorNumber) {
             my.addDataToBinData(req, received.bin_level).reRenderTheNextTime(true).update();
         }
+    };
+
+    my.removeAllDOMElements = function() {
+        // remove all DOM elements so that they are recreated
+        // during the next run of my().
+
+        xAxisContainer = false;
+        xAxisMinorContainer = false;
+        yAxisContainer = false;
+        timeContextContainer = false;
+        clipPath = false;
+        pathArea = false;
+        pathPath = false;
+        grad = false;
     };
 
     my.addDataToBinData = function (datas, level) {

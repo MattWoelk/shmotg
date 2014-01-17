@@ -382,6 +382,8 @@ function removePlot(p) {
     // Remove the chart from the plots array
     plots.splice(index, 1);
 
+    match.removeAllDOMElements();
+
     redraw();
 }
 
@@ -421,12 +423,18 @@ function addPlot (sensorType, sensorNumber) {
     if (sensorType === "girder"){
         initPlot(true, {}, sendRequestToServer, interval, sensorType, sensorNumber, curLevel);
     } else if (sensorType === "cloudcover") {
+        cloudPlot.reRenderTheNextTime(true);
+        cloudPlot.whichLevelToRender(curLevel);
         cloudPlot.xScale(xScale.copy());
         plots.push(cloudPlot);
         updateUI();
+        cloudPlot.update();
     } else if (sensorType === "temperature") {
+        tempPlot.reRenderTheNextTime(true);
+        tempPlot.whichLevelToRender(curLevel);
         tempPlot.xScale(xScale.copy());
         plots.push(tempPlot);
+        tempPlot.displayThisChart(true);
         updateUI();
     }
 }
