@@ -355,16 +355,18 @@ var redraw = function () {
 };
 
 function removePlot(p) {
-    // Show each of this plot's parents
+    removeMatchingFromListOfRequestsMade(p.sensorNumber(), p.sensorType());
     var plt = _.find(plots, function (d) {
         return p.sensorNumber() === d.sensorNumber() && p.sensorType() === d.sensorType();
     });
 
+    // Show each of this plot's parents
     for (var i = 0, l = plt.multiChart_parentBinnedCharts().length; i < l; i++) {
         var d = plt.multiChart_parentBinnedCharts()[i];
         var ty = d.sensorType();
         var nu = d.sensorNumber();
         plots.splice(plots.indexOf(d), 1);
+        removeMatchingFromListOfRequestsMade(d.sensorNumber(), d.sensorType());
         addPlot(d.sensorType(), d.sensorNumber());
     }
 
@@ -580,6 +582,14 @@ function addToServerQueue(ob) {
 
 var uniqueRequestID = 0;
 var listOfRequestsMade = [];
+
+function removeMatchingFromListOfRequestsMade(sensorNumber, sensorType) {
+    // so we can request all of these from the server again
+
+    listOfRequestsMade = _.filter(listOfRequestsMade, function(d) {
+        return d.sensorNumber !== sensorNumber || sensorType !== sensorType;
+    });
+}
 
 function sendRequestToServer(req) {
     if(_.findWhere(listOfRequestsMade, {sensorNumber: req.sensorNumber, sensorType: req.sensorType, ms_start: req.ms_start, ms_end: req.ms_end, bin_level: req.bin_level})) {
