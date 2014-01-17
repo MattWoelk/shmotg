@@ -1,7 +1,6 @@
 // This goes through the couchdb database
 // and rebins data as requested. (See USAGE);
 
-console.log("rebinner: engaged");
 var debug = false;
 
 ////////////////////////////////////////////////
@@ -76,6 +75,8 @@ var lowestLevel = parseInt(process.argv[8]);
 var sensorNumber = parseInt(process.argv[9]);
 req.bin_level = lowestLevel;
 req.sensorNumber = sensorNumber;
+
+console.log("rebinner: engaged ", process.argv);
 // COMMAND LINE INPUT }}}
 
 // {{{ WHERE TO WALK
