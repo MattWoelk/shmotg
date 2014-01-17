@@ -352,8 +352,6 @@ var redraw = function () {
     add_dat.exit().remove();
 
     // DRAW EDIT ELEMENTS }}}
-
-    updateZoom();
 };
 
 function removePlot(p) {
@@ -450,10 +448,10 @@ function setLoadingIcon(on) {
 }
 
 function updateUI() {
-    redraw();
     d3.select("#charts").attr("height", getTotalChartHeight(plots_filtered())).attr("width", document.getElementById("chartContainer").offsetWidth);
     zoomRect.attr("fill", "rgba(0,0,0,0)")
             .call(zoom);
+    redraw();
 }
 
 function initPlot(addToDisplay, data, sendReq, oneSample, sensorType, sensorNumber, level, isMulti) {
@@ -469,22 +467,9 @@ function initPlot(addToDisplay, data, sendReq, oneSample, sensorType, sensorNumb
 
     updateUI();
 
-    // Redefine this function now that we have data for it to work from
-    updateZoom = function () {
-        zoomAll();
-        xScale = plot.xScale();
-        yScale = plot.yScale();
-        zoom.x(xScale);
-        xScale.range([0, document.getElementById("chartContainer").offsetWidth]);
-    };
-
-    updateZoom();
     return plot;
 }
 
-// This will be changed once 'news' is sent from the server
-// for now it's just a dummy
-var updateZoom = function () { return 0; };
 var oldXScale = d3.scale.linear();
 
 function zoomAll() {
@@ -730,7 +715,6 @@ function toggleEditables() {
         d3.select("#edit_minus").style("display", "none");
         d3.select("#zoomRectGreyOut").style("display", "none");
     }
-    redraw();
 }
 toggleEditables();
 // EDITABLES }}}
